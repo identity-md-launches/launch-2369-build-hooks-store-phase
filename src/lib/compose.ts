@@ -41,7 +41,7 @@ export const DEFAULT_STACK = ['swap-fee', 'anti-sniper', 'jar'];
 
 export const defaults = (def: BlockDef): Record<string, ParamValue> => Object.fromEntries(def.params.map(x => [x.k, x.default]));
 export const entry = (id: string): BlockEntry => ({ id, p: defaults(BY_ID[id]) });
-export const emptySettings = (): Settings => ({ chain: null, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' });
+export const emptySettings = (): Settings => ({ chain: null, pair: 'imd', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' });
 export const newDraft = (): Draft => ({ v: 2, type: 'A', mode: null, prompt: '', blocks: [entry('token')], settings: emptySettings(), seeded: false });
 
 /** Quotes, backslashes, angle brackets and line breaks become spaces (5.1). */

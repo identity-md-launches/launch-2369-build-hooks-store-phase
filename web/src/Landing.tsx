@@ -3,9 +3,11 @@ import { pondScene } from '../../src/scene/pond';
 import { cast, subscribeToCasts } from '../../src/scene/cast';
 import { saveDraft } from './draft';
 import type { SiteConfig } from './config';
+import { CHAINS, type Launch } from './types';
+import { matchesLaunch, parseLaunches, relativeTime, relayFetch, type RelayLaunch } from './relay';
 
 type Metrics = { agents: number; launches: number; jobs: number };
-export function Landing({ config }: { config: SiteConfig }) {
+export function Landing({ config, launches = [] }: { config: SiteConfig; launches?: Launch[] }) {
   const host = useRef<HTMLDivElement>(null), canvas = useRef<HTMLCanvasElement>(null);
   const pond = useRef<ReturnType<typeof pondScene> | null>(null);
   const [still, setStill] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -13,6 +15,38 @@ export function Landing({ config }: { config: SiteConfig }) {
   const input = useRef<HTMLInputElement>(null);
   const [prompt, setPrompt] = useState(''), [error, setError] = useState('');
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [relayRows, setRelayRows] = useState<RelayLaunch[]>([]);
+  const knownLaunches = useRef(launches); knownLaunches.current = launches;
+  const named = useRef('');
+  useEffect(() => {
+    if (!config.relayUrl) return;
+    const controller = new AbortController(), seen = new Set<string>(); let baseline = false, busy = false;
+    const poll = async () => {
+      if (busy) return; busy = true;
+      try {
+        const rows = parseLaunches(await relayFetch(config.relayUrl!, '/launches?limit=100', undefined, controller.signal));
+        if (controller.signal.aborted) return;
+        for (const row of rows.filter(r => r.status === 'live')) {
+          if (baseline && !seen.has(row.id) && knownLaunches.current.some(l => matchesLaunch(row, l))) {
+            const message = `${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt)}`;
+            named.current = `${row.id}:${row.updatedAt}`; cast(message);
+          }
+          seen.add(row.id);
+        }
+        baseline = true; setRelayRows(rows);
+      } catch { /* Keep the truthful chain ticker when optional names are unavailable. */ }
+      finally { busy = false; }
+    };
+    void poll(); const timer = setInterval(() => void poll(), 20000);
+    return () => { controller.abort(); clearInterval(timer); };
+  }, [config.relayUrl]);
+  useEffect(() => {
+    const row = relayRows.filter(r => r.status === 'live' && launches.some(l => matchesLaunch(r, l))).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
+    if (row && named.current !== `${row.id}:${row.updatedAt}`) {
+      named.current = `${row.id}:${row.updatedAt}`;
+      setTicker(`${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt)}`);
+    }
+  }, [relayRows, launches]);
   useEffect(() => {
     const controller = new AbortController();
     fetch(config.swarmUrl, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]) })
@@ -28,7 +62,7 @@ export function Landing({ config }: { config: SiteConfig }) {
     if (!host.current || !canvas.current) return;
     let nextSample = 3;
     const scene = pondScene(host.current, canvas.current, elapsed => {
-      if (elapsed >= nextSample) { nextSample = elapsed + 18; cast('Practice cast · waiting for the next store launch.'); }
+      if (!config.relayUrl && elapsed >= nextSample) { nextSample = elapsed + 18; cast('Practice cast · waiting for the next store launch.'); }
     });
     pond.current = scene;
     scene.onMotionChange(setStill);

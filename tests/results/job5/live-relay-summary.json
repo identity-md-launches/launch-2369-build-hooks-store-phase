@@ -1,0 +1,95 @@
+{
+  "checkedAt": "2026-10-21T19:12:26.664Z",
+  "mode": "Undeployed Worker handler with real production fetch, no payment",
+  "status": 200,
+  "cors": "*",
+  "facts": 14,
+  "blockers": [],
+  "plan": [
+    "Build and test the contracts",
+    "Test them, as another agent",
+    "Write what to deploy",
+    "Audit the math, as a specialist agent",
+    "Audit the permissions, as a specialist agent",
+    "Audit the economics, as a specialist agent",
+    "Audit the control flow, as a specialist agent",
+    "Judge the audit: reproduce, merge and rank what was found",
+    "Deploy on Ethereum mainnet"
+  ],
+  "reads": [
+    {
+      "path": "/launches?limit=1",
+      "status": 200,
+      "cors": "*",
+      "cacheControl": "public, max-age=30",
+      "keys": [
+        "count",
+        "launches"
+      ]
+    },
+    {
+      "path": "/jobs/ba9d232e-9213-459b-963d-811773f73376",
+      "status": 200,
+      "cors": "*",
+      "cacheControl": "public, max-age=30",
+      "keys": [
+        "workflow",
+        "planning",
+        "id",
+        "state",
+        "template",
+        "objective",
+        "blockedReason",
+        "createdAt",
+        "updatedAt",
+        "paidBy",
+        "via",
+        "parentJobId",
+        "project",
+        "deliver",
+        "host",
+        "site",
+        "launch",
+        "oracleRequestId",
+        "delivery",
+        "media",
+        "nodes",
+        "reviews"
+      ],
+      "stageNodeCount": 8
+    },
+    {
+      "path": "/intake/1/0xfb27c27c69f1c9cea0fd779afcb00caf0110547a89c53f028f94579b7934b580",
+      "status": 200,
+      "cors": "*",
+      "cacheControl": "public, max-age=30",
+      "keys": [
+        "chainId",
+        "transactionHash",
+        "entries"
+      ],
+      "matchedJobId": "b8266408-ea53-4538-8fdf-f97cc723364f"
+    }
+  ],
+  "import": {
+    "status": 200,
+    "cors": "*",
+    "input": {
+      "url": "https://github.com/identity-md-launches/launch-2335-launch-daemon-daemon-ethereum",
+      "ref": "317dd1aeee7369413497aee884ae875b3512dae8",
+      "kind": "contracts"
+    },
+    "response": {
+      "ok": true,
+      "source": {
+        "kind": "contracts",
+        "repoUrl": "https://github.com/identity-md-launches/launch-2335-launch-daemon-daemon-ethereum.git",
+        "baseCommit": "317dd1aeee7369413497aee884ae875b3512dae8",
+        "owner": "identity-md-launches",
+        "repo": "launch-2335-launch-daemon-daemon-ethereum",
+        "ref": "317dd1aeee7369413497aee884ae875b3512dae8",
+        "sizeKb": 529
+      }
+    }
+  }
+}

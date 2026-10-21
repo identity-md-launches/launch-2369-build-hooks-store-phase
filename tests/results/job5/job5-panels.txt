@@ -1,0 +1,48 @@
+
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/job5.spec.ts
+
+[WebServer] (node:35) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 1 worker
+
+(node:47) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/job5.spec.ts:31:4 › Store regression at 320px: route, controls, resources and reflow (873ms)
+  ✓   2 tests/job5.spec.ts:31:4 › Catalog regression at 320px: route, controls, resources and reflow (491ms)
+  ✓   3 tests/job5.spec.ts:31:4 › Builder regression at 320px: route, controls, resources and reflow (546ms)
+  ✓   4 tests/job5.spec.ts:31:4 › Launch regression at 320px: route, controls, resources and reflow (415ms)
+  ✓   5 tests/job5.spec.ts:31:4 › Hook regression at 320px: route, controls, resources and reflow (386ms)
+  ✓   6 tests/job5.spec.ts:31:4 › My hooks regression at 320px: route, controls, resources and reflow (425ms)
+  ✓   7 tests/job5.spec.ts:31:4 › Learn regression at 320px: route, controls, resources and reflow (390ms)
+  ✓   8 tests/job5.spec.ts:31:4 › Store regression at 390px: route, controls, resources and reflow (502ms)
+  ✓   9 tests/job5.spec.ts:31:4 › Catalog regression at 390px: route, controls, resources and reflow (457ms)
+  ✓  10 tests/job5.spec.ts:31:4 › Builder regression at 390px: route, controls, resources and reflow (504ms)
+  ✓  11 tests/job5.spec.ts:31:4 › Launch regression at 390px: route, controls, resources and reflow (392ms)
+  ✓  12 tests/job5.spec.ts:31:4 › Hook regression at 390px: route, controls, resources and reflow (413ms)
+  ✓  13 tests/job5.spec.ts:31:4 › My hooks regression at 390px: route, controls, resources and reflow (398ms)
+  ✓  14 tests/job5.spec.ts:31:4 › Learn regression at 390px: route, controls, resources and reflow (441ms)
+  ✓  15 tests/job5.spec.ts:31:4 › Store regression at 1440px: route, controls, resources and reflow (565ms)
+  ✓  16 tests/job5.spec.ts:31:4 › Catalog regression at 1440px: route, controls, resources and reflow (468ms)
+  ✓  17 tests/job5.spec.ts:31:4 › Builder regression at 1440px: route, controls, resources and reflow (507ms)
+  ✓  18 tests/job5.spec.ts:31:4 › Launch regression at 1440px: route, controls, resources and reflow (416ms)
+  ✓  19 tests/job5.spec.ts:31:4 › Hook regression at 1440px: route, controls, resources and reflow (421ms)
+  ✓  20 tests/job5.spec.ts:31:4 › My hooks regression at 1440px: route, controls, resources and reflow (436ms)
+  ✓  21 tests/job5.spec.ts:31:4 › Learn regression at 1440px: route, controls, resources and reflow (397ms)
+  ✓  22 tests/job5.spec.ts:65:1 › live free check renders IMD facts and plan, blocks continuation and direct Launch, persists on reload, then clears after a recheck (1.2s)
+  ✓  23 tests/job5.spec.ts:87:1 › free check exposes pending, failure and retry without accepting stale or malformed replies (804ms)
+  ✓  24 tests/job5.spec.ts:101:1 › own code resolves through /import before composing, checking or reviewing payment; a changed source relocks the flow (812ms)
+  ✓  25 tests/job5.spec.ts:122:1 › relay timeline discovers the current job through matching intake and renders build, audit and deployment progress (442ms)
+  ✓  26 tests/job5.spec.ts:137:1 › pond ticker names only store-matched API launches, casts only a newly live launch, and updates while reduced motion stays still (559ms)
+  ✓  27 tests/job5.spec.ts:153:1 › rendered job 5 evidence: Store and checked Builder first screens at 390px (598ms)
+  ✓  28 tests/job5.spec.ts:165:39 › configured relay panels, long names and errors wrap at 320px (642ms)
+  ✓  29 tests/job5.spec.ts:165:39 › configured relay panels, long names and errors wrap at 390px (626ms)
+  ✓  30 tests/job5.spec.ts:165:39 › configured relay panels, long names and errors wrap at 1440px (804ms)
+
+  30 passed (20.0s)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

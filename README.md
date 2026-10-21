@@ -1,8 +1,8 @@
 # The Hooks Store
 
-Phase 1, jobs 1–4: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
+Phase 1, jobs 1–5: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
 
-Job 4 refreshes `SPEC.md` to **1.15**, corrects the Ethereum RPC and history windows, removes the header chain pill, implements payment on Ethereum or Robinhood Chain independently of the deploy chain, and adds the type C pool-call calculator. The existing pond, catalog filtering, Builder, Learn and management interactions remain.
+Job 5 refreshes `SPEC.md` to **1.16**, puts **IMD first and selected** in new type A drafts, adds the relay/free check/import flow, names store launches in the pond ticker, reads real job stages, and polishes the monochrome scene. Existing explicit pairing choices in saved drafts are preserved. The job 4 payment flow, RPCs, chain history, header, pool-call calculator and management behavior remain.
 
 ## Install, preview and rebuild
 
@@ -33,7 +33,23 @@ The **Connect** control reuses the wallet layer from [the requested upstream com
 
 Wallet review, receipt wait, confirmation and errors are separate states. Submitted hashes survive reload under a body/account/payment-chain-specific key. **Check confirmation** rereads the receipt without sending another transaction. A rejected signature unlocks retry; an uncertain submitted transaction keeps the next step locked. Changing wallets or payment chains invalidates approval state. Storage failures retain the current flow in memory and tell the visitor to keep the page open and copy hashes.
 
-The committed `inProgress: true` is preserved: the banner stays visible and payments stay locked until the operator opens launches. Review, copy, browsing and wallet connection work now. Tests disable the flag only in local fixtures. `relayUrl` remains null; Launch explicitly warns that a refused body spends the fee and offers **Copy request**. The optional relay, free check and imports remain job 5.
+The committed `inProgress: true` is preserved: the banner stays visible and payments stay locked. **No real launch happens before the owner reads the separate, read-only adversarial review by a different seat.** Review, copy, browsing and wallet connection work now. Tests disable the flag only in local fixtures. `relayUrl` remains null; Launch warns that a refused body spends the fee and offers **Copy request**. This delivery does not deploy the relay or any contract.
+
+## Optional relay and free check
+
+[relay/README.md](relay/README.md) includes the operator's one-command Cloudflare deployment and dependency-free worker tests. Set `relayUrl` in `public/site-config.json` to the deployed HTTPS origin and rebuild. Keep the default `null` to use the site entirely through public chain reads.
+
+With a relay configured, a valid Builder request enables **Check with the swarm (free)**. The site sends `{action: "launch.open", input: <exact composer body>}` to `/check`, then displays **What the swarm understood**: IMD's fact labels and states, plan titles, blockers and suggestions. Blockers lock both Continue and the Launch page's payment controls. Pending/failed checks remain explicit and retryable. Editing a checked request, changing a wallet address that appears in it, or changing its imported source requires a fresh check; old results never certify different bytes. Checks are optional until one is run. A free check does not launch the hook or replace its audit panel.
+
+Own-code requests first use **Resolve repository** in Advanced. `/import` receives `{url, ref, kind: "contracts"}` and must return a valid pinned `source.repoUrl` and `source.baseCommit`. Only that resolved source enters the displayed/composed body when the relay exists. Import failures retain the fields and lock continuation. Editing either source field invalidates resolution. Without the relay, the prior explicit repository/full-commit flow remains available.
+
+The last check and import are cached in this tab's `sessionStorage` (`hooks-store:check:v1`, `hooks-store:import:v1`). Blockers survive reloads; successful results match the exact JSON and relay URL. No private keys or signatures enter the relay.
+
+The Store polls `/launches?limit=100` every 20 seconds. Names come from returned token/hook artifacts, including standalone hooks reported as `other`. Only entries matched by chain and launch id/hook address to a chain-proven store request can appear in its ticker. Initial history does not cast; a newly live matching entry casts once. Reduced motion keeps the canvas still while updating the message. Long names wrap fully. An unavailable relay retains the chain-based ticker and catalog.
+
+Hook timelines discover pending jobs from the matching `/intake/<paymentChain>/<requestTx>` entry, or use the delivered job id. They poll `/jobs/:id` for **Building**, **Audit panel** and **Deploying**. Live/Failed still depend on chain completion/result reads. Missing job data gets a Retry action without inventing progress. The relay caches successful GETs for 30 seconds, so those optional stages and names may lag that cache window.
+
+The scene adds bank reeds, a hat drawn above the unchanged Pepe data, a distant boat and one or two birds over sparse canopy tiles. It retains the existing monochrome inks, cell sizes, fish and cast timings.
 
 ## Type C: open the pool
 
@@ -74,6 +90,13 @@ npm --prefix web run typecheck
 npm --prefix web run build
 web/node_modules/.bin/playwright install chromium
 npm --prefix web run test:e2e
+node --test relay/worker.test.mjs
+node scripts/check-delivery.mjs
+# Job 5 routes/relay interactions at 320, 390 and 1440px:
+npm --prefix web run test:e2e -- tests/job5.spec.ts
+# Tool-only accessibility dependencies, kept outside the project:
+npm install --prefix /tmp/hooks-a11y lighthouse puppeteer-core
+HOOKS_A11Y_TOOLS=/tmp/hooks-a11y node web/scripts/check-accessibility.mjs
 # Read-only public RPC test:
 HOOKS_LIVE_RPC=1 npm --prefix web run test:e2e -- tests/live-rpc.spec.ts
 # Requires Anvil on PATH. Starts/stops its own guarded local Robinhood fork:
@@ -84,6 +107,8 @@ node web/scripts/run-launch-checks.mjs --all --live
 
 The fork runner uses a public fixture payer, impersonated only inside loopback Anvil. It mocks that account's IMD balance with `anvil_setStorageAt`, verifies `balanceOf`, and runs type A and B approvals/requests against the forked real contracts. It asserts exact preview bytes, cross-chain deployment selection and parsed request ids. Browser tests cover receipt gating, wrong chain, signature rejection, zero price, refresh recovery, copy, pool conversion and responsive layouts. The default browser suite skips network-dependent cases unless enabled. Two older Ethereum-management fork checks remain separately optional; their setup is in `web/scripts/fork-setup.mjs` and `check-fork.mjs`.
 
-Actual results, measured timings, six-domain Better Interface coverage and limitations are in [VALIDATION.md](VALIDATION.md) and [tests/results/job4](tests/results/job4/). [DESIGN.md](DESIGN.md) documents the final implemented system. Results are worker observations, not independent certification.
+Actual job 5 results, Lighthouse reports, measured timings, six-domain Better Interface coverage and limitations are in [VALIDATION.md](VALIDATION.md) and [tests/results/job5](tests/results/job5/). Lighthouse accessibility is **100** on Store, Builder and its checked-response panel. Chromium covers every route at 320, 390 and 1440px. WebKit could not start because this runtime lacks its system libraries; no Safari result is claimed. [DESIGN.md](DESIGN.md) documents the final system. Earlier evidence remains under `tests/results/job4/` and prior directories. Results are worker observations, not independent certification.
+
+The next seat's review scope and reproducible entry points are in [the money-path review handoff](tests/results/job5/REVIEW-HANDOFF.md). Its read-only review is a separate step; this build does not certify its own money path.
 
 The final export must stay with source and `web/package-lock.json`. No private keys, contracts deployed by this job, live payments, vendored registry, dependency caches or submodules are required.

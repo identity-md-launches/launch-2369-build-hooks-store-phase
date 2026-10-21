@@ -1,5 +1,5 @@
-/** Port of mockup/index.html pondScene. Character grids and drawing math are preserved.
- * Only TypeScript types, React lifecycle cleanup, motion controls and diagnostics are added.
+/** Port of mockup/index.html pondScene. Character grids and fish/cast math are preserved.
+ * Job 5 adds monochrome bank reeds, a fisher's hat, distant boat and canopy birds.
  */
 import PEPE from './pepe.json';
 export type CastState = 'idle' | 'windup' | 'fly' | 'splash' | 'sink' | 'wait' | 'bite' | 'reel' | 'cheer';
@@ -127,6 +127,35 @@ export function pondScene(host: HTMLElement, canvas: HTMLCanvasElement, onTick?:
     for (var c3 = boatL + 3; c3 < boatR - 2; c3++) put(c3, sr + 1, c3 === boatL + 3 ? "'" : c3 === boatR - 3 ? "'" : '-', 1);
   }
   function drawPepe() { var fr = PEPE[pepeFrame]; for (var r = 0; r < fr.length; r++) { var line = fr[r]; for (var c = 0; c < line.length; c++) if (line[c] !== ' ') put(pc + c, pr + r, line[c], 0); } }
+  function drawHat() {
+    // Draw over the empty cells above his head; the source sprite data stays exact.
+    text(pc + 12, pr + 2, '.SSS.', 0);
+    text(pc + 11, pr + 3, '/S###S\\', 0);
+    text(pc + 8, pr + 4, '___SSSSSSSS___', 0);
+  }
+  function drawBanks() {
+    // Sparse canopy at the edges leaves the landing copy and fishing line clear.
+    for (var side = 0; side < 2; side++) {
+      for (var r = 1; r < 5; r++) for (var c = 0; c < Math.min(15, Math.floor(cols * .18)); c++) {
+        if (hash(c, r, side + 51) < .58 - r * .08) put(side ? cols - c - 1 : c, r, r < 3 ? 'S' : ':', 2);
+      }
+      for (var k = 0; k < 5; k++) {
+        var stem = side ? cols - 2 - k : 1 + k, height = 2 + k % 3;
+        for (var j = 0; j < height; j++) put(stem, sr - 1 - j, j === height - 1 && k % 2 ? 'S' : '|', 1);
+        put(stem + (side ? -1 : 1), sr - height + 1, side ? '/' : '\\', 1);
+      }
+      text(side ? cols - 7 : 0, sr, '.:;SS;:', 1);
+    }
+    // A small, distant rowboat on the far bank, well above the main water line.
+    var distant = Math.round(cols * .14);
+    text(distant, sr - 5, ' .|.', 2);
+    text(distant - 1, sr - 4, '\\SSSS/', 1);
+    text(distant, sr - 3, "'--'", 2);
+    // One or two additional birds above the canopy, using only untiled strokes.
+    var birdC = cols - 15 + Math.round(Math.sin(t * .12) * 2), flap = Math.floor(t * 2) % 2 ? '\\v/' : '_v_';
+    text(birdC, 1, flap, 1);
+    if (cols > 60) text(birdC - 7, 2, flap, 2);
+  }
   function lineCells(c0: number, r0: number, c1: number, r1: number, fn: (c: number, r: number, dc: number, dr: number) => void) { var dc = c1 - c0, dr = r1 - r0, n = Math.max(Math.abs(dc), Math.abs(dr)) || 1; for (var i = 0; i <= n; i++) fn(Math.round(c0 + dc * i / n), Math.round(r0 + dr * i / n), dc, dr); }
   function strokeGlyph(dc: number, dr: number) { var ad = Math.abs(dc), ar = Math.abs(dr); if (ar < ad * 0.45) return '_'; if (ad < ar * 0.45) return '|'; return (dc < 0) === (dr < 0) ? '\\' : '/'; }
   function drawRod() { var dc = tip.c - hand.c, dr = tip.r - hand.r, n = Math.abs(dc) || 1, prev: number | null = null; if (Math.abs(dr) > Math.abs(dc)) { lineCells(hand.c, hand.r, tip.c, tip.r, function (c, r) { put(c, r, '|', 0); }); return; }
@@ -200,7 +229,7 @@ export function pondScene(host: HTMLElement, canvas: HTMLCanvasElement, onTick?:
   function step(dt: number) { t += dt; stepBigFish(dt); stepSmall(dt); stepCast(dt); stepLife(dt); if (onTick) onTick(t); }
   function draw() {
     if (!N) return;
-    clearCells(); drawWater(); drawBigFish(); drawSmall(); drawLife(); drawPepe(); drawBoat(); drawRod(); drawLine(); drawHook(); drawSplash();
+    clearCells(); drawWater(); drawBanks(); drawBigFish(); drawSmall(); drawLife(); drawPepe(); drawHat(); drawBoat(); drawRod(); drawLine(); drawHook(); drawSplash();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     ctx.font = '13px VT323, "Courier New", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var lv = 1; lv <= 3; lv++) { ctx.fillStyle = 'rgba(21,19,15,' + ALPHA[lv] + ')'; for (var i = 0; i < N; i++) if (level[i] === lv) ctx.fillRect((i % cols) * CW, Math.floor(i / cols) * CH, CW, CH); }

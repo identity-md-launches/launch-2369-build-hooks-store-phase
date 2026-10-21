@@ -1,8 +1,10 @@
 # The Hooks Store — product and build specification
 
-Version 1.15 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
+Version 1.16 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
 
 This document is a specification, not a wish list. Every section says exactly what to build, what data it uses, and how to tell when it is done. The clickable mockup in `mockup/index.html` is the visual reference; where the mockup and this text disagree, this text wins.
+
+Changes in 1.16 (2026-10-21): job 4 is delivered and verified (jobs/log.md): the chain reads settle in about five seconds on a fresh browser, the top bar has no chain pill, and the launch flow is live behind the in-progress banner. The Builder's Pair with select lists IMD first and starts on IMD, ETH second (owner's decision 14 in section 14); job 5 carries it. IMD's launch policy pairs a new token's pool only with ETH, IMD or, on Ethereum, FWA (capabilities read 2026-10-21); the store offers ETH and IMD.
 
 Changes in 1.15 (2026-10-21): the top bar loses the chain pill (owner's decision 13 in section 14): the bar is the logo, the nav, the search box and Connect, and the chosen deploy chain shows only in the Builder's settings and summary and on the cards (3.0, 4 step 3). Job 4 carries the removal with its other corrections.
 
@@ -103,7 +105,7 @@ The canvas reads top to bottom as three numbered questions, so the launch type i
 - Describe mode: a text area (3,000 characters), four example chips that fill it, then "Blocks added from the palette" as chips with an × to remove each one, and the rule in one sentence: blocks become numbered rules under your words; if your words and a rule disagree, the rule wins. The palette stays available in this mode, so a block can be added or removed without leaving it.
 - Blocks mode: the stack. The token block (type A only) sits first with a pine stripe and a BRING MY OWN / USE STANDARD TOKEN switch. Each behavior block shows its number, title, the short label with the numbers filled in, its fields, up, down and remove, and a "Who uses it" line (4.12) followed by what the block adds to the hook page after launch ("On the hook page: owner buttons: pause swaps, resume swaps"). A block the launch type does not allow is dimmed with a pill and left out of the request.
 
-**3. Settings.** Deploy chain (Robinhood Chain or Ethereum; no default: the select starts on "Choose a chain", Continue stays disabled until the user picks one; the chosen chain appears in the summary and on the launch page, never in the top bar), pair with, the pool share (no default: the user must choose 10–90% in steps of 5, and Continue stays disabled until they do) and the remainder address (type A), existing token address and symbol (type C), hook name (B and C), owner address (used only when a block adds a power), and a collapsed ADVANCED: START FROM MY OWN CODE with repository URL and commit. Rule errors appear in a red notice under the stack (4.10).
+**3. Settings.** Deploy chain (Robinhood Chain or Ethereum; no default: the select starts on "Choose a chain", Continue stays disabled until the user picks one; the chosen chain appears in the summary and on the launch page, never in the top bar), pair with (a select that lists IMD first and starts on IMD, then ETH; both are sold on both chains), the pool share (no default: the user must choose 10–90% in steps of 5, and Continue stays disabled until they do) and the remainder address (type A), existing token address and symbol (type C), hook name (B and C), owner address (used only when a block adds a power), and a collapsed ADVANCED: START FROM MY OWN CODE with repository URL and commit. Rule errors appear in a red notice under the stack (4.10).
 
 **Layout.** Three columns on desktop (palette 280 px, canvas, preview 340 px); stacked on phones in the order canvas, palette, preview. The palette stays available in Describe mode so a user can add a block to their words.
 
@@ -296,7 +298,7 @@ The site does not hold hook code: every launch is written, tested and audited by
 
 Type A:
 ```
-Launch {name} ({symbol}) with a Uniswap v4 hook on {chain}, paired with {ETH|IMD}.
+Launch {name} ({symbol}) with a Uniswap v4 hook on {chain}, paired with {IMD|ETH}.
 {token sentence}
 ```
 Type B:
@@ -460,7 +462,7 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 | 2 | Builder and composer | Launch type first, modes and chooser, palette groups and state pills, all catalog blocks with their management notes, settings, summary preview with the exact-text disclosure, composer and body encoder, draft persistence, unit tests with the three fixtures |
 | 3 | Chain reads, search by address, hook page, My hooks | Intake log decoding on both chains, result.json fetch, block-label matching, address resolution on chain, the Manage and Anyone-can panels built from section 4.11, pond triggers from chain, snapshot script |
 | 4 | Launch flow | The job 3 corrections of 7.2 (Ethereum RPC, start blocks and windows) and 3.0 (no chain pill), wallets on Ethereum and Robinhood Chain, price read, approve, request, receipt parsing, Launch page per type, pool-opening panel (copy-only in phase 1) |
-| 5 | Relay, polish and the review | A two-step chain: `build-website` (worker, live free check and facts panel, stage names, import of own code, scene polish with reeds, hat and birds, copy pass) then `adversarial-review` by a different seat, read-only, of the money path from jobs 4 and 5; IMD's free check accepts the shape with no blockers and adds the design critic as well, all inside one 0.5 IMD job |
+| 5 | Relay, polish and the review | A two-step chain: `build-website` (pairing order IMD first, worker, live free check and facts panel, stage names, import of own code, scene polish with reeds, hat and birds, copy pass) then `adversarial-review` by a different seat, read-only, of the money path from jobs 4 and 5; IMD's free check accepts the shape with no blockers and adds the design critic as well, all inside one 0.5 IMD job |
 | 6a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
 | 6 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
 
@@ -479,6 +481,7 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 11. Brand mark (2026-10-21, after job 2): the drawn pixel fishing hook of 3.0 replaces the ʃ character, which VT323 cannot draw; the owner asked for the mockup's mark or anything but the fallback glyph the live site showed.
 12. No test network (2026-10-21, after job 2): Sepolia is dropped. Hooks deploy on Robinhood Chain or Ethereum from the first launch, the user chooses the chain in the Builder with no default, and testing is done with real launches on those chains; the tested marks record real launches instead of a verification round. IMD's free check accepts the sample launch bodies with chain ids 1 and 4663 with no blockers (5.3). The owner's IMD sits on Ethereum, which can pay for launches on either chain (6.2).
 13. No chain pill (2026-10-21, after job 3): the owner asked to remove the ETHEREUM · ROBINHOOD pill from the top bar. The bar is the logo, the nav, the search box and Connect; the chosen deploy chain shows in the Builder's settings and summary, on the launch page and on each card. Job 4 carries the removal.
+14. Pairing order (2026-10-21, after job 4): the Pair with select lists IMD first and starts on IMD, ETH second. IMD's launch policy offers ETH, IMD and, on Ethereum only, FWA as the pool pairing for a new token; the store does not offer FWA. Job 5 carries the order.
 
 ## 15. From mockup to live
 

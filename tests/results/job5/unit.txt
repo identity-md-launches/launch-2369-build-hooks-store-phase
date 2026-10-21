@@ -1,0 +1,68 @@
+
+> the-hooks-store@0.1.0 test
+> node --test ../tests/*.test.mjs
+
+✔ decodes at least two real Requested and two Completed logs from each chain (10.493521ms)
+✔ requires launch action, accepted kind and an exact terminal marker; handles both composer endings (14.939134ms)
+✔ every numbered rule template matches its own rendered sentence; label parameters and repeated values survive (9.650071ms)
+✔ request location is the payment chain; contract location comes from body.chainId (2.092717ms)
+✔ completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit (6.047107ms)
+✔ real result JSON for a completed build without addresses never fabricates Live (5.068434ms)
+✔ Live result mapping and 40/64-hex searches use exact launch addresses and hashes (1.328596ms)
+✔ owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings (1.63263ms)
+✔ inclusive backwards ranges are gap-free, non-overlapping and never exceed 10,000 blocks (0.275422ms)
+✔ ENS reverse results cache by lowercase payer for a day, including negative lookups (0.553968ms)
+✔ cache construction re-filters unrelated launches; storage corruption stays usable (1.447343ms)
+✔ head polling casts only newly observed store launches and resumes from the saved cursor (45.623738ms)
+✔ result launch UUIDs are preserved for evidence without inventing a numeric launch number (2.228981ms)
+✔ configured windows start at Intake deployment and use 100,000 / 400,000 inclusive blocks (0.272357ms)
+✔ every failure splits logs to at most 1,000 blocks, including non-range HTTP errors (1.35264ms)
+✔ Completed is fetched once per shared window and matched even when seen before its older request (5.916902ms)
+✔ catalog has every section 4 block with the required fields (2.543441ms)
+✔ every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions (5.31975ms)
+✔ blocks a launch type does not allow are dimmed in the palette and left out of the request (0.407438ms)
+✔ composed text equals the three fixtures byte for byte (6.585171ms)
+✔ words and rules together: numbered rules win; owner sentence names the functions; last line keeps names (0.525094ms)
+✔ request bodies follow 5.2 for every type and stay under 16 KiB (4.569327ms)
+✔ pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5 (1.135798ms)
+✔ the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot (1.10447ms)
+✔ swap-fee dependencies: fade, split and LP share need it and leave with it (1.865067ms)
+✔ buy/sell fees and the swap fee exclude each other; each block once (0.636089ms)
+✔ reorder keeps the token first; bring-your-own token replaces the standard one (1.053424ms)
+✔ field limits produce inline issues (0.626035ms)
+✔ job 1 landing drafts open in the describe editor (0.523762ms)
+✔ the preview is the exact compact UTF-8 JSON used in a cross-chain A/B/C request (4.530481ms)
+✔ only enabled deploy chains and complete, size-limited drafts reach the payment flow (1.125011ms)
+✔ zero and excessive prices are refused; bounded positive prices are exact (0.256413ms)
+✔ wrong chain and changed account refuse before approval or request simulation (0.965573ms)
+✔ zero price prevents a signature and rejection translates to a recoverable message (1.017771ms)
+✔ changed price, missing allowance, body over 16 KiB and the build banner fail closed (1.123329ms)
+✔ approval receipts verify token events for EOAs and Smart Wallets, including replacement guards (4.51005ms)
+✔ integer square root rounds down exactly, including large integers (1.290949ms)
+✔ price is inverted for sorted ETH/token and adjusted for token decimals (0.642541ms)
+✔ zero, negative, exponent, malformed and unrepresentable prices are refused (0.690051ms)
+✔ copyable initialize calldata uses live addresses, sorted native ETH, fee tier and matching spacing (5.629423ms)
+✔ IMD facts, states, plan titles, blockers and suggestions are retained without inventing success (4.424481ms)
+✔ free check sends the exact composer body inside the action envelope (41.771811ms)
+✔ own-code import uses the production API shape and only accepts a pinned GitHub source (2.376081ms)
+✔ IMD HTTP failures never become a clear check (1.006764ms)
+✔ intake job discovery matches the request id and action before using admission.result.jobId (0.346658ms)
+✔ job nodes map real build, audit and deployment states, including failures (0.795188ms)
+✔ ticker names come from API artifacts and match a chain-proven store launch; unrelated launches stay out (0.546737ms)
+✔ new type A drafts default to IMD and persisted explicit pairings survive normalization (0.480688ms)
+✔ Pepe grids and all meta values match the reference character for character (10.657145ms)
+✔ Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction (6.168478ms)
+✔ exported cast integration delivers real messages and unsubscribes on route cleanup (45.374846ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 832.616486
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

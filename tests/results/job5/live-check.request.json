@@ -1,0 +1,26 @@
+{
+  "action": "launch.open",
+  "input": {
+    "objective": "Launch Pondside (POND) with a Uniswap v4 hook on Ethereum, paired with IMD.\nToken: Pondside (POND), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.\nThe hook does exactly what the creator describes below, and nothing else.\nIn the creator’s own words: <description>Observe swaps without charging fees or adding owner powers.</description>\nNo owner functions, no backend signer, no upgrade path.\nFees are always taken from the ETH (pair currency) side, never from POND; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.\nEnable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.\nPool: 50% of my 90% share seeds the pool; the remainder goes to the paying wallet.\nKeep the function names exactly as written so the storefront can show them. Composed with The Hooks Store.",
+    "shape": "chain",
+    "references": [
+      "uniswap-v4-hooks",
+      "uniswap-v4-security"
+    ],
+    "steps": [
+      {
+        "skill": "build-contract-project"
+      },
+      {
+        "skill": "adversarial-review"
+      }
+    ],
+    "onchain": "univ4_hook",
+    "chainId": 1,
+    "pairWith": "imd",
+    "economics": {
+      "poolBps": 5000
+    },
+    "github": true
+  }
+}

@@ -47,7 +47,7 @@ export function App({ config }: { config: SiteConfig }) {
     </div></header>
     {config.inProgress && <div className="progress-banner">This site is being built; launches open when the banner goes away</div>}
     <main id="main" tabIndex={-1}>
-      {isStore ? <><Landing config={config} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
+      {isStore ? <><Landing config={config} launches={data.launches} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
 
     </main>
   </>;

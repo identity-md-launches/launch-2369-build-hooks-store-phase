@@ -116,7 +116,7 @@ input::placeholder { color: var(--ink-2); opacity: 1; }
 .stats dd { margin: 4px 0 0; font: 400 var(--text-title)/1 var(--mono); }
 .ticker { position: absolute; inset-inline: 16px; bottom: 12px; z-index: 2; display: flex; justify-content: center; pointer-events: none; }
 .ticker-box { display: flex; align-items: center; max-width: 100%; border: 2px solid var(--ink); padding: 3px 8px; background: var(--paper-3); font: 400 var(--text-large)/1.1 var(--mono); }
-.ticker [role=status] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ticker [role=status] { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .ticker button { pointer-events: auto; flex: 0 0 auto; min-height: 32px; font: 500 var(--text-body)/1.3 var(--body); color: var(--pine); background: transparent; border: 0; border-left: 1px solid var(--ink-3); margin-inline-start: 8px; padding-inline: 8px 0; text-decoration: underline; text-underline-offset: 3px; }
 .ads { margin: 22px 0 4px; }
 .ads-head { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-bottom: 12px; }
@@ -266,7 +266,7 @@ details p { margin: 0; max-width: 75ch; }
 .pal-text { min-width: 0; }
 .pal-item strong { display: block; font-size: var(--text-body); font-weight: 600; line-height: 1.25; }
 .pal-item .b { display: block; font-size: var(--text-body); color: var(--ink-2); line-height: 1.3; }
-.pal-item.off .pal-text { opacity: .6; }
+.pal-item.off .pal-text { color: var(--ink-2); }
 .pill.state { max-width: 96px; white-space: normal; text-align: center; justify-content: center; color: var(--ink-2); border-color: var(--ink-3); background: var(--paper-2); overflow-wrap: anywhere; }
 .btn.tiny { min-height: 36px; padding: 6px 10px; font-size: var(--text-xs); box-shadow: 3px 3px 0 var(--ink); }
 /* Keep each tooltip inside its row, including signs close to either viewport edge. */
@@ -294,7 +294,7 @@ details p { margin: 0; max-width: 75ch; }
 .choice p { font-size: var(--text-body); margin: 0; }
 .blk { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 16px; }
 .blk.token { border-left: 12px solid var(--pine); }
-.blk.off { opacity: .55; }
+.blk.off { color: var(--ink-2); border-color: var(--ink-3); background: var(--paper-2); }
 .blk-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
 .blk-head h3 { margin: 0; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .blk-head h3 .num { font-size: var(--text-large); }
@@ -318,7 +318,7 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .rule-line { margin-bottom: 8px; }
 .added { display: flex; flex-wrap: wrap; gap: 8px; }
 .added .chip { color: var(--ink); border-color: var(--ink); font: 400 var(--text-large)/1.1 var(--mono); }
-.added .chip.off { opacity: .6; }
+.added .chip.off { color: var(--ink-2); border-style: dashed; }
 .added .chip button { min-width: 32px; min-height: 32px; border: 0; background: transparent; color: var(--ink); font: 400 var(--text-label)/1 var(--display); padding: 0; }
 .added .chip button:hover { background: var(--paper-2); }
 .settings { padding: 14px; }
@@ -394,6 +394,23 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .timeline strong { font: 400 var(--text-xs)/1.5 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
 .timeline small { font-size: var(--text-body); line-height: 1.4; }
 .timeline .confirmed { background: var(--pine); color: var(--on-pine); }
+.timeline .active { background: var(--paper-3); box-shadow: inset 0 -5px 0 var(--pine); }
+.timeline .stage-failed { background: var(--paper-3); box-shadow: inset 0 -5px 0 var(--bad); }
+.swarm-panel { border-top: 2px dashed var(--ink-3); margin-top: 20px; padding-top: 20px; overflow-wrap: anywhere; }
+.swarm-panel h2 { margin-bottom: 12px; }
+.swarm-panel h3 { margin-top: 20px; }
+.swarm-panel ul, .swarm-panel ol { padding-inline-start: 22px; font-size: var(--text-body); }
+.swarm-panel li + li { margin-top: 8px; }
+.swarm-facts { margin: 0; font-size: var(--text-body); }
+.swarm-facts > div { padding-block: 10px; border-bottom: 1px solid var(--ink-3); }
+.swarm-facts dt { margin-bottom: 6px; }
+.swarm-facts dd { margin: 0; }
+.swarm-facts dd p { margin: 6px 0 0; }
+.swarm-facts .pill.state { max-width: none; background: var(--paper-3); color: var(--ink); }
+.swarm-blockers { border-inline-start: 4px solid var(--bad); }
+.launch-check { padding: 20px; margin-block: 20px; }
+.launch-check > [role=status] { margin-top: 12px; }
+.relay-stage-note { margin-top: -12px; margin-bottom: 24px; }
 .detail-data { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: 24px; margin-bottom: 24px; }
 .addresses, .evidence, .hook-request, .pool-panel, .saved-draft, .promotions, .mine-connect, .launch-review > .box { padding: 20px; min-width: 0; }
 .addresses .kv > div { grid-template-columns: 100px minmax(0,1fr); gap: 12px; }

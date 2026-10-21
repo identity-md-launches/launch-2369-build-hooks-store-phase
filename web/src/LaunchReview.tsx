@@ -12,6 +12,8 @@ import type { RawLog } from './chain/decode';
 import { launchBody, approveLaunch, requestLaunch, readLaunchPrice, requestedId, verifyApprovalReceipt, launchError, type LaunchContext } from './chain/launch';
 import { PENDING_KEY, pendingRequests } from './MyHooks';
 import { cast } from '../../src/scene/cast';
+import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
+import { SwarmPanel } from './SwarmPanel';
 
 type Step = { hash?: Hex; phase: 'idle' | 'wallet' | 'pending' | 'success' | 'failed'; error?: string; price?: bigint };
 const idle: Step = { phase: 'idle' };
@@ -19,13 +21,18 @@ const TYPES = { A: 'Hook + new token + pool', B: 'Hook only', C: 'Hook for my ex
 export function LaunchReview({ config, store }: { config: SiteConfig; store: LaunchStore }) {
   const [draft] = useState(loadDraft), ctx = context(draft);
   const { address, chainId, isConnected } = useAccount(), { data: wallet } = useWalletClient();
+  const ownCode = useOwnCode(draft, config.relayUrl);
   const { mutateAsync: switchChain, isPending: switching } = useSwitchChain();
   const [paymentChain, setPaymentChain] = useState(() => chainId && config.paymentChains.includes(chainId) ? chainId : config.paymentChains[0]);
   const [price, setPrice] = useState<bigint | null>(null), [priceError, setPriceError] = useState(''), [revision, setRevision] = useState(0);
   const [approval, setApproval] = useState<Step>(idle), [launch, setLaunch] = useState<Step>(idle), [copyNote, setCopyNote] = useState(''), [switchError, setSwitchError] = useState('');
   const flight = useRef(false);
   const client = store.clients[paymentChain], payment = config.chains.find(c => c.id === paymentChain)!;
-  const preview = useMemo(() => { try { return { ...launchBody(draft, config, address), error: '' }; } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [draft, config, address]);
+  const preview = useMemo(() => { try {
+    if (!ownCode.prepared) throw new Error('Resolve your repository in the Builder before launching.');
+    return { ...launchBody(ownCode.prepared, config, address), error: '' };
+  } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [ownCode.prepared, config, address]);
+  const check = useSwarmCheck(config.relayUrl, preview.json || null);
   const identity = `${address}:${paymentChain}:${preview.bytes}`;
   const attemptKey = `hooks-store:launch-tx:${keccak256(stringToHex(identity))}`;
   const [storageNote, setStorageNote] = useState('');
@@ -67,7 +74,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     location.hash = `#hook/${operation.chainId}/${id}`;
   };
   const run = async (kind: 'approve' | 'launch') => {
-    if (flight.current || !connected || !wallet || !address || preview.error || config.inProgress) return;
+    if (flight.current || !connected || !wallet || !address || preview.error || config.inProgress || check.gate) return;
     if (kind === 'launch' && (approval.phase !== 'success' || !approval.price)) return;
     flight.current = true;
     const operation: LaunchContext = { config, chainId: paymentChain, account: address, client, wallet, bytes: preview.bytes };
@@ -124,14 +131,15 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     <section className="box"><h2>What you pay</h2><table className="review-table fee-table"><tbody>
       <tr><th scope="row">Swarm + audit panel</th><td><Text>{`${price === null ? '0.5' : formatUnits(price, 18)} IMD once`}</Text>{price === null && <span className="small muted"> · maximum; {priceError ? 'live price unavailable' : 'checking live price'}</span>}</td></tr>
       <tr><th scope="row">Wallet gas</th><td><Text>2 transactions, paid in ETH</Text></td></tr>
-      {draft.type === 'A' ? <><tr><th scope="row">Token supply</th><td><Text>{`10% swarm / 90% you; ${draft.settings.pool ?? 'choose'}% of yours in the pool`}</Text></td></tr><tr><th scope="row">Pool trading fee</th><td><Text>1.25% (1% to you, 0.25% network) plus the hook’s own fee</Text></td></tr></> : <tr><th scope="row">Token and pool</th><td>None created. You get the audited hook contract only.</td></tr>}
+      {draft.type === 'A' ? <><tr><th scope="row">Token supply</th><td><Text>{`10% swarm / 90% you; ${draft.settings.pool ?? 'choose'}% of yours in the pool`}</Text></td></tr><tr><th scope="row">Pool trading fee</th><td><Text>1.25% (1% to you, 0.25% network) plus the hook’s own fee</Text></td></tr></> : <tr><th scope="row">Token and pool</th><td>None created. The swarm builds and reviews the hook contract.</td></tr>}
       {draft.type === 'C' && <tr><th scope="row">Opening the pool</th><td>One more transaction from your wallet after the hook is live, prepared by the site.</td></tr>}
       <tr><th scope="row">Deployment</th><td>Paid by IMD</td></tr>
     </tbody></table><p className="small muted">USD context is unavailable. Gas is estimated by your wallet.</p></section></div>
     <p className="notice"><strong>Payment happens on Robinhood Chain or Ethereum, in IMD.</strong> Your hook deploys on the chain you chose in the Builder, which can be the other one.</p>
     {draft.type === 'C' && <p>The site prepares the pool-opening call after your hook is live. Copy it into a v4 interface; sending it here opens in phase <Text>2b</Text>.</p>}
     {!config.relayUrl && <div className="notice"><strong>A refused request still spends the fee.</strong><p>The free check is unavailable without the relay. Read the exact request before paying.</p><button className="btn" disabled={!!preview.error} onClick={() => void copy()}>Copy request</button><span role="status" className="copy-status">{copyNote}</span></div>}
-    <details className="box exact-launch"><summary>Exact request the swarm receives</summary><div><pre data-testid="launch-json">{preview.json || compose(draft, address)}</pre></div></details>
+    {config.relayUrl && <section className="box launch-check"><h2>Check before paying</h2><p>A refused request still spends the fee. A free check does not guarantee acceptance or replace the audit panel.</p><button className="btn" disabled={!!preview.error || check.busy || busy} onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button><p role="status" className="small">{check.gate || (check.result ? 'The check matches the exact request below.' : 'You can check this request with IMD before paying.')}</p>{check.error && <p role="alert" className="field-error">{check.error}</p>}{check.result && <SwarmPanel result={check.result} />}</section>}
+    <details className="box exact-launch"><summary>Exact request the swarm receives</summary><div><pre data-testid="launch-json">{preview.json || (!ownCode.ready ? 'Resolve your repository in the Builder to compose the request from its pinned source.' : compose(draft, address))}</pre></div></details>
     {preview.error && <p className="form-error" role="alert">{preview.error} <a href="#builder">Edit in Builder</a></p>}
     {config.inProgress && <p className="notice">Launches open when the site banner goes away. You can review and copy your request now.</p>}
     {storageNote && <p className="notice" role="status">{storageNote}</p>}
@@ -142,11 +150,11 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
         {address && <AddressValue label="paying wallet" value={address} explorer={payment.explorerUrl} />}{switchError && <p className="field-error" role="alert">{switchError}</p>}<p className="small muted">Connecting needs no transaction or gas.</p>
       </li>
       <li className="box"><h2><span className="num">2.</span> Approve IMD</h2><p>Allow Intake to spend exactly the current launch price.</p>
-        <button className="btn primary" disabled={!connected || busy || approval.phase === 'success' || price === null || !!preview.error || config.inProgress} onClick={() => void run('approve')}>{approval.phase === 'wallet' || approval.phase === 'pending' ? 'Approving…' : approval.phase === 'success' ? 'Approved' : <Text>{`Approve ${price === null ? 'IMD' : `${formatUnits(price, 18)} IMD`}`}</Text>}</button>
+        <button className="btn primary" disabled={!connected || busy || approval.phase === 'success' || price === null || !!preview.error || config.inProgress || !!check.gate} onClick={() => void run('approve')}>{approval.phase === 'wallet' || approval.phase === 'pending' ? 'Approving…' : approval.phase === 'success' ? 'Approved' : <Text>{`Approve ${price === null ? 'IMD' : `${formatUnits(price, 18)} IMD`}`}</Text>}</button>
         {!connected && <p className="small muted">Connect on your payment chain first.</p>}{priceError && <p className="field-error" role="alert">{priceError} <button className="link-button" onClick={() => setRevision(v => v + 1)}>Retry price</button></p>}
         {feedback(approval, 'approve')}
       </li>
-      <li className="box"><h2><span className="num">3.</span> Launch</h2><p>Send this request and pay the swarm. The audit panel is included.</p><button className="btn primary" disabled={!connected || busy || approval.phase !== 'success' || launch.phase === 'success' || !!preview.error || config.inProgress} onClick={() => void run('launch')}>{launch.phase === 'wallet' || launch.phase === 'pending' ? 'Launching…' : 'Launch hook'}</button>
+      <li className="box"><h2><span className="num">3.</span> Launch</h2><p>Send this request and pay the swarm. The audit panel is included.</p><button className="btn primary" disabled={!connected || busy || approval.phase !== 'success' || launch.phase === 'success' || !!preview.error || config.inProgress || !!check.gate} onClick={() => void run('launch')}>{launch.phase === 'wallet' || launch.phase === 'pending' ? 'Launching…' : 'Launch hook'}</button>
         {approval.phase !== 'success' && <p className="small muted">Wait for the approval receipt before launching.</p>}{feedback(launch, 'launch')}
         {launch.phase === 'failed' && /price changed|approval is no longer/i.test(launch.error ?? '') && <button className="link-button" onClick={() => { setApproval(idle); setLaunch(idle); setRevision(v => v + 1); }}>Review price and approve again</button>}
       </li>

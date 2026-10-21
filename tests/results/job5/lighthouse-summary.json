@@ -1,0 +1,27 @@
+{
+  "lighthouseVersion": "13.5.0",
+  "width": 390,
+  "results": [
+    {
+      "route": "store",
+      "mode": "navigation",
+      "finalUrl": "http://127.0.0.1:44401/preview/#store",
+      "score": 100,
+      "failed": []
+    },
+    {
+      "route": "builder",
+      "mode": "navigation",
+      "finalUrl": "http://127.0.0.1:44401/preview/#builder",
+      "score": 100,
+      "failed": []
+    },
+    {
+      "route": "builder",
+      "mode": "checked response snapshot",
+      "score": 100,
+      "failed": []
+    }
+  ],
+  "fixture": "Production export; deterministic empty chain history, unavailable swarm metrics, and a recorded IMD free-check response. No wallet or transaction."
+}

@@ -7,6 +7,8 @@ import {
 } from '../../src/lib/compose';
 import { assetUrl, type SiteConfig } from './config';
 import { loadDraft, storeDraft } from './draft';
+import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
+import { SwarmPanel } from './SwarmPanel';
 
 const TYPES: [LaunchType, string, string][] = [
   ['A', 'Hook + new token + pool', 'IMD launches your hook, a token and the trading pool together. The simplest path.'],
@@ -79,6 +81,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const [verified, setVerified] = useState<Set<string>>(new Set());
   const [blocked, setBlocked] = useState<{ source: string; titles: string[] } | null>(null);
   const { address } = useAccount();
+  const ownCode = useOwnCode(draft, config.relayUrl);
   useEffect(() => { setStorageError(!storeDraft(draft)); }, [draft]);
   useEffect(() => {
     let live = true;
@@ -87,9 +90,11 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   }, [config.blocksVerifiedUrl]);
 
   const ctx = context(draft), s = draft.settings;
-  const text = useMemo(() => compose(draft, address), [draft, address]);
+  const text = ownCode.prepared ? compose(ownCode.prepared, address) : 'Resolve your repository in Settings to compose the request from its pinned source.';
+  const requestJson = ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null;
+  const check = useSwarmCheck(config.relayUrl, requestJson);
   const issues = useMemo(() => [...validate(draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [draft, address, config.enabledDeployChains]);
-  const bytes = useMemo(() => bodyBytes(body(draft, address)), [draft, address]);
+  const bytes = ownCode.prepared ? bodyBytes(body(ownCode.prepared, address)) : 0;
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);
   const tested = (id: string) => verified.has(id);
   const update = (next: Draft) => { setBlocked(null); setDraft(next); };
@@ -205,7 +210,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
           <option value="">Choose a chain</option>{[4663, 1].filter(id => enabledChains.includes(id)).map(id => <option key={id} value={id}>{CHAIN_NAMES[id]}</option>)}
         </select>)}
         {draft.type === 'A' && setting('pair', 'Pair with', <select id="s-pair" value={s.pair} onChange={e => settings({ pair: e.target.value as 'eth' | 'imd' })}>
-          <option value="eth">ETH</option><option value="imd">IMD</option>
+          <option value="imd">IMD</option><option value="eth">ETH</option>
         </select>)}
       </div>
       {draft.type === 'A' && <div className="field-row">
@@ -223,7 +228,10 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <details className="advanced" open={!!(s.repo || s.commit) || undefined}>
         <summary>Advanced: start from my own code</summary>
         <div><p className="small">Point the swarm at a public GitHub repository with your hook. It is audited as imported code, adapted to the launch, and reviewed before deploying.</p>
-          <div className="field-row">{setting('repo', 'Repository URL', textInput('repo', 'https://github.com/you/your-hook'))}{setting('commit', 'Commit', textInput('commit', '40-character commit id', true))}</div></div>
+          <div className="field-row">{setting('repo', 'Repository URL', textInput('repo', 'https://github.com/you/your-hook'))}{setting('commit', 'Commit', textInput('commit', '40-character commit id', true))}</div>
+          {ownCode.needed && <><button className="btn" type="button" disabled={ownCode.busy || !s.repo.trim() || !s.commit.trim()} onClick={() => void ownCode.resolve()}>{ownCode.busy ? 'Resolving repository…' : ownCode.ready ? 'Resolve repository again' : 'Resolve repository'}</button><p className="small muted" role="status">{ownCode.ready ? `Pinned source: ${ownCode.source?.repoUrl} · ${ownCode.source?.baseCommit}` : 'Resolve this public Foundry repository before composing or checking your request.'}</p></>}
+          {ownCode.error && <p className="field-error" role="alert">{ownCode.error}</p>}
+        </div>
       </details>
     </div>
   </section>;
@@ -248,16 +256,18 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <div><span>Request body</span><strong>{(bytes / 1024).toFixed(1)} / 16 KiB</strong></div>
     </div>
     <div className="actions">
-      <button className="btn" type="button" disabled aria-describedby="check-note">Check with the swarm (free)</button>
-      <button className="btn primary" type="button" disabled={issues.length > 0} aria-describedby={issues.length ? 'continue-note' : undefined}
-        onClick={() => { if (!issues.length) location.hash = '#launch'; }}>Continue to launch</button>
+      <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !ownCode.ready || issues.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
+      <button className="btn primary" type="button" disabled={issues.length > 0 || !ownCode.ready || !!check.gate} aria-describedby={issues.length ? 'continue-note' : 'check-note'}
+        onClick={() => { if (!issues.length && ownCode.ready && !check.gate) location.hash = '#launch'; }}>Continue to launch</button>
     </div>
-    <p className="small muted" id="check-note">The free check needs the relay, which is not set up yet.</p>
+    <p className="small muted" id="check-note" role="status">{!config.relayUrl ? 'The free check needs the relay, which is not set up yet.' : !ownCode.ready ? 'Resolve your repository in Settings before continuing.' : check.gate || 'The free check sends this request to IMD. No wallet, payment or launch.'}</p>
+    {check.error && <p className="field-error" role="alert">{check.error}</p>}
     {issues.length > 0 && <div className="small continue-note" id="continue-note" role="status"><strong>Before you continue:</strong><ul>{[...new Set(issues.map(i => i.message))].slice(0, 6).map(m => <li key={m}>{m}</li>)}</ul></div>}
+    {check.result && <SwarmPanel result={check.result} />}
   </aside>;
 
   return <section className="wrap page builder-page" aria-labelledby="builder-h">
-    <div className="block-head"><h1 id="builder-h">Builder</h1><span className="small muted">Drafts save in this browser. Nothing is sent until you launch.</span></div>
+    <div className="block-head"><h1 id="builder-h">Builder</h1><span className="small muted">Drafts save in this browser. Free checks send your request; launching needs payment.</span></div>
     {storageError && <div className="notice" role="alert">This browser is not saving your draft. Allow site storage to keep it after a reload.</div>}
     <div className="builder">
       {palette}
