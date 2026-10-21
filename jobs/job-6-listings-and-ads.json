@@ -1,0 +1,11 @@
+{
+  "parentJobId": "JOB_5_ID",
+  "objective": "The Hooks Store, phase 2 job 6: free listings and paid #ad placements. Implement SPEC.md sections 3.1 (featured carousel) and 6.6 against the deployed HookListingRegistry and FeaturedPlacementsV2 contracts from the ad contracts launch, whose addresses and ABIs the operator has put into public/site-config.json and src/abi. Featured strip: read featured(1, 100) with each placement total, getPlacement for each active id, getListing and getMetadata at the pinned revision; render the one-line cards (#AD pill, name, symbol, by creator as ENS name or shortened payer address, hours left) in the self-scrolling strip, sorted by total paid with ties by lower id, open-slot card last, refreshed every 60 seconds; no buttons on the strip. Promotions panel in My hooks per SPEC 3.5: the wallet's placements with hours left, total paid, rank, BOOST (ask an amount, deposit if needed, boost(id, amount)) and CANCEL; without configured addresses the strip shows only the open-slot card and the panel says phase 2. Promote a hook: from the Promotions panel, for a live hook the connected wallet launched, a four-step flow with real wallet transactions: create the free listing in HookListingRegistry (createListing with chainId, hook address and metadata filled from the hook page: name, source and audit links, the callback mask read from the hook address bits, the fee and admin disclosures composed from the blocks), approve and deposit 0.1 IMD into FeaturedPlacementsV2, purchase(listingId, revision, proceedsRecipient read live, deadline now + 10 minutes) for a 24-hour placement, and a done state linking to the carousel. Also: cancel an active placement with the pro-rata base refund and forfeited boosts explained, withdraw available balance, and the hook page's #ad state when a placement is active. Tests: an Anvil fork with the two contracts deployed from the pinned build runs listing, deposit, purchase, boost from a second wallet, cancel and withdraw end to end and asserts the carousel shows the pinned revision after an edit; Playwright for the flow at three widths. Deliver source, dist/ and test results.",
+  "skill": "build-website",
+  "references": [
+    "eth-frontend-ux",
+    "eth-addresses"
+  ],
+  "github": true,
+  "ipfs": "the-hooks-store"
+}

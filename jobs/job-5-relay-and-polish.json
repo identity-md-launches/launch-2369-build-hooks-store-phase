@@ -1,0 +1,11 @@
+{
+  "parentJobId": "JOB_4_ID",
+  "objective": "The Hooks Store, phase 1 job 5 of 6: the relay, the live free check, scene polish and final polish. Implement SPEC.md section 7.4 and the phase 2 polish of section 9 (reeds at the banks, a hat on the fisher, one or two birds over the canopy, all monochrome tiles). Write relay/worker.js, a single-file Cloudflare Worker that forwards POST /check to https://api.imd.fun/requests/check and POST /import to https://api.imd.fun/requests/import, and GET /launches, /launches/:id, /jobs/:id and /intake/:chain/:tx to the same paths on api.imd.fun, adds Access-Control-Allow-Origin *, caches GET responses for 30 seconds, and rejects every other path and method; include a README with the one-command deploy and unit tests with a fetch mock. In the site, read relayUrl from site-config.json (null by default): when set, enable the free-check button in the Builder and render the What the swarm understood panel from the response (facts with their states, plan step titles, blockers, suggestions) and block Launch while blockers exist; resolve own-code repositories through /import before composing; name launches in the pond ticker from /launches; show the real stage names Building, Audit panel and Deploying on the Hook page timeline from /jobs/:id. Final copy pass against SPEC.md section 8; Lighthouse accessibility at least 95 on Store and Builder; Playwright regression at three widths for every route. Deliver source, dist/, relay/ and test results.",
+  "skill": "build-website",
+  "references": [
+    "eth-frontend-ux",
+    "better-interface"
+  ],
+  "github": true,
+  "ipfs": "the-hooks-store"
+}

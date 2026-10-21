@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Hooks Store</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Design mockup: describe a Uniswap v4 hook or stack reviewed blocks, and have the IMD swarm build, audit and launch it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Press+Start+2P&family=VT323&display=swap">
+<style>
+/* Layout concept: Steam storefront bones (sticky bar with search, a full-bleed illustrated landing, an #ad carousel, filter rail + dense grid) in a retro-pixel skin on beige paper, black ink outlines, hard shadows, one pine accent. Single light look by design. */
+:root {
+  --paper: #e9dfc3; --paper-2: #dfd3b0; --paper-3: #f3ecd8;
+  --ink: #15130f; --ink-2: #5b5342; --ink-3: #8a816a;
+  --pine: #1e5a3a; --pine-2: #2c7a50; --on-pine: #f3ecd8;
+  --bad: #a3382b; --warn: #a1731c; --ok: #1e5a3a; --ad: #c9a227;
+  --grid: rgba(21,19,15,.07);
+  --display: 'Press Start 2P', 'Courier New', monospace;
+  --body: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
+  --mono: 'VT323', 'Courier New', ui-monospace, monospace;
+  --shadow: 4px 4px 0 var(--ink);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 500 17px/1.5 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--pine); }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; line-height: 1.5; margin: 0 0 12px; text-wrap: balance; }
+h1 { font-size: 22px; } h2 { font-size: 13px; } h3 { font-size: 11px; } h4 { font-size: 9px; color: var(--ink-2); letter-spacing: .04em; }
+p { margin: 0 0 12px; max-width: 65ch; }
+a { color: var(--pine); text-underline-offset: 3px; }
+a:hover { color: var(--pine-2); }
+:focus-visible { outline: 3px solid var(--pine); outline-offset: 2px; }
+code, .mono { font-family: var(--mono); font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }
+/* numbers always in the terminal face: the pixel body font draws 5 like 8 */
+.num, .fees td b, .cost strong, .stats dd { font-family: var(--mono); font-size: 1.3em; line-height: 1; font-variant-numeric: tabular-nums; }
+input[type=number] { font-family: var(--mono); font-size: 22px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.muted { color: var(--ink-2); }
+.small { font-size: 14px; }
+.box { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); }
+.panel { background: var(--paper-2); border: 3px solid var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 3px solid var(--ink); background: var(--paper-3); color: var(--ink); font: 400 10px/1.4 var(--display); text-decoration: none; cursor: pointer; box-shadow: var(--shadow); transition: transform .08s, box-shadow .08s; white-space: nowrap; }
+.btn:hover { background: var(--paper-2); color: var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn.primary { background: var(--pine); color: var(--on-pine); }
+.btn.primary:hover { background: var(--pine-2); color: var(--on-pine); }
+.btn.tiny { min-height: 32px; padding: 0 10px; font-size: 8px; box-shadow: 3px 3px 0 var(--ink); }
+.btn.flat { box-shadow: none; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.pill { display: inline-block; font: 400 8px/1.4 var(--display); padding: 5px 8px; border: 2px solid var(--ink); background: var(--paper-3); color: var(--ink); white-space: nowrap; }
+.pill.live { background: var(--ok); color: var(--on-pine); border-color: var(--ok); }
+.pill.prog { background: var(--warn); color: #15130f; border-color: var(--warn); }
+.pill.bad { background: var(--bad); color: #f3ecd8; border-color: var(--bad); }
+.pill.chain { background: var(--paper-2); }
+.pill.ad { background: var(--ad); border-color: var(--ad); color: #15130f; }
+.warn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 2px solid var(--ink); background: var(--ad); color: var(--ink); font: 400 9px/1 var(--display); vertical-align: middle; margin-left: 6px; cursor: help; position: relative; }
+.warn::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 260px; background: var(--ink); color: var(--paper); font: 500 14px/1.35 var(--body); padding: 8px 10px; border: 2px solid var(--paper); white-space: normal; text-align: left; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 30; }
+.warn:hover::after, .warn:focus-visible::after { opacity: 1; }
+.pal-item .warn::after { left: 0; transform: none; }
+.pill.state { white-space: normal; text-align: center; max-width: 96px; font-size: 7px; color: var(--ink-2); border-color: var(--ink-3); }
+input, select, textarea { width: 100%; min-height: 44px; background: var(--paper-3); color: var(--ink); border: 3px solid var(--ink); padding: 8px 10px; font: 500 16px/1.3 var(--body); }
+textarea { min-height: 90px; resize: vertical; }
+label { display: block; font: 400 9px/1.5 var(--display); margin: 10px 0 6px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.notice { border: 3px solid var(--ink); padding: 12px 14px; background: var(--paper-2); margin: 12px 0; }
+.notice.warn { border-left: 10px solid var(--warn); }
+.notice.ok { border-left: 10px solid var(--ok); }
+.notice.bad { border-left: 10px solid var(--bad); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.kv { display: grid; margin: 0; }
+.kv > div { display: grid; grid-template-columns: 170px 1fr; gap: 12px; padding: 8px 0; border-bottom: 2px dashed var(--ink-3); }
+.kv dt { font: 400 9px/1.6 var(--display); color: var(--ink-2); } .kv dd { margin: 0; min-width: 0; }
+table.fees { width: 100%; border-collapse: collapse; }
+.fees th, .fees td { text-align: left; padding: 8px 6px; border-bottom: 2px dashed var(--ink-3); vertical-align: top; font-weight: 500; }
+.fees th { font: 400 9px/1.6 var(--display); color: var(--ink-2); width: 34%; }
+.seg { display: inline-flex; border: 3px solid var(--ink); background: var(--paper-3); box-shadow: var(--shadow); }
+.seg button { min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--ink); font: 400 9px/1.4 var(--display); cursor: pointer; }
+.seg button.on { background: var(--pine); color: var(--on-pine); }
+.seg button + button { border-left: 3px solid var(--ink); }
+details { border: 3px solid var(--ink); background: var(--paper-3); margin-bottom: 10px; }
+summary { cursor: pointer; padding: 12px 14px; font: 400 10px/1.6 var(--display); list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-family: var(--display); } details[open] summary::after { content: "\2212"; }
+details > div { padding: 0 14px 14px; }
+
+.mock { background: var(--ink); color: var(--paper); padding: 8px 0; }
+.mock .wrap { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+.mock b { font: 400 9px/1.6 var(--display); }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--pine); color: var(--on-pine); border-bottom: 3px solid var(--ink); }
+.top-in { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-block: 8px; flex-wrap: nowrap; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--on-pine); text-decoration: none; font: 400 12px/1 var(--display); flex: 0 0 auto; }
+.brand .hook { font-family: var(--mono); font-size: 30px; line-height: 1; }
+.nav { display: flex; gap: 2px; flex: 0 0 auto; }
+.nav a { color: var(--on-pine); text-decoration: none; font: 400 9px/1 var(--display); padding: 12px 10px; border: 2px solid transparent; white-space: nowrap; }
+.nav a:hover { border-color: var(--on-pine); color: var(--on-pine); }
+.nav a.on { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+.search { display: flex; flex: 1 1 120px; min-width: 0; margin-left: auto; }
+.search input { min-height: 40px; font-size: 15px; }
+.chainpill { font: 400 8px/1 var(--display); border: 2px solid var(--on-pine); padding: 8px 10px; white-space: nowrap; flex: 0 0 auto; }
+.connect { flex: 0 0 auto; width: 168px; background: var(--paper); overflow: hidden; }
+
+/* landing: full bleed, a monochrome character-tile pond behind centered copy */
+.landing { position: relative; width: 100%; min-height: 660px; overflow: hidden; border-bottom: 3px solid var(--ink); background: var(--paper); background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 12px 12px; }
+.scene { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.layer { position: absolute; margin: 0; font: 400 13px/15px var(--mono); white-space: pre; color: var(--ink-2); }
+.layer span { display: inline-block; width: 9px; height: 15px; text-align: center; }
+.layer .t1 { background: rgba(21,19,15,.07); color: var(--ink-2); } .layer .t2 { background: rgba(21,19,15,.15); color: var(--ink); } .layer .t3 { background: rgba(21,19,15,.26); color: var(--ink); }
+.layer .dot { color: var(--ink-3); } .layer .ln { color: var(--ink); } .layer .bob { color: var(--ink); background: rgba(21,19,15,.15); }
+.canopy { left: 0; top: 0; } .shore { left: 0; }
+.branch { right: 0; top: 0; transform-origin: 100% 0; animation: sway 8s ease-in-out infinite alternate; }
+.branch.l { right: auto; left: 0; transform-origin: 0 0; animation-duration: 10s; animation-delay: -4s; }
+.water { left: 0; } .water.a { animation: fadeA 3.2s steps(1) infinite; } .water.b { animation: fadeB 3.2s steps(1) infinite; }
+.pad { animation: drift 10s ease-in-out infinite alternate; } .pad.b { animation-duration: 13s; animation-delay: -6s; }
+.bank { right: 0; bottom: 0; }
+.fisher { left: 56%; top: 58%; }
+.fish { top: 72%; animation: swimL 38s linear infinite; }
+.fish.two { top: 84%; animation: swimR 52s linear infinite; animation-delay: -22s; }
+.leaf { top: 0; animation: fall 15s linear infinite; opacity: 0; color: var(--ink-2); }
+.leaf.two { animation-delay: -5s; } .leaf.three { animation-delay: -10s; }
+@keyframes sway { from { transform: rotate(-1deg); } to { transform: rotate(1.2deg); } }
+@keyframes fadeA { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes fadeB { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes drift { from { transform: translate(0, 0); } to { transform: translate(9px, 4px); } }
+@keyframes swimL { from { left: 104%; } to { left: -8%; } }
+@keyframes swimR { from { left: -8%; } to { left: 104%; } }
+@keyframes fall { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 8% { opacity: .9; } 88% { opacity: .9; } 100% { transform: translate(-120px, 700px) rotate(200deg); opacity: 0; } }
+.landing-copy { position: relative; z-index: 1; width: min(680px, 100%); margin: 0 auto; padding: 128px max(16px, env(safe-area-inset-left, 0px)) 110px; text-align: center; }
+.landing-copy::before { content: ""; position: absolute; inset: 96px -60px 70px; background: radial-gradient(closest-side, rgba(233,223,195,.97) 62%, rgba(233,223,195,0)); z-index: -1; }
+.landing-copy h1 { font-size: 26px; line-height: 1.6; }
+.landing-copy .lede { font-size: 18px; margin: 0 auto 20px; }
+.eyebrow { font: 400 9px/1.6 var(--display); color: var(--pine); margin-bottom: 12px; }
+.prompt { display: flex; background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 6px; text-align: left; }
+.prompt input { border: 0; min-height: 48px; font-size: 17px; background: transparent; }
+.prompt .btn { box-shadow: none; }
+.alt { margin: 14px auto 0; font-size: 15px; }
+.stats { display: flex; justify-content: center; gap: 18px; margin: 22px 0 0; padding: 0; flex-wrap: wrap; }
+.stats > div { border: 3px solid var(--ink); background: var(--paper-3); padding: 8px 14px; min-width: 150px; }
+.stats dt { font: 400 8px/1.6 var(--display); color: var(--ink-2); } .stats dd { margin: 0; font-size: 26px; }
+.ticker { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 1; text-align: center; font-family: var(--mono); font-size: 19px; line-height: 1.1; color: var(--ink); pointer-events: none; }
+.ticker span { background: var(--paper-3); border: 2px solid var(--ink); padding: 2px 10px; }
+
+/* featured #ad strip: compact cards scrolling on their own */
+.ads { margin: 18px 0 4px; }
+.ads-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.ads-head h2 { margin: 0; display: flex; align-items: center; gap: 10px; }
+.marquee { overflow: hidden; border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink); background: var(--paper-2); }
+.marquee-track { display: flex; gap: 12px; width: max-content; padding: 10px 12px; animation: marquee 42s linear infinite; }
+.marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.adcard { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; border: 3px solid var(--ink); background: #fbf3dc; padding: 4px 10px; text-decoration: none; color: var(--ink); white-space: nowrap; box-shadow: 3px 3px 0 var(--ink); }
+.adcard:hover { background: var(--paper-3); color: var(--ink); }
+.adcard .nm { font: 400 9px/1.4 var(--display); } .adcard .sym { font-family: var(--mono); font-size: 18px; color: var(--ink-2); }
+.adcard .by { font-size: 13px; color: var(--ink-2); } .adcard .left { font-family: var(--mono); font-size: 17px; }
+.adcard.slot { background: var(--paper-3); border-style: dashed; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .marquee { overflow-x: auto; } .marquee-track { animation: none; } }
+
+/* store */
+.store { display: grid; grid-template-columns: 240px 1fr; gap: 24px; margin: 20px 0 40px; }
+.rail { padding: 14px; align-self: start; }
+.rail h4 { margin: 12px 0 6px; } .rail h4:first-child { margin-top: 0; }
+.rail label { display: flex; align-items: center; gap: 8px; font: 500 15px/1.2 var(--body); min-height: 34px; margin: 0; }
+.rail input[type=checkbox], .rail input[type=radio] { width: 18px; min-height: 18px; height: 18px; margin: 0; accent-color: var(--pine); }
+.rail select { min-height: 40px; font-size: 15px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+.card { background: var(--paper-3); border: 3px solid var(--ink); padding: 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card-top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.card h3 { margin: 4px 0 0; font-size: 11px; line-height: 1.6; } .card h3 small { display: block; font-family: var(--mono); font-size: 20px; color: var(--ink-2); }
+.card p { font-size: 15px; margin: 0; }
+.blocks { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.blocks li { font: 500 13px/1 var(--body); border: 2px solid var(--ink-3); padding: 5px 7px; color: var(--ink-2); }
+.card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; font-size: 14px; }
+.block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.block-head h2 { margin: 0; }
+.empty { border: 3px dashed var(--ink-3); padding: 24px; text-align: center; color: var(--ink-2); }
+
+/* builder */
+.builder { display: grid; grid-template-columns: 280px minmax(0, 1fr) 340px; gap: 20px; margin-bottom: 40px; align-items: start; }
+.palette { padding: 12px; }
+.palette details { margin-bottom: 8px; background: var(--paper-3); } .palette summary { padding: 10px 12px; font-size: 9px; }
+.pal-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 2px dashed var(--ink-3); }
+.pal-item:last-child { border-bottom: 0; }
+.pal-item strong { display: block; font-size: 15px; line-height: 1.25; } .pal-item span.b { display: block; font-size: 13px; color: var(--ink-2); line-height: 1.3; }
+.pal-item.off { opacity: .6; }
+.canvas { min-width: 0; }
+.types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.type { text-align: left; padding: 12px; cursor: pointer; background: var(--paper-3); border: 3px solid var(--ink); font: inherit; color: inherit; }
+.type.on { background: var(--pine); color: var(--on-pine); } .type strong { display: block; font: 400 9px/1.5 var(--display); margin-bottom: 6px; } .type span { font-size: 14px; display: block; }
+.chooser { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.choice { text-align: left; padding: 18px; cursor: pointer; background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); font: inherit; color: inherit; }
+.choice:hover { background: var(--paper-2); } .choice h3 { margin-bottom: 8px; } .choice p { font-size: 15px; margin: 0; }
+.blk { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 16px; }
+.blk-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+.blk-head h3 { margin: 0; } .blk .sentence { margin: 8px 0 4px; font-size: 15px; }
+.blk .params { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.blk .params label { margin-top: 4px; }
+.blk.token { border-left: 12px solid var(--pine); }
+.blk .manage-note { font-size: 13px; color: var(--ink-2); margin: 6px 0 0; }
+.order { display: flex; gap: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.chip { border: 2px solid var(--ink-3); background: var(--paper-3); padding: 6px 10px; font: 500 14px/1.2 var(--body); cursor: pointer; color: var(--ink-2); }
+.chip:hover { border-color: var(--pine); color: var(--pine); }
+.added { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 0; }
+.added .chip { color: var(--ink); border-color: var(--ink); display: inline-flex; gap: 8px; align-items: center; cursor: default; }
+.added .chip button { border: 0; background: transparent; font: 400 10px/1 var(--display); cursor: pointer; color: var(--bad); padding: 0; }
+.preview { padding: 14px; position: sticky; top: 90px; }
+.sum { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
+.sum li { display: grid; grid-template-columns: 88px 1fr; gap: 8px; font-size: 15px; border-bottom: 2px dashed var(--ink-3); padding: 6px 0; }
+.sum li b { font: 400 8px/1.8 var(--display); color: var(--ink-2); }
+.sum ol { margin: 0; padding-left: 18px; } .sum ol li { display: list-item; border: 0; padding: 2px 0; grid-template-columns: none; }
+.preview pre { font: 400 18px/1.15 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--paper-3); padding: 10px; max-height: 320px; overflow: auto; margin: 0; }
+.cost { display: grid; gap: 6px; font-size: 15px; margin-top: 12px; }
+.cost div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 2px dashed var(--ink-3); padding: 4px 0; align-items: baseline; }
+.plan { display: none; } .plan.show { display: block; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 14px; margin: 8px 0 0; padding: 0; list-style: none; }
+.facts li b { font: 400 8px/1.6 var(--display); color: var(--ink-2); display: block; }
+
+/* launch */
+.launch { display: grid; grid-template-columns: 1fr 380px; gap: 24px; margin-bottom: 40px; align-items: start; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.steps li { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; background: var(--paper-3); border: 3px solid var(--ink); padding: 12px; }
+.steps .num { font: 400 16px/44px var(--display); text-align: center; border: 3px solid var(--ink); background: var(--paper-2); height: 44px; }
+.steps li.done .num { background: var(--pine); color: var(--on-pine); }
+.steps h3 { margin: 4px 0 6px; } .steps p { font-size: 15px; margin-bottom: 8px; }
+
+/* hook page */
+.hook-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 20px; }
+.timeline { list-style: none; padding: 0; margin: 0 0 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.timeline li { border: 3px solid var(--ink); padding: 8px; font: 400 8px/1.6 var(--display); background: var(--paper-3); min-width: 0; overflow-wrap: anywhere; }
+.timeline li.done { background: var(--pine); color: var(--on-pine); } .timeline li.now { background: var(--warn); color: #15130f; }
+.timeline li span { display: block; font: 500 13px/1.3 var(--body); margin-top: 4px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.addr { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.copy { font: 400 8px/1 var(--display); border: 2px solid var(--ink); background: var(--paper-2); padding: 6px 8px; cursor: pointer; color: var(--ink); }
+.manage { display: grid; gap: 10px; }
+.manage .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; border-bottom: 2px dashed var(--ink-3); padding: 8px 0; }
+.manage .row:last-child { border-bottom: 0; } .manage .row p { margin: 0; font-size: 15px; } .manage .row .fn { font-family: var(--mono); font-size: 18px; color: var(--ink-2); }
+.mine-list { display: grid; gap: 14px; }
+.mine-list .card { flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.view[hidden] { display: none; }
+section.view { padding-block: 8px 24px; }
+
+@media (max-width: 820px) {
+  .store, .builder, .launch, .two, .chooser, .field-row { grid-template-columns: 1fr; }
+  .builder { display: flex; flex-direction: column; }
+  .builder .canvas { order: 1; } .builder .palette { order: 2; } .builder .preview { order: 3; position: static; }
+  .types { grid-template-columns: 1fr; }
+  .timeline { grid-template-columns: 1fr 1fr; }
+  .kv > div { grid-template-columns: 1fr; gap: 2px; }
+  .top-in { flex-wrap: wrap; gap: 8px 12px; } .brand { flex: 1 1 auto; } .chainpill { display: none; } .nav { order: 3; flex-basis: 100%; justify-content: space-between; gap: 0; } .nav a { padding: 10px 6px; font-size: 8px; } .search { order: 4; flex-basis: 100%; margin-left: 0; } .connect { width: auto; min-width: 110px; }
+  .landing { min-height: 600px; } .landing-copy { padding: 150px 16px 80px; } .landing-copy::before { inset: 120px -16px 60px; background: rgba(233,223,195,.92); } .landing-copy h1 { font-size: 20px; }
+  .prompt { flex-direction: column; } .prompt .btn { width: 100%; }
+  }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .branch, .water, .pad, .fish, .leaf { animation: none !important; } .water.b { opacity: 0; } .leaf { opacity: .8; } .fish { left: 20%; } .fish.two { left: 70%; } }
+</style>
+</head>
+<body>
+<div class="mock"><div class="wrap"><b>DESIGN MOCKUP</b><span>Sample data. Nothing here connects a wallet or sends a transaction. Four hook cards are real IMD launches; the rest are marked as examples. Click the water to see a cast.</span></div></div>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#store" aria-label="The Hooks Store, home"><span class="hook" aria-hidden="true">&#x0283;</span><span>THE HOOKS STORE</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#store" data-nav="store">STORE</a>
+      <a href="#builder" data-nav="builder">BUILDER</a>
+      <a href="#mine" data-nav="mine">MY HOOKS</a>
+      <a href="#learn" data-nav="learn">LEARN</a>
+    </nav>
+    <form class="search" role="search" id="searchform"><label class="sr" for="q">Search hooks by name, token, block or address</label><input id="q" type="search" placeholder="Search name, token, block or 0x address" autocomplete="off"></form>
+    <span class="chainpill" id="chainpill">SEPOLIA &middot; TEST PHASE</span>
+    <button class="btn tiny connect" id="connect" type="button" title="Connect a wallet">CONNECT</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ STORE ============ -->
+<section class="view" id="view-store" aria-labelledby="store-h">
+  <h1 class="sr" id="store-h">Store</h1>
+  <div class="landing" id="landing">
+    <div class="scene" aria-hidden="true">
+      <pre class="layer canopy" id="canopy"></pre>
+      <pre class="layer shore" id="shore"></pre>
+      <pre class="layer water a" id="water-a"></pre>
+      <pre class="layer water b" id="water-b"></pre>
+      <div id="pads"></div>
+      <pre class="layer branch" id="branch"></pre>
+      <pre class="layer branch l" id="branch-l"></pre>
+      <pre class="layer bank" id="bank"></pre>
+      <pre class="layer fisher" id="fisher"></pre>
+      <pre class="layer fish" id="fish1"></pre>
+      <pre class="layer fish two" id="fish2"></pre>
+      <pre class="layer leaf" id="leaf1" style="left:88%"></pre>
+      <pre class="layer leaf two" id="leaf2" style="left:92%"></pre>
+      <pre class="layer leaf three" id="leaf3" style="left:6%"></pre>
+    </div>
+    <div class="landing-copy">
+      <p class="eyebrow">UNISWAP V4 HOOKS &middot; BUILT BY THE IMD SWARM</p>
+      <h1>Stack blocks. Cast a hook.</h1>
+      <p class="lede">Describe the hook you want, or stack reviewed blocks. The swarm writes it, tests it, audits it and launches it. You pay <b class="num">0.5 IMD</b> and gas.</p>
+      <form class="prompt" id="landing-prompt"><label class="sr" for="landing-q">Describe your hook</label><input id="landing-q" placeholder="What should your hook do? e.g. 1% of every buy goes to a prize pot"><button class="btn primary" type="submit">DESCRIBE IT</button></form>
+      <p class="alt">or <a href="#builder" data-mode="blocks">open the block builder</a> &middot; <a href="#catalog">browse hooks</a></p>
+      <dl class="stats" aria-label="Live network numbers (sample)">
+        <div><dt>AGENTS ONLINE</dt><dd>1,045</dd></div>
+        <div><dt>HOOKS LIVE</dt><dd>52</dd></div>
+        <div><dt>LAUNCHES TODAY</dt><dd>6</dd></div>
+      </dl>
+    </div>
+    <div class="ticker" role="status"><span id="ticker">Quiet on the pond. Waiting for the next launch.</span></div>
+  </div>
+
+  <div class="wrap">
+    <div class="ads" aria-labelledby="ads-h">
+      <div class="ads-head"><h2 id="ads-h">FEATURED <span class="pill ad">#AD</span></h2><span class="small muted">Paid placements, <b class="num">0.1 IMD</b> for 24 hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</span></div>
+      <div class="marquee" id="marquee"><div class="marquee-track" id="track"></div></div>
+    </div>
+
+    <div class="store" id="catalog">
+      <aside class="rail panel" aria-label="Filters">
+        <h4>BLOCK TYPE</h4>
+        <div id="f-groups"></div>
+        <h4>CHAIN</h4>
+        <label><input type="checkbox" class="f-chain" value="11155111" checked> Sepolia (test)</label>
+        <label><input type="checkbox" class="f-chain" value="4663" checked> Robinhood Chain</label>
+        <label><input type="checkbox" class="f-chain" value="1" checked> Ethereum</label>
+        <h4>STATUS</h4>
+        <label><input type="radio" name="st" value="all" checked> All</label>
+        <label><input type="radio" name="st" value="live"> Live only</label>
+        <label><input type="radio" name="st" value="prog"> In progress</label>
+        <h4>SORT</h4>
+        <select id="f-sort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="az">Name A to Z</option></select>
+      </aside>
+      <div>
+        <div class="block-head"><h2 id="store-title">ON THE POND</h2><span class="small muted" id="shown"></span></div>
+        <div class="grid" id="cards"></div>
+        <div class="empty" id="no-cards" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUILDER ============ -->
+<section class="view wrap" id="view-builder" hidden aria-labelledby="builder-h">
+  <div class="block-head"><h1 id="builder-h" style="margin:0">BUILDER</h1><span class="small muted">Drafts save in this browser. Nothing is sent until you launch.</span></div>
+  <div class="builder">
+    <aside class="palette panel" aria-label="Block palette" id="palette"></aside>
+    <div class="canvas">
+      <h2>1. WHAT ARE YOU LAUNCHING?</h2>
+      <div class="types" id="types">
+        <button class="type on" type="button" data-type="A"><strong>HOOK + NEW TOKEN + POOL</strong><span>IMD launches your hook, a token and the trading pool together. The simplest path.</span></button>
+        <button class="type" type="button" data-type="B"><strong>HOOK ONLY</strong><span>Just the hook contract, no token, no pool. Anyone can open a pool with it later.</span></button>
+        <button class="type" type="button" data-type="C"><strong>HOOK FOR MY EXISTING TOKEN</strong><span>Deploy the hook, then open a pool for a token that is already live.</span></button>
+      </div>
+      <div class="block-head"><h2 style="margin:0">2. HOW DO YOU WANT TO BUILD IT?</h2><div class="seg" role="group" aria-label="Builder mode"><button type="button" id="mode-prompt">DESCRIBE IT</button><button type="button" id="mode-blocks">STACK BLOCKS</button></div></div>
+      <div class="chooser" id="chooser">
+        <button class="choice" type="button" data-pick="prompt"><h3>DESCRIBE IT IN WORDS</h3><p>Write what your hook should do, the way you would explain it to a friend. The swarm reads it as requirements. Best when you already know what you want.</p></button>
+        <button class="choice" type="button" data-pick="blocks"><h3>STACK BLOCKS</h3><p>Pick reviewed building blocks (fees, protection, treasury, liquidity rules and more), set the numbers, and the site writes the request for you. Best for a first hook.</p></button>
+      </div>
+      <div id="prompt-editor" hidden>
+        <div class="box" style="padding:14px;margin-bottom:20px">
+          <label for="p-text">WHAT SHOULD IT DO? (MAX 3,000 CHARACTERS)</label>
+          <textarea id="p-text" maxlength="3000" style="min-height:160px" placeholder="Every time someone buys, 2% of the ETH goes into a prize pot. Once an hour the pot goes to a random buyer from that hour, weighted by how much they bought. No team wallet, no pause button."></textarea>
+          <p class="small muted" style="margin:8px 0 0">Try a starting point:</p>
+          <div class="chips" id="p-chips"></div>
+          <p class="small muted" style="margin-top:12px"><strong>Blocks added from the palette</strong> become numbered rules under your words. If your words and a rule disagree, the rule wins.</p><div class="added" id="added"></div>
+        </div>
+      </div>
+      <div id="blocks-editor" hidden>
+        <div id="canvas"></div>
+        <div class="notice bad" id="rule-notice" hidden></div>
+      </div>
+      <div id="settings" hidden>
+        <h2>3. SETTINGS</h2>
+        <div class="box" style="padding:14px">
+          <div class="field-row" id="type-c-fields" hidden>
+            <div><label for="s-token">EXISTING TOKEN ADDRESS</label><input id="s-token" placeholder="0x…" spellcheck="false"></div>
+            <div><label for="s-tsym">ITS SYMBOL (OPTIONAL)</label><input id="s-tsym" placeholder="e.g. UNI"></div>
+          </div>
+          <div class="field-row" id="type-bc-fields" hidden>
+            <div><label for="s-hname">HOOK NAME</label><input id="s-hname" placeholder="e.g. PondGuardHook"></div>
+            <div></div>
+          </div>
+          <div class="field-row">
+            <div><label for="s-chain">DEPLOY ON</label><select id="s-chain"><option value="11155111">Sepolia (test phase)</option><option value="4663" disabled>Robinhood Chain (phase 2)</option><option value="1" disabled>Ethereum (phase 2)</option></select></div>
+            <div id="pair-field"><label for="s-pair">PAIR WITH</label><select id="s-pair"><option value="eth">ETH</option><option value="imd" disabled>IMD (Robinhood and Ethereum only)</option></select></div>
+          </div>
+          <div class="field-row" id="pool-fields">
+            <div><label for="s-pool">POOL SHARE OF YOUR 90% (%) · YOUR CHOICE</label><input id="s-pool" type="number" min="10" max="90" step="5" placeholder="10 to 90"><p class="small muted" style="margin:6px 0 0">How much of your share seeds the trading pool. The rest goes to your remainder address. Nothing is chosen for you.</p></div>
+            <div><label for="s-rem">REMAINDER GOES TO</label><input id="s-rem" placeholder="your connected wallet" spellcheck="false"></div>
+          </div>
+          <label for="s-owner">OWNER ADDRESS (USED ONLY IF A BLOCK ADDS AN OWNER POWER)</label><input id="s-owner" placeholder="your connected wallet" spellcheck="false">
+          <details style="margin-top:12px"><summary>ADVANCED: START FROM MY OWN CODE</summary><div><p class="small">Point the swarm at a public GitHub repository with your hook. It is audited as imported code, adapted to the launch, and reviewed before deploying.</p><div class="field-row"><div><label for="s-repo">REPOSITORY URL</label><input id="s-repo" placeholder="https://github.com/you/your-hook"></div><div><label for="s-commit">COMMIT</label><input id="s-commit" placeholder="40-character commit id"></div></div></div></details>
+        </div>
+      </div>
+    </div>
+    <aside class="preview panel" aria-label="Preview">
+      <h2>YOUR HOOK, IN SHORT</h2>
+      <ul class="sum" id="summary-short"></ul>
+      <details><summary>EXACT TEXT THE SWARM RECEIVES</summary><div><pre id="composed"></pre></div></details>
+      <div class="cost">
+        <div><span>Swarm fee</span><strong>0.5 IMD</strong></div>
+        <div><span>Gas</span><strong>2 tx</strong></div>
+        <div><span>Length</span><strong id="chars">0 / 7,500</strong></div>
+      </div>
+      <div class="actions"><button class="btn" id="check" type="button">CHECK WITH THE SWARM (FREE)</button><a class="btn primary" href="#launch">CONTINUE TO LAUNCH</a></div>
+      <div class="plan notice ok" id="plan">
+        <strong>What the swarm understood (simulated)</strong>
+        <ul class="facts" id="facts"></ul>
+        <p class="small" style="margin:10px 0 4px"><strong>Plan:</strong> build and test, independent tests, four audit specialists, a judge, then deploy. <strong>Blockers:</strong> none.</p>
+        <p class="small muted" style="margin:0">The real site sends this to IMD's free check through the relay and shows the live answer.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ LAUNCH ============ -->
+<section class="view wrap" id="view-launch" hidden aria-labelledby="launch-h">
+  <h1 id="launch-h">REVIEW AND LAUNCH</h1>
+  <div class="launch">
+    <div>
+      <div class="box" style="padding:14px;margin-bottom:20px"><h2>SUMMARY</h2><dl class="kv" id="summary"></dl></div>
+      <div class="box" style="padding:14px;margin-bottom:20px"><h2>WHAT YOU PAY AND GET</h2><table class="fees" id="fees"></table></div>
+      <div class="notice warn"><strong>Payment happens on Robinhood Chain or Ethereum.</strong> IMD lives there. Your hook still deploys on the chain you chose (Sepolia in the test phase).</div>
+      <div class="notice" id="type-c-note" hidden><strong>After the hook is live:</strong> open the pool. We prepare the one transaction that creates the token / ETH pool with your hook and hand it to your wallet. Then add liquidity from any v4 interface.</div>
+    </div>
+    <div>
+      <ol class="steps">
+        <li id="st1"><span class="num">1</span><div><h3>CONNECT ON ROBINHOOD OR ETHEREUM</h3><p>Rabby, MetaMask or any wallet. You need <b class="num">0.5 IMD</b> plus a little ETH for gas.</p><button class="btn tiny" id="l-connect" type="button">CONNECT WALLET</button></div></li>
+        <li id="st2"><span class="num">2</span><div><h3>APPROVE 0.5 IMD</h3><p>Lets the IMD Intake take exactly the swarm fee, once.</p><button class="btn tiny" id="l-approve" type="button" disabled>APPROVE 0.5 IMD</button><p class="small mono" id="l-approve-hash"></p></div></li>
+        <li id="st3"><span class="num">3</span><div><h3>LAUNCH</h3><p>One transaction sends your request to the swarm. A refused request still spends the fee, so check it first.</p><button class="btn tiny primary" id="l-launch" type="button" disabled>LAUNCH HOOK</button><p class="small mono" id="l-launch-hash"></p></div></li>
+      </ol>
+      <div class="notice ok" id="l-done" hidden><strong>The swarm has your request.</strong> Builds take minutes to hours. We cast the rod when it goes live. <a href="#hook/pond">Open the hook page</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOOK PAGE ============ -->
+<section class="view wrap" id="view-hook" hidden aria-labelledby="hook-h">
+  <div class="hook-head">
+    <div><p class="eyebrow" id="h-eyebrow"></p><h1 id="hook-h"></h1><p class="mono" id="h-symbol"></p></div>
+    <div class="actions" style="margin:0" id="h-actions"></div>
+  </div>
+  <ol class="timeline" id="h-timeline"></ol>
+  <div class="two">
+    <div class="box" style="padding:14px"><h2>ADDRESSES</h2><dl class="kv" id="h-addr"></dl></div>
+    <div class="box" style="padding:14px"><h2>EVIDENCE</h2><dl class="kv" id="h-evidence"></dl></div>
+  </div>
+  <div class="two">
+    <div class="box" style="padding:14px"><h2>OWNER CONTROLS</h2><div class="manage" id="h-manage"></div></div>
+    <div class="box" style="padding:14px"><h2>TRADERS, ANYONE, AND READINGS</h2><div class="manage" id="h-anyone"></div></div>
+  </div>
+  <div class="box" style="padding:14px">
+    <h2>WHAT IT DOES</h2>
+    <ul class="blocks" id="h-blocks" style="margin-bottom:10px"></ul>
+    <p class="small muted">The request as it was sent to the swarm (first lines):</p>
+    <pre class="mono" id="h-text" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0"></pre>
+  </div>
+</section>
+
+<!-- ============ MY HOOKS ============ -->
+<section class="view wrap" id="view-mine" hidden aria-labelledby="mine-h">
+  <div class="block-head"><h1 id="mine-h" style="margin:0">MY HOOKS</h1><span class="small muted" id="mine-wallet">Connect a wallet to see your launches.</span></div>
+  <div class="notice" id="mine-draft"><strong>Saved draft</strong> <span id="mine-draft-name"></span> &middot; <a href="#builder">Resume</a> &middot; <button class="btn tiny flat" type="button" id="discard">DISCARD</button></div>
+  <div class="mine-list" id="mine-list"></div>
+  <h2 style="margin-top:24px">PROMOTIONS <span class="pill ad">#AD</span></h2>
+  <div class="box" style="padding:14px">
+    <p class="small">A placement shows your hook in the featured strip for 24 hours for <b class="num">0.1 IMD</b>. The strip is ranked by total paid: top up to move up. Top-ups are not refunded; cancelling refunds the unused part of the base price.</p>
+    <div class="mine-list" id="promo-list"></div>
+    <div class="actions"><button class="btn primary" type="button" disabled>PROMOTE A HOOK (PHASE 2)</button></div>
+  </div>
+</section>
+
+<!-- ============ LEARN ============ -->
+<section class="view wrap" id="view-learn" hidden aria-labelledby="learn-h">
+  <h1 id="learn-h">LEARN</h1>
+  <details open><summary>WHAT IS A HOOK?</summary><div><p>A Uniswap v4 hook is a small contract attached to a trading pool. It runs before or after swaps and liquidity changes and can add a fee, block a trade, lock liquidity, or move money to a treasury. The pool's rules, written by you.</p></div></details>
+  <details><summary>DESCRIBE IT OR STACK BLOCKS?</summary><div><p>Both produce the same kind of request. Blocks are reviewed patterns with numbers to fill in, so the swarm gets an exact rule. Your own words give you freedom; the swarm reads them as requirements and the free check tells you what it understood before you pay. You can mix them.</p></div></details>
+  <details><summary>WHAT HAPPENS AFTER I PAY?</summary><div><p>Your request goes to the IMD swarm. One agent writes the contracts, another tests them, a panel of four auditors and a judge review them, and IMD's deployer launches them. You can watch every step on the IMD explorer.</p></div></details>
+  <details><summary>WHAT HAPPENS TO A FEATURE AFTER LAUNCH?</summary><div><p>Most blocks run by themselves inside the pool. A few give the owner a switch (pause, allowlists, donation rules): those appear under Owner controls on your hook page, for your wallet only. A few give traders or anyone a button (place a limit order, trigger a buyback, run a prize draw) and a few only publish a reading (an average price, a jar balance): those appear under Traders, anyone, and readings. Every block card in the builder says which of these it is.</p></div></details>
+  <details><summary>WHAT DOES IT COST?</summary><div><p><b class="num">0.5 IMD</b> plus gas for two transactions. The audit panel is included in that fee. Deployment gas is paid by IMD. A request the swarm refuses still costs the fee, which is why the builder checks it for free first. A featured #ad slot is <b class="num">0.1 IMD</b> for 7 days and is optional.</p></div></details>
+  <details><summary>WHY SEPOLIA FIRST?</summary><div><p>Sepolia is a test network. Hooks launched there cost the same swarm fee but trade play money, so we can prove the whole path before opening Robinhood Chain and Ethereum.</p></div></details>
+  <details><summary>WHO AUDITS IT?</summary><div><p>IMD's audit panel: four specialist agents (math, permissions, economics, control flow) and a judge who reproduces their findings. Nothing deploys with an unresolved finding. This is an automated review, not a guarantee.</p></div></details>
+  <h2 style="margin-top:24px">READ THE SOURCES</h2>
+  <div class="box" style="padding:14px;margin-bottom:20px">
+    <dl class="kv">
+      <div><dt>IMD</dt><dd><a href="https://imd.fun/docs/" target="_blank" rel="noreferrer">IMD docs</a>: how jobs, launches, payment and the audit panel work.</dd></div>
+      <div><dt>UNISWAP V4</dt><dd><a href="https://docs.uniswap.org/contracts/v4/overview" target="_blank" rel="noreferrer">v4 overview</a> &middot; <a href="https://docs.uniswap.org/contracts/v4/concepts/hooks" target="_blank" rel="noreferrer">What hooks are</a> &middot; <a href="https://docs.uniswap.org/contracts/v4/concepts/PoolManager" target="_blank" rel="noreferrer">The PoolManager</a> &middot; <a href="https://docs.uniswap.org/contracts/v4/concepts/dynamic-fees" target="_blank" rel="noreferrer">Dynamic fees</a></dd></div>
+      <div><dt>FOR BUILDERS</dt><dd><a href="https://docs.uniswap.org/contracts/v4/guides/hooks/your-first-hook" target="_blank" rel="noreferrer">Your first hook</a> &middot; <a href="https://docs.uniswap.org/contracts/v4/guides/hooks/hook-deployment" target="_blank" rel="noreferrer">Hook deployment and address mining</a> &middot; <a href="https://docs.uniswap.org/contracts/v4/reference/core/libraries/Hooks" target="_blank" rel="noreferrer">Hooks library reference</a></dd></div>
+    </dl>
+  </div>
+  <h2>WHAT A HOOK CAN DO: THE 14 PERMISSIONS</h2>
+  <p>A hook is called by the pool at fixed moments. Each moment is a permission the hook switches on. Everything in the builder maps to one or more of them (from Uniswap's docs, in plain words).</p>
+  <div class="box" style="padding:14px">
+    <table class="fees">
+      <tr><th>beforeInitialize / afterInitialize</th><td>Runs when a pool is created with this hook. Can refuse pools that do not fit (pair, fee tier) and set things up. IMD launches require one of them. <span class="muted">Blocks: Pool rules, every launch.</span></td></tr>
+      <tr><th>beforeSwap</th><td>Runs before every trade. Can block it, limit it, or change the fee for this trade. <span class="muted">Blocks: anti-sniper, max buy, max swap, cooldown, circuit breaker, scheduled open, trading hours, allowlists, pause, sunset, dynamic LP fee.</span></td></tr>
+      <tr><th>afterSwap</th><td>Runs after every trade, seeing the final amounts. Used for counting, oracles and collecting fees. <span class="muted">Blocks: swap fee, buyback jar, prize pot, price oracle, limit orders.</span></td></tr>
+      <tr><th>beforeAddLiquidity / afterAddLiquidity</th><td>Runs when someone adds liquidity. Can gate who may add and record when they did. <span class="muted">Blocks: LP allowlist, minimum position, liquidity lock, JIT penalty.</span></td></tr>
+      <tr><th>beforeRemoveLiquidity / afterRemoveLiquidity</th><td>Runs when liquidity is removed. Can enforce lock-ups and penalties. <span class="muted">Blocks: liquidity lock, JIT penalty.</span></td></tr>
+      <tr><th>beforeDonate / afterDonate</th><td>Runs when someone donates tokens to the pool's liquidity providers. <span class="muted">Blocks: donation rules, share fees with LPs.</span></td></tr>
+      <tr><th>beforeSwapReturnDelta</th><td>Lets the hook take over part or all of a trade's accounting. Powerful and risky; it is how custom curves and batch auctions work. <span class="muted">Blocks: stable curve, batch auctions.</span></td></tr>
+      <tr><th>afterSwapReturnDelta</th><td>Lets the hook take a cut of a trade's output. This is how hook fees are collected. <span class="muted">Blocks: every fee block, buyback jar, prize pot.</span></td></tr>
+      <tr><th>afterAddLiquidityReturnDelta / afterRemoveLiquidityReturnDelta</th><td>Lets the hook adjust what a liquidity provider puts in or takes out. <span class="muted">Blocks: JIT penalty, yield on idle liquidity.</span></td></tr>
+    </table>
+    <p class="small muted" style="margin:10px 0 0">A hook's address encodes which permissions it has, which is why IMD mines a special address before deploying it.</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var CHAINS = { 1: 'Ethereum', 4663: 'Robinhood Chain', 11155111: 'Sepolia' };
+  var PM = { 1: '0x000000000004444c5dc75cB358380D2e3dE08A90', 4663: '0x8366a39CC670B4001A1121B8F6A443A643e40951', 11155111: '0xE03A1074c86CFeDd5C142C4F04F1a1536e203543' };
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+
+  // ------------------------------------------------------------ sample catalog
+  var HOOKS = [
+    { id: 'hamster', name: 'HamsterHook', symbol: 'HAMSTER', chain: 1, status: 'live', n: 2336, groups: ['fees', 'treasury'], blocks: ['Swap fee 1.1%', 'Treasury'], ids: ['custom'], text: '1.1% of the IMD side of every swap goes to the HamsterVault reward pot.', real: true, t: 1, by: 'hamsterhour.eth', hook: '0x82f636a92364d13754d7b3e72d460f0be20a28cc', token: '0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86', dist: '0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', tx: '0x847c6b2faf49eea8f6e36c0327de0041d592eb400755799b57a05778d37fafc3', job: '863eba48-5cac-4fee-a772-9695de63efd2', req: 'Ethereum, paired with IMD. Token is a plain ERC-20 (no tax, mint, burn or owner). Send the 80% remainder to HamsterVault if the launch allows it. HOOK FEE: 1.1% of the actual IMD leg of every swap (buy input or sell output), all swap modes, real deltas. 0.5% to depositRewards...', ad: true, adHours: 14, boost: 0.35 },
+    { id: 'anti', name: 'AntiSniperHook', symbol: 'HAMSTER', chain: 1, status: 'live', n: 2315, groups: ['protection', 'fees'], blocks: ['Anti-sniper window', 'Fee that fades'], ids: ['anti-sniper', 'swap-fee', 'fee-fade'], text: 'A decaying anti-sniper fee on a fixed-supply token. No game, no lottery.', real: true, t: 2, job: '1fe27d94-91f4-45d2-94df-a4ec33117059', req: 'Hamster Hour: fixed-supply launch token with a decaying anti-sniper hook on Ethereum mainnet. No game, no betting, no lottery: this launch is the token and its hook only...' },
+    { id: 'idm', name: 'IDM Sequencer', symbol: 'IDM', chain: 4663, status: 'live', n: 2303, groups: ['custom'], blocks: ['Own source'], ids: [], text: 'A zero-fee sequencer hook imported from the creator\u2019s own repository and reviewed before launch.', real: true, t: 3, job: '18ac1075-a6ce-4487-83f3-17e3d795c1f1', req: 'Review and launch the token named Intelligent Dance Market (IDM) from github.com/discodirector/idm-hook on Robinhood Chain with its immutable zero-fee Uniswap v4 sequencer hook...' },
+    { id: 'jar', name: 'Sherwood Jar', symbol: 'JAR', chain: 4663, status: 'live', n: 2279, groups: ['treasury'], blocks: ['Buyback jar 1%', 'Burn'], ids: ['jar'], text: '1% of the ETH side of every swap fills a jar; when it tips over it buys into the Sherwood game and burns the IMD.', real: true, sampleName: true, t: 4, by: '0x3b1f\u2026a92c', job: '3622d85b-c97e-441b-98d5-4503fcf5e5ba', req: 'Build a v4 hook that plays Sherwood for us: a small cut of every trade of this coin goes into a jar, and when it fills up, it buys into Sherwood. On every swap, take 1% of the ETH side into the hook...', ad: true, adHours: 21, boost: 0.1 },
+    { id: 'pond', name: 'Pondside', symbol: 'POND', chain: 11155111, status: 'prog', n: null, groups: ['fees', 'protection', 'treasury'], blocks: ['Swap fee 1%', 'Anti-sniper window', 'Buyback jar'], ids: ['swap-fee', 'anti-sniper', 'jar'], text: 'Example: a test-phase hook now at the audit panel.', real: false, t: 5 },
+    { id: 'reel', name: 'Reel', symbol: 'REEL', chain: 4663, status: 'live', n: 2290, groups: ['protection', 'timing', 'advanced'], blocks: ['Cooldown 30s', 'Pause switch', 'Allowlist opening', 'Price oracle'], ids: ['cooldown', 'pause', 'allowlist', 'oracle'], text: 'Example: an owner-managed hook with a pause switch, an allowlist opening and an on-chain price oracle.', real: false, t: 6, mine: true, by: '0x5a7e\u2026f00d', ad: true, adHours: 6, boost: 0.2 }
+  ];
+  var GROUPS = [['fees', 'Fees'], ['protection', 'Protection'], ['treasury', 'Treasury and rewards'], ['liquidity', 'Liquidity rules'], ['timing', 'Timing and access'], ['advanced', 'Advanced'], ['games', 'Games and lotteries'], ['custom', 'Own source']];
+  function statusPill(s) { return s === 'live' ? '<span class="pill live">LIVE</span>' : s === 'prog' ? '<span class="pill prog">AUDIT PANEL</span>' : s === 'bad' ? '<span class="pill bad">FAILED</span>' : '<span class="pill prog">REQUESTED</span>'; }
+  var filters = { groups: {}, chains: {}, status: 'all', sort: 'new', q: '' };
+  GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663, 11155111].forEach(function (c) { filters.chains[c] = true; });
+  $('f-groups').innerHTML = GROUPS.map(function (g) { return '<label><input type="checkbox" class="f-group" value="' + g[0] + '" checked> ' + g[1] + '</label>'; }).join('');
+  var isAddr = function (s) { return /^0x[0-9a-fA-F]{40}$/.test(s.trim()); };
+  function matchesQuery(h, q) {
+    if (!q) return true;
+    var s = q.trim().toLowerCase();
+    if (isAddr(s)) return [h.hook, h.token, h.dist].some(function (a) { return a && a.toLowerCase() === s; });
+    if (/^0x[0-9a-f]{64}$/.test(s)) return (h.tx || '').toLowerCase() === s;
+    var hay = [h.name, h.symbol, h.text, h.blocks.join(' '), CHAINS[h.chain]].join(' ').toLowerCase();
+    return s.split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+  function cardHtml(h, extra) {
+    return '<article class="card' + (extra || '') + '">' +
+      '<div class="card-top"><span class="pill chain">' + CHAINS[h.chain].toUpperCase() + '</span>' + (extra ? '<span class="pill ad">#AD</span>' : statusPill(h.status)) + '</div>' +
+      '<h3>' + esc(h.name) + (h.sampleName ? ' <em class="small muted" style="font-family:var(--body);font-style:normal">(name is a sample)</em>' : '') + '<small>$' + esc(h.symbol) + '</small></h3>' +
+      '<p>' + esc(h.text) + '</p>' +
+      '<ul class="blocks">' + h.blocks.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul>' +
+      (extra ? '<div class="boost"><span>Boost <b class="num">' + h.boost.toFixed(2) + ' IMD</b> \u00b7 ' + h.adHours + 'h left</span><button class="btn tiny flat" type="button">BOOST</button></div>' : '') +
+      '<div class="card-foot"><span class="muted">' + (extra ? '' : (h.n ? 'Launch #' + h.n : (h.real ? '' : 'Example'))) + '</span><a href="#hook/' + h.id + '">VIEW</a></div></article>';
+  }
+  function renderCards() {
+    var q = filters.q;
+    var rows = HOOKS.filter(function (h) { return matchesQuery(h, q) && filters.chains[h.chain] && (filters.status === 'all' || (filters.status === 'live' ? h.status === 'live' : h.status !== 'live')) && (h.groups.some(function (g) { return filters.groups[g]; })); });
+    rows.sort(function (a, b) { return filters.sort === 'az' ? a.name.localeCompare(b.name) : filters.sort === 'old' ? a.t - b.t : b.t - a.t; });
+    $('store-title').textContent = q ? 'RESULTS FOR \u201C' + q.toUpperCase() + '\u201D' : 'ON THE POND';
+    $('shown').textContent = rows.length + (rows.length === 1 ? ' hook' : ' hooks') + (isAddr(q) ? ' \u00b7 searched by address' : '');
+    $('cards').innerHTML = rows.map(function (h) { return cardHtml(h); }).join('');
+    var none = $('no-cards'); none.hidden = rows.length > 0;
+    if (!rows.length) none.innerHTML = isAddr(q) ? 'No hook in the catalog has this address. The real site then reads the address on chain: a hook answers poolManager() and getHookPermissions(); a token answers name() and symbol().' : 'No hooks match. <a href="#catalog" id="clear">Clear search and filters</a> or build the first one.';
+  }
+  function renderAds() {
+    var ads = HOOKS.filter(function (h) { return h.ad; }).sort(function (a, b) { return b.boost - a.boost; });
+    var items = ads.map(function (h) { return '<a class="adcard" href="#hook/' + h.id + '"><span class="pill ad">#AD</span><span class="nm">' + esc(h.name) + '</span><span class="sym">$' + esc(h.symbol) + '</span><span class="by">by ' + esc(h.by || 'unknown') + '</span><span class="left">' + h.adHours + 'h</span></a>'; }).join('') +
+      '<a class="adcard slot" href="#mine"><span class="pill ad">#AD</span><span class="nm">OPEN SLOT</span><span class="by">0.1 IMD / 24h \u00b7 promote from My hooks</span></a>';
+    $('track').innerHTML = items + items;
+  }
+  $('searchform').addEventListener('submit', function (e) { e.preventDefault(); filters.q = $('q').value; location.hash = '#catalog'; renderCards(); });
+  $('q').addEventListener('input', function () { filters.q = $('q').value; renderCards(); if (location.hash.indexOf('store') < 0 && location.hash !== '#catalog' && location.hash !== '') location.hash = '#catalog'; });
+  document.querySelectorAll('.f-group').forEach(function (c) { c.addEventListener('change', function () { filters.groups[c.value] = c.checked; renderCards(); }); });
+  document.querySelectorAll('.f-chain').forEach(function (c) { c.addEventListener('change', function () { filters.chains[Number(c.value)] = c.checked; renderCards(); }); });
+  document.querySelectorAll('input[name=st]').forEach(function (r) { r.addEventListener('change', function () { filters.status = r.value; renderCards(); }); });
+  $('f-sort').addEventListener('change', function () { filters.sort = $('f-sort').value; renderCards(); });
+  $('no-cards').addEventListener('click', function (e) { if (e.target.id === 'clear') { filters.q = ''; $('q').value = ''; document.querySelectorAll('.f-group,.f-chain').forEach(function (c) { c.checked = true; }); GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663, 11155111].forEach(function (c) { filters.chains[c] = true; }); renderCards(); } });
+
+  // ------------------------------------------------------------ block catalog (mirrors SPEC section 4; manage = functions the request asks for)
+  var CATALOG = [
+    { id: 'token', group: 'token', title: 'Launch token', blurb: 'Standard IMD token: 1B supply, no owner.', fixed: true, types: 'A',
+      params: [{ k: 'name', label: 'TOKEN NAME', type: 'text', d: 'Pondside' }, { k: 'symbol', label: 'SYMBOL', type: 'text', d: 'POND' }],
+      s: function (p) { return 'Token: ' + p.name + ' (' + p.symbol + '), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.'; } },
+    { id: 'own-token', group: 'token', title: 'Bring your own token', blurb: 'Your name, symbol, supply and decimals.', types: 'A', replaces: 'token',
+      params: [{ k: 'name', label: 'TOKEN NAME', type: 'text', d: 'Pondside' }, { k: 'symbol', label: 'SYMBOL', type: 'text', d: 'POND' }, { k: 'supply', label: 'SUPPLY', type: 'number', d: 100000000, min: 1 }, { k: 'dec', label: 'DECIMALS', type: 'number', d: 18, min: 6, max: 18 }],
+      s: function (p) { return 'Token: my own token ' + p.name + ' (' + p.symbol + '), supply ' + Number(p.supply).toLocaleString('en-US') + ', ' + p.dec + ' decimals, minted once to the launch factory, no transfer fee, nothing minted after launch, no privileged address can move, freeze, pause or seize a holder\u2019s tokens.'; } },
+    { id: 'swap-fee', group: 'fees', title: 'Swap fee', blurb: 'A fixed cut of every swap, sent somewhere.', types: 'ABC',
+      params: [{ k: 'rate', label: 'RATE (%)', type: 'number', d: 1.0, min: 0.1, max: 5, step: 0.1 }, { k: 'applies', label: 'APPLIES TO', type: 'select', d: 'buy and sell', opts: ['buy and sell', 'buy', 'sell'] }, { k: 'to', label: 'SEND TO', type: 'select', d: 'my wallet', opts: ['my wallet', 'treasury address', 'burn (buy and burn)'] }],
+      short: function (p) { return num(p.rate) + '% on every ' + p.applies + ' \u2192 ' + p.to; },
+      anyone: [['claimFees()', 'Send collected fees to the recipient']],
+      s: function (p) { return 'Take ' + num(p.rate) + '% of the ETH side of every ' + p.applies + ' as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to ' + p.to + '. Expose claimFees() that anyone may call to redeem claims to the recipient.'; } },
+    { id: 'fee-fade', group: 'fees', title: 'Fee that fades', blurb: 'Starts high at launch, settles to a floor.', types: 'ABC', requires: 'swap-fee',
+      params: [{ k: 'start', label: 'START (%)', type: 'number', d: 10, min: 1, max: 30, step: 0.5 }, { k: 'end', label: 'END (%)', type: 'number', d: 1, min: 0, max: 5, step: 0.1 }, { k: 'mins', label: 'OVER (MINUTES)', type: 'number', d: 30, min: 1, max: 1440 }],
+      short: function (p) { return num(p.start) + '% \u2192 ' + num(p.end) + '% over ' + p.mins + ' min'; }, view: [['currentFeeBps()', 'The fee right now']],
+      s: function (p) { return 'The hook fee starts at ' + num(p.start) + '% of the ETH side of every swap when the pool opens and decreases linearly to ' + num(p.end) + '% over the first ' + p.mins + ' minutes, then stays at ' + num(p.end) + '%. Expose currentFeeBps() as a view.'; } },
+    { id: 'fee-dir', group: 'fees', title: 'Different buy and sell fees', blurb: 'One rate for buys, another for sells.', types: 'ABC', excludes: 'swap-fee',
+      params: [{ k: 'buy', label: 'BUY FEE (%)', type: 'number', d: 0.5, min: 0, max: 5, step: 0.1 }, { k: 'sell', label: 'SELL FEE (%)', type: 'number', d: 2.0, min: 0, max: 5, step: 0.1 }, { k: 'to', label: 'SEND TO', type: 'select', d: 'my wallet', opts: ['my wallet', 'treasury address'] }],
+      short: function (p) { return 'buy ' + num(p.buy) + '%, sell ' + num(p.sell) + '% \u2192 ' + p.to; }, anyone: [['claimFees()', 'Send collected fees to the recipient']],
+      s: function (p) { return 'Take ' + num(p.buy) + '% of the ETH side of every buy and ' + num(p.sell) + '% of the ETH side of every sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to ' + p.to + '. Expose claimFees() that anyone may call to redeem claims to the recipient.'; } },
+    { id: 'fee-size', group: 'fees', title: 'Whale fee', blurb: 'Big swaps pay an extra fee.', types: 'ABC',
+      params: [{ k: 'above', label: 'SWAPS ABOVE (ETH)', type: 'number', d: 1, min: 0.01, step: 0.01 }, { k: 'extra', label: 'EXTRA FEE (%)', type: 'number', d: 1.0, min: 0.1, max: 5, step: 0.1 }],
+      short: function (p) { return '+' + num(p.extra) + '% above ' + p.above + ' ETH'; },
+      s: function (p) { return 'Any swap whose ETH side is larger than ' + p.above + ' ETH pays an extra ' + num(p.extra) + '% of its ETH side as a hook fee, on top of any other hook fee, settled the same way and sent to the same recipient.'; } },
+    { id: 'fee-vol', group: 'fees', title: 'Volatility fee', blurb: 'Fee rises when the price moves fast.', types: 'ABC',
+      params: [{ k: 'move', label: 'PRICE MOVE (%)', type: 'number', d: 5, min: 0.5, max: 50, step: 0.5 }, { k: 'blocks', label: 'WITHIN (BLOCKS)', type: 'number', d: 20, min: 1, max: 10000 }, { k: 'fee', label: 'FEE WHILE VOLATILE (%)', type: 'number', d: 3, min: 0.1, max: 5, step: 0.1 }],
+      short: function (p) { return num(p.fee) + '% when price moves ' + num(p.move) + '% in ' + p.blocks + ' blocks'; }, view: [['isVolatile()', 'Whether the raised fee applies now']],
+      s: function (p) { return 'When the pool price has moved more than ' + num(p.move) + '% within the last ' + p.blocks + ' blocks, the hook fee on the ETH side of every swap is ' + num(p.fee) + '% until the move settles below that; otherwise the normal hook fee applies. Expose isVolatile() as a view.'; } },
+    { id: 'fee-split', group: 'fees', title: 'Split the fee', blurb: 'Send the hook fee to two places.', types: 'ABC', requires: 'swap-fee',
+      params: [{ k: 'a', label: 'SHARE TO MY WALLET (%)', type: 'number', d: 70, min: 0, max: 100 }, { k: 'b', label: 'SECOND ADDRESS', type: 'text', d: '0x0000000000000000000000000000000000000000' }],
+      short: function (p) { return p.a + '% me / ' + (100 - p.a) + '% ' + String(p.b).slice(0, 8) + '\u2026'; },
+      s: function (p) { return 'Split every hook fee: ' + p.a + '% to my wallet and ' + (100 - Number(p.a)) + '% to ' + p.b + '.'; } },
+    { id: 'lp-fee', group: 'fees', title: 'Dynamic LP fee', blurb: 'The pool\u2019s own fee tier moves with volatility. Own pools only.', types: 'BC',
+      params: [{ k: 'lo', label: 'LOW (%)', type: 'number', d: 0.3, min: 0.01, max: 10, step: 0.01 }, { k: 'hi', label: 'HIGH (%)', type: 'number', d: 1.0, min: 0.01, max: 10, step: 0.01 }],
+      short: function (p) { return 'LP fee ' + p.lo + '% to ' + p.hi + '%'; }, view: [['currentLpFee()', 'The pool fee right now']],
+      s: function (p) { return 'The pool uses a dynamic LP fee that the hook sets per swap between ' + p.lo + '% and ' + p.hi + '% based on recent price volatility (the BaseDynamicFee pattern). Expose currentLpFee() as a view.'; } },
+    { id: 'anti-sniper', group: 'protection', title: 'Anti-sniper window', blurb: 'Cap what one wallet can buy right after launch.', types: 'ABC',
+      params: [{ k: 'mins', label: 'WINDOW (MINUTES)', type: 'number', d: 10, min: 1, max: 1440 }, { k: 'pct', label: 'MAX BUY PER WALLET (% OF SUPPLY)', type: 'number', d: 1.0, min: 0.1, max: 10, step: 0.1 }],
+      short: function (p) { return 'first ' + p.mins + ' min: max ' + num(p.pct) + '% per wallet'; }, view: [['windowEndsAt()', 'When the window closes']],
+      s: function (p) { return 'For the first ' + p.mins + ' minutes after the pool opens, each wallet may buy at most ' + num(p.pct) + '% of the total supply in total; larger buys revert. Expose windowEndsAt() as a view.'; } },
+    { id: 'max-buy', group: 'protection', title: 'Max buy per wallet', blurb: 'A permanent cap on what one wallet can buy.', types: 'ABC',
+      params: [{ k: 'pct', label: 'MAX PER WALLET (% OF SUPPLY)', type: 'number', d: 2.0, min: 0.1, max: 50, step: 0.1 }],
+      short: function (p) { return 'max ' + num(p.pct) + '% of supply per wallet, ever'; }, view: [['boughtBy(address)', 'How much a wallet has bought']],
+      s: function (p) { return 'Each wallet may buy at most ' + num(p.pct) + '% of the total supply through this pool in total, for the life of the pool; larger buys revert. Sells are never blocked. Expose boughtBy(address) as a view.'; } },
+    { id: 'max-swap', group: 'protection', title: 'Max swap size', blurb: 'Reject any single swap above a size.', types: 'ABC',
+      params: [{ k: 'tokens', label: 'MAX PER SWAP (TOKENS)', type: 'number', d: 1000000, min: 1 }],
+      short: function (p, c) { return 'max ' + Number(p.tokens).toLocaleString('en-US') + ' ' + c.symbol + ' per swap'; },
+      s: function (p, c) { return 'Reject any single swap whose specified amount is above ' + Number(p.tokens).toLocaleString('en-US') + ' ' + c.symbol + ', in either direction. This caps only the amount the swapper specifies.'; } },
+    { id: 'anti-sandwich', group: 'protection', title: 'Anti-sandwich', blurb: 'Stop sandwich attacks within a block.', types: 'ABC', params: [],
+      short: function () { return 'sandwich protection on'; },
+      s: function () { return 'Protect swappers from sandwich attacks: within one block, swaps against the direction of the block\u2019s first swap execute at no better than the block\u2019s opening price (the AntiSandwichHook pattern).'; } },
+    { id: 'cooldown', group: 'protection', title: 'Cooldown', blurb: 'Make a wallet wait between swaps.', types: 'ABC',
+      params: [{ k: 'secs', label: 'WAIT (SECONDS)', type: 'number', d: 30, min: 1, max: 86400 }],
+      short: function (p) { return p.secs + 's between swaps per wallet'; }, view: [['nextSwapAt(address)', 'When a wallet may swap again']],
+      s: function (p) { return 'A wallet must wait at least ' + p.secs + ' seconds between its swaps in this pool. Expose nextSwapAt(address) as a view.'; } },
+    { id: 'breaker', group: 'protection', title: 'Circuit breaker', blurb: 'Pause trading briefly after a violent move.', types: 'ABC',
+      params: [{ k: 'move', label: 'PRICE MOVE (%)', type: 'number', d: 20, min: 1, max: 90 }, { k: 'blocks', label: 'WITHIN (BLOCKS)', type: 'number', d: 10, min: 1, max: 10000 }, { k: 'pause', label: 'PAUSE FOR (MINUTES)', type: 'number', d: 5, min: 1, max: 1440 }],
+      short: function (p) { return 'pause ' + p.pause + ' min after a ' + p.move + '% move'; }, view: [['haltedUntil()', 'When trading resumes, if halted']],
+      s: function (p) { return 'If the pool price moves more than ' + p.move + '% within ' + p.blocks + ' blocks, reject every swap for the next ' + p.pause + ' minutes, then resume automatically. Liquidity can still be removed during the pause. Expose haltedUntil() as a view.'; } },
+    { id: 'jar', group: 'treasury', title: 'Buyback jar', blurb: 'Collect a cut, then buy your token with it.', types: 'ABC',
+      params: [{ k: 'rate', label: 'JAR RATE (% OF ETH SIDE)', type: 'number', d: 1.0, min: 0.1, max: 5, step: 0.1 }, { k: 'trig', label: 'TRIGGER AT (ETH)', type: 'number', d: 0.1, min: 0.01, max: 100, step: 0.01 }, { k: 'act', label: 'THEN', type: 'select', d: 'burn the bought tokens', opts: ['burn the bought tokens', 'send them to the treasury address'] }],
+      short: function (p) { return num(p.rate) + '% into a jar, buy back at ' + p.trig + ' ETH, ' + (p.act.indexOf('burn') === 0 ? 'burn' : 'treasury'); }, anyone: [['buyback()', 'Spend the jar when it is full']], view: [['jar()', 'ETH in the jar']],
+      s: function (p, c) { return 'Collect ' + num(p.rate) + '% of the ETH side of every swap into a jar held by the hook. Whenever the jar holds at least ' + p.trig + ' ETH, anyone may call buyback() to buy ' + c.symbol + ' from this pool with the whole jar and ' + p.act + '. The swap that fills the jar does not revert if the buyback fails. Expose jar() as a view.'; } },
+    { id: 'pot', group: 'games', title: 'Prize pot', blurb: 'A cut of buys goes to a lucky buyer.', types: 'ABC',
+      params: [{ k: 'rate', label: 'POT RATE (% OF ETH SIDE OF BUYS)', type: 'number', d: 2.0, min: 0.1, max: 5, step: 0.1 }, { k: 'hours', label: 'DRAW EVERY (HOURS)', type: 'number', d: 1, min: 1, max: 168 }],
+      short: function (p) { return num(p.rate) + '% of buys to a pot, drawn every ' + p.hours + 'h'; }, anyone: [['draw()', 'Run the draw when the period is over']], view: [['pot()', 'ETH in the pot'], ['nextDrawAt()', 'Next draw time']],
+      s: function (p) { return 'Collect ' + num(p.rate) + '% of the ETH side of every buy into a prize pot. Every ' + p.hours + ' hour(s), anyone may call draw() to pay the whole pot to one buyer from that period chosen at random, weighted by how much ETH each buyer spent; randomness comes from recent block data, which is acceptable for small pots and must be stated in the README. Expose pot() and nextDrawAt() as views.'; } },
+    { id: 'lp-share', group: 'treasury', title: 'Share fees with LPs', blurb: 'Part of the hook fee goes back to liquidity providers.', types: 'ABC', requires: 'swap-fee',
+      params: [{ k: 'pct', label: 'SHARE TO LPS (%)', type: 'number', d: 50, min: 1, max: 100 }],
+      short: function (p) { return p.pct + '% of the hook fee to LPs'; },
+      s: function (p) { return 'Donate ' + p.pct + '% of every hook fee back to the pool\u2019s liquidity providers in proportion to their liquidity (through the PoolManager\u2019s donate), and send the rest as the fee block says.'; } },
+    { id: 'lp-lock', group: 'liquidity', title: 'Liquidity lock', blurb: 'Liquidity cannot be removed for a while.', types: 'ABC',
+      params: [{ k: 'days', label: 'LOCK (DAYS)', type: 'number', d: 7, min: 1, max: 365 }],
+      short: function (p) { return 'LP locked ' + p.days + ' days'; }, view: [['unlockAt(address)', 'When a provider may withdraw']],
+      s: function (p) { return 'Liquidity added to the pool is locked for ' + p.days + ' days from the time it was added; removing it earlier reverts. The launch factory\u2019s own zero-change fee collection is always allowed. Expose unlockAt(address) as a view.'; } },
+    { id: 'jit', group: 'liquidity', title: 'JIT penalty', blurb: 'Punish liquidity that only shows up for one trade.', types: 'ABC',
+      params: [{ k: 'blocks', label: 'PENALTY WINDOW (BLOCKS)', type: 'number', d: 10, min: 1, max: 1000 }],
+      short: function (p) { return 'JIT penalty within ' + p.blocks + ' blocks'; },
+      s: function (p) { return 'Penalize just-in-time liquidity: liquidity removed within ' + p.blocks + ' blocks of being added forfeits the fees it earned in that time to the remaining liquidity providers (the LiquidityPenaltyHook pattern).'; } },
+    { id: 'lp-allow', group: 'liquidity', title: 'LP allowlist', blurb: 'Only listed wallets may add liquidity.', types: 'ABC', power: 'add and remove liquidity-provider allowlist addresses', params: [],
+      short: function () { return 'only allowlisted LPs'; }, owner: [['setLpAllowed(address[],bool)', 'Add or remove liquidity providers']], view: [['isLpAllowed(address)', 'Is a wallet on the list']],
+      s: function () { return 'Only addresses the owner has added to a liquidity allowlist may add liquidity; anyone may remove their own. The launch factory\u2019s initial seeding is always allowed. Expose setLpAllowed(address[] accounts, bool allowed) for the owner and isLpAllowed(address) as a view.'; } },
+    { id: 'lp-min', group: 'liquidity', title: 'Minimum position', blurb: 'No dust positions.', types: 'ABC',
+      params: [{ k: 'eth', label: 'MINIMUM (ETH VALUE)', type: 'number', d: 0.05, min: 0.001, step: 0.001 }],
+      short: function (p) { return 'positions of at least ' + p.eth + ' ETH'; },
+      s: function (p) { return 'Reject adding liquidity worth less than ' + p.eth + ' ETH at the current price. Removing is never blocked by this rule.'; } },
+    { id: 'open-at', group: 'timing', title: 'Scheduled open', blurb: 'No trading before a date and time.', types: 'ABC',
+      params: [{ k: 'when', label: 'OPEN AT (UTC)', type: 'text', d: '2026-11-01 16:00' }],
+      short: function (p) { return 'opens ' + p.when + ' UTC'; }, view: [['opensAt()', 'The opening time']],
+      s: function (p) { return 'Reject every swap before ' + p.when + ' UTC. Liquidity may be added before then. Expose opensAt() as a view.'; } },
+    { id: 'hours', group: 'timing', title: 'Trading hours', blurb: 'Only trade during certain hours.', types: 'ABC',
+      params: [{ k: 'from', label: 'FROM (UTC HOUR)', type: 'number', d: 9, min: 0, max: 23 }, { k: 'to', label: 'TO (UTC HOUR)', type: 'number', d: 17, min: 0, max: 23 }],
+      short: function (p) { return 'trades only ' + p.from + ':00 to ' + p.to + ':00 UTC'; }, view: [['isOpen()', 'Whether trading is open now']],
+      s: function (p) { return 'Allow swaps only between ' + p.from + ':00 and ' + p.to + ':00 UTC each day, judged by block timestamp; reject all others. Liquidity changes are always allowed. Expose isOpen() as a view.'; } },
+    { id: 'allowlist', group: 'timing', title: 'Allowlist opening', blurb: 'Only listed wallets may buy at first.', types: 'ABC', power: 'add and remove buyer allowlist addresses',
+      params: [{ k: 'mins', label: 'WINDOW (MINUTES)', type: 'number', d: 15, min: 1, max: 1440 }],
+      short: function (p) { return 'allowlist only for ' + p.mins + ' min'; }, owner: [['setAllowed(address[],bool)', 'Add or remove buyers']], view: [['isAllowed(address)', 'Is a wallet on the list']],
+      s: function (p) { return 'For the first ' + p.mins + ' minutes after the pool opens, only addresses the owner has added to an allowlist may buy. After that, anyone. Expose setAllowed(address[] accounts, bool allowed) for the owner and isAllowed(address) as a view.'; } },
+    { id: 'pause', group: 'timing', title: 'Pause switch', blurb: 'The owner can pause swaps. Buyers may dislike it.', types: 'ABC', power: 'pause and unpause swaps', params: [],
+      short: function () { return 'owner can pause'; }, owner: [['pause()', 'Pause swaps'], ['unpause()', 'Resume swaps']], view: [['paused()', 'Paused right now?']],
+      s: function () { return 'The owner may pause and unpause swaps. Liquidity can always be removed while paused. Expose pause() and unpause() for the owner and paused() as a view.'; } },
+    { id: 'sunset', group: 'timing', title: 'Sunset', blurb: 'The hook stops enforcing rules after a date.', types: 'ABC',
+      params: [{ k: 'when', label: 'AFTER (UTC)', type: 'text', d: '2027-01-01 00:00' }],
+      short: function (p) { return 'rules end ' + p.when + ' UTC'; }, view: [['sunsetAt()', 'When the rules end']],
+      s: function (p) { return 'After ' + p.when + ' UTC every rule above stops applying and the hook lets every swap and liquidity change through unchanged, forever. Expose sunsetAt() as a view.'; } },
+    { id: 'oracle', group: 'advanced', title: 'Price oracle', blurb: 'Other contracts can read a time-weighted price.', types: 'ABC', params: [],
+      short: function () { return 'on-chain TWAP oracle'; }, view: [['twap(uint32 secondsAgo)', 'The average price over a period']],
+      s: function () { return 'Record a time-weighted average price of the pool that other contracts can read (the BaseOracleHook pattern, with a Uniswap v3 compatible observe interface). Expose twap(uint32 secondsAgo) as a view returning the average price as a Q64.96 sqrt price.'; } },
+    { id: 'limit', group: 'advanced', title: 'Limit orders', blurb: 'Users can place orders that fill at a price.', types: 'ABC', params: [],
+      short: function () { return 'limit orders'; }, user: [['placeOrder(bool zeroForOne, int24 tick, uint256 amount)', 'Place an order'], ['cancelOrder(uint256 id)', 'Cancel an unfilled order'], ['claim(uint256 id)', 'Collect a filled order']],
+      s: function () { return 'Let users place limit orders in the hook that fill automatically when the pool price crosses the order price, and withdraw unfilled orders at any time (the LimitOrderHook pattern). Expose placeOrder(bool zeroForOne, int24 tick, uint256 amount) returning an id, cancelOrder(uint256 id) and claim(uint256 id).'; } },
+    { id: 'yield', group: 'advanced', title: 'Yield on idle liquidity', blurb: 'Idle liquidity is lent out to earn yield.', types: 'ABC',
+      params: [{ k: 'proto', label: 'LENDING PROTOCOL', type: 'select', d: 'Aave', opts: ['Aave', 'Morpho'] }],
+      short: function (p) { return 'idle liquidity lent on ' + p.proto; }, anyone: [['rebalance()', 'Move idle liquidity in or out of lending']],
+      s: function (p) { return 'Liquidity the pool is not using at the current price is lent on ' + p.proto + ' and recalled when needed for swaps (the ReHypothecationHook pattern). If ' + p.proto + ' has no deployment on the chosen chain, the swarm must report that as a blocker instead of substituting another protocol. Expose rebalance() that anyone may call.'; } },
+    { id: 'async', group: 'advanced', title: 'Batch auctions', blurb: 'Swaps settle together in batches.', types: 'BC',
+      params: [{ k: 'secs', label: 'BATCH EVERY (SECONDS)', type: 'number', d: 60, min: 12, max: 3600 }],
+      short: function (p) { return 'batches every ' + p.secs + 's'; }, anyone: [['settleBatch()', 'Settle the current batch']],
+      s: function (p) { return 'Swaps are not filled immediately: the hook collects them and settles each batch at one clearing price every ' + p.secs + ' seconds (the BaseAsyncSwap pattern). Expose settleBatch() that anyone may call once a batch period has ended.'; } },
+    { id: 'curve', group: 'advanced', title: 'Stable curve', blurb: 'Constant-sum pricing for like-valued assets.', types: 'BC', params: [],
+      short: function () { return 'constant-sum curve'; },
+      s: function () { return 'Replace the pool\u2019s pricing with a constant-sum curve suited to two assets of the same value (the BaseCustomCurve pattern).'; } },
+    { id: 'pool-rules', group: 'advanced', title: 'Pool rules', blurb: 'Which pools may use this hook.', types: 'BC',
+      params: [{ k: 'tier', label: 'ALLOWED FEE TIER (%)', type: 'select', d: '0.3', opts: ['0.05', '0.3', '1'] }],
+      short: function (p) { return 'only ETH pairs at ' + p.tier + '%'; },
+      s: function (p) { return 'Only pools where one currency is native ETH and the fee tier is ' + p.tier + '% may be initialized with this hook; any other pool initialization reverts.'; } },
+    { id: 'donate', group: 'advanced', title: 'Donation rules', blurb: 'Who may donate to the pool.', types: 'ABC', power: 'change the donation allowlist',
+      params: [{ k: 'who', label: 'WHO MAY DONATE', type: 'select', d: 'only the owner', opts: ['only the owner', 'only allowlisted addresses', 'nobody'] }],
+      short: function (p) { return 'donations: ' + p.who; }, owner: [['setDonor(address,bool)', 'Allow or block a donor']],
+      s: function (p) { return 'Donations to the pool are allowed from ' + p.who + '; all other donations revert. Expose setDonor(address account, bool allowed) for the owner.'; } },
+    { id: 'custom', group: 'custom', title: 'Custom rule', blurb: 'One rule in your own words.', types: 'ABC',
+      params: [{ k: 'text', label: 'THE RULE (ONE OR TWO SENTENCES)', type: 'text', d: '' }],
+      short: function (p) { return p.text ? String(p.text).slice(0, 48) + (p.text.length > 48 ? '\u2026' : '') : '(empty custom rule)'; },
+      s: function (p) { return cleanText(p.text) || '(custom rule not written yet)'; } }
+  ];
+  function num(v) { var n = Number(v); return isFinite(n) ? n.toFixed(1) : String(v); }
+  function cleanText(s) { return String(s || '').replace(/["\\<>\r\n]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  var byId = {}; CATALOG.forEach(function (b) { byId[b.id] = b; });
+  var PAL_GROUPS = [['token', 'TOKEN'], ['fees', 'FEES'], ['protection', 'PROTECTION'], ['treasury', 'TREASURY AND REWARDS'], ['liquidity', 'LIQUIDITY RULES'], ['timing', 'TIMING AND ACCESS'], ['advanced', 'ADVANCED'], ['games', 'GAMES AND LOTTERIES'], ['custom', 'CUSTOM']];
+  var EXAMPLES = [
+    'Every time someone buys, 2% of the ETH goes into a prize pot. Once an hour the pot goes to a random buyer from that hour, weighted by how much they bought.',
+    'Take 1% of every sell and buy my token back with it, then burn what was bought. No fees on buys.',
+    'For the first 10 minutes nobody can buy more than 0.5% of the supply, and each wallet must wait 30 seconds between swaps.',
+    'Liquidity is locked for 30 days and anyone who adds and removes liquidity within 10 blocks forfeits their fees.'
+  ];
+
+  var state = { mode: null, type: 'A', prompt: '', blocks: [], settings: { chain: 11155111, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' }, wallet: null };
+  function defaults(b) { var p = {}; b.params.forEach(function (x) { p[x.k] = x.d; }); return p; }
+  function seedBlocks() { state.blocks = [{ id: 'token', p: defaults(byId.token) }, { id: 'swap-fee', p: defaults(byId['swap-fee']) }, { id: 'anti-sniper', p: defaults(byId['anti-sniper']) }, { id: 'jar', p: defaults(byId.jar) }]; }
+  try { var saved = JSON.parse(localStorage.getItem('hooks-store:mockup-draft:v3') || 'null'); if (saved && saved.blocks && saved.settings) { state = saved; state.wallet = null; } else seedBlocks(); } catch (e) { seedBlocks(); }
+  function save() { try { localStorage.setItem('hooks-store:mockup-draft:v3', JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+
+  function has(id) { return state.blocks.some(function (b) { return b.id === id; }); }
+  function tokenBlock() { return state.blocks.filter(function (b) { return b.id === 'token' || b.id === 'own-token'; })[0]; }
+  function ctx() {
+    var t = tokenBlock(), s = state.settings;
+    if (state.type === 'A' && t) return { symbol: t.p.symbol || 'TOKEN', name: t.p.name || 'Untitled' };
+    if (state.type === 'C') return { symbol: s.tsym || 'the token', name: s.hname || 'Untitled hook' };
+    return { symbol: 'the pool\u2019s token', name: s.hname || 'Untitled hook' };
+  }
+  function walletOr(v) { return (v && v.trim()) || (state.wallet || 'the paying wallet'); }
+  function behaviorBlocks() { return state.blocks.filter(function (b) { return b.id !== 'token' && b.id !== 'own-token'; }); }
+  function available(def) { return def.types.indexOf(state.type) >= 0; }
+
+  function compose() {
+    var c = ctx(), s = state.settings, lines = [], powers = [], rules = [];
+    behaviorBlocks().forEach(function (b) { var def = byId[b.id]; if (!available(def)) return; if (def.power) powers.push(def.power); rules.push(def.s(b.p, c)); });
+    var prompt = cleanText(state.prompt).slice(0, 3000);
+    if (state.type === 'A') { lines.push('Launch ' + c.name + ' (' + c.symbol + ') with a Uniswap v4 hook on ' + CHAINS[s.chain] + ', paired with ' + s.pair.toUpperCase() + '.'); var t = tokenBlock(); lines.push(byId[t.id].s(t.p, c)); }
+    else if (state.type === 'B') { lines.push('Deploy one contract: ' + c.name + ', a standalone Uniswap v4 hook with no token and no pool of its own, on ' + CHAINS[s.chain] + '. It must be usable by anyone initializing a new pool with it on the PoolManager passed as a constructor argument (' + CHAINS[s.chain] + ' PoolManager ' + PM[s.chain] + ').'); }
+    else { lines.push('Deploy one contract on ' + CHAINS[s.chain] + ': ' + c.name + ', a Uniswap v4 hook for the existing token ' + (s.token || '0x…') + (s.tsym ? ' (' + s.tsym + ')' : '') + ', paired with ETH. No new token and no pool created by the launch; the creator will initialize the pool with this hook afterwards on the PoolManager passed as a constructor argument (' + PM[s.chain] + ').'); }
+    if (prompt && rules.length) lines.push('The hook does exactly what the creator describes, plus the numbered rules, and nothing else. If the description and a numbered rule disagree, the numbered rule wins.');
+    else if (prompt) lines.push('The hook does exactly what the creator describes below, and nothing else.');
+    else lines.push('The hook does exactly the following, and nothing else:');
+    if (prompt) lines.push('In the creator\u2019s own words: <description>' + prompt + '</description>');
+    if (rules.length) rules.forEach(function (r, i) { lines.push((i + 1) + '. ' + r); });
+    if (!prompt && !rules.length) lines.push('1. No swap-time behavior: the hook only implements the callback the launch factory requires and observes swaps.');
+    lines.push(powers.length ? 'Owner ' + walletOr(s.owner) + ' may only: ' + powers.join(', ') + ', through the functions named above. No other admin function, no backend signer, no upgrade path.' : 'No owner functions, no backend signer, no upgrade path.');
+    lines.push('Fees are always taken from the ETH (pair currency) side, never from ' + c.symbol + '; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.');
+    if (state.type === 'A') { lines.push('Enable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.'); if (s.pool !== null) lines.push('Pool: ' + s.pool + '% of my 90% share seeds the pool; the remainder goes to ' + walletOr(s.rem) + '.'); }
+    else lines.push('Take the PoolManager as a constructor argument and enable only the callbacks the behavior above needs. The deployed address must carry the correct hook permission bits (mine a CREATE2 salt). Owner, if any, is $owner.');
+    if (s.repo) lines.push('Start from the creator\u2019s own source at ' + s.repo + (s.commit ? ' commit ' + s.commit : '') + ': audit it as imported code, adapt it to this launch, and keep its behavior.');
+    lines.push('Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store' + (rules.length ? ' block builder' : '') + '.');
+    return lines.join('\n');
+  }
+  function body() {
+    var s = state.settings, b = { objective: compose() };
+    if (state.type === 'A') { b.shape = 'chain'; b.references = ['uniswap-v4-hooks', 'uniswap-v4-security']; b.steps = [{ skill: 'build-contract-project' }, { skill: 'adversarial-review' }]; b.onchain = 'univ4_hook'; b.chainId = s.chain; b.pairWith = s.pair; if (s.owner) b.owner = s.owner.toLowerCase(); if (s.pool !== null || s.rem) { b.economics = {}; if (s.pool !== null) b.economics.poolBps = s.pool * 100; if (s.rem) b.economics.remainderTo = s.rem.toLowerCase(); } if (has('own-token')) b.customToken = true; }
+    else { b.onchain = 'evm_contracts'; b.chainId = s.chain; if (s.owner) b.owner = s.owner.toLowerCase(); }
+    if (s.repo) { b.repoUrl = s.repo; b.baseCommit = s.commit; }
+    b.github = true; return b;
+  }
+  function rateTotal() { var t = 0; behaviorBlocks().forEach(function (b) { if (b.id === 'swap-fee' || b.id === 'jar' || b.id === 'pot') t += Number(b.p.rate) || 0; if (b.id === 'fee-size') t += Number(b.p.extra) || 0; if (b.id === 'fee-dir') t += Math.max(Number(b.p.buy) || 0, Number(b.p.sell) || 0); }); return t; }
+
+  // ------------------------------------------------------------ builder rendering
+  function renderPalette() {
+    $('palette').innerHTML = PAL_GROUPS.map(function (g, gi) {
+      if (g[0] === 'token' && state.type !== 'A') return '';
+      var items = CATALOG.filter(function (b) { return b.group === g[0]; });
+      var html = items.map(function (b) {
+        var off = has(b.id) || !available(b) || (b.requires && !has(b.requires)) || (b.excludes && has(b.excludes));
+        var why = has(b.id) ? 'ADDED' : !available(b) ? (b.types === 'BC' ? 'OWN POOLS ONLY' : 'TOKEN LAUNCH ONLY') : (b.requires && !has(b.requires)) ? 'NEEDS ' + byId[b.requires].title.toUpperCase() : (b.excludes && has(b.excludes)) ? 'REMOVE ' + byId[b.excludes].title.toUpperCase() + ' FIRST' : '';
+        var btn = b.fixed ? '<span class="pill state">ALWAYS</span>' : off ? '<span class="pill state">' + why + '</span>' : '<button class="btn tiny" type="button" data-add="' + b.id + '">ADD</button>';
+        return '<div class="pal-item' + (off ? ' off' : '') + '"><div><strong>' + esc(b.title) + warnSign(b.id) + '</strong><span class="b">' + esc(b.blurb) + '</span></div>' + btn + '</div>';
+      }).join('');
+      return '<details' + (gi < 3 ? ' open' : '') + '><summary>' + g[1] + '<span class="muted">' + items.filter(function (b) { return has(b.id); }).length + '/' + items.length + '</span></summary><div>' + '' + html + '</div></details>';
+    }).join('');
+  }
+  function field(bi, x, v) {
+    var id = 'p-' + bi + '-' + x.k;
+    if (x.type === 'select') return '<div><label for="' + id + '">' + x.label + '</label><select id="' + id + '" data-b="' + bi + '" data-k="' + x.k + '">' + x.opts.map(function (o) { return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></div>';
+    return '<div><label for="' + id + '">' + x.label + '</label><input id="' + id + '" type="' + x.type + '" value="' + esc(v) + '" data-b="' + bi + '" data-k="' + x.k + '"' + (x.min !== undefined ? ' min="' + x.min + '"' : '') + (x.max !== undefined ? ' max="' + x.max + '"' : '') + (x.step !== undefined ? ' step="' + x.step + '"' : '') + '></div>';
+  }
+  function warnSign(id) { return RISK[id] ? '<span class="warn" tabindex="0" role="img" aria-label="Heads up" data-tip="Heads up: this block is easy to work around or needs care. ' + esc(RISK[id]) + '" title="' + esc(RISK[id]) + '">!</span>' : ''; }
+  var RISK = { pot: 'The draw uses block data for randomness. A well-funded player can tilt the odds. Keep pots small and say so on your token\u2019s page.', breaker: 'A large trader can trip the breaker on purpose to stall trading for everyone.', 'anti-sniper': 'Per-wallet limits can be sidestepped by splitting across several wallets.', 'max-buy': 'Per-wallet limits can be sidestepped by splitting across several wallets.', cooldown: 'Per-wallet limits can be sidestepped by splitting across several wallets.', 'max-swap': 'A trader can split one large trade into several smaller ones.' };
+  var WHO = { 'swap-fee': 'Runs itself; fees reach the recipient automatically.', 'fee-fade': 'Runs itself.', 'fee-dir': 'Runs itself.', 'fee-size': 'Runs itself.', 'fee-vol': 'Runs itself.', 'fee-split': 'Runs itself.', 'lp-fee': 'Runs itself; sets the pool fee each swap.', 'anti-sniper': 'Runs itself for the window, then switches off.', 'max-buy': 'Runs itself.', 'max-swap': 'Runs itself.', 'anti-sandwich': 'Runs itself.', 'cooldown': 'Runs itself.', 'breaker': 'Runs itself.', jar: 'Runs itself; anyone presses the button when the jar is full.', pot: 'Runs itself; anyone presses the button when the period ends.', 'lp-share': 'Runs itself.', 'lp-lock': 'Runs itself.', jit: 'Runs itself.', 'lp-allow': 'You (the owner) keep the list up to date.', 'lp-min': 'Runs itself.', 'open-at': 'Runs itself.', hours: 'Runs itself.', allowlist: 'You (the owner) keep the list up to date.', pause: 'You (the owner) flip the switch.', sunset: 'Runs itself.', oracle: 'For other contracts and apps: they read the price. Nothing for you to do.', limit: 'For traders: they get an order form on your hook page.', yield: 'Runs itself; anyone can press rebalance.', async: 'Runs itself; anyone can settle a finished batch.', curve: 'Runs itself.', 'pool-rules': 'Runs itself at pool creation.', donate: 'You (the owner) decide who may donate.', custom: 'Whatever your sentence says.' };
+  function manageNote(def) {
+    var bits = [];
+    if (def.owner) bits.push('Owner buttons: ' + def.owner.map(function (f) { return f[1].toLowerCase(); }).join(', '));
+    if (def.anyone) bits.push('Anyone can: ' + def.anyone.map(function (f) { return f[1].toLowerCase(); }).join(', '));
+    if (def.user) bits.push('Users get: ' + def.user.map(function (f) { return f[1].toLowerCase(); }).join(', '));
+    return '<p class="manage-note"><strong>Who uses it:</strong> ' + esc(WHO[def.id] || 'Runs itself.') + (bits.length ? ' <strong>On the hook page:</strong> ' + esc(bits.join('. ')) + '.' : '') + '</p>';
+  }
+  function renderCanvas() {
+    var c = ctx(), n = 0;
+    $('canvas').innerHTML = state.blocks.map(function (b, i) {
+      var def = byId[b.id], isTok = b.id === 'token' || b.id === 'own-token';
+      if (isTok && state.type !== 'A') return '';
+      if (!isTok) n++;
+      var off = !available(def);
+      return '<div class="blk' + (isTok ? ' token' : '') + '"' + (off ? ' style="opacity:.55"' : '') + '>' +
+        '<div class="blk-head"><h3>' + (isTok ? 'TOKEN' : n + '. ' + esc(def.title).toUpperCase() + warnSign(def.id)) + (off ? ' <span class="pill state">NOT FOR THIS LAUNCH TYPE</span>' : '') + '</h3>' +
+        '<div class="order">' + (isTok ? (b.id === 'own-token' ? '<button class="btn tiny" type="button" data-std="1">USE STANDARD TOKEN</button>' : '<button class="btn tiny" type="button" data-own="1">BRING MY OWN</button>') : '<button class="btn tiny" type="button" data-up="' + i + '" aria-label="Move up">&#9650;</button><button class="btn tiny" type="button" data-down="' + i + '" aria-label="Move down">&#9660;</button><button class="btn tiny" type="button" data-rm="' + i + '">REMOVE</button>') + '</div></div>' +
+        '<p class="sentence">' + esc(def.short ? def.short(b.p, c) : def.s(b.p, c)) + '</p>' +
+        (def.params.length ? '<div class="params">' + def.params.map(function (x) { return field(i, x, b.p[x.k]); }).join('') + '</div>' : '') + manageNote(def) + '</div>';
+    }).join('') || '<div class="empty">No blocks yet. Add some from the palette, or describe your hook in words.</div>';
+    rules();
+  }
+  function rules() { var r = rateTotal(), nt = $('rule-notice'); if (r > 5) { nt.hidden = false; nt.innerHTML = '<strong>Fees total ' + num(r) + '%.</strong> All ETH-side fees together must stay at or below 5%.'; } else nt.hidden = true; }
+  function renderPreview() {
+    var c = ctx(), s = state.settings, text = compose(), powers = [];
+    var items = behaviorBlocks().filter(function (b) { return available(byId[b.id]); }).map(function (b) { var d = byId[b.id]; if (d.power) powers.push(d.power); return '<li>' + esc(d.short ? d.short(b.p, c) : d.title) + warnSign(b.id) + '</li>'; });
+    var sum = [];
+    sum.push(['TYPE', state.type === 'A' ? 'Hook + new token + pool' : state.type === 'B' ? 'Hook only, no token' : 'Hook for existing token ' + (s.token ? s.token.slice(0, 10) + '\u2026' : '(address missing)')]);
+    if (state.type === 'A') sum.push(['TOKEN', esc(c.name) + ' ($' + esc(c.symbol) + ')' + (has('own-token') ? ', your own' : ', standard')]); else sum.push(['HOOK', esc(c.name)]);
+    sum.push(['CHAIN', CHAINS[s.chain] + (state.type === 'A' ? ', paired with ' + s.pair.toUpperCase() : '')]);
+    sum.push(['WORDS', cleanText(state.prompt) ? '<span class="muted">\u201C' + esc(cleanText(state.prompt).slice(0, 110)) + (state.prompt.length > 110 ? '\u2026' : '') + '\u201D</span>' : '<span class="muted">none</span>']);
+    sum.push(['RULES', items.length ? '<ol>' + items.join('') + '</ol>' : '<span class="muted">none</span>']);
+    sum.push(['OWNER', powers.length ? esc(walletOr(s.owner)) + ' may ' + esc(powers.join(', ')) : 'no owner powers']);
+    if (state.type === 'A') sum.push(['POOL', s.pool === null ? '<span style="color:var(--bad)">not chosen yet: set the pool share in settings</span>' : '<span class="num">' + s.pool + '%</span> of your share, rest to ' + esc(walletOr(s.rem))]);
+    $('summary-short').innerHTML = sum.map(function (r) { return '<li><b>' + r[0] + '</b><span>' + r[1] + '</span></li>'; }).join('');
+    $('added').innerHTML = behaviorBlocks().length ? behaviorBlocks().map(function (b) { var d = byId[b.id]; return '<span class="chip">' + esc(d.short ? d.short(b.p, c) : d.title) + '<button type="button" data-rmchip="' + state.blocks.indexOf(b) + '" aria-label="Remove ' + esc(d.title) + '">✕</button></span>'; }).join('') : '<span class="small muted">No blocks added. Use the palette on the left to add one.</span>';
+    $('composed').textContent = text;
+    $('chars').textContent = text.length.toLocaleString('en-US') + ' / 7,500';
+    $('facts').innerHTML = [['FEE RULE', rateTotal() > 0 || /fee|%/.test(state.prompt) ? 'stated' : 'none'], ['FEE DESTINATION', /wallet|treasury|burn|pot|jar|LP/i.test(text) ? 'stated' : 'unknown'], ['ADMIN', powers.length ? 'stated' : 'none'], ['TOKEN NAME AND SYMBOL', state.type === 'A' ? 'stated' : 'not applicable'], ['CALLBACKS', 'fixed by the launch'], ['DEPENDENCIES', has('yield') ? 'unknown: lending protocol' : 'none']].map(function (f) { return '<li><b>' + f[0] + '</b>' + f[1] + '</li>'; }).join('');
+  }
+  function renderSummary() {
+    var c = ctx(), s = state.settings, rows = [];
+    rows.push(['LAUNCH TYPE', state.type === 'A' ? 'Hook + new token + pool' : state.type === 'B' ? 'Hook only' : 'Hook for existing token']);
+    rows.push([state.type === 'A' ? 'TOKEN' : 'HOOK', esc(c.name) + (state.type === 'A' ? ' ($' + esc(c.symbol) + ')' : '')]);
+    if (state.type === 'C') rows.push(['EXISTING TOKEN', esc(s.token || '(missing)')]);
+    rows.push(['DEPLOY ON', CHAINS[s.chain]]);
+    if (state.type === 'A') { rows.push(['PAIRED WITH', s.pair.toUpperCase()]); rows.push(['POOL SHARE', s.pool === null ? '<span style="color:var(--bad)">not chosen</span>' : '<span class="num">' + s.pool + '%</span> of your 90%']); rows.push(['REMAINDER TO', esc(walletOr(s.rem))]); }
+    rows.push(['OWNER', esc(walletOr(s.owner))]); rows.push(['RULES', String(behaviorBlocks().length) + (cleanText(state.prompt) ? ' blocks + your words' : ' blocks')]); rows.push(['DESCRIPTION', '<span class="num">' + compose().length.toLocaleString('en-US') + '</span> characters']);
+    $('summary').innerHTML = rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('');
+    var fees = [['Swarm fee', '<b>0.5 IMD</b>, once. The audit panel is included. Read live from the Intake before you approve.'], ['Gas', 'Two transactions on the payment chain: approve, then launch.']];
+    if (state.type === 'A') { fees.push(['Token supply', '<b>10%</b> to the swarm, <b>90%</b> to you. ' + (s.pool === null ? 'You have not chosen how much of yours seeds the pool yet.' : '<b>' + s.pool + '%</b> of yours seeds the pool, the rest goes to your remainder address.')]); fees.push(['Pool trading fee', '<b>1.25%</b> of every trade: <b>1%</b> to you, <b>0.25%</b> to the network. Your hook\u2019s own fee comes on top.']); }
+    else { fees.push(['Token and pool', 'None created. You get the audited hook contract only.']); if (state.type === 'C') fees.push(['Opening the pool', 'One more transaction from your wallet after the hook is live, prepared by the site. Liquidity is yours to add.']); }
+    fees.push(['Deployment', 'Paid by IMD. No deployment gas for you.']);
+    $('fees').innerHTML = fees.map(function (f) { return '<tr><th>' + f[0] + '</th><td>' + f[1] + '</td></tr>'; }).join('');
+    $('l-launch').title = state.type === 'A' && s.pool === null ? 'Choose the pool share first' : '';
+    $('type-c-note').hidden = state.type !== 'C';
+  }
+  function renderMode() {
+    var m = state.mode;
+    $('chooser').hidden = !!m; $('settings').hidden = !m;
+    $('mode-prompt').classList.toggle('on', m === 'prompt'); $('mode-blocks').classList.toggle('on', m === 'blocks');
+    $('prompt-editor').hidden = m !== 'prompt'; $('blocks-editor').hidden = m !== 'blocks';
+  }
+  function renderTypes() {
+    document.querySelectorAll('.type').forEach(function (b) { b.classList.toggle('on', b.dataset.type === state.type); });
+    $('type-c-fields').hidden = state.type !== 'C'; $('type-bc-fields').hidden = state.type === 'A';
+    $('pool-fields').hidden = state.type !== 'A'; $('pair-field').style.visibility = state.type === 'A' ? 'visible' : 'hidden';
+  }
+  function renderAll() { renderMode(); renderTypes(); renderPalette(); renderCanvas(); renderPreview(); renderSummary(); renderMine(); save(); }
+
+  ['chain', 'pair', 'pool', 'rem', 'owner', 'token', 'tsym', 'hname', 'repo', 'commit'].forEach(function (k) {
+    var el = $('s-' + k); el.value = state.settings[k] === null || state.settings[k] === undefined ? '' : state.settings[k];
+    el.addEventListener('input', function () { state.settings[k] = k === 'chain' ? Number(el.value) : k === 'pool' ? (el.value === '' ? null : Number(el.value)) : el.value; renderCanvas(); renderPreview(); renderSummary(); save(); });
+  });
+  $('p-text').value = state.prompt;
+  $('p-text').addEventListener('input', function () { state.prompt = $('p-text').value; renderPreview(); renderSummary(); save(); });
+  $('p-chips').innerHTML = EXAMPLES.map(function (t, i) { return '<button class="chip" type="button" data-ex="' + i + '">' + esc(t.slice(0, 54)) + '\u2026</button>'; }).join('');
+  $('p-chips').addEventListener('click', function (e) { var b = e.target.closest('[data-ex]'); if (!b) return; state.prompt = EXAMPLES[Number(b.dataset.ex)]; $('p-text').value = state.prompt; renderPreview(); renderSummary(); save(); });
+  $('chooser').addEventListener('click', function (e) { var b = e.target.closest('[data-pick]'); if (!b) return; state.mode = b.dataset.pick; renderAll(); });
+  $('mode-prompt').addEventListener('click', function () { state.mode = 'prompt'; renderAll(); });
+  $('mode-blocks').addEventListener('click', function () { state.mode = 'blocks'; renderAll(); });
+  $('types').addEventListener('click', function (e) { var b = e.target.closest('[data-type]'); if (!b) return; state.type = b.dataset.type; renderAll(); });
+  $('landing-prompt').addEventListener('submit', function (e) { e.preventDefault(); state.prompt = $('landing-q').value; $('p-text').value = state.prompt; state.mode = 'prompt'; save(); location.hash = '#builder'; renderAll(); });
+  document.querySelector('[data-mode="blocks"]').addEventListener('click', function () { state.mode = 'blocks'; save(); });
+
+  $('view-builder').addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.add) { var def = byId[t.dataset.add]; if (def.replaces) { state.blocks = state.blocks.filter(function (b) { return b.id !== def.replaces; }); state.blocks.unshift({ id: def.id, p: defaults(def) }); } else state.blocks.push({ id: def.id, p: defaults(def) }); renderAll(); }
+    if (t.dataset.own) { var tok = tokenBlock(); var p = defaults(byId['own-token']); if (tok) { p.name = tok.p.name; p.symbol = tok.p.symbol; } state.blocks = state.blocks.filter(function (b) { return b.id !== 'token'; }); state.blocks.unshift({ id: 'own-token', p: p }); renderAll(); }
+    if (t.dataset.std) { var tok2 = tokenBlock(); var p2 = defaults(byId.token); if (tok2) { p2.name = tok2.p.name; p2.symbol = tok2.p.symbol; } state.blocks = state.blocks.filter(function (b) { return b.id !== 'own-token'; }); state.blocks.unshift({ id: 'token', p: p2 }); renderAll(); }
+    if (t.dataset.rmchip) { t.dataset.rm = t.dataset.rmchip; }
+    if (t.dataset.rm) { var i = Number(t.dataset.rm); var removed = state.blocks.splice(i, 1)[0]; if (removed.id === 'swap-fee') state.blocks = state.blocks.filter(function (b) { return b.id !== 'fee-fade' && b.id !== 'fee-split' && b.id !== 'lp-share'; }); renderAll(); }
+    if (t.dataset.up) { var u = Number(t.dataset.up); if (u > 1) { var tmp = state.blocks[u]; state.blocks[u] = state.blocks[u - 1]; state.blocks[u - 1] = tmp; renderAll(); } }
+    if (t.dataset.down) { var d = Number(t.dataset.down); if (d < state.blocks.length - 1) { var tmp2 = state.blocks[d]; state.blocks[d] = state.blocks[d + 1]; state.blocks[d + 1] = tmp2; renderAll(); } }
+  });
+  $('canvas').addEventListener('input', function (e) {
+    var t = e.target; if (t.dataset.b === undefined) return;
+    state.blocks[Number(t.dataset.b)].p[t.dataset.k] = t.value;
+    var c = ctx(), sentences = $('canvas').querySelectorAll('.sentence'), k = 0;
+    state.blocks.forEach(function (b) { if ((b.id === 'token' || b.id === 'own-token') && state.type !== 'A') return; if (sentences[k]) { var d = byId[b.id]; sentences[k].textContent = d.short ? d.short(b.p, c) : d.s(b.p, c); } k++; });
+    rules(); renderPreview(); renderSummary(); save();
+  });
+  $('check').addEventListener('click', function () { $('plan').classList.add('show'); renderPreview(); });
+
+  // ------------------------------------------------------------ wallet and launch (mock)
+  var SAMPLE_WALLET = '0x5a7e\u2026f00d';
+  function setWallet(on) {
+    state.wallet = on ? SAMPLE_WALLET : null;
+    $('connect').textContent = on ? SAMPLE_WALLET.toUpperCase() : 'CONNECT'; $('connect').title = on ? 'Disconnect ' + SAMPLE_WALLET : 'Connect a wallet';
+    $('mine-wallet').textContent = on ? 'Wallet ' + SAMPLE_WALLET + ' (sample)' : 'Connect a wallet to see your launches.';
+    $('st1').classList.toggle('done', on); $('l-connect').textContent = on ? 'CONNECTED (SAMPLE)' : 'CONNECT WALLET'; $('l-approve').disabled = !on;
+    renderAll(); if (location.hash.indexOf('#hook') === 0) route();
+  }
+  $('connect').addEventListener('click', function () { setWallet(!state.wallet); });
+  $('l-connect').addEventListener('click', function () { setWallet(true); });
+  $('l-approve').addEventListener('click', function () { var b = this; b.disabled = true; b.textContent = 'WAITING FOR RECEIPT\u2026'; setTimeout(function () { b.textContent = 'APPROVED'; $('st2').classList.add('done'); $('l-approve-hash').textContent = 'tx 0x3c1d\u2026a9e2 (sample)'; $('l-launch').disabled = false; }, 900); });
+  var mine = [];
+  $('l-launch').addEventListener('click', function () {
+    var b = this; b.disabled = true; b.textContent = 'WAITING FOR RECEIPT\u2026';
+    setTimeout(function () { b.textContent = 'LAUNCHED'; $('st3').classList.add('done'); $('l-launch-hash').textContent = 'request 0x9b2f\u202641c7 (sample)'; $('l-done').hidden = false; var c = ctx(); mine.unshift({ name: c.name, symbol: c.symbol, chain: state.settings.chain, status: 'req', when: 'just now', id: 'pond' }); renderMine(); cast(c.name + ' was requested on ' + CHAINS[state.settings.chain] + ' \u00b7 just now'); }, 1200);
+  });
+  function renderMine() {
+    var rows = mine.slice(); if (state.wallet) HOOKS.filter(function (h) { return h.mine; }).forEach(function (h) { rows.push({ name: h.name, symbol: h.symbol, chain: h.chain, status: h.status, when: 'Oct 18', sample: true, id: h.id }); });
+    $('mine-list').innerHTML = rows.length ? rows.map(function (h) { return '<div class="card"><div><h3 style="margin:0">' + esc(h.name) + ' <small style="display:inline">$' + esc(h.symbol) + '</small></h3><span class="small muted">' + CHAINS[h.chain] + ' \u00b7 ' + h.when + (h.sample ? ' \u00b7 example' : '') + '</span></div>' + statusPill(h.status) + '<span style="display:flex;gap:8px"><a class="btn tiny" href="#hook/' + h.id + '">VIEW</a>' + (h.status === 'live' ? '<a class="btn tiny primary" href="#hook/' + h.id + '">MANAGE</a>' : '') + '</span></div>'; }).join('') : '<p class="muted">' + (state.wallet ? 'No launch requests from this wallet yet.' : 'Your launch requests appear here, read from the chain for the connected wallet.') + '</p>';
+    var promos = state.wallet ? HOOKS.filter(function (h) { return h.mine && h.ad; }) : [];
+    $('promo-list').innerHTML = promos.length ? promos.map(function (h) { return '<div class="card"><div><h3 style="margin:0">' + esc(h.name) + ' <small style="display:inline">$' + esc(h.symbol) + '</small></h3><span class="small muted">In the strip \u00b7 <span class="num">' + h.adHours + 'h</span> left \u00b7 total paid <span class="num">' + (0.1 + h.boost).toFixed(2) + ' IMD</span> \u00b7 rank ' + (HOOKS.filter(function (x) { return x.ad && x.boost > h.boost; }).length + 1) + ' of ' + HOOKS.filter(function (x) { return x.ad; }).length + '</span></div><span style="display:flex;gap:8px"><button class="btn tiny primary" type="button">BOOST</button><button class="btn tiny" type="button">CANCEL</button></span></div>'; }).join('') : '<p class="muted">' + (state.wallet ? 'No placements from this wallet. Promote a live hook to appear in the featured strip.' : 'Connect a wallet to see and manage your placements.') + '</p>';
+    $('mine-draft-name').textContent = ctx().name + ' \u00b7 ' + (state.mode === 'prompt' ? 'described in words' : behaviorBlocks().length + ' blocks');
+  }
+  $('discard').addEventListener('click', function () { seedBlocks(); state.prompt = ''; state.mode = null; $('p-text').value = ''; renderAll(); });
+  document.body.addEventListener('click', function (e) {
+    var b = e.target.closest('.copy'); if (!b) return; var v = b.dataset.copy;
+    function fallback() { var r = document.createRange(); r.selectNodeContents(b.previousElementSibling); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(function () { b.textContent = 'COPIED'; setTimeout(function () { b.textContent = 'COPY'; }, 1200); }, fallback); else fallback();
+  });
+
+  // ------------------------------------------------------------ hook page, with manage panels built from the blocks
+  function renderHook(id) {
+    var h = HOOKS.filter(function (x) { return x.id === id; })[0] || HOOKS[0];
+    $('h-eyebrow').textContent = CHAINS[h.chain].toUpperCase() + (h.n ? ' \u00b7 LAUNCH #' + h.n : ' \u00b7 EXAMPLE'); $('hook-h').textContent = h.name; $('h-symbol').textContent = '$' + h.symbol + (h.id === 'hamster' ? ' \u00b7 paired with IMD' : '');
+    $('h-actions').innerHTML = statusPill(h.status) + '<a class="btn" href="#builder">BUILD ONE LIKE THIS</a>';
+    var steps = [['REQUESTED', 'request on chain'], ['BUILDING', 'build-contract-project'], ['AUDIT PANEL', '4 specialists, 1 judge'], ['DEPLOYING', 'IMD deployer'], ['LIVE', 'verified']];
+    var doneTo = h.status === 'live' ? 5 : h.status === 'prog' ? 2 : 1;
+    $('h-timeline').innerHTML = steps.map(function (s, i) { return '<li class="' + (i < doneTo ? 'done' : i === doneTo ? 'now' : '') + '">' + s[0] + '<span>' + (i < doneTo ? s[1] : i === doneTo ? 'in progress' : 'waiting') + '</span></li>'; }).join('');
+    var addr = function (label, v) { return '<div><dt>' + label + '</dt><dd class="addr">' + (v ? '<code>' + v + '</code><button class="copy" type="button" data-copy="' + v + '">COPY</button>' : '<span class="muted">unknown until live</span>') + '</dd></div>'; };
+    $('h-addr').innerHTML = addr('HOOK', h.hook) + (h.token || h.id !== 'reel' ? addr('TOKEN', h.token) : '') + (h.dist ? addr('DISTRIBUTOR', h.dist) : '') + (h.tx ? '<div><dt>LAUNCH TX</dt><dd><code>' + h.tx + '</code></dd></div>' : '');
+    $('h-evidence').innerHTML = '<div><dt>SOURCE</dt><dd>' + (h.job ? '<a href="https://explorer.imd.fun/jobs/' + h.job + '" target="_blank" rel="noreferrer">Job ' + h.job.slice(0, 8) + ' on the IMD explorer</a>' : '<span class="muted">appears when the build is accepted</span>') + '</dd></div><div><dt>AUDIT</dt><dd>' + (h.status === 'live' ? 'Passed IMD\u2019s audit panel before deployment.' : 'Not yet.') + '</dd></div><div><dt>TRADE</dt><dd>' + (h.status === 'live' ? '<a href="#hook/' + h.id + '">Open the pool (link template set by the operator)</a>' : '<span class="muted">after launch</span>') + '</dd></div>';
+    $('h-blocks').innerHTML = h.blocks.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('');
+    $('h-text').textContent = h.req || 'Request text appears here once the launch is on chain.';
+    var isOwner = !!state.wallet && h.mine, owner = [], anyone = [], views = [];
+    (h.ids || []).forEach(function (bid) { var d = byId[bid]; if (!d) return; (d.owner || []).forEach(function (f) { owner.push(f); }); (d.anyone || []).forEach(function (f) { anyone.push(f); }); (d.user || []).forEach(function (f) { anyone.push(f); }); (d.view || []).forEach(function (f) { views.push(f); }); });
+    var row = function (f, enabled, cls) { return '<div class="row"><div><p>' + esc(f[1]) + '</p><span class="fn">' + esc(f[0]) + '</span></div><button class="btn tiny' + (cls || '') + '" type="button"' + (enabled ? '' : ' disabled') + '>' + (f[0].indexOf('(') > 0 && f[0].indexOf('()') < 0 ? 'OPEN FORM' : 'SEND') + '</button></div>'; };
+    $('h-manage').innerHTML = h.status !== 'live' ? '<p class="muted">Available once the hook is live.</p>' : owner.length ? (isOwner ? '' : '<p class="small muted">Connect the owner wallet to use these.</p>') + owner.map(function (f) { return row(f, isOwner, ' primary'); }).join('') : (h.id === 'hamster' ? '<p class="muted">This hook is managed from the project\u2019s own vault contract, outside the store.</p>' : '<p class="muted">No owner switches. This hook runs itself.</p>');
+    $('h-anyone').innerHTML = h.status !== 'live' ? '<p class="muted">Available once the hook is live.</p>' : (anyone.map(function (f) { return row(f, true); }).join('') + (views.length ? views.map(function (f) { return '<div class="row"><div><p>' + esc(f[1]) + '</p><span class="fn">' + esc(f[0]) + '</span></div><span class="num muted">read on load</span></div>'; }).join('') : '') || '<p class="muted">Nothing to trigger. This hook runs itself.</p>');
+  }
+
+  // ------------------------------------------------------------ routing
+  function route() {
+    var raw = (location.hash || '#store').replace('#', ''), h = raw.split('/')[0], known = ['store', 'builder', 'launch', 'hook', 'mine', 'learn'];
+    if (h === 'catalog') h = 'store'; if (known.indexOf(h) < 0) h = 'store';
+    known.forEach(function (k) { $('view-' + k).hidden = k !== h; });
+    document.querySelectorAll('.nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === (h === 'hook' ? 'store' : h === 'launch' ? 'builder' : h)); });
+    if (raw === 'catalog') { $('catalog').scrollIntoView(); } else window.scrollTo(0, 0);
+    if (h === 'hook') renderHook(raw.split('/')[1]); if (h === 'launch') renderSummary(); if (h === 'builder') renderMode();
+  }
+  addEventListener('hashchange', route);
+
+  // ------------------------------------------------------------ the pond, as monochrome character tiles (composition after the owner's reference)
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tiles(rows) {
+    return rows.map(function (r) { var out = ''; for (var i = 0; i < r.length; i++) { var ch = r[i], k = '';
+      if (ch === ' ') { out += '<span> </span>'; continue; }
+      if (ch === '8' || ch === '#' || ch === '%' || ch === '@') k = 't3'; else if (ch === 'S' || ch === '&') k = 't2'; else if (ch === 't' || ch === ':' || ch === ';') k = 't1'; else if (ch === '.' || ch === "'" || ch === ',' || ch === '"' || ch === '`' || ch === '-' || ch === '~') k = 'dot'; else if (ch === 'o') k = 'bob'; else k = 'ln';
+      out += '<span class="' + k + '">' + esc(ch) + '</span>'; } return out; }).join('\n');
+  }
+  var seed = 7; function rnd() { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+  function field(cols, rows, pick) { var out = []; for (var r = 0; r < rows; r++) { var line = ''; for (var c = 0; c < cols; c++) line += pick(r, c, rnd()); out.push(line); } return out; }
+  var CANOPY_CHARS = ['%', '#', '8', 'S', 'S', 't', 't', ':'];
+  $('canopy').innerHTML = tiles(field(220, 8, function (r, c, x) { var d = [0.88, 0.86, 0.8, 0.7, 0.5, 0.3, 0.14, 0.05][r] * (0.85 + 0.3 * Math.sin(c / 9)); if (x > d) return ' '; var w = Math.min(7, Math.floor(x / d * 8)); return CANOPY_CHARS[Math.max(0, w - (r > 4 ? 0 : 1))]; }));
+  $('shore').style.top = '118px'; $('shore').innerHTML = tiles(field(220, 2, function (r, c, x) { return x < (r === 0 ? 0.35 : 0.12) ? (x < 0.08 ? ',' : '-') : ' '; }));
+  $('water-a').style.top = '150px'; $('water-b').style.top = '150px';
+  $('water-a').innerHTML = tiles(field(220, 36, function (r, c, x) { return x < 0.045 ? '~' : x < 0.06 ? '-' : ' '; }));
+  $('water-b').innerHTML = tiles(field(220, 36, function (r, c, x) { return x < 0.045 ? '~' : x < 0.06 ? '-' : ' '; }));
+  var PAD_BIG = ['   .:SSSSS:.', '  (:S88888S:)', "   ':SSSSS:'"], PAD_SMALL = [' .:SSS:.', '(:S888S:)', " ':SSS:'"], PAD_FLOWER = ['   .:SSSS*:.', '  (:S88888S:)', "   ':SSSSS:'"];
+  var PADS = [[3, 25, PAD_BIG], [12, 33, PAD_SMALL], [20, 48, PAD_FLOWER], [5, 44, PAD_SMALL], [30, 24, PAD_BIG], [38, 31, PAD_SMALL], [9, 60, PAD_SMALL], [26, 68, PAD_BIG], [46, 40, PAD_FLOWER], [14, 76, PAD_SMALL], [40, 55, PAD_SMALL], [52, 62, PAD_BIG]];
+  $('pads').innerHTML = PADS.map(function (p, i) { return '<pre class="layer pad' + (i % 2 ? ' b' : '') + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + tiles(p[2]) + '</pre>'; }).join('');
+  $('branch').innerHTML = tiles([
+    "                                                  _____",
+    "                                        ___..--''  ,,, `--.",
+    "                                  _.-''  ,,,,%%%%%%%,,,,   `-.",
+    "                              .-''  ,,,%%%###%%%%###%%,,,,     `.",
+    "                           .''  ,,%%%####%%%,,,%%%###%%,,,",
+    "                         .'   ,,%%%###%%%,,,   ,,%%%%%,,",
+    "                        /   ,,,%%###%%%,,,        ,,,,",
+    "                       /    ,,%%%%%%,,,",
+    "                      /      ,,,%%%,,,",
+    "                     /        ,,,,,",
+    "                    /",
+    "                   /"
+  ]);
+  $('branch-l').innerHTML = tiles([
+    "____",
+    "    `--.._    ,,,",
+    "          `-._,,%%%,,",
+    "             \\,,%%###%%,,",
+    "              \\,,%%%%%%,,,",
+    "               \\  ,,%%%,,",
+    "                \\   ,,,",
+    "                 \\"
+  ]);
+  var BANK = field(96, 14, function (r, c, x) { var edge = 11 - Math.floor(c / 9); if (r < edge) return ' '; return x < 0.42 ? (x < 0.14 ? '"' : x < 0.28 ? ',' : "'") : ' '; });
+  function stamp(rows, r0, c0, sprite) { sprite.forEach(function (line, i) { var r = r0 + i; if (!rows[r]) return; rows[r] = (rows[r].slice(0, c0) + line + rows[r].slice(c0 + line.length)).slice(0, 96); }); }
+  stamp(BANK, 3, 40, ['   .tSt.', '  :S888S:', '  t88888t', ' :S88888S:', '  tSSSSSt']);
+  stamp(BANK, 5, 62, ['   .:tt:.', '  :S8888S:', '   t8888t', '  .S8888S.', '  :SSSSSS:']);
+  $('bank').innerHTML = tiles(BANK);
+  var BODY = ['                               :tt:', '                              :8888:', '                             .S8888S.', '                               S88S', '                             .:S88S:.', '                            :S888888S:', '                            t88888888t', '                           .S88888888S.', '                        ,,,:tSSSSSSSSt:,,,', '                      ,,,,,,,,,,,,,,,,,,,,,,'];
+  function frame(kind) {
+    var rows = BODY.map(function (r) { return r.padEnd(46); });
+    var put = function (ri, ci, str) { var r = rows[ri] || ''.padEnd(46); rows[ri] = (r.slice(0, ci) + str + r.slice(ci + str.length)).slice(0, 46); };
+    if (kind === 'idle' || kind === 'land' || kind === 'ripple') { put(4, 8, '_____________________'); put(5, 6, '/'); put(6, 4, '/'); put(7, 2, '/'); }
+    if (kind === 'idle') { put(8, 0, '( o )'); }
+    if (kind === 'land') { put(8, 0, '(*)'); }
+    if (kind === 'ripple') { put(8, 0, '( o )'); put(9, 0, '(     )'); }
+    if (kind === 'reel') { put(3, 28, '/'); put(2, 27, '/'); put(1, 26, '/'); put(0, 25, '/'); }
+    if (kind === 'cast') { put(4, 14, '_______________'); put(2, 1, '.----------.'); put(3, 0, 'o'); }
+    return tiles(rows);
+  }
+  var fisher = $('fisher'), casting = false, queue = 0, castCount = 0;
+  fisher.innerHTML = frame('idle');
+  function cast(msg) {
+    castCount++; if (msg) $('ticker').textContent = msg;
+    if (reduce) { return; }
+    if (casting) { if (queue < 3) queue++; return; }
+    casting = true; var seq = ['reel', 'reel', 'cast', 'cast', 'land', 'ripple', 'ripple'], i = 0;
+    (function step() { fisher.innerHTML = frame(seq[i]); i++; if (i < seq.length) setTimeout(step, 240); else { casting = false; fisher.innerHTML = frame('idle'); if (queue > 0) { queue--; cast(); } } })();
+  }
+  $('fish1').innerHTML = tiles(['<><']); $('fish2').innerHTML = tiles(['><>']);
+  $('leaf1').innerHTML = tiles([',']); $('leaf2').innerHTML = tiles(["'"]); $('leaf3').innerHTML = tiles([',']);
+  var DEMO = ['HamsterHook was launched on Ethereum · 4 min ago', 'A new hook was requested on Robinhood Chain · just now', 'Sherwood Jar was launched on Robinhood Chain · 12 min ago', 'AntiSniperHook was launched on Ethereum · 31 min ago'], demoI = 0;
+  $('landing').addEventListener('click', function (e) { if (e.target.closest('.landing-copy')) return; cast(DEMO[demoI++ % DEMO.length] + ' (sample)'); });
+  if (!reduce) setInterval(function () { if (location.hash === '' || location.hash === '#store' || location.hash === '#catalog') cast(DEMO[demoI++ % DEMO.length] + ' (sample)'); }, 24000);
+
+  // debug surface for tests
+  window.__hs = { compose: compose, body: body, state: state, CATALOG: CATALOG, defaults: defaults, render: renderAll };
+
+  // ------------------------------------------------------------ boot
+  renderCards(); renderAds(); renderAll(); route();
+})();
+</script>
+</body>
+</html>
