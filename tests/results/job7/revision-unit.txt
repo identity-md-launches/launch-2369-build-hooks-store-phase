@@ -1,0 +1,3868 @@
+TAP version 13
+# Subtest: decodes at least two real Requested and two Completed logs from each chain
+ok 1 - decodes at least two real Requested and two Completed logs from each chain
+  ---
+  duration_ms: 18.916342
+  type: 'test'
+  ...
+# Subtest: requires launch action, accepted kind and an exact terminal marker; handles both composer endings
+ok 2 - requires launch action, accepted kind and an exact terminal marker; handles both composer endings
+  ---
+  duration_ms: 27.566705
+  type: 'test'
+  ...
+# Subtest: every numbered rule template matches its own rendered sentence; label parameters and repeated values survive
+ok 3 - every numbered rule template matches its own rendered sentence; label parameters and repeated values survive
+  ---
+  duration_ms: 19.239104
+  type: 'test'
+  ...
+# Subtest: old fee templates remain readable and current IMD fees decode into the same management blocks
+ok 4 - old fee templates remain readable and current IMD fees decode into the same management blocks
+  ---
+  duration_ms: 14.129217
+  type: 'test'
+  ...
+# Subtest: fee recipients recovered from a request retain a literal address unless it was the paying wallet
+ok 5 - fee recipients recovered from a request retain a literal address unless it was the paying wallet
+  ---
+  duration_ms: 1.040111
+  type: 'test'
+  ...
+# Subtest: request location is the payment chain; contract location comes from body.chainId
+ok 6 - request location is the payment chain; contract location comes from body.chainId
+  ---
+  duration_ms: 2.885244
+  type: 'test'
+  ...
+# Subtest: completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit
+ok 7 - completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit
+  ---
+  duration_ms: 9.293804
+  type: 'test'
+  ...
+# Subtest: real result JSON for a completed build without addresses never fabricates Live
+ok 8 - real result JSON for a completed build without addresses never fabricates Live
+  ---
+  duration_ms: 2.75991
+  type: 'test'
+  ...
+# Subtest: Live result mapping and 40/64-hex searches use exact launch addresses and hashes
+ok 9 - Live result mapping and 40/64-hex searches use exact launch addresses and hashes
+  ---
+  duration_ms: 2.575437
+  type: 'test'
+  ...
+# Subtest: owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings
+ok 10 - owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings
+  ---
+  duration_ms: 3.718209
+  type: 'test'
+  ...
+# Subtest: inclusive backwards ranges are gap-free, non-overlapping and never exceed 10,000 blocks
+ok 11 - inclusive backwards ranges are gap-free, non-overlapping and never exceed 10,000 blocks
+  ---
+  duration_ms: 0.386751
+  type: 'test'
+  ...
+# Subtest: ENS reverse results cache by lowercase payer for a day, including negative lookups
+ok 12 - ENS reverse results cache by lowercase payer for a day, including negative lookups
+  ---
+  duration_ms: 0.759988
+  type: 'test'
+  ...
+# Subtest: cache construction re-filters unrelated launches; storage corruption stays usable
+ok 13 - cache construction re-filters unrelated launches; storage corruption stays usable
+  ---
+  duration_ms: 5.256811
+  type: 'test'
+  ...
+# Subtest: head polling casts only newly observed store launches and resumes from the saved cursor
+ok 14 - head polling casts only newly observed store launches and resumes from the saved cursor
+  ---
+  duration_ms: 95.451
+  type: 'test'
+  ...
+# Subtest: result launch UUIDs are preserved for evidence without inventing a numeric launch number
+ok 15 - result launch UUIDs are preserved for evidence without inventing a numeric launch number
+  ---
+  duration_ms: 3.458043
+  type: 'test'
+  ...
+# Subtest: configured windows start at Intake deployment and use 100,000 / 400,000 inclusive blocks
+ok 16 - configured windows start at Intake deployment and use 100,000 / 400,000 inclusive blocks
+  ---
+  duration_ms: 0.464918
+  type: 'test'
+  ...
+# Subtest: every failure splits logs to at most 1,000 blocks, including non-range HTTP errors
+ok 17 - every failure splits logs to at most 1,000 blocks, including non-range HTTP errors
+  ---
+  duration_ms: 1.761667
+  type: 'test'
+  ...
+# Subtest: Completed is fetched once per shared window and matched even when seen before its older request
+ok 18 - Completed is fetched once per shared window and matched even when seen before its older request
+  ---
+  duration_ms: 7.733001
+  type: 'test'
+  ...
+# Subtest: reorg fixture retracts an orphaned request from rows and persistent records (absent on reread)
+ok 19 - reorg fixture retracts an orphaned request from rows and persistent records (absent on reread)
+  ---
+  duration_ms: 14.674354
+  type: 'test'
+  ...
+# Subtest: reorg fixture retracts an orphaned request from rows and persistent records (removed log)
+ok 20 - reorg fixture retracts an orphaned request from rows and persistent records (removed log)
+  ---
+  duration_ms: 13.303146
+  type: 'test'
+  ...
+# Subtest: reorg fixture retracts an orphaned completion and Live result (absent on reread)
+ok 21 - reorg fixture retracts an orphaned completion and Live result (absent on reread)
+  ---
+  duration_ms: 55.031039
+  type: 'test'
+  ...
+# Subtest: reorg fixture retracts an orphaned completion and Live result (removed log)
+ok 22 - reorg fixture retracts an orphaned completion and Live result (removed log)
+  ---
+  duration_ms: 16.876585
+  type: 'test'
+  ...
+# Subtest: refresh checks the canonical block hash of a cached request, even outside the overlap
+ok 23 - refresh checks the canonical block hash of a cached request, even outside the overlap
+  ---
+  duration_ms: 18.476892
+  type: 'test'
+  ...
+# Subtest: refresh checks the canonical block hash of a cached completion, even outside the overlap
+ok 24 - refresh checks the canonical block hash of a cached completion, even outside the overlap
+  ---
+  duration_ms: 19.446782
+  type: 'test'
+  ...
+# Subtest: a failed canonical reread preserves cached events and reports the read error
+ok 25 - a failed canonical reread preserves cached events and reports the read error
+  ---
+  duration_ms: 13.448937
+  type: 'test'
+  ...
+# Subtest: late result enrichment cannot resurrect a completion removed by a reorg
+ok 26 - late result enrichment cannot resurrect a completion removed by a reorg
+  ---
+  duration_ms: 29.308616
+  type: 'test'
+  ...
+# Subtest: catalog has every section 4 block with the required fields
+ok 27 - catalog has every section 4 block with the required fields
+  ---
+  duration_ms: 4.21166
+  type: 'test'
+  ...
+# Subtest: every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions
+ok 28 - every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions
+  ---
+  duration_ms: 13.104135
+  type: 'test'
+  ...
+# Subtest: blocks a launch type does not allow are dimmed in the palette and left out of the request
+ok 29 - blocks a launch type does not allow are dimmed in the palette and left out of the request
+  ---
+  duration_ms: 0.64808
+  type: 'test'
+  ...
+# Subtest: composed text equals the three fixtures byte for byte
+ok 30 - composed text equals the three fixtures byte for byte
+  ---
+  duration_ms: 6.705214
+  type: 'test'
+  ...
+# Subtest: words and rules together: numbered rules win; owner sentence names the functions; last line keeps names
+ok 31 - words and rules together: numbered rules win; owner sentence names the functions; last line keeps names
+  ---
+  duration_ms: 0.531192
+  type: 'test'
+  ...
+# Subtest: request bodies follow 5.2 for every type and stay under 16 KiB
+ok 32 - request bodies follow 5.2 for every type and stay under 16 KiB
+  ---
+  duration_ms: 3.553271
+  type: 'test'
+  ...
+# Subtest: pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5
+ok 33 - pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5
+  ---
+  duration_ms: 4.72649
+  type: 'test'
+  ...
+# Subtest: the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot
+ok 34 - the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot
+  ---
+  duration_ms: 1.506972
+  type: 'test'
+  ...
+# Subtest: swap-fee dependencies: fade, split and LP share need it and leave with it
+ok 35 - swap-fee dependencies: fade, split and LP share need it and leave with it
+  ---
+  duration_ms: 1.270212
+  type: 'test'
+  ...
+# Subtest: buy/sell fees and the swap fee exclude each other; each block once
+ok 36 - buy/sell fees and the swap fee exclude each other; each block once
+  ---
+  duration_ms: 0.710206
+  type: 'test'
+  ...
+# Subtest: reorder keeps the token first; bring-your-own token replaces the standard one
+ok 37 - reorder keeps the token first; bring-your-own token replaces the standard one
+  ---
+  duration_ms: 0.909678
+  type: 'test'
+  ...
+# Subtest: field limits produce inline issues
+ok 38 - field limits produce inline issues
+  ---
+  duration_ms: 1.343227
+  type: 'test'
+  ...
+# Subtest: job 1 landing drafts open in the describe editor
+ok 39 - job 1 landing drafts open in the describe editor
+  ---
+  duration_ms: 0.577548
+  type: 'test'
+  ...
+# Subtest: the fee sentence names the actual pair currency; hook-only and existing-token requests use ETH
+ok 40 - the fee sentence names the actual pair currency; hook-only and existing-token requests use ETH
+  ---
+  duration_ms: 0.53063
+  type: 'test'
+  ...
+# Subtest: reported unsafe composed drafts are refused by the production serializer and free-check client
+ok 41 - reported unsafe composed drafts are refused by the production serializer and free-check client
+  ---
+  duration_ms: 22.838021
+  type: 'test'
+  ...
+# Subtest: the preview is the exact compact UTF-8 JSON used in a cross-chain A/B/C request
+ok 42 - the preview is the exact compact UTF-8 JSON used in a cross-chain A/B/C request
+  ---
+  duration_ms: 9.298494
+  type: 'test'
+  ...
+# Subtest: only enabled deploy chains and complete, size-limited drafts reach the payment flow
+ok 43 - only enabled deploy chains and complete, size-limited drafts reach the payment flow
+  ---
+  duration_ms: 1.389153
+  type: 'test'
+  ...
+# Subtest: zero and excessive prices are refused; bounded positive prices are exact
+ok 44 - zero and excessive prices are refused; bounded positive prices are exact
+  ---
+  duration_ms: 0.462283
+  type: 'test'
+  ...
+# Subtest: wrong chain and changed account refuse before approval or request simulation
+ok 45 - wrong chain and changed account refuse before approval or request simulation
+  ---
+  duration_ms: 2.78098
+  type: 'test'
+  ...
+# Subtest: zero price prevents a signature and rejection translates to a recoverable message
+ok 46 - zero price prevents a signature and rejection translates to a recoverable message
+  ---
+  duration_ms: 4.843809
+  type: 'test'
+  ...
+# Subtest: changed price, missing allowance, body over 16 KiB and the build banner fail closed
+ok 47 - changed price, missing allowance, body over 16 KiB and the build banner fail closed
+  ---
+  duration_ms: 6.918322
+  type: 'test'
+  ...
+# Subtest: the final signing guard checks the actual composed bytes again before approving or launching
+ok 48 - the final signing guard checks the actual composed bytes again before approving or launching
+  ---
+  duration_ms: 8.613054
+  type: 'test'
+  ...
+# Subtest: approval receipts verify token events for EOAs and Smart Wallets, including replacement guards
+ok 49 - approval receipts verify token events for EOAs and Smart Wallets, including replacement guards
+  ---
+  duration_ms: 10.717982
+  type: 'test'
+  ...
+# Subtest: integer square root rounds down exactly, including large integers
+ok 50 - integer square root rounds down exactly, including large integers
+  ---
+  duration_ms: 2.184336
+  type: 'test'
+  ...
+# Subtest: price is inverted for sorted ETH/token and adjusted for token decimals
+ok 51 - price is inverted for sorted ETH/token and adjusted for token decimals
+  ---
+  duration_ms: 1.174361
+  type: 'test'
+  ...
+# Subtest: zero, negative, exponent, malformed and unrepresentable prices are refused
+ok 52 - zero, negative, exponent, malformed and unrepresentable prices are refused
+  ---
+  duration_ms: 0.946055
+  type: 'test'
+  ...
+# Subtest: copyable initialize calldata uses live addresses, sorted native ETH, fee tier and matching spacing
+ok 53 - copyable initialize calldata uses live addresses, sorted native ETH, fee tier and matching spacing
+  ---
+  duration_ms: 12.358874
+  type: 'test'
+  ...
+# Subtest: IMD facts, states, plan titles, blockers and suggestions are retained without inventing success
+ok 54 - IMD facts, states, plan titles, blockers and suggestions are retained without inventing success
+  ---
+  duration_ms: 4.575589
+  type: 'test'
+  ...
+# Subtest: free check sends the exact composer body inside the action envelope
+ok 55 - free check sends the exact composer body inside the action envelope
+  ---
+  duration_ms: 60.575787
+  type: 'test'
+  ...
+# Subtest: own-code import uses the production API shape and only accepts a pinned GitHub source
+ok 56 - own-code import uses the production API shape and only accepts a pinned GitHub source
+  ---
+  duration_ms: 2.580456
+  type: 'test'
+  ...
+# Subtest: IMD HTTP failures never become a clear check
+ok 57 - IMD HTTP failures never become a clear check
+  ---
+  duration_ms: 3.07005
+  type: 'test'
+  ...
+# Subtest: HTML, proxy text, empty and malformed JSON responses use a retryable status message
+ok 58 - HTML, proxy text, empty and malformed JSON responses use a retryable status message
+  ---
+  duration_ms: 5.366255
+  type: 'test'
+  ...
+# Subtest: intake job discovery matches the request id and action before using admission.result.jobId
+ok 59 - intake job discovery matches the request id and action before using admission.result.jobId
+  ---
+  duration_ms: 0.844656
+  type: 'test'
+  ...
+# Subtest: recorded live GET /jobs/:id response uses waiting, accepted and failed without inventing progress
+ok 60 - recorded live GET /jobs/:id response uses waiting, accepted and failed without inventing progress
+  ---
+  duration_ms: 1.938157
+  type: 'test'
+  ...
+# Subtest: blocked questions retain IMD blockedReason and every failed-node failureReason verbatim
+ok 61 - blocked questions retain IMD blockedReason and every failed-node failureReason verbatim
+  ---
+  duration_ms: 1.413899
+  type: 'test'
+  ...
+# Subtest: an inconsistent composer body is refused locally without making a relay call
+ok 62 - an inconsistent composer body is refused locally without making a relay call
+  ---
+  duration_ms: 1.411965
+  type: 'test'
+  ...
+# Subtest: job nodes map real build, audit and deployment states, including failures
+ok 63 - job nodes map real build, audit and deployment states, including failures
+  ---
+  duration_ms: 0.929404
+  type: 'test'
+  ...
+# Subtest: ticker names come from API artifacts and match a chain-proven store launch; unrelated launches stay out
+ok 64 - ticker names come from API artifacts and match a chain-proven store launch; unrelated launches stay out
+  ---
+  duration_ms: 0.776789
+  type: 'test'
+  ...
+# Subtest: new type A drafts default to IMD and persisted explicit pairings survive normalization
+ok 65 - new type A drafts default to IMD and persisted explicit pairings survive normalization
+  ---
+  duration_ms: 0.564183
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/A/imd/1, in either order
+ok 66 - conflicting catalog pair lp-lock+hours/A/imd/1, in either order
+  ---
+  duration_ms: 25.000936
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/A/imd/1, in either order
+ok 67 - conflicting catalog pair lp-lock+pause/A/imd/1, in either order
+  ---
+  duration_ms: 2.697854
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/A/imd/1, in either order
+ok 68 - conflicting catalog pair lp-lock+breaker/A/imd/1, in either order
+  ---
+  duration_ms: 3.037188
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/A/imd/1, in either order
+ok 69 - conflicting catalog pair max-buy+max-swap/A/imd/1, in either order
+  ---
+  duration_ms: 4.761145
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/A/imd/1, in either order
+ok 70 - conflicting catalog pair max-buy+hours/A/imd/1, in either order
+  ---
+  duration_ms: 4.989693
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/A/imd/1, in either order
+ok 71 - conflicting catalog pair max-buy+pause/A/imd/1, in either order
+  ---
+  duration_ms: 1.980306
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/A/imd/1, in either order
+ok 72 - conflicting catalog pair max-buy+breaker/A/imd/1, in either order
+  ---
+  duration_ms: 2.504985
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/A/imd/1, in either order
+ok 73 - conflicting catalog pair max-buy+open-at/A/imd/1, in either order
+  ---
+  duration_ms: 2.132179
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/A/imd/1, in either order
+ok 74 - conflicting catalog pair max-buy+cooldown/A/imd/1, in either order
+  ---
+  duration_ms: 2.117792
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/A/imd/1
+ok 75 - custom fee settlement assertions/A/imd/1
+  ---
+  duration_ms: 7.102184
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/A/imd/1
+ok 76 - fee recipient clauses/A/imd/1
+  ---
+  duration_ms: 4.94092
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/A/imd/1
+ok 77 - dependency addresses belong to the service, not the recipient/A/imd/1
+  ---
+  duration_ms: 3.986469
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/A/imd/4663, in either order
+ok 78 - conflicting catalog pair lp-lock+hours/A/imd/4663, in either order
+  ---
+  duration_ms: 2.061747
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/A/imd/4663, in either order
+ok 79 - conflicting catalog pair lp-lock+pause/A/imd/4663, in either order
+  ---
+  duration_ms: 4.252766
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/A/imd/4663, in either order
+ok 80 - conflicting catalog pair lp-lock+breaker/A/imd/4663, in either order
+  ---
+  duration_ms: 2.117663
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/A/imd/4663, in either order
+ok 81 - conflicting catalog pair max-buy+max-swap/A/imd/4663, in either order
+  ---
+  duration_ms: 1.270822
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/A/imd/4663, in either order
+ok 82 - conflicting catalog pair max-buy+hours/A/imd/4663, in either order
+  ---
+  duration_ms: 1.385636
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/A/imd/4663, in either order
+ok 83 - conflicting catalog pair max-buy+pause/A/imd/4663, in either order
+  ---
+  duration_ms: 1.165775
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/A/imd/4663, in either order
+ok 84 - conflicting catalog pair max-buy+breaker/A/imd/4663, in either order
+  ---
+  duration_ms: 1.357864
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/A/imd/4663, in either order
+ok 85 - conflicting catalog pair max-buy+open-at/A/imd/4663, in either order
+  ---
+  duration_ms: 1.517933
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/A/imd/4663, in either order
+ok 86 - conflicting catalog pair max-buy+cooldown/A/imd/4663, in either order
+  ---
+  duration_ms: 2.115849
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/A/imd/4663
+ok 87 - custom fee settlement assertions/A/imd/4663
+  ---
+  duration_ms: 3.585451
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/A/imd/4663
+ok 88 - fee recipient clauses/A/imd/4663
+  ---
+  duration_ms: 3.75663
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/A/imd/4663
+ok 89 - dependency addresses belong to the service, not the recipient/A/imd/4663
+  ---
+  duration_ms: 4.512792
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/A/eth/1, in either order
+ok 90 - conflicting catalog pair lp-lock+hours/A/eth/1, in either order
+  ---
+  duration_ms: 1.567246
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/A/eth/1, in either order
+ok 91 - conflicting catalog pair lp-lock+pause/A/eth/1, in either order
+  ---
+  duration_ms: 1.652694
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/A/eth/1, in either order
+ok 92 - conflicting catalog pair lp-lock+breaker/A/eth/1, in either order
+  ---
+  duration_ms: 1.701645
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/A/eth/1, in either order
+ok 93 - conflicting catalog pair max-buy+max-swap/A/eth/1, in either order
+  ---
+  duration_ms: 1.199729
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/A/eth/1, in either order
+ok 94 - conflicting catalog pair max-buy+hours/A/eth/1, in either order
+  ---
+  duration_ms: 1.447551
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/A/eth/1, in either order
+ok 95 - conflicting catalog pair max-buy+pause/A/eth/1, in either order
+  ---
+  duration_ms: 1.090364
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/A/eth/1, in either order
+ok 96 - conflicting catalog pair max-buy+breaker/A/eth/1, in either order
+  ---
+  duration_ms: 2.55051
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/A/eth/1, in either order
+ok 97 - conflicting catalog pair max-buy+open-at/A/eth/1, in either order
+  ---
+  duration_ms: 2.536364
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/A/eth/1, in either order
+ok 98 - conflicting catalog pair max-buy+cooldown/A/eth/1, in either order
+  ---
+  duration_ms: 1.283737
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/A/eth/1
+ok 99 - custom fee settlement assertions/A/eth/1
+  ---
+  duration_ms: 2.911885
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/A/eth/1
+ok 100 - fee recipient clauses/A/eth/1
+  ---
+  duration_ms: 3.387883
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/A/eth/1
+ok 101 - dependency addresses belong to the service, not the recipient/A/eth/1
+  ---
+  duration_ms: 2.552865
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/A/eth/4663, in either order
+ok 102 - conflicting catalog pair lp-lock+hours/A/eth/4663, in either order
+  ---
+  duration_ms: 2.188825
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/A/eth/4663, in either order
+ok 103 - conflicting catalog pair lp-lock+pause/A/eth/4663, in either order
+  ---
+  duration_ms: 2.564365
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/A/eth/4663, in either order
+ok 104 - conflicting catalog pair lp-lock+breaker/A/eth/4663, in either order
+  ---
+  duration_ms: 1.204568
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/A/eth/4663, in either order
+ok 105 - conflicting catalog pair max-buy+max-swap/A/eth/4663, in either order
+  ---
+  duration_ms: 0.998453
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/A/eth/4663, in either order
+ok 106 - conflicting catalog pair max-buy+hours/A/eth/4663, in either order
+  ---
+  duration_ms: 1.299635
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/A/eth/4663, in either order
+ok 107 - conflicting catalog pair max-buy+pause/A/eth/4663, in either order
+  ---
+  duration_ms: 2.158458
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/A/eth/4663, in either order
+ok 108 - conflicting catalog pair max-buy+breaker/A/eth/4663, in either order
+  ---
+  duration_ms: 0.950535
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/A/eth/4663, in either order
+ok 109 - conflicting catalog pair max-buy+open-at/A/eth/4663, in either order
+  ---
+  duration_ms: 0.773013
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/A/eth/4663, in either order
+ok 110 - conflicting catalog pair max-buy+cooldown/A/eth/4663, in either order
+  ---
+  duration_ms: 1.079485
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/A/eth/4663
+ok 111 - custom fee settlement assertions/A/eth/4663
+  ---
+  duration_ms: 2.752716
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/A/eth/4663
+ok 112 - fee recipient clauses/A/eth/4663
+  ---
+  duration_ms: 5.050454
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/A/eth/4663
+ok 113 - dependency addresses belong to the service, not the recipient/A/eth/4663
+  ---
+  duration_ms: 2.216636
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/B/imd/1, in either order
+ok 114 - conflicting catalog pair lp-lock+hours/B/imd/1, in either order
+  ---
+  duration_ms: 2.065655
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/B/imd/1, in either order
+ok 115 - conflicting catalog pair lp-lock+pause/B/imd/1, in either order
+  ---
+  duration_ms: 1.526328
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/B/imd/1, in either order
+ok 116 - conflicting catalog pair lp-lock+breaker/B/imd/1, in either order
+  ---
+  duration_ms: 1.81641
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/B/imd/1, in either order
+ok 117 - conflicting catalog pair max-buy+max-swap/B/imd/1, in either order
+  ---
+  duration_ms: 2.328446
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/B/imd/1, in either order
+ok 118 - conflicting catalog pair max-buy+hours/B/imd/1, in either order
+  ---
+  duration_ms: 1.961461
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/B/imd/1, in either order
+ok 119 - conflicting catalog pair max-buy+pause/B/imd/1, in either order
+  ---
+  duration_ms: 1.913591
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/B/imd/1, in either order
+ok 120 - conflicting catalog pair max-buy+breaker/B/imd/1, in either order
+  ---
+  duration_ms: 2.094309
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/B/imd/1, in either order
+ok 121 - conflicting catalog pair max-buy+open-at/B/imd/1, in either order
+  ---
+  duration_ms: 1.843601
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/B/imd/1, in either order
+ok 122 - conflicting catalog pair max-buy+cooldown/B/imd/1, in either order
+  ---
+  duration_ms: 1.796782
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/B/imd/1
+ok 123 - custom fee settlement assertions/B/imd/1
+  ---
+  duration_ms: 4.431351
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/B/imd/1
+ok 124 - fee recipient clauses/B/imd/1
+  ---
+  duration_ms: 5.076374
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/B/imd/1
+ok 125 - dependency addresses belong to the service, not the recipient/B/imd/1
+  ---
+  duration_ms: 3.098882
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/B/imd/4663, in either order
+ok 126 - conflicting catalog pair lp-lock+hours/B/imd/4663, in either order
+  ---
+  duration_ms: 1.77869
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/B/imd/4663, in either order
+ok 127 - conflicting catalog pair lp-lock+pause/B/imd/4663, in either order
+  ---
+  duration_ms: 1.658225
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/B/imd/4663, in either order
+ok 128 - conflicting catalog pair lp-lock+breaker/B/imd/4663, in either order
+  ---
+  duration_ms: 1.699582
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/B/imd/4663, in either order
+ok 129 - conflicting catalog pair max-buy+max-swap/B/imd/4663, in either order
+  ---
+  duration_ms: 1.881792
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/B/imd/4663, in either order
+ok 130 - conflicting catalog pair max-buy+hours/B/imd/4663, in either order
+  ---
+  duration_ms: 2.340637
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/B/imd/4663, in either order
+ok 131 - conflicting catalog pair max-buy+pause/B/imd/4663, in either order
+  ---
+  duration_ms: 2.220554
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/B/imd/4663, in either order
+ok 132 - conflicting catalog pair max-buy+breaker/B/imd/4663, in either order
+  ---
+  duration_ms: 2.215485
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/B/imd/4663, in either order
+ok 133 - conflicting catalog pair max-buy+open-at/B/imd/4663, in either order
+  ---
+  duration_ms: 2.892538
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/B/imd/4663, in either order
+ok 134 - conflicting catalog pair max-buy+cooldown/B/imd/4663, in either order
+  ---
+  duration_ms: 2.1324
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/B/imd/4663
+ok 135 - custom fee settlement assertions/B/imd/4663
+  ---
+  duration_ms: 5.517618
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/B/imd/4663
+ok 136 - fee recipient clauses/B/imd/4663
+  ---
+  duration_ms: 5.236071
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/B/imd/4663
+ok 137 - dependency addresses belong to the service, not the recipient/B/imd/4663
+  ---
+  duration_ms: 2.283101
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/B/eth/1, in either order
+ok 138 - conflicting catalog pair lp-lock+hours/B/eth/1, in either order
+  ---
+  duration_ms: 1.619322
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/B/eth/1, in either order
+ok 139 - conflicting catalog pair lp-lock+pause/B/eth/1, in either order
+  ---
+  duration_ms: 1.456789
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/B/eth/1, in either order
+ok 140 - conflicting catalog pair lp-lock+breaker/B/eth/1, in either order
+  ---
+  duration_ms: 1.254591
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/B/eth/1, in either order
+ok 141 - conflicting catalog pair max-buy+max-swap/B/eth/1, in either order
+  ---
+  duration_ms: 1.112296
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/B/eth/1, in either order
+ok 142 - conflicting catalog pair max-buy+hours/B/eth/1, in either order
+  ---
+  duration_ms: 1.269108
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/B/eth/1, in either order
+ok 143 - conflicting catalog pair max-buy+pause/B/eth/1, in either order
+  ---
+  duration_ms: 1.298713
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/B/eth/1, in either order
+ok 144 - conflicting catalog pair max-buy+breaker/B/eth/1, in either order
+  ---
+  duration_ms: 1.222272
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/B/eth/1, in either order
+ok 145 - conflicting catalog pair max-buy+open-at/B/eth/1, in either order
+  ---
+  duration_ms: 1.93969
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/B/eth/1, in either order
+ok 146 - conflicting catalog pair max-buy+cooldown/B/eth/1, in either order
+  ---
+  duration_ms: 1.362703
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/B/eth/1
+ok 147 - custom fee settlement assertions/B/eth/1
+  ---
+  duration_ms: 3.22108
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/B/eth/1
+ok 148 - fee recipient clauses/B/eth/1
+  ---
+  duration_ms: 3.671312
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/B/eth/1
+ok 149 - dependency addresses belong to the service, not the recipient/B/eth/1
+  ---
+  duration_ms: 1.630252
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/B/eth/4663, in either order
+ok 150 - conflicting catalog pair lp-lock+hours/B/eth/4663, in either order
+  ---
+  duration_ms: 0.902364
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/B/eth/4663, in either order
+ok 151 - conflicting catalog pair lp-lock+pause/B/eth/4663, in either order
+  ---
+  duration_ms: 1.180863
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/B/eth/4663, in either order
+ok 152 - conflicting catalog pair lp-lock+breaker/B/eth/4663, in either order
+  ---
+  duration_ms: 1.327037
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/B/eth/4663, in either order
+ok 153 - conflicting catalog pair max-buy+max-swap/B/eth/4663, in either order
+  ---
+  duration_ms: 1.377291
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/B/eth/4663, in either order
+ok 154 - conflicting catalog pair max-buy+hours/B/eth/4663, in either order
+  ---
+  duration_ms: 1.159845
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/B/eth/4663, in either order
+ok 155 - conflicting catalog pair max-buy+pause/B/eth/4663, in either order
+  ---
+  duration_ms: 1.137594
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/B/eth/4663, in either order
+ok 156 - conflicting catalog pair max-buy+breaker/B/eth/4663, in either order
+  ---
+  duration_ms: 1.383812
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/B/eth/4663, in either order
+ok 157 - conflicting catalog pair max-buy+open-at/B/eth/4663, in either order
+  ---
+  duration_ms: 1.312519
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/B/eth/4663, in either order
+ok 158 - conflicting catalog pair max-buy+cooldown/B/eth/4663, in either order
+  ---
+  duration_ms: 1.197755
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/B/eth/4663
+ok 159 - custom fee settlement assertions/B/eth/4663
+  ---
+  duration_ms: 2.587098
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/B/eth/4663
+ok 160 - fee recipient clauses/B/eth/4663
+  ---
+  duration_ms: 4.720941
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/B/eth/4663
+ok 161 - dependency addresses belong to the service, not the recipient/B/eth/4663
+  ---
+  duration_ms: 1.032246
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/C/imd/1, in either order
+ok 162 - conflicting catalog pair lp-lock+hours/C/imd/1, in either order
+  ---
+  duration_ms: 1.501482
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/C/imd/1, in either order
+ok 163 - conflicting catalog pair lp-lock+pause/C/imd/1, in either order
+  ---
+  duration_ms: 1.53804
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/C/imd/1, in either order
+ok 164 - conflicting catalog pair lp-lock+breaker/C/imd/1, in either order
+  ---
+  duration_ms: 0.994586
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/C/imd/1, in either order
+ok 165 - conflicting catalog pair max-buy+max-swap/C/imd/1, in either order
+  ---
+  duration_ms: 1.638528
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/C/imd/1, in either order
+ok 166 - conflicting catalog pair max-buy+hours/C/imd/1, in either order
+  ---
+  duration_ms: 1.087079
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/C/imd/1, in either order
+ok 167 - conflicting catalog pair max-buy+pause/C/imd/1, in either order
+  ---
+  duration_ms: 0.966023
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/C/imd/1, in either order
+ok 168 - conflicting catalog pair max-buy+breaker/C/imd/1, in either order
+  ---
+  duration_ms: 0.979889
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/C/imd/1, in either order
+ok 169 - conflicting catalog pair max-buy+open-at/C/imd/1, in either order
+  ---
+  duration_ms: 1.091158
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/C/imd/1, in either order
+ok 170 - conflicting catalog pair max-buy+cooldown/C/imd/1, in either order
+  ---
+  duration_ms: 0.804662
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/C/imd/1
+ok 171 - custom fee settlement assertions/C/imd/1
+  ---
+  duration_ms: 2.342982
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/C/imd/1
+ok 172 - fee recipient clauses/C/imd/1
+  ---
+  duration_ms: 3.974757
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/C/imd/1
+ok 173 - dependency addresses belong to the service, not the recipient/C/imd/1
+  ---
+  duration_ms: 1.781093
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/C/imd/4663, in either order
+ok 174 - conflicting catalog pair lp-lock+hours/C/imd/4663, in either order
+  ---
+  duration_ms: 1.158752
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/C/imd/4663, in either order
+ok 175 - conflicting catalog pair lp-lock+pause/C/imd/4663, in either order
+  ---
+  duration_ms: 1.344318
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/C/imd/4663, in either order
+ok 176 - conflicting catalog pair lp-lock+breaker/C/imd/4663, in either order
+  ---
+  duration_ms: 1.09309
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/C/imd/4663, in either order
+ok 177 - conflicting catalog pair max-buy+max-swap/C/imd/4663, in either order
+  ---
+  duration_ms: 1.154074
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/C/imd/4663, in either order
+ok 178 - conflicting catalog pair max-buy+hours/C/imd/4663, in either order
+  ---
+  duration_ms: 0.983325
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/C/imd/4663, in either order
+ok 179 - conflicting catalog pair max-buy+pause/C/imd/4663, in either order
+  ---
+  duration_ms: 1.222882
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/C/imd/4663, in either order
+ok 180 - conflicting catalog pair max-buy+breaker/C/imd/4663, in either order
+  ---
+  duration_ms: 1.045961
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/C/imd/4663, in either order
+ok 181 - conflicting catalog pair max-buy+open-at/C/imd/4663, in either order
+  ---
+  duration_ms: 0.887377
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/C/imd/4663, in either order
+ok 182 - conflicting catalog pair max-buy+cooldown/C/imd/4663, in either order
+  ---
+  duration_ms: 0.798009
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/C/imd/4663
+ok 183 - custom fee settlement assertions/C/imd/4663
+  ---
+  duration_ms: 1.501883
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/C/imd/4663
+ok 184 - fee recipient clauses/C/imd/4663
+  ---
+  duration_ms: 4.350831
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/C/imd/4663
+ok 185 - dependency addresses belong to the service, not the recipient/C/imd/4663
+  ---
+  duration_ms: 1.65548
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/C/eth/1, in either order
+ok 186 - conflicting catalog pair lp-lock+hours/C/eth/1, in either order
+  ---
+  duration_ms: 1.363324
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/C/eth/1, in either order
+ok 187 - conflicting catalog pair lp-lock+pause/C/eth/1, in either order
+  ---
+  duration_ms: 1.353577
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/C/eth/1, in either order
+ok 188 - conflicting catalog pair lp-lock+breaker/C/eth/1, in either order
+  ---
+  duration_ms: 0.974208
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/C/eth/1, in either order
+ok 189 - conflicting catalog pair max-buy+max-swap/C/eth/1, in either order
+  ---
+  duration_ms: 0.884842
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/C/eth/1, in either order
+ok 190 - conflicting catalog pair max-buy+hours/C/eth/1, in either order
+  ---
+  duration_ms: 0.99079
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/C/eth/1, in either order
+ok 191 - conflicting catalog pair max-buy+pause/C/eth/1, in either order
+  ---
+  duration_ms: 1.450377
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/C/eth/1, in either order
+ok 192 - conflicting catalog pair max-buy+breaker/C/eth/1, in either order
+  ---
+  duration_ms: 1.540064
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/C/eth/1, in either order
+ok 193 - conflicting catalog pair max-buy+open-at/C/eth/1, in either order
+  ---
+  duration_ms: 1.022739
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/C/eth/1, in either order
+ok 194 - conflicting catalog pair max-buy+cooldown/C/eth/1, in either order
+  ---
+  duration_ms: 1.344399
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/C/eth/1
+ok 195 - custom fee settlement assertions/C/eth/1
+  ---
+  duration_ms: 2.95804
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/C/eth/1
+ok 196 - fee recipient clauses/C/eth/1
+  ---
+  duration_ms: 3.76706
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/C/eth/1
+ok 197 - dependency addresses belong to the service, not the recipient/C/eth/1
+  ---
+  duration_ms: 1.769673
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+hours/C/eth/4663, in either order
+ok 198 - conflicting catalog pair lp-lock+hours/C/eth/4663, in either order
+  ---
+  duration_ms: 1.260102
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+pause/C/eth/4663, in either order
+ok 199 - conflicting catalog pair lp-lock+pause/C/eth/4663, in either order
+  ---
+  duration_ms: 1.223394
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair lp-lock+breaker/C/eth/4663, in either order
+ok 200 - conflicting catalog pair lp-lock+breaker/C/eth/4663, in either order
+  ---
+  duration_ms: 1.315845
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+max-swap/C/eth/4663, in either order
+ok 201 - conflicting catalog pair max-buy+max-swap/C/eth/4663, in either order
+  ---
+  duration_ms: 1.159945
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+hours/C/eth/4663, in either order
+ok 202 - conflicting catalog pair max-buy+hours/C/eth/4663, in either order
+  ---
+  duration_ms: 0.951495
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+pause/C/eth/4663, in either order
+ok 203 - conflicting catalog pair max-buy+pause/C/eth/4663, in either order
+  ---
+  duration_ms: 1.090866
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+breaker/C/eth/4663, in either order
+ok 204 - conflicting catalog pair max-buy+breaker/C/eth/4663, in either order
+  ---
+  duration_ms: 1.42013
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+open-at/C/eth/4663, in either order
+ok 205 - conflicting catalog pair max-buy+open-at/C/eth/4663, in either order
+  ---
+  duration_ms: 1.014403
+  type: 'test'
+  ...
+# Subtest: conflicting catalog pair max-buy+cooldown/C/eth/4663, in either order
+ok 206 - conflicting catalog pair max-buy+cooldown/C/eth/4663, in either order
+  ---
+  duration_ms: 2.828067
+  type: 'test'
+  ...
+# Subtest: custom fee settlement assertions/C/eth/4663
+ok 207 - custom fee settlement assertions/C/eth/4663
+  ---
+  duration_ms: 2.540853
+  type: 'test'
+  ...
+# Subtest: fee recipient clauses/C/eth/4663
+ok 208 - fee recipient clauses/C/eth/4663
+  ---
+  duration_ms: 9.512092
+  type: 'test'
+  ...
+# Subtest: dependency addresses belong to the service, not the recipient/C/eth/4663
+ok 209 - dependency addresses belong to the service, not the recipient/C/eth/4663
+  ---
+  duration_ms: 1.720651
+  type: 'test'
+  ...
+# Subtest: the supplied Buy back and burn example passes; opposite fee scopes pass and same scopes conflict
+ok 210 - the supplied Buy back and burn example passes; opposite fee scopes pass and same scopes conflict
+  ---
+  duration_ms: 6.962833
+  type: 'test'
+  ...
+# Subtest: recorded token_split compares pool share with the exact request and requires an explicit checked opt-out
+ok 211 - recorded token_split compares pool share with the exact request and requires an explicit checked opt-out
+  ---
+  duration_ms: 2.763227
+  type: 'test'
+  ...
+# Subtest: fixed token_split compares concrete remainder addresses and resolves your wallet from the payer
+ok 212 - fixed token_split compares concrete remainder addresses and resolves your wallet from the payer
+  ---
+  duration_ms: 0.595932
+  type: 'test'
+  ...
+# Subtest: composed token/A/imd/1: currency, recipients, dependencies and consistency
+ok 213 - composed token/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 20.387247
+  type: 'test'
+  ...
+# Subtest: composed token/A/imd/4663: currency, recipients, dependencies and consistency
+ok 214 - composed token/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.660338
+  type: 'test'
+  ...
+# Subtest: composed token/A/eth/1: currency, recipients, dependencies and consistency
+ok 215 - composed token/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.064877
+  type: 'test'
+  ...
+# Subtest: composed token/A/eth/4663: currency, recipients, dependencies and consistency
+ok 216 - composed token/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.486137
+  type: 'test'
+  ...
+# Subtest: composed token/B/imd/1: currency, recipients, dependencies and consistency
+ok 217 - composed token/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 3.003054
+  type: 'test'
+  ...
+# Subtest: composed token/B/imd/4663: currency, recipients, dependencies and consistency
+ok 218 - composed token/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.564083
+  type: 'test'
+  ...
+# Subtest: composed token/B/eth/1: currency, recipients, dependencies and consistency
+ok 219 - composed token/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.62122
+  type: 'test'
+  ...
+# Subtest: composed token/B/eth/4663: currency, recipients, dependencies and consistency
+ok 220 - composed token/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.327201
+  type: 'test'
+  ...
+# Subtest: composed token/C/imd/1: currency, recipients, dependencies and consistency
+ok 221 - composed token/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.973106
+  type: 'test'
+  ...
+# Subtest: composed token/C/imd/4663: currency, recipients, dependencies and consistency
+ok 222 - composed token/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.770318
+  type: 'test'
+  ...
+# Subtest: composed token/C/eth/1: currency, recipients, dependencies and consistency
+ok 223 - composed token/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.473013
+  type: 'test'
+  ...
+# Subtest: composed token/C/eth/4663: currency, recipients, dependencies and consistency
+ok 224 - composed token/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.59988
+  type: 'test'
+  ...
+# Subtest: composed own-token/A/imd/1: currency, recipients, dependencies and consistency
+ok 225 - composed own-token/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.469292
+  type: 'test'
+  ...
+# Subtest: composed own-token/A/imd/4663: currency, recipients, dependencies and consistency
+ok 226 - composed own-token/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.540418
+  type: 'test'
+  ...
+# Subtest: composed own-token/A/eth/1: currency, recipients, dependencies and consistency
+ok 227 - composed own-token/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.454507
+  type: 'test'
+  ...
+# Subtest: composed own-token/A/eth/4663: currency, recipients, dependencies and consistency
+ok 228 - composed own-token/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.523867
+  type: 'test'
+  ...
+# Subtest: composed own-token/B/imd/1: currency, recipients, dependencies and consistency
+ok 229 - composed own-token/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.369409
+  type: 'test'
+  ...
+# Subtest: composed own-token/B/imd/4663: currency, recipients, dependencies and consistency
+ok 230 - composed own-token/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.399165
+  type: 'test'
+  ...
+# Subtest: composed own-token/B/eth/1: currency, recipients, dependencies and consistency
+ok 231 - composed own-token/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.384558
+  type: 'test'
+  ...
+# Subtest: composed own-token/B/eth/4663: currency, recipients, dependencies and consistency
+ok 232 - composed own-token/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.345875
+  type: 'test'
+  ...
+# Subtest: composed own-token/C/imd/1: currency, recipients, dependencies and consistency
+ok 233 - composed own-token/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.343932
+  type: 'test'
+  ...
+# Subtest: composed own-token/C/imd/4663: currency, recipients, dependencies and consistency
+ok 234 - composed own-token/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.405366
+  type: 'test'
+  ...
+# Subtest: composed own-token/C/eth/1: currency, recipients, dependencies and consistency
+ok 235 - composed own-token/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.382594
+  type: 'test'
+  ...
+# Subtest: composed own-token/C/eth/4663: currency, recipients, dependencies and consistency
+ok 236 - composed own-token/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.392503
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/A/imd/1: currency, recipients, dependencies and consistency
+ok 237 - composed swap-fee/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 3.244756
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/A/imd/4663: currency, recipients, dependencies and consistency
+ok 238 - composed swap-fee/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.72037
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/A/eth/1: currency, recipients, dependencies and consistency
+ok 239 - composed swap-fee/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 2.092615
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/A/eth/4663: currency, recipients, dependencies and consistency
+ok 240 - composed swap-fee/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.043428
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/B/imd/1: currency, recipients, dependencies and consistency
+ok 241 - composed swap-fee/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.514245
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/B/imd/4663: currency, recipients, dependencies and consistency
+ok 242 - composed swap-fee/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.031435
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/B/eth/1: currency, recipients, dependencies and consistency
+ok 243 - composed swap-fee/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.717039
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/B/eth/4663: currency, recipients, dependencies and consistency
+ok 244 - composed swap-fee/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.776269
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/C/imd/1: currency, recipients, dependencies and consistency
+ok 245 - composed swap-fee/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.69096
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/C/imd/4663: currency, recipients, dependencies and consistency
+ok 246 - composed swap-fee/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.352374
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/C/eth/1: currency, recipients, dependencies and consistency
+ok 247 - composed swap-fee/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.778553
+  type: 'test'
+  ...
+# Subtest: composed swap-fee/C/eth/4663: currency, recipients, dependencies and consistency
+ok 248 - composed swap-fee/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.639623
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/A/imd/1: currency, recipients, dependencies and consistency
+ok 249 - composed fee-fade/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.352445
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/A/imd/4663: currency, recipients, dependencies and consistency
+ok 250 - composed fee-fade/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 5.36891
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/A/eth/1: currency, recipients, dependencies and consistency
+ok 251 - composed fee-fade/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.855747
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/A/eth/4663: currency, recipients, dependencies and consistency
+ok 252 - composed fee-fade/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.743778
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/B/imd/1: currency, recipients, dependencies and consistency
+ok 253 - composed fee-fade/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.269729
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/B/imd/4663: currency, recipients, dependencies and consistency
+ok 254 - composed fee-fade/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 2.332102
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/B/eth/1: currency, recipients, dependencies and consistency
+ok 255 - composed fee-fade/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.208315
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/B/eth/4663: currency, recipients, dependencies and consistency
+ok 256 - composed fee-fade/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.496262
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/C/imd/1: currency, recipients, dependencies and consistency
+ok 257 - composed fee-fade/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.059847
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/C/imd/4663: currency, recipients, dependencies and consistency
+ok 258 - composed fee-fade/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.808289
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/C/eth/1: currency, recipients, dependencies and consistency
+ok 259 - composed fee-fade/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.954591
+  type: 'test'
+  ...
+# Subtest: composed fee-fade/C/eth/4663: currency, recipients, dependencies and consistency
+ok 260 - composed fee-fade/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.854395
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/A/imd/1: currency, recipients, dependencies and consistency
+ok 261 - composed fee-dir/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.104782
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/A/imd/4663: currency, recipients, dependencies and consistency
+ok 262 - composed fee-dir/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.84087
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/A/eth/1: currency, recipients, dependencies and consistency
+ok 263 - composed fee-dir/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.678236
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/A/eth/4663: currency, recipients, dependencies and consistency
+ok 264 - composed fee-dir/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.677956
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/B/imd/1: currency, recipients, dependencies and consistency
+ok 265 - composed fee-dir/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.728439
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/B/imd/4663: currency, recipients, dependencies and consistency
+ok 266 - composed fee-dir/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.71297
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/B/eth/1: currency, recipients, dependencies and consistency
+ok 267 - composed fee-dir/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.17356
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/B/eth/4663: currency, recipients, dependencies and consistency
+ok 268 - composed fee-dir/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.245414
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/C/imd/1: currency, recipients, dependencies and consistency
+ok 269 - composed fee-dir/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.736034
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/C/imd/4663: currency, recipients, dependencies and consistency
+ok 270 - composed fee-dir/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.693645
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/C/eth/1: currency, recipients, dependencies and consistency
+ok 271 - composed fee-dir/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.636518
+  type: 'test'
+  ...
+# Subtest: composed fee-dir/C/eth/4663: currency, recipients, dependencies and consistency
+ok 272 - composed fee-dir/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.68601
+  type: 'test'
+  ...
+# Subtest: composed fee-size/A/imd/1: currency, recipients, dependencies and consistency
+ok 273 - composed fee-size/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.775748
+  type: 'test'
+  ...
+# Subtest: composed fee-size/A/imd/4663: currency, recipients, dependencies and consistency
+ok 274 - composed fee-size/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.753075
+  type: 'test'
+  ...
+# Subtest: composed fee-size/A/eth/1: currency, recipients, dependencies and consistency
+ok 275 - composed fee-size/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.616169
+  type: 'test'
+  ...
+# Subtest: composed fee-size/A/eth/4663: currency, recipients, dependencies and consistency
+ok 276 - composed fee-size/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.754117
+  type: 'test'
+  ...
+# Subtest: composed fee-size/B/imd/1: currency, recipients, dependencies and consistency
+ok 277 - composed fee-size/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.722938
+  type: 'test'
+  ...
+# Subtest: composed fee-size/B/imd/4663: currency, recipients, dependencies and consistency
+ok 278 - composed fee-size/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.711988
+  type: 'test'
+  ...
+# Subtest: composed fee-size/B/eth/1: currency, recipients, dependencies and consistency
+ok 279 - composed fee-size/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.91699
+  type: 'test'
+  ...
+# Subtest: composed fee-size/B/eth/4663: currency, recipients, dependencies and consistency
+ok 280 - composed fee-size/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.654632
+  type: 'test'
+  ...
+# Subtest: composed fee-size/C/imd/1: currency, recipients, dependencies and consistency
+ok 281 - composed fee-size/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.688415
+  type: 'test'
+  ...
+# Subtest: composed fee-size/C/imd/4663: currency, recipients, dependencies and consistency
+ok 282 - composed fee-size/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.695878
+  type: 'test'
+  ...
+# Subtest: composed fee-size/C/eth/1: currency, recipients, dependencies and consistency
+ok 283 - composed fee-size/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 2.548055
+  type: 'test'
+  ...
+# Subtest: composed fee-size/C/eth/4663: currency, recipients, dependencies and consistency
+ok 284 - composed fee-size/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.566147
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/A/imd/1: currency, recipients, dependencies and consistency
+ok 285 - composed fee-vol/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.831311
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/A/imd/4663: currency, recipients, dependencies and consistency
+ok 286 - composed fee-vol/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.690739
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/A/eth/1: currency, recipients, dependencies and consistency
+ok 287 - composed fee-vol/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.612012
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/A/eth/4663: currency, recipients, dependencies and consistency
+ok 288 - composed fee-vol/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.649582
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/B/imd/1: currency, recipients, dependencies and consistency
+ok 289 - composed fee-vol/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.681251
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/B/imd/4663: currency, recipients, dependencies and consistency
+ok 290 - composed fee-vol/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.563442
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/B/eth/1: currency, recipients, dependencies and consistency
+ok 291 - composed fee-vol/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.622411
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/B/eth/4663: currency, recipients, dependencies and consistency
+ok 292 - composed fee-vol/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.651646
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/C/imd/1: currency, recipients, dependencies and consistency
+ok 293 - composed fee-vol/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.58357
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/C/imd/4663: currency, recipients, dependencies and consistency
+ok 294 - composed fee-vol/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.585744
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/C/eth/1: currency, recipients, dependencies and consistency
+ok 295 - composed fee-vol/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.580684
+  type: 'test'
+  ...
+# Subtest: composed fee-vol/C/eth/4663: currency, recipients, dependencies and consistency
+ok 296 - composed fee-vol/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.566227
+  type: 'test'
+  ...
+# Subtest: composed fee-split/A/imd/1: currency, recipients, dependencies and consistency
+ok 297 - composed fee-split/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.982002
+  type: 'test'
+  ...
+# Subtest: composed fee-split/A/imd/4663: currency, recipients, dependencies and consistency
+ok 298 - composed fee-split/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.986771
+  type: 'test'
+  ...
+# Subtest: composed fee-split/A/eth/1: currency, recipients, dependencies and consistency
+ok 299 - composed fee-split/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.784454
+  type: 'test'
+  ...
+# Subtest: composed fee-split/A/eth/4663: currency, recipients, dependencies and consistency
+ok 300 - composed fee-split/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.784624
+  type: 'test'
+  ...
+# Subtest: composed fee-split/B/imd/1: currency, recipients, dependencies and consistency
+ok 301 - composed fee-split/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.770137
+  type: 'test'
+  ...
+# Subtest: composed fee-split/B/imd/4663: currency, recipients, dependencies and consistency
+ok 302 - composed fee-split/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.87368
+  type: 'test'
+  ...
+# Subtest: composed fee-split/B/eth/1: currency, recipients, dependencies and consistency
+ok 303 - composed fee-split/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.807707
+  type: 'test'
+  ...
+# Subtest: composed fee-split/B/eth/4663: currency, recipients, dependencies and consistency
+ok 304 - composed fee-split/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.742326
+  type: 'test'
+  ...
+# Subtest: composed fee-split/C/imd/1: currency, recipients, dependencies and consistency
+ok 305 - composed fee-split/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.764667
+  type: 'test'
+  ...
+# Subtest: composed fee-split/C/imd/4663: currency, recipients, dependencies and consistency
+ok 306 - composed fee-split/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.9594
+  type: 'test'
+  ...
+# Subtest: composed fee-split/C/eth/1: currency, recipients, dependencies and consistency
+ok 307 - composed fee-split/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.906041
+  type: 'test'
+  ...
+# Subtest: composed fee-split/C/eth/4663: currency, recipients, dependencies and consistency
+ok 308 - composed fee-split/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.872127
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/A/imd/1: currency, recipients, dependencies and consistency
+ok 309 - composed lp-fee/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.491527
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/A/imd/4663: currency, recipients, dependencies and consistency
+ok 310 - composed lp-fee/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.336678
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/A/eth/1: currency, recipients, dependencies and consistency
+ok 311 - composed lp-fee/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.369349
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/A/eth/4663: currency, recipients, dependencies and consistency
+ok 312 - composed lp-fee/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.297805
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/B/imd/1: currency, recipients, dependencies and consistency
+ok 313 - composed lp-fee/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.412259
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/B/imd/4663: currency, recipients, dependencies and consistency
+ok 314 - composed lp-fee/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.406338
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/B/eth/1: currency, recipients, dependencies and consistency
+ok 315 - composed lp-fee/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.361966
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/B/eth/4663: currency, recipients, dependencies and consistency
+ok 316 - composed lp-fee/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.363859
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/C/imd/1: currency, recipients, dependencies and consistency
+ok 317 - composed lp-fee/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.475347
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/C/imd/4663: currency, recipients, dependencies and consistency
+ok 318 - composed lp-fee/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.405166
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/C/eth/1: currency, recipients, dependencies and consistency
+ok 319 - composed lp-fee/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.329054
+  type: 'test'
+  ...
+# Subtest: composed lp-fee/C/eth/4663: currency, recipients, dependencies and consistency
+ok 320 - composed lp-fee/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.343642
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/A/imd/1: currency, recipients, dependencies and consistency
+ok 321 - composed anti-sniper/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.470607
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/A/imd/4663: currency, recipients, dependencies and consistency
+ok 322 - composed anti-sniper/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.382795
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/A/eth/1: currency, recipients, dependencies and consistency
+ok 323 - composed anti-sniper/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.347559
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/A/eth/4663: currency, recipients, dependencies and consistency
+ok 324 - composed anti-sniper/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.301953
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/B/imd/1: currency, recipients, dependencies and consistency
+ok 325 - composed anti-sniper/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.307944
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/B/imd/4663: currency, recipients, dependencies and consistency
+ok 326 - composed anti-sniper/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.355684
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/B/eth/1: currency, recipients, dependencies and consistency
+ok 327 - composed anti-sniper/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.254985
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/B/eth/4663: currency, recipients, dependencies and consistency
+ok 328 - composed anti-sniper/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.450451
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/C/imd/1: currency, recipients, dependencies and consistency
+ok 329 - composed anti-sniper/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.620564
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/C/imd/4663: currency, recipients, dependencies and consistency
+ok 330 - composed anti-sniper/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.285474
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/C/eth/1: currency, recipients, dependencies and consistency
+ok 331 - composed anti-sniper/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.220211
+  type: 'test'
+  ...
+# Subtest: composed anti-sniper/C/eth/4663: currency, recipients, dependencies and consistency
+ok 332 - composed anti-sniper/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.240068
+  type: 'test'
+  ...
+# Subtest: composed max-buy/A/imd/1: currency, recipients, dependencies and consistency
+ok 333 - composed max-buy/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.45509
+  type: 'test'
+  ...
+# Subtest: composed max-buy/A/imd/4663: currency, recipients, dependencies and consistency
+ok 334 - composed max-buy/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.313425
+  type: 'test'
+  ...
+# Subtest: composed max-buy/A/eth/1: currency, recipients, dependencies and consistency
+ok 335 - composed max-buy/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.205483
+  type: 'test'
+  ...
+# Subtest: composed max-buy/A/eth/4663: currency, recipients, dependencies and consistency
+ok 336 - composed max-buy/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.322311
+  type: 'test'
+  ...
+# Subtest: composed max-buy/B/imd/1: currency, recipients, dependencies and consistency
+ok 337 - composed max-buy/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.334945
+  type: 'test'
+  ...
+# Subtest: composed max-buy/B/imd/4663: currency, recipients, dependencies and consistency
+ok 338 - composed max-buy/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.299568
+  type: 'test'
+  ...
+# Subtest: composed max-buy/B/eth/1: currency, recipients, dependencies and consistency
+ok 339 - composed max-buy/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.641918
+  type: 'test'
+  ...
+# Subtest: composed max-buy/B/eth/4663: currency, recipients, dependencies and consistency
+ok 340 - composed max-buy/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.395659
+  type: 'test'
+  ...
+# Subtest: composed max-buy/C/imd/1: currency, recipients, dependencies and consistency
+ok 341 - composed max-buy/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.3539
+  type: 'test'
+  ...
+# Subtest: composed max-buy/C/imd/4663: currency, recipients, dependencies and consistency
+ok 342 - composed max-buy/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.254155
+  type: 'test'
+  ...
+# Subtest: composed max-buy/C/eth/1: currency, recipients, dependencies and consistency
+ok 343 - composed max-buy/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.5679
+  type: 'test'
+  ...
+# Subtest: composed max-buy/C/eth/4663: currency, recipients, dependencies and consistency
+ok 344 - composed max-buy/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.399135
+  type: 'test'
+  ...
+# Subtest: composed max-swap/A/imd/1: currency, recipients, dependencies and consistency
+ok 345 - composed max-swap/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.679077
+  type: 'test'
+  ...
+# Subtest: composed max-swap/A/imd/4663: currency, recipients, dependencies and consistency
+ok 346 - composed max-swap/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.295632
+  type: 'test'
+  ...
+# Subtest: composed max-swap/A/eth/1: currency, recipients, dependencies and consistency
+ok 347 - composed max-swap/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.231392
+  type: 'test'
+  ...
+# Subtest: composed max-swap/A/eth/4663: currency, recipients, dependencies and consistency
+ok 348 - composed max-swap/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.183612
+  type: 'test'
+  ...
+# Subtest: composed max-swap/B/imd/1: currency, recipients, dependencies and consistency
+ok 349 - composed max-swap/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.22506
+  type: 'test'
+  ...
+# Subtest: composed max-swap/B/imd/4663: currency, recipients, dependencies and consistency
+ok 350 - composed max-swap/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.211795
+  type: 'test'
+  ...
+# Subtest: composed max-swap/B/eth/1: currency, recipients, dependencies and consistency
+ok 351 - composed max-swap/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.439811
+  type: 'test'
+  ...
+# Subtest: composed max-swap/B/eth/4663: currency, recipients, dependencies and consistency
+ok 352 - composed max-swap/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.334845
+  type: 'test'
+  ...
+# Subtest: composed max-swap/C/imd/1: currency, recipients, dependencies and consistency
+ok 353 - composed max-swap/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.431686
+  type: 'test'
+  ...
+# Subtest: composed max-swap/C/imd/4663: currency, recipients, dependencies and consistency
+ok 354 - composed max-swap/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.225721
+  type: 'test'
+  ...
+# Subtest: composed max-swap/C/eth/1: currency, recipients, dependencies and consistency
+ok 355 - composed max-swap/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.248424
+  type: 'test'
+  ...
+# Subtest: composed max-swap/C/eth/4663: currency, recipients, dependencies and consistency
+ok 356 - composed max-swap/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.465549
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/A/imd/1: currency, recipients, dependencies and consistency
+ok 357 - composed anti-sandwich/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.436465
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/A/imd/4663: currency, recipients, dependencies and consistency
+ok 358 - composed anti-sandwich/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.412319
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/A/eth/1: currency, recipients, dependencies and consistency
+ok 359 - composed anti-sandwich/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.278059
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/A/eth/4663: currency, recipients, dependencies and consistency
+ok 360 - composed anti-sandwich/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.307765
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/B/imd/1: currency, recipients, dependencies and consistency
+ok 361 - composed anti-sandwich/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.284441
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/B/imd/4663: currency, recipients, dependencies and consistency
+ok 362 - composed anti-sandwich/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.241751
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/B/eth/1: currency, recipients, dependencies and consistency
+ok 363 - composed anti-sandwich/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.196206
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/B/eth/4663: currency, recipients, dependencies and consistency
+ok 364 - composed anti-sandwich/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.25759
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/C/imd/1: currency, recipients, dependencies and consistency
+ok 365 - composed anti-sandwich/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.472441
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/C/imd/4663: currency, recipients, dependencies and consistency
+ok 366 - composed anti-sandwich/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.205183
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/C/eth/1: currency, recipients, dependencies and consistency
+ok 367 - composed anti-sandwich/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.341487
+  type: 'test'
+  ...
+# Subtest: composed anti-sandwich/C/eth/4663: currency, recipients, dependencies and consistency
+ok 368 - composed anti-sandwich/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.415616
+  type: 'test'
+  ...
+# Subtest: composed cooldown/A/imd/1: currency, recipients, dependencies and consistency
+ok 369 - composed cooldown/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.35849
+  type: 'test'
+  ...
+# Subtest: composed cooldown/A/imd/4663: currency, recipients, dependencies and consistency
+ok 370 - composed cooldown/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.324916
+  type: 'test'
+  ...
+# Subtest: composed cooldown/A/eth/1: currency, recipients, dependencies and consistency
+ok 371 - composed cooldown/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.246029
+  type: 'test'
+  ...
+# Subtest: composed cooldown/A/eth/4663: currency, recipients, dependencies and consistency
+ok 372 - composed cooldown/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.301964
+  type: 'test'
+  ...
+# Subtest: composed cooldown/B/imd/1: currency, recipients, dependencies and consistency
+ok 373 - composed cooldown/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.34847
+  type: 'test'
+  ...
+# Subtest: composed cooldown/B/imd/4663: currency, recipients, dependencies and consistency
+ok 374 - composed cooldown/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.272488
+  type: 'test'
+  ...
+# Subtest: composed cooldown/B/eth/1: currency, recipients, dependencies and consistency
+ok 375 - composed cooldown/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.288818
+  type: 'test'
+  ...
+# Subtest: composed cooldown/B/eth/4663: currency, recipients, dependencies and consistency
+ok 376 - composed cooldown/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.307894
+  type: 'test'
+  ...
+# Subtest: composed cooldown/C/imd/1: currency, recipients, dependencies and consistency
+ok 377 - composed cooldown/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.523988
+  type: 'test'
+  ...
+# Subtest: composed cooldown/C/imd/4663: currency, recipients, dependencies and consistency
+ok 378 - composed cooldown/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.390008
+  type: 'test'
+  ...
+# Subtest: composed cooldown/C/eth/1: currency, recipients, dependencies and consistency
+ok 379 - composed cooldown/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.317002
+  type: 'test'
+  ...
+# Subtest: composed cooldown/C/eth/4663: currency, recipients, dependencies and consistency
+ok 380 - composed cooldown/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.275815
+  type: 'test'
+  ...
+# Subtest: composed breaker/A/imd/1: currency, recipients, dependencies and consistency
+ok 381 - composed breaker/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.427708
+  type: 'test'
+  ...
+# Subtest: composed breaker/A/imd/4663: currency, recipients, dependencies and consistency
+ok 382 - composed breaker/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.455199
+  type: 'test'
+  ...
+# Subtest: composed breaker/A/eth/1: currency, recipients, dependencies and consistency
+ok 383 - composed breaker/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.325948
+  type: 'test'
+  ...
+# Subtest: composed breaker/A/eth/4663: currency, recipients, dependencies and consistency
+ok 384 - composed breaker/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.401359
+  type: 'test'
+  ...
+# Subtest: composed breaker/B/imd/1: currency, recipients, dependencies and consistency
+ok 385 - composed breaker/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.389787
+  type: 'test'
+  ...
+# Subtest: composed breaker/B/imd/4663: currency, recipients, dependencies and consistency
+ok 386 - composed breaker/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.291714
+  type: 'test'
+  ...
+# Subtest: composed breaker/B/eth/1: currency, recipients, dependencies and consistency
+ok 387 - composed breaker/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.290873
+  type: 'test'
+  ...
+# Subtest: composed breaker/B/eth/4663: currency, recipients, dependencies and consistency
+ok 388 - composed breaker/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.309027
+  type: 'test'
+  ...
+# Subtest: composed breaker/C/imd/1: currency, recipients, dependencies and consistency
+ok 389 - composed breaker/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.286324
+  type: 'test'
+  ...
+# Subtest: composed breaker/C/imd/4663: currency, recipients, dependencies and consistency
+ok 390 - composed breaker/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.307584
+  type: 'test'
+  ...
+# Subtest: composed breaker/C/eth/1: currency, recipients, dependencies and consistency
+ok 391 - composed breaker/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.292836
+  type: 'test'
+  ...
+# Subtest: composed breaker/C/eth/4663: currency, recipients, dependencies and consistency
+ok 392 - composed breaker/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.252071
+  type: 'test'
+  ...
+# Subtest: composed jar/A/imd/1: currency, recipients, dependencies and consistency
+ok 393 - composed jar/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.621581
+  type: 'test'
+  ...
+# Subtest: composed jar/A/imd/4663: currency, recipients, dependencies and consistency
+ok 394 - composed jar/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.508099
+  type: 'test'
+  ...
+# Subtest: composed jar/A/eth/1: currency, recipients, dependencies and consistency
+ok 395 - composed jar/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.633814
+  type: 'test'
+  ...
+# Subtest: composed jar/A/eth/4663: currency, recipients, dependencies and consistency
+ok 396 - composed jar/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 2.669002
+  type: 'test'
+  ...
+# Subtest: composed jar/B/imd/1: currency, recipients, dependencies and consistency
+ok 397 - composed jar/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.801556
+  type: 'test'
+  ...
+# Subtest: composed jar/B/imd/4663: currency, recipients, dependencies and consistency
+ok 398 - composed jar/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.634153
+  type: 'test'
+  ...
+# Subtest: composed jar/B/eth/1: currency, recipients, dependencies and consistency
+ok 399 - composed jar/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.201232
+  type: 'test'
+  ...
+# Subtest: composed jar/B/eth/4663: currency, recipients, dependencies and consistency
+ok 400 - composed jar/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.604068
+  type: 'test'
+  ...
+# Subtest: composed jar/C/imd/1: currency, recipients, dependencies and consistency
+ok 401 - composed jar/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.64822
+  type: 'test'
+  ...
+# Subtest: composed jar/C/imd/4663: currency, recipients, dependencies and consistency
+ok 402 - composed jar/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.687103
+  type: 'test'
+  ...
+# Subtest: composed jar/C/eth/1: currency, recipients, dependencies and consistency
+ok 403 - composed jar/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.596995
+  type: 'test'
+  ...
+# Subtest: composed jar/C/eth/4663: currency, recipients, dependencies and consistency
+ok 404 - composed jar/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.880833
+  type: 'test'
+  ...
+# Subtest: composed lp-share/A/imd/1: currency, recipients, dependencies and consistency
+ok 405 - composed lp-share/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.837623
+  type: 'test'
+  ...
+# Subtest: composed lp-share/A/imd/4663: currency, recipients, dependencies and consistency
+ok 406 - composed lp-share/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.695848
+  type: 'test'
+  ...
+# Subtest: composed lp-share/A/eth/1: currency, recipients, dependencies and consistency
+ok 407 - composed lp-share/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.606522
+  type: 'test'
+  ...
+# Subtest: composed lp-share/A/eth/4663: currency, recipients, dependencies and consistency
+ok 408 - composed lp-share/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.560566
+  type: 'test'
+  ...
+# Subtest: composed lp-share/B/imd/1: currency, recipients, dependencies and consistency
+ok 409 - composed lp-share/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.657627
+  type: 'test'
+  ...
+# Subtest: composed lp-share/B/imd/4663: currency, recipients, dependencies and consistency
+ok 410 - composed lp-share/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.639053
+  type: 'test'
+  ...
+# Subtest: composed lp-share/B/eth/1: currency, recipients, dependencies and consistency
+ok 411 - composed lp-share/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.584801
+  type: 'test'
+  ...
+# Subtest: composed lp-share/B/eth/4663: currency, recipients, dependencies and consistency
+ok 412 - composed lp-share/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.572799
+  type: 'test'
+  ...
+# Subtest: composed lp-share/C/imd/1: currency, recipients, dependencies and consistency
+ok 413 - composed lp-share/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.638691
+  type: 'test'
+  ...
+# Subtest: composed lp-share/C/imd/4663: currency, recipients, dependencies and consistency
+ok 414 - composed lp-share/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.577598
+  type: 'test'
+  ...
+# Subtest: composed lp-share/C/eth/1: currency, recipients, dependencies and consistency
+ok 415 - composed lp-share/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.122074
+  type: 'test'
+  ...
+# Subtest: composed lp-share/C/eth/4663: currency, recipients, dependencies and consistency
+ok 416 - composed lp-share/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.787199
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/A/imd/1: currency, recipients, dependencies and consistency
+ok 417 - composed lp-lock/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.454148
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/A/imd/4663: currency, recipients, dependencies and consistency
+ok 418 - composed lp-lock/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.567839
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/A/eth/1: currency, recipients, dependencies and consistency
+ok 419 - composed lp-lock/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.353118
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/A/eth/4663: currency, recipients, dependencies and consistency
+ok 420 - composed lp-lock/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.314076
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/B/imd/1: currency, recipients, dependencies and consistency
+ok 421 - composed lp-lock/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.35917
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/B/imd/4663: currency, recipients, dependencies and consistency
+ok 422 - composed lp-lock/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.316771
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/B/eth/1: currency, recipients, dependencies and consistency
+ok 423 - composed lp-lock/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.289089
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/B/eth/4663: currency, recipients, dependencies and consistency
+ok 424 - composed lp-lock/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.307894
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/C/imd/1: currency, recipients, dependencies and consistency
+ok 425 - composed lp-lock/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.309036
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/C/imd/4663: currency, recipients, dependencies and consistency
+ok 426 - composed lp-lock/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.293477
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/C/eth/1: currency, recipients, dependencies and consistency
+ok 427 - composed lp-lock/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.286575
+  type: 'test'
+  ...
+# Subtest: composed lp-lock/C/eth/4663: currency, recipients, dependencies and consistency
+ok 428 - composed lp-lock/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.286314
+  type: 'test'
+  ...
+# Subtest: composed jit/A/imd/1: currency, recipients, dependencies and consistency
+ok 429 - composed jit/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.355773
+  type: 'test'
+  ...
+# Subtest: composed jit/A/imd/4663: currency, recipients, dependencies and consistency
+ok 430 - composed jit/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.321209
+  type: 'test'
+  ...
+# Subtest: composed jit/A/eth/1: currency, recipients, dependencies and consistency
+ok 431 - composed jit/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.255205
+  type: 'test'
+  ...
+# Subtest: composed jit/A/eth/4663: currency, recipients, dependencies and consistency
+ok 432 - composed jit/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.250007
+  type: 'test'
+  ...
+# Subtest: composed jit/B/imd/1: currency, recipients, dependencies and consistency
+ok 433 - composed jit/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.301092
+  type: 'test'
+  ...
+# Subtest: composed jit/B/imd/4663: currency, recipients, dependencies and consistency
+ok 434 - composed jit/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.264605
+  type: 'test'
+  ...
+# Subtest: composed jit/B/eth/1: currency, recipients, dependencies and consistency
+ok 435 - composed jit/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.262521
+  type: 'test'
+  ...
+# Subtest: composed jit/B/eth/4663: currency, recipients, dependencies and consistency
+ok 436 - composed jit/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.2845
+  type: 'test'
+  ...
+# Subtest: composed jit/C/imd/1: currency, recipients, dependencies and consistency
+ok 437 - composed jit/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.257501
+  type: 'test'
+  ...
+# Subtest: composed jit/C/imd/4663: currency, recipients, dependencies and consistency
+ok 438 - composed jit/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.250417
+  type: 'test'
+  ...
+# Subtest: composed jit/C/eth/1: currency, recipients, dependencies and consistency
+ok 439 - composed jit/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.377696
+  type: 'test'
+  ...
+# Subtest: composed jit/C/eth/4663: currency, recipients, dependencies and consistency
+ok 440 - composed jit/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.315188
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/A/imd/1: currency, recipients, dependencies and consistency
+ok 441 - composed lp-allow/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.709173
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/A/imd/4663: currency, recipients, dependencies and consistency
+ok 442 - composed lp-allow/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.372666
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/A/eth/1: currency, recipients, dependencies and consistency
+ok 443 - composed lp-allow/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.363008
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/A/eth/4663: currency, recipients, dependencies and consistency
+ok 444 - composed lp-allow/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.939158
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/B/imd/1: currency, recipients, dependencies and consistency
+ok 445 - composed lp-allow/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.53034
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/B/imd/4663: currency, recipients, dependencies and consistency
+ok 446 - composed lp-allow/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.326008
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/B/eth/1: currency, recipients, dependencies and consistency
+ok 447 - composed lp-allow/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.331279
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/B/eth/4663: currency, recipients, dependencies and consistency
+ok 448 - composed lp-allow/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.308105
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/C/imd/1: currency, recipients, dependencies and consistency
+ok 449 - composed lp-allow/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.368036
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/C/imd/4663: currency, recipients, dependencies and consistency
+ok 450 - composed lp-allow/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.318925
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/C/eth/1: currency, recipients, dependencies and consistency
+ok 451 - composed lp-allow/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.340546
+  type: 'test'
+  ...
+# Subtest: composed lp-allow/C/eth/4663: currency, recipients, dependencies and consistency
+ok 452 - composed lp-allow/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.426015
+  type: 'test'
+  ...
+# Subtest: composed lp-min/A/imd/1: currency, recipients, dependencies and consistency
+ok 453 - composed lp-min/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.408513
+  type: 'test'
+  ...
+# Subtest: composed lp-min/A/imd/4663: currency, recipients, dependencies and consistency
+ok 454 - composed lp-min/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.333092
+  type: 'test'
+  ...
+# Subtest: composed lp-min/A/eth/1: currency, recipients, dependencies and consistency
+ok 455 - composed lp-min/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.269964
+  type: 'test'
+  ...
+# Subtest: composed lp-min/A/eth/4663: currency, recipients, dependencies and consistency
+ok 456 - composed lp-min/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.298718
+  type: 'test'
+  ...
+# Subtest: composed lp-min/B/imd/1: currency, recipients, dependencies and consistency
+ok 457 - composed lp-min/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.339934
+  type: 'test'
+  ...
+# Subtest: composed lp-min/B/imd/4663: currency, recipients, dependencies and consistency
+ok 458 - composed lp-min/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.39101
+  type: 'test'
+  ...
+# Subtest: composed lp-min/B/eth/1: currency, recipients, dependencies and consistency
+ok 459 - composed lp-min/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.408682
+  type: 'test'
+  ...
+# Subtest: composed lp-min/B/eth/4663: currency, recipients, dependencies and consistency
+ok 460 - composed lp-min/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.287907
+  type: 'test'
+  ...
+# Subtest: composed lp-min/C/imd/1: currency, recipients, dependencies and consistency
+ok 461 - composed lp-min/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.320608
+  type: 'test'
+  ...
+# Subtest: composed lp-min/C/imd/4663: currency, recipients, dependencies and consistency
+ok 462 - composed lp-min/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.310079
+  type: 'test'
+  ...
+# Subtest: composed lp-min/C/eth/1: currency, recipients, dependencies and consistency
+ok 463 - composed lp-min/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.276166
+  type: 'test'
+  ...
+# Subtest: composed lp-min/C/eth/4663: currency, recipients, dependencies and consistency
+ok 464 - composed lp-min/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.300131
+  type: 'test'
+  ...
+# Subtest: composed open-at/A/imd/1: currency, recipients, dependencies and consistency
+ok 465 - composed open-at/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.367607
+  type: 'test'
+  ...
+# Subtest: composed open-at/A/imd/4663: currency, recipients, dependencies and consistency
+ok 466 - composed open-at/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.334915
+  type: 'test'
+  ...
+# Subtest: composed open-at/A/eth/1: currency, recipients, dependencies and consistency
+ok 467 - composed open-at/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.387242
+  type: 'test'
+  ...
+# Subtest: composed open-at/A/eth/4663: currency, recipients, dependencies and consistency
+ok 468 - composed open-at/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.352157
+  type: 'test'
+  ...
+# Subtest: composed open-at/B/imd/1: currency, recipients, dependencies and consistency
+ok 469 - composed open-at/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.45003
+  type: 'test'
+  ...
+# Subtest: composed open-at/B/imd/4663: currency, recipients, dependencies and consistency
+ok 470 - composed open-at/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.375682
+  type: 'test'
+  ...
+# Subtest: composed open-at/B/eth/1: currency, recipients, dependencies and consistency
+ok 471 - composed open-at/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.293507
+  type: 'test'
+  ...
+# Subtest: composed open-at/B/eth/4663: currency, recipients, dependencies and consistency
+ok 472 - composed open-at/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.305451
+  type: 'test'
+  ...
+# Subtest: composed open-at/C/imd/1: currency, recipients, dependencies and consistency
+ok 473 - composed open-at/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.297897
+  type: 'test'
+  ...
+# Subtest: composed open-at/C/imd/4663: currency, recipients, dependencies and consistency
+ok 474 - composed open-at/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.298889
+  type: 'test'
+  ...
+# Subtest: composed open-at/C/eth/1: currency, recipients, dependencies and consistency
+ok 475 - composed open-at/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.311962
+  type: 'test'
+  ...
+# Subtest: composed open-at/C/eth/4663: currency, recipients, dependencies and consistency
+ok 476 - composed open-at/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.272359
+  type: 'test'
+  ...
+# Subtest: composed hours/A/imd/1: currency, recipients, dependencies and consistency
+ok 477 - composed hours/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.356154
+  type: 'test'
+  ...
+# Subtest: composed hours/A/imd/4663: currency, recipients, dependencies and consistency
+ok 478 - composed hours/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.33841
+  type: 'test'
+  ...
+# Subtest: composed hours/A/eth/1: currency, recipients, dependencies and consistency
+ok 479 - composed hours/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.279693
+  type: 'test'
+  ...
+# Subtest: composed hours/A/eth/4663: currency, recipients, dependencies and consistency
+ok 480 - composed hours/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.288429
+  type: 'test'
+  ...
+# Subtest: composed hours/B/imd/1: currency, recipients, dependencies and consistency
+ok 481 - composed hours/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.32718
+  type: 'test'
+  ...
+# Subtest: composed hours/B/imd/4663: currency, recipients, dependencies and consistency
+ok 482 - composed hours/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.293036
+  type: 'test'
+  ...
+# Subtest: composed hours/B/eth/1: currency, recipients, dependencies and consistency
+ok 483 - composed hours/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.311431
+  type: 'test'
+  ...
+# Subtest: composed hours/B/eth/4663: currency, recipients, dependencies and consistency
+ok 484 - composed hours/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.29493
+  type: 'test'
+  ...
+# Subtest: composed hours/C/imd/1: currency, recipients, dependencies and consistency
+ok 485 - composed hours/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.292665
+  type: 'test'
+  ...
+# Subtest: composed hours/C/imd/4663: currency, recipients, dependencies and consistency
+ok 486 - composed hours/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.295922
+  type: 'test'
+  ...
+# Subtest: composed hours/C/eth/1: currency, recipients, dependencies and consistency
+ok 487 - composed hours/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.298708
+  type: 'test'
+  ...
+# Subtest: composed hours/C/eth/4663: currency, recipients, dependencies and consistency
+ok 488 - composed hours/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.280504
+  type: 'test'
+  ...
+# Subtest: composed allowlist/A/imd/1: currency, recipients, dependencies and consistency
+ok 489 - composed allowlist/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.339022
+  type: 'test'
+  ...
+# Subtest: composed allowlist/A/imd/4663: currency, recipients, dependencies and consistency
+ok 490 - composed allowlist/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.316901
+  type: 'test'
+  ...
+# Subtest: composed allowlist/A/eth/1: currency, recipients, dependencies and consistency
+ok 491 - composed allowlist/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.289219
+  type: 'test'
+  ...
+# Subtest: composed allowlist/A/eth/4663: currency, recipients, dependencies and consistency
+ok 492 - composed allowlist/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.315961
+  type: 'test'
+  ...
+# Subtest: composed allowlist/B/imd/1: currency, recipients, dependencies and consistency
+ok 493 - composed allowlist/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.329836
+  type: 'test'
+  ...
+# Subtest: composed allowlist/B/imd/4663: currency, recipients, dependencies and consistency
+ok 494 - composed allowlist/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.330617
+  type: 'test'
+  ...
+# Subtest: composed allowlist/B/eth/1: currency, recipients, dependencies and consistency
+ok 495 - composed allowlist/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.353039
+  type: 'test'
+  ...
+# Subtest: composed allowlist/B/eth/4663: currency, recipients, dependencies and consistency
+ok 496 - composed allowlist/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.410676
+  type: 'test'
+  ...
+# Subtest: composed allowlist/C/imd/1: currency, recipients, dependencies and consistency
+ok 497 - composed allowlist/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.395397
+  type: 'test'
+  ...
+# Subtest: composed allowlist/C/imd/4663: currency, recipients, dependencies and consistency
+ok 498 - composed allowlist/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.302174
+  type: 'test'
+  ...
+# Subtest: composed allowlist/C/eth/1: currency, recipients, dependencies and consistency
+ok 499 - composed allowlist/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.309227
+  type: 'test'
+  ...
+# Subtest: composed allowlist/C/eth/4663: currency, recipients, dependencies and consistency
+ok 500 - composed allowlist/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.304519
+  type: 'test'
+  ...
+# Subtest: composed pause/A/imd/1: currency, recipients, dependencies and consistency
+ok 501 - composed pause/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.329796
+  type: 'test'
+  ...
+# Subtest: composed pause/A/imd/4663: currency, recipients, dependencies and consistency
+ok 502 - composed pause/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.333212
+  type: 'test'
+  ...
+# Subtest: composed pause/A/eth/1: currency, recipients, dependencies and consistency
+ok 503 - composed pause/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.342949
+  type: 'test'
+  ...
+# Subtest: composed pause/A/eth/4663: currency, recipients, dependencies and consistency
+ok 504 - composed pause/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.286144
+  type: 'test'
+  ...
+# Subtest: composed pause/B/imd/1: currency, recipients, dependencies and consistency
+ok 505 - composed pause/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.343161
+  type: 'test'
+  ...
+# Subtest: composed pause/B/imd/4663: currency, recipients, dependencies and consistency
+ok 506 - composed pause/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.329074
+  type: 'test'
+  ...
+# Subtest: composed pause/B/eth/1: currency, recipients, dependencies and consistency
+ok 507 - composed pause/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.313395
+  type: 'test'
+  ...
+# Subtest: composed pause/B/eth/4663: currency, recipients, dependencies and consistency
+ok 508 - composed pause/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.45506
+  type: 'test'
+  ...
+# Subtest: composed pause/C/imd/1: currency, recipients, dependencies and consistency
+ok 509 - composed pause/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.339743
+  type: 'test'
+  ...
+# Subtest: composed pause/C/imd/4663: currency, recipients, dependencies and consistency
+ok 510 - composed pause/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.463966
+  type: 'test'
+  ...
+# Subtest: composed pause/C/eth/1: currency, recipients, dependencies and consistency
+ok 511 - composed pause/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.299149
+  type: 'test'
+  ...
+# Subtest: composed pause/C/eth/4663: currency, recipients, dependencies and consistency
+ok 512 - composed pause/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.30517
+  type: 'test'
+  ...
+# Subtest: composed sunset/A/imd/1: currency, recipients, dependencies and consistency
+ok 513 - composed sunset/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.448777
+  type: 'test'
+  ...
+# Subtest: composed sunset/A/imd/4663: currency, recipients, dependencies and consistency
+ok 514 - composed sunset/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.300171
+  type: 'test'
+  ...
+# Subtest: composed sunset/A/eth/1: currency, recipients, dependencies and consistency
+ok 515 - composed sunset/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 3.621508
+  type: 'test'
+  ...
+# Subtest: composed sunset/A/eth/4663: currency, recipients, dependencies and consistency
+ok 516 - composed sunset/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.554014
+  type: 'test'
+  ...
+# Subtest: composed sunset/B/imd/1: currency, recipients, dependencies and consistency
+ok 517 - composed sunset/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.363719
+  type: 'test'
+  ...
+# Subtest: composed sunset/B/imd/4663: currency, recipients, dependencies and consistency
+ok 518 - composed sunset/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.281425
+  type: 'test'
+  ...
+# Subtest: composed sunset/B/eth/1: currency, recipients, dependencies and consistency
+ok 519 - composed sunset/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.315018
+  type: 'test'
+  ...
+# Subtest: composed sunset/B/eth/4663: currency, recipients, dependencies and consistency
+ok 520 - composed sunset/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.253343
+  type: 'test'
+  ...
+# Subtest: composed sunset/C/imd/1: currency, recipients, dependencies and consistency
+ok 521 - composed sunset/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.211515
+  type: 'test'
+  ...
+# Subtest: composed sunset/C/imd/4663: currency, recipients, dependencies and consistency
+ok 522 - composed sunset/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.271788
+  type: 'test'
+  ...
+# Subtest: composed sunset/C/eth/1: currency, recipients, dependencies and consistency
+ok 523 - composed sunset/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.223688
+  type: 'test'
+  ...
+# Subtest: composed sunset/C/eth/4663: currency, recipients, dependencies and consistency
+ok 524 - composed sunset/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.229688
+  type: 'test'
+  ...
+# Subtest: composed oracle/A/imd/1: currency, recipients, dependencies and consistency
+ok 525 - composed oracle/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.33229
+  type: 'test'
+  ...
+# Subtest: composed oracle/A/imd/4663: currency, recipients, dependencies and consistency
+ok 526 - composed oracle/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.341197
+  type: 'test'
+  ...
+# Subtest: composed oracle/A/eth/1: currency, recipients, dependencies and consistency
+ok 527 - composed oracle/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.297566
+  type: 'test'
+  ...
+# Subtest: composed oracle/A/eth/4663: currency, recipients, dependencies and consistency
+ok 528 - composed oracle/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.318043
+  type: 'test'
+  ...
+# Subtest: composed oracle/B/imd/1: currency, recipients, dependencies and consistency
+ok 529 - composed oracle/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.328483
+  type: 'test'
+  ...
+# Subtest: composed oracle/B/imd/4663: currency, recipients, dependencies and consistency
+ok 530 - composed oracle/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.303336
+  type: 'test'
+  ...
+# Subtest: composed oracle/B/eth/1: currency, recipients, dependencies and consistency
+ok 531 - composed oracle/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.312293
+  type: 'test'
+  ...
+# Subtest: composed oracle/B/eth/4663: currency, recipients, dependencies and consistency
+ok 532 - composed oracle/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.299309
+  type: 'test'
+  ...
+# Subtest: composed oracle/C/imd/1: currency, recipients, dependencies and consistency
+ok 533 - composed oracle/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.299569
+  type: 'test'
+  ...
+# Subtest: composed oracle/C/imd/4663: currency, recipients, dependencies and consistency
+ok 534 - composed oracle/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.291354
+  type: 'test'
+  ...
+# Subtest: composed oracle/C/eth/1: currency, recipients, dependencies and consistency
+ok 535 - composed oracle/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.265776
+  type: 'test'
+  ...
+# Subtest: composed oracle/C/eth/4663: currency, recipients, dependencies and consistency
+ok 536 - composed oracle/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.271166
+  type: 'test'
+  ...
+# Subtest: composed limit/A/imd/1: currency, recipients, dependencies and consistency
+ok 537 - composed limit/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.355173
+  type: 'test'
+  ...
+# Subtest: composed limit/A/imd/4663: currency, recipients, dependencies and consistency
+ok 538 - composed limit/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.286816
+  type: 'test'
+  ...
+# Subtest: composed limit/A/eth/1: currency, recipients, dependencies and consistency
+ok 539 - composed limit/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.40181
+  type: 'test'
+  ...
+# Subtest: composed limit/A/eth/4663: currency, recipients, dependencies and consistency
+ok 540 - composed limit/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.334474
+  type: 'test'
+  ...
+# Subtest: composed limit/B/imd/1: currency, recipients, dependencies and consistency
+ok 541 - composed limit/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.345976
+  type: 'test'
+  ...
+# Subtest: composed limit/B/imd/4663: currency, recipients, dependencies and consistency
+ok 542 - composed limit/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.594128
+  type: 'test'
+  ...
+# Subtest: composed limit/B/eth/1: currency, recipients, dependencies and consistency
+ok 543 - composed limit/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.290912
+  type: 'test'
+  ...
+# Subtest: composed limit/B/eth/4663: currency, recipients, dependencies and consistency
+ok 544 - composed limit/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.300791
+  type: 'test'
+  ...
+# Subtest: composed limit/C/imd/1: currency, recipients, dependencies and consistency
+ok 545 - composed limit/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.300961
+  type: 'test'
+  ...
+# Subtest: composed limit/C/imd/4663: currency, recipients, dependencies and consistency
+ok 546 - composed limit/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.264663
+  type: 'test'
+  ...
+# Subtest: composed limit/C/eth/1: currency, recipients, dependencies and consistency
+ok 547 - composed limit/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.270726
+  type: 'test'
+  ...
+# Subtest: composed limit/C/eth/4663: currency, recipients, dependencies and consistency
+ok 548 - composed limit/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.271998
+  type: 'test'
+  ...
+# Subtest: composed yield/A/imd/1: currency, recipients, dependencies and consistency
+ok 549 - composed yield/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.794062
+  type: 'test'
+  ...
+# Subtest: composed yield/A/imd/4663: currency, recipients, dependencies and consistency
+ok 550 - composed yield/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.333071
+  type: 'test'
+  ...
+# Subtest: composed yield/A/eth/1: currency, recipients, dependencies and consistency
+ok 551 - composed yield/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.351256
+  type: 'test'
+  ...
+# Subtest: composed yield/A/eth/4663: currency, recipients, dependencies and consistency
+ok 552 - composed yield/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.336999
+  type: 'test'
+  ...
+# Subtest: composed yield/B/imd/1: currency, recipients, dependencies and consistency
+ok 553 - composed yield/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.555327
+  type: 'test'
+  ...
+# Subtest: composed yield/B/imd/4663: currency, recipients, dependencies and consistency
+ok 554 - composed yield/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.611891
+  type: 'test'
+  ...
+# Subtest: composed yield/B/eth/1: currency, recipients, dependencies and consistency
+ok 555 - composed yield/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.101835
+  type: 'test'
+  ...
+# Subtest: composed yield/B/eth/4663: currency, recipients, dependencies and consistency
+ok 556 - composed yield/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.39124
+  type: 'test'
+  ...
+# Subtest: composed yield/C/imd/1: currency, recipients, dependencies and consistency
+ok 557 - composed yield/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.340095
+  type: 'test'
+  ...
+# Subtest: composed yield/C/imd/4663: currency, recipients, dependencies and consistency
+ok 558 - composed yield/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.458656
+  type: 'test'
+  ...
+# Subtest: composed yield/C/eth/1: currency, recipients, dependencies and consistency
+ok 559 - composed yield/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.614647
+  type: 'test'
+  ...
+# Subtest: composed yield/C/eth/4663: currency, recipients, dependencies and consistency
+ok 560 - composed yield/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.378427
+  type: 'test'
+  ...
+# Subtest: composed async/A/imd/1: currency, recipients, dependencies and consistency
+ok 561 - composed async/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.518067
+  type: 'test'
+  ...
+# Subtest: composed async/A/imd/4663: currency, recipients, dependencies and consistency
+ok 562 - composed async/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.292536
+  type: 'test'
+  ...
+# Subtest: composed async/A/eth/1: currency, recipients, dependencies and consistency
+ok 563 - composed async/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.251109
+  type: 'test'
+  ...
+# Subtest: composed async/A/eth/4663: currency, recipients, dependencies and consistency
+ok 564 - composed async/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.240228
+  type: 'test'
+  ...
+# Subtest: composed async/B/imd/1: currency, recipients, dependencies and consistency
+ok 565 - composed async/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.350264
+  type: 'test'
+  ...
+# Subtest: composed async/B/imd/4663: currency, recipients, dependencies and consistency
+ok 566 - composed async/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.264814
+  type: 'test'
+  ...
+# Subtest: composed async/B/eth/1: currency, recipients, dependencies and consistency
+ok 567 - composed async/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.220431
+  type: 'test'
+  ...
+# Subtest: composed async/B/eth/4663: currency, recipients, dependencies and consistency
+ok 568 - composed async/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.368647
+  type: 'test'
+  ...
+# Subtest: composed async/C/imd/1: currency, recipients, dependencies and consistency
+ok 569 - composed async/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.282828
+  type: 'test'
+  ...
+# Subtest: composed async/C/imd/4663: currency, recipients, dependencies and consistency
+ok 570 - composed async/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.195104
+  type: 'test'
+  ...
+# Subtest: composed async/C/eth/1: currency, recipients, dependencies and consistency
+ok 571 - composed async/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.196396
+  type: 'test'
+  ...
+# Subtest: composed async/C/eth/4663: currency, recipients, dependencies and consistency
+ok 572 - composed async/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.308275
+  type: 'test'
+  ...
+# Subtest: composed curve/A/imd/1: currency, recipients, dependencies and consistency
+ok 573 - composed curve/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.316029
+  type: 'test'
+  ...
+# Subtest: composed curve/A/imd/4663: currency, recipients, dependencies and consistency
+ok 574 - composed curve/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.271948
+  type: 'test'
+  ...
+# Subtest: composed curve/A/eth/1: currency, recipients, dependencies and consistency
+ok 575 - composed curve/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.26809
+  type: 'test'
+  ...
+# Subtest: composed curve/A/eth/4663: currency, recipients, dependencies and consistency
+ok 576 - composed curve/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.234447
+  type: 'test'
+  ...
+# Subtest: composed curve/B/imd/1: currency, recipients, dependencies and consistency
+ok 577 - composed curve/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.290632
+  type: 'test'
+  ...
+# Subtest: composed curve/B/imd/4663: currency, recipients, dependencies and consistency
+ok 578 - composed curve/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.464067
+  type: 'test'
+  ...
+# Subtest: composed curve/B/eth/1: currency, recipients, dependencies and consistency
+ok 579 - composed curve/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.276426
+  type: 'test'
+  ...
+# Subtest: composed curve/B/eth/4663: currency, recipients, dependencies and consistency
+ok 580 - composed curve/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.291775
+  type: 'test'
+  ...
+# Subtest: composed curve/C/imd/1: currency, recipients, dependencies and consistency
+ok 581 - composed curve/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.3162
+  type: 'test'
+  ...
+# Subtest: composed curve/C/imd/4663: currency, recipients, dependencies and consistency
+ok 582 - composed curve/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.245759
+  type: 'test'
+  ...
+# Subtest: composed curve/C/eth/1: currency, recipients, dependencies and consistency
+ok 583 - composed curve/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.244105
+  type: 'test'
+  ...
+# Subtest: composed curve/C/eth/4663: currency, recipients, dependencies and consistency
+ok 584 - composed curve/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.270956
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/A/imd/1: currency, recipients, dependencies and consistency
+ok 585 - composed pool-rules/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.268251
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/A/imd/4663: currency, recipients, dependencies and consistency
+ok 586 - composed pool-rules/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.216845
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/A/eth/1: currency, recipients, dependencies and consistency
+ok 587 - composed pool-rules/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.398514
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/A/eth/4663: currency, recipients, dependencies and consistency
+ok 588 - composed pool-rules/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.258712
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/B/imd/1: currency, recipients, dependencies and consistency
+ok 589 - composed pool-rules/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.528246
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/B/imd/4663: currency, recipients, dependencies and consistency
+ok 590 - composed pool-rules/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 7.515445
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/B/eth/1: currency, recipients, dependencies and consistency
+ok 591 - composed pool-rules/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.714569
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/B/eth/4663: currency, recipients, dependencies and consistency
+ok 592 - composed pool-rules/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.387292
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/C/imd/1: currency, recipients, dependencies and consistency
+ok 593 - composed pool-rules/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.353059
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/C/imd/4663: currency, recipients, dependencies and consistency
+ok 594 - composed pool-rules/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.253984
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/C/eth/1: currency, recipients, dependencies and consistency
+ok 595 - composed pool-rules/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.273822
+  type: 'test'
+  ...
+# Subtest: composed pool-rules/C/eth/4663: currency, recipients, dependencies and consistency
+ok 596 - composed pool-rules/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 1.307921
+  type: 'test'
+  ...
+# Subtest: composed donate/A/imd/1: currency, recipients, dependencies and consistency
+ok 597 - composed donate/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.649863
+  type: 'test'
+  ...
+# Subtest: composed donate/A/imd/4663: currency, recipients, dependencies and consistency
+ok 598 - composed donate/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.366514
+  type: 'test'
+  ...
+# Subtest: composed donate/A/eth/1: currency, recipients, dependencies and consistency
+ok 599 - composed donate/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.267048
+  type: 'test'
+  ...
+# Subtest: composed donate/A/eth/4663: currency, recipients, dependencies and consistency
+ok 600 - composed donate/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.466831
+  type: 'test'
+  ...
+# Subtest: composed donate/B/imd/1: currency, recipients, dependencies and consistency
+ok 601 - composed donate/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.342379
+  type: 'test'
+  ...
+# Subtest: composed donate/B/imd/4663: currency, recipients, dependencies and consistency
+ok 602 - composed donate/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.380099
+  type: 'test'
+  ...
+# Subtest: composed donate/B/eth/1: currency, recipients, dependencies and consistency
+ok 603 - composed donate/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.598317
+  type: 'test'
+  ...
+# Subtest: composed donate/B/eth/4663: currency, recipients, dependencies and consistency
+ok 604 - composed donate/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.585593
+  type: 'test'
+  ...
+# Subtest: composed donate/C/imd/1: currency, recipients, dependencies and consistency
+ok 605 - composed donate/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.290022
+  type: 'test'
+  ...
+# Subtest: composed donate/C/imd/4663: currency, recipients, dependencies and consistency
+ok 606 - composed donate/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.404606
+  type: 'test'
+  ...
+# Subtest: composed donate/C/eth/1: currency, recipients, dependencies and consistency
+ok 607 - composed donate/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.319356
+  type: 'test'
+  ...
+# Subtest: composed donate/C/eth/4663: currency, recipients, dependencies and consistency
+ok 608 - composed donate/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.292726
+  type: 'test'
+  ...
+# Subtest: composed pot/A/imd/1: currency, recipients, dependencies and consistency
+ok 609 - composed pot/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.802498
+  type: 'test'
+  ...
+# Subtest: composed pot/A/imd/4663: currency, recipients, dependencies and consistency
+ok 610 - composed pot/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.822966
+  type: 'test'
+  ...
+# Subtest: composed pot/A/eth/1: currency, recipients, dependencies and consistency
+ok 611 - composed pot/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.643481
+  type: 'test'
+  ...
+# Subtest: composed pot/A/eth/4663: currency, recipients, dependencies and consistency
+ok 612 - composed pot/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.512987
+  type: 'test'
+  ...
+# Subtest: composed pot/B/imd/1: currency, recipients, dependencies and consistency
+ok 613 - composed pot/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.670271
+  type: 'test'
+  ...
+# Subtest: composed pot/B/imd/4663: currency, recipients, dependencies and consistency
+ok 614 - composed pot/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.639454
+  type: 'test'
+  ...
+# Subtest: composed pot/B/eth/1: currency, recipients, dependencies and consistency
+ok 615 - composed pot/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.612914
+  type: 'test'
+  ...
+# Subtest: composed pot/B/eth/4663: currency, recipients, dependencies and consistency
+ok 616 - composed pot/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.850968
+  type: 'test'
+  ...
+# Subtest: composed pot/C/imd/1: currency, recipients, dependencies and consistency
+ok 617 - composed pot/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.609978
+  type: 'test'
+  ...
+# Subtest: composed pot/C/imd/4663: currency, recipients, dependencies and consistency
+ok 618 - composed pot/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.793731
+  type: 'test'
+  ...
+# Subtest: composed pot/C/eth/1: currency, recipients, dependencies and consistency
+ok 619 - composed pot/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.682274
+  type: 'test'
+  ...
+# Subtest: composed pot/C/eth/4663: currency, recipients, dependencies and consistency
+ok 620 - composed pot/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.589139
+  type: 'test'
+  ...
+# Subtest: composed custom/A/imd/1: currency, recipients, dependencies and consistency
+ok 621 - composed custom/A/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.752874
+  type: 'test'
+  ...
+# Subtest: composed custom/A/imd/4663: currency, recipients, dependencies and consistency
+ok 622 - composed custom/A/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.325708
+  type: 'test'
+  ...
+# Subtest: composed custom/A/eth/1: currency, recipients, dependencies and consistency
+ok 623 - composed custom/A/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.987893
+  type: 'test'
+  ...
+# Subtest: composed custom/A/eth/4663: currency, recipients, dependencies and consistency
+ok 624 - composed custom/A/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.775547
+  type: 'test'
+  ...
+# Subtest: composed custom/B/imd/1: currency, recipients, dependencies and consistency
+ok 625 - composed custom/B/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.372686
+  type: 'test'
+  ...
+# Subtest: composed custom/B/imd/4663: currency, recipients, dependencies and consistency
+ok 626 - composed custom/B/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.386842
+  type: 'test'
+  ...
+# Subtest: composed custom/B/eth/1: currency, recipients, dependencies and consistency
+ok 627 - composed custom/B/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.986931
+  type: 'test'
+  ...
+# Subtest: composed custom/B/eth/4663: currency, recipients, dependencies and consistency
+ok 628 - composed custom/B/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.304058
+  type: 'test'
+  ...
+# Subtest: composed custom/C/imd/1: currency, recipients, dependencies and consistency
+ok 629 - composed custom/C/imd/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.448507
+  type: 'test'
+  ...
+# Subtest: composed custom/C/imd/4663: currency, recipients, dependencies and consistency
+ok 630 - composed custom/C/imd/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.34286
+  type: 'test'
+  ...
+# Subtest: composed custom/C/eth/1: currency, recipients, dependencies and consistency
+ok 631 - composed custom/C/eth/1: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.285442
+  type: 'test'
+  ...
+# Subtest: composed custom/C/eth/4663: currency, recipients, dependencies and consistency
+ok 632 - composed custom/C/eth/4663: currency, recipients, dependencies and consistency
+  ---
+  duration_ms: 0.887096
+  type: 'test'
+  ...
+# Subtest: all fee recipient and buyback choices resolve to paying wallet, IMD treasury or same-pool burn
+ok 633 - all fee recipient and buyback choices resolve to paying wallet, IMD treasury or same-pool burn
+  ---
+  duration_ms: 20.724657
+  type: 'test'
+  ...
+# Subtest: known launch 2 question is a live rule and catches the contradictory historical output
+ok 634 - known launch 2 question is a live rule and catches the contradictory historical output
+  ---
+  duration_ms: 1.454644
+  type: 'test'
+  ...
+# Subtest: unresolved, shortened and zero recipients fail before the free check or launch
+ok 635 - unresolved, shortened and zero recipients fail before the free check or launch
+  ---
+  duration_ms: 1.681828
+  type: 'test'
+  ...
+# Subtest: external services and conversion pools need a deploy-chain address; forbidding other pools passes
+ok 636 - external services and conversion pools need a deploy-chain address; forbidding other pools passes
+  ---
+  duration_ms: 2.558394
+  type: 'test'
+  ...
+# Subtest: contradictions are reported with both sentences and corrected combinations pass
+ok 637 - contradictions are reported with both sentences and corrected combinations pass
+  ---
+  duration_ms: 7.750844
+  type: 'test'
+  ...
+# Subtest: fixed IMD fee conversion is shown as a conflict until the request explicitly opts out
+ok 638 - fixed IMD fee conversion is shown as a conflict until the request explicitly opts out
+  ---
+  duration_ms: 1.455046
+  type: 'test'
+  ...
+# Subtest: fixed-fact opt-outs must be positive sentences, and custom owner rules cannot contradict the footer
+ok 639 - fixed-fact opt-outs must be positive sentences, and custom owner rules cannot contradict the footer
+  ---
+  duration_ms: 1.498196
+  type: 'test'
+  ...
+# Subtest: saved treasury choices migrate to the owner-approved IMD treasury without a new field
+ok 640 - saved treasury choices migrate to the owner-approved IMD treasury without a new field
+  ---
+  duration_ms: 0.676373
+  type: 'test'
+  ...
+# Subtest: Pepe grids and all meta values match the reference character for character
+ok 641 - Pepe grids and all meta values match the reference character for character
+  ---
+  duration_ms: 28.751004
+  type: 'test'
+  ...
+# Subtest: Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction
+ok 642 - Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction
+  ---
+  duration_ms: 10.505856
+  type: 'test'
+  ...
+# Subtest: exported cast integration delivers real messages and unsubscribes on route cleanup
+ok 643 - exported cast integration delivers real messages and unsubscribes on route cleanup
+  ---
+  duration_ms: 113.082856
+  type: 'test'
+  ...
+1..643
+# tests 643
+# suites 0
+# pass 643
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1698.678571

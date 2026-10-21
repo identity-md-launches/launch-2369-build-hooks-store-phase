@@ -1,0 +1,49 @@
+npm notice run the-hooks-store@0.1.0 test:e2e
+npm notice run playwright test --fully-parallel --workers=1 --shard=6/6
+[WebServer] (node:32) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 32 tests using 1 worker, shard 6 of 6
+
+(node:44) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -   1 tests/launch.spec.ts:99:38 › Robinhood Anvil fork pays for type B, gates receipts, parses id and preserves preview bytes
+  ✓   2 tests/launch.spec.ts:127:1 › type C live hook prepares a copy-only pool call with on-chain decimals (872ms)
+  -   3 tests/launch.spec.ts:158:1 › a refresh recovers the approval receipt without another payment or approval
+  ✓   4 tests/launch.spec.ts:172:39 › launch review fits 320px and keeps the complete summary, fees and wallet steps (1.1s)
+  ✓   5 tests/launch.spec.ts:172:39 › launch review fits 390px and keeps the complete summary, fees and wallet steps (1.1s)
+  ✓   6 tests/launch.spec.ts:172:39 › launch review fits 821px and keeps the complete summary, fees and wallet steps (788ms)
+  ✓   7 tests/launch.spec.ts:172:39 › launch review fits 1440px and keeps the complete summary, fees and wallet steps (1.1s)
+  ✓   8 tests/launch.spec.ts:186:1 › Copy request copies the exact compact preview JSON (1.0s)
+  -   9 tests/live-relay.spec.ts:7:1 › one real free check from the production export through the owner relay; no wallet or launch
+  -  10 tests/live-rpc.spec.ts:4:1 › a fresh browser settles both real RPC histories within 30 seconds
+  ✓  11 tests/pond.spec.ts:24:1 › water click draws every cast frame in order with specified timings, then returns through idle (4.0s)
+  ✓  12 tests/pond.spec.ts:47:1 › reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it (1.0s)
+  ✓  13 tests/pond.spec.ts:58:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (1.3s)
+  ✓  14 tests/pond.spec.ts:77:1 › cast queue is capped at three and a keyboard press on the water also casts (827ms)
+  ✓  15 tests/store.spec.ts:20:3 › Store and Learn fit 320px; product and describe action visible (1.2s)
+  ✓  16 tests/store.spec.ts:20:3 › Store and Learn fit 390px; product and describe action visible (1.1s)
+  ✓  17 tests/store.spec.ts:20:3 › Store and Learn fit 1440px; product and describe action visible (1.8s)
+  ✓  18 tests/store.spec.ts:52:3 › Desktop bar remains one row at 821px, search >=120 and connected width unchanged (913ms)
+  ✓  19 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1024px, search >=120 and connected width unchanged (941ms)
+  ✓  20 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1440px, search >=120 and connected width unchanged (1.2s)
+  ✓  21 tests/store.spec.ts:75:1 › search shows the no-match state over the empty pond; Enter scrolls to Results (753ms)
+  ✓  22 tests/store.spec.ts:86:1 › a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains (1.0s)
+  ✓  23 tests/store.spec.ts:101:1 › describe saves required draft key, preserves other fields and opens the describe editor (891ms)
+  ✓  24 tests/store.spec.ts:115:1 › only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn (998ms)
+  ✓  25 tests/store.spec.ts:127:1 › swarm failure hides all metrics; successful response uses actual fields with honest labels (1.0s)
+  ✓  26 tests/store.spec.ts:134:1 › public config flag removes the in-progress banner (633ms)
+  ✓  27 tests/store.spec.ts:138:1 › keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger (965ms)
+  ✓  28 tests/store.spec.ts:146:1 › export works offline at a gateway subpath with local fonts and a single beige theme (919ms)
+  ✓  29 tests/store.spec.ts:158:1 › empty or blocked storage never silently loses a description (1.1s)
+  ✓  30 tests/store.spec.ts:169:1 › catalog navigation does not restore a stale Learn scroll (549ms)
+  ✓  31 tests/wallet.spec.ts:34:1 › EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects (1.1s)
+  ✓  32 tests/wallet.spec.ts:50:1 › mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay (1.1s)
+
+  4 skipped
+  28 passed (36.2s)
+npm notice
+npm notice New patch version of npm available! 12.2.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

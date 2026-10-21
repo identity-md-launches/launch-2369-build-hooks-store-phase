@@ -1,0 +1,48 @@
+npm notice run the-hooks-store@0.1.0 test:e2e
+npm notice run playwright test --fully-parallel --workers=1 --shard=4/6
+[WebServer] (node:32) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 32 tests using 1 worker, shard 4 of 6
+
+(node:44) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/job7-revision.spec.ts:98:3 › revision: supplied Buy back and burn example remains usable at 320px (789ms)
+  ✓   2 tests/job7-revision.spec.ts:41:6 › revision: lp-lock+hours locks both routes at 390px and removing a rule repairs it (975ms)
+  ✓   3 tests/job7-revision.spec.ts:41:6 › revision: max-buy+max-swap locks both routes at 390px and removing a rule repairs it (765ms)
+  ✓   4 tests/job7-revision.spec.ts:64:6 › revision: custom rule Every swap fee must be paid in ETH. locks Check and Launch at 390px (830ms)
+  ✓   5 tests/job7-revision.spec.ts:64:6 › revision: custom rule Use Chainlink VRF to draw the pot and pay the winner at 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. locks Check and Launch at 390px (814ms)
+  ✓   6 tests/job7-revision.spec.ts:64:6 › revision: custom rule Use the USDC/ETH pool for pricing. locks Check and Launch at 390px (890ms)
+  ✓   7 tests/job7-revision.spec.ts:64:6 › revision: custom rule Send swap fees to Bob. locks Check and Launch at 390px (831ms)
+  ✓   8 tests/job7-revision.spec.ts:64:6 › revision: custom rule Swap fees go to Bob. locks Check and Launch at 390px (870ms)
+  ✓   9 tests/job7-revision.spec.ts:75:3 › revision: recorded token_split locks 65% allocation through reload until an explicit opt-out is rechecked at 390px (1.3s)
+  ✓  10 tests/job7-revision.spec.ts:98:3 › revision: supplied Buy back and burn example remains usable at 390px (825ms)
+  ✓  11 tests/job7-revision.spec.ts:41:6 › revision: lp-lock+hours locks both routes at 1440px and removing a rule repairs it (921ms)
+  ✓  12 tests/job7-revision.spec.ts:41:6 › revision: max-buy+max-swap locks both routes at 1440px and removing a rule repairs it (830ms)
+  ✓  13 tests/job7-revision.spec.ts:64:6 › revision: custom rule Every swap fee must be paid in ETH. locks Check and Launch at 1440px (864ms)
+  ✓  14 tests/job7-revision.spec.ts:64:6 › revision: custom rule Use Chainlink VRF to draw the pot and pay the winner at 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. locks Check and Launch at 1440px (935ms)
+  ✓  15 tests/job7-revision.spec.ts:64:6 › revision: custom rule Use the USDC/ETH pool for pricing. locks Check and Launch at 1440px (969ms)
+  ✓  16 tests/job7-revision.spec.ts:64:6 › revision: custom rule Send swap fees to Bob. locks Check and Launch at 1440px (889ms)
+  ✓  17 tests/job7-revision.spec.ts:64:6 › revision: custom rule Swap fees go to Bob. locks Check and Launch at 1440px (958ms)
+  ✓  18 tests/job7-revision.spec.ts:75:3 › revision: recorded token_split locks 65% allocation through reload until an explicit opt-out is rechecked at 1440px (1.2s)
+  ✓  19 tests/job7-revision.spec.ts:98:3 › revision: supplied Buy back and burn example remains usable at 1440px (826ms)
+  ✓  20 tests/job7-revision.spec.ts:109:1 › revision: ETH pairing rejects an IMD payment sentence and an addressed fixed remainder conflicts (1.1s)
+  ✓  21 tests/job7.spec.ts:27:1 › mismatched currency names the sentence and blocks the free check and direct Launch until corrected (943ms)
+  ✓  22 tests/job7.spec.ts:45:1 › my wallet is resolved from the connected payer and treasury choices use the pinned address (919ms)
+  ✓  23 tests/job7.spec.ts:61:1 › an explicit recipient recovered from an older request stays visible and is not rerouted to my wallet (676ms)
+  ✓  24 tests/job7.spec.ts:70:1 › unavailable lending deployments and contradictory rules lock the composed request (789ms)
+  ✓  25 tests/job7.spec.ts:81:1 › fixed fact conflict is visible and persists on Launch until an explicit request opt-out is checked (1.4s)
+  ✓  26 tests/job7.spec.ts:100:1 › the IMD fee opt-out resolves the fixed ETH conversion default in the understood panel (856ms)
+  ✓  27 tests/job7.spec.ts:109:74 › blocked job at 320px shows both IMD question fields and Fix in Builder restores the exact submitted draft (1.4s)
+  ✓  28 tests/job7.spec.ts:109:74 › blocked job at 320px shows both IMD question fields and Fix in Builder restores an older on-chain request (1.2s)
+  ✓  29 tests/job7.spec.ts:109:74 › blocked job at 390px shows both IMD question fields and Fix in Builder restores the exact submitted draft (1.3s)
+  ✓  30 tests/job7.spec.ts:109:74 › blocked job at 390px shows both IMD question fields and Fix in Builder restores an older on-chain request (1.4s)
+  ✓  31 tests/job7.spec.ts:109:74 › blocked job at 1440px shows both IMD question fields and Fix in Builder restores the exact submitted draft (1.5s)
+  ✓  32 tests/job7.spec.ts:109:74 › blocked job at 1440px shows both IMD question fields and Fix in Builder restores an older on-chain request (1.5s)
+
+  32 passed (36.6s)
+npm notice
+npm notice New patch version of npm available! 12.2.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

@@ -1,0 +1,50 @@
+npm notice run the-hooks-store@0.1.0 test:e2e
+npm notice run playwright test --fully-parallel --workers=1 --shard=1/6
+[WebServer] (node:32) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 33 tests using 1 worker, shard 1 of 6
+
+(node:44) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/builder.spec.ts:30:3 › Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload (2.6s)
+  ✓   2 tests/builder.spec.ts:30:3 › Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload (2.4s)
+  ✓   3 tests/builder.spec.ts:30:3 › Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload (2.3s)
+  ✓   4 tests/builder.spec.ts:93:1 › first visit to the stack starts from the default stack; preview, cost box and disabled check (1.3s)
+  ✓   5 tests/builder.spec.ts:112:1 › pool share has no default; Continue stays disabled until 10 to 90 in steps of 5 (1.1s)
+  ✓   6 tests/builder.spec.ts:132:1 › 4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks (1.6s)
+  ✓   7 tests/builder.spec.ts:169:1 › risk tooltips at 320px: every sign stays readable on hover and keyboard focus (5.0s)
+  ✓   8 tests/builder.spec.ts:169:1 › risk tooltips at 390px: every sign stays readable on hover and keyboard focus (5.0s)
+  ✓   9 tests/builder.spec.ts:169:1 › risk tooltips at 1440px: every sign stays readable on hover and keyboard focus (5.7s)
+  ✓  10 tests/builder.spec.ts:223:1 › untested block names expose the status to assistive technology without a risk sign (997ms)
+  ✓  11 tests/builder.spec.ts:236:1 › dependent-removal status describes the removed block and clears after the next draft edit (5.8s)
+  ✓  12 tests/builder.spec.ts:257:1 › tested marks: a passing entry shows the tick, others say not yet tested (889ms)
+  ✓  13 tests/builder.spec.ts:266:1 › tested marks fall back to the bundled copy when the spec repository cannot be read (857ms)
+  ✓  14 tests/builder.spec.ts:273:1 › the shipped bundled copy is empty, so nothing shows a tick offline (844ms)
+  ✓  15 tests/builder.spec.ts:279:1 › type C and B settings, own code and the request shape (1.0s)
+  ✓  16 tests/hook.spec.ts:4:35 › Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning (1.1s)
+  ✓  17 tests/hook.spec.ts:4:35 › Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning (986ms)
+  ✓  18 tests/hook.spec.ts:4:35 › Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning (1.1s)
+  ✓  19 tests/hook.spec.ts:22:1 › owner forms validate address arrays and booleans; query-param viewing never unlocks controls (1.2s)
+  ✓  20 tests/hook.spec.ts:30:1 › My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo (1.0s)
+  ✓  21 tests/hook.spec.ts:35:1 › catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges (870ms)
+  ✓  22 tests/hook.spec.ts:41:1 › failed completion and unavailable result remain explicit, with addresses unknown (537ms)
+  ✓  23 tests/hook.spec.ts:44:1 › result failures are retryable without inventing a live deployment (901ms)
+  ✓  24 tests/hook.spec.ts:47:1 › header switches an unsupported wallet to Ethereum (944ms)
+  -  25 tests/hook.spec.ts:50:1 › Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()
+  ✓  26 tests/hook.spec.ts:59:1 › readings refresh after 20 seconds, and a connected non-owner stays locked (835ms)
+  -  27 tests/hook.spec.ts:65:1 › unknown-address lookup shows a known fork hook and prefills type C for a known token
+  ✓  28 tests/hook.spec.ts:74:1 › Connect keeps a wallet already on Robinhood Chain connected without a switch (748ms)
+  ✓  29 tests/job5.spec.ts:31:4 › Store regression at 320px: route, controls, resources and reflow (985ms)
+  ✓  30 tests/job5.spec.ts:31:4 › Catalog regression at 320px: route, controls, resources and reflow (662ms)
+  ✓  31 tests/job5.spec.ts:31:4 › Builder regression at 320px: route, controls, resources and reflow (775ms)
+  ✓  32 tests/job5.spec.ts:31:4 › Launch regression at 320px: route, controls, resources and reflow (643ms)
+  ✓  33 tests/job5.spec.ts:31:4 › Hook regression at 320px: route, controls, resources and reflow (680ms)
+
+  2 skipped
+  31 passed (56.0s)
+npm notice
+npm notice New patch version of npm available! 12.2.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

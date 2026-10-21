@@ -34,7 +34,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     if (!ownCode.prepared) throw new Error('Resolve your repository in the Builder before launching.');
     return { ...launchBody(ownCode.prepared, config, address), error: '' };
   } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [ownCode.prepared, config, address]);
-  const check = useSwarmCheck(config.relayUrl, ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null);
+  const check = useSwarmCheck(config.relayUrl, ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null, address);
   const identity = `${address}:${paymentChain}:${preview.bytes}`;
   const attemptKey = `hooks-store:launch-tx:${keccak256(stringToHex(identity))}`;
   const [storageNote, setStorageNote] = useState('');

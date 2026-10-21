@@ -1,0 +1,50 @@
+{
+  "stage": "before revision",
+  "method": "Real body(newDraft) composition followed by the existing pure safety functions, before source edits",
+  "cases": [
+    {
+      "case": "lp-lock + hours",
+      "findings": []
+    },
+    {
+      "case": "max-buy + max-swap",
+      "findings": []
+    },
+    {
+      "case": "paid in ETH",
+      "findings": []
+    },
+    {
+      "case": "VRF with payee",
+      "findings": []
+    },
+    {
+      "case": "named pool",
+      "findings": []
+    },
+    {
+      "case": "named recipient",
+      "findings": []
+    },
+    {
+      "case": "Buy back and burn",
+      "findings": [
+        {
+          "code": "contradiction",
+          "sentence": "Take 1% of every sell and buy my token back with it, then burn what was bought. No fees on buys.\nConflicts with: Take 1% of every sell and buy my token back with it, then burn what was bought. No fees on buys.",
+          "message": "The request both forbids fees and charges a fee. Remove one rule."
+        }
+      ]
+    },
+    {
+      "case": "fixed token_split 50 vs 65",
+      "findings": [],
+      "fixedFact": {
+        "id": "token_split",
+        "label": "Split: 10% to the swarm, the other 90% is yours: 50% into the pool, the rest to your wallet",
+        "state": "fixed",
+        "required": false
+      }
+    }
+  ]
+}

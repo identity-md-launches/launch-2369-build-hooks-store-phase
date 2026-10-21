@@ -1,0 +1,94 @@
+{
+  "scope": "All six reproduced job 7 review findings",
+  "unit": {
+    "passed": 643,
+    "failed": 0
+  },
+  "relayWorker": {
+    "passed": 9,
+    "failed": 0
+  },
+  "playwright": {
+    "passed": 188,
+    "skipped": 7,
+    "failed": 0,
+    "flaky": 0,
+    "durationMs": 232494.553,
+    "batches": 6
+  },
+  "routeWidths": {
+    "routes": [
+      "Store",
+      "Catalog",
+      "Builder",
+      "Launch",
+      "Hook",
+      "My hooks",
+      "Learn"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "combinations": 21
+  },
+  "composerMatrix": {
+    "individualBlockCases": 420,
+    "catalogPairVariants": 108,
+    "types": [
+      "A",
+      "B",
+      "C"
+    ],
+    "pairingSettings": [
+      "imd",
+      "eth"
+    ],
+    "chains": [
+      1,
+      4663
+    ],
+    "eachSupportedPairCheckedInBothOrders": true
+  },
+  "designProbe": {
+    "passed": 13,
+    "checks": 16,
+    "preservedStyleExceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "noPublicTransactionSent": true,
+  "sourceSha256": "f4c6a22bfea84874eda1791c9e475f30de151a2519f563b671d95710e2f91a71",
+  "liveRpc": {
+    "capturedAt": "2026-10-21T23:24:13.490Z",
+    "passed": true,
+    "liveRpcElapsedMs": 8892,
+    "status": "Read from Ethereum and Robinhood Chain. Refreshes every 20 seconds.",
+    "logCalls": {
+      "https://rpc.mevblocker.io/": 3,
+      "https://rpc.mainnet.chain.robinhood.com/": 69
+    },
+    "transports": {}
+  },
+  "exportIntegrity": true,
+  "submissionBudget": {
+    "limitBytes": 8388608,
+    "candidateFiles": 430,
+    "rawFileBytes": 11884243,
+    "conservativeUncompressedTarBytes": 12227584,
+    "completeSnapshotGitBundleBytes": 6816659,
+    "reservedMetadataBytes": 16384,
+    "headroomBytes": 1555565,
+    "protectedPathsChanged": [],
+    "dependencyOrCachePaths": [],
+    "submodules": [],
+    "excludedInputs": [
+      ".imd/",
+      "test/scratch/"
+    ],
+    "passed": true
+  }
+}

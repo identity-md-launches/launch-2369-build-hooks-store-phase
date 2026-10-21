@@ -1,4 +1,12 @@
-# Worker validation — job 7: launch safety
+# Worker validation — job 7 revision
+
+The six reported findings were reproduced and fixed; the accepted visual system, build/dependency configuration, contracts and economics remain. Source and the rebuilt `dist/` accompany this revision. Each finding has a decision in [.imd-responses.json](.imd-responses.json).
+
+Final revision checks: **643 unit tests**, **9 relay tests**, **188 Chromium cases** passed, with seven optional browser cases skipped and no failures/flaky cases. Typecheck and production build passed. All seven routes and the new correction flows were exercised at **320, 390 and 1440px**. A fresh browser settled both real public RPC histories in **8,892ms**. No real signature or transaction was sent. The offline design probe passed **13/16**, retaining the three established pixel-style exceptions.
+
+Current evidence, six-domain coverage, source findings and practical limits are in [tests/results/job7/REVISION.md](tests/results/job7/REVISION.md), [revision-summary.json](tests/results/job7/revision-summary.json) and the `revision-` reports/screenshots. Browser batches cover the entire suite after the final source build; the interrupted preliminary command is recorded separately. Screen-reader, physical-device, Safari/WebKit, native wallet-app and optional Anvil checks were not performed in this revision. Address association checks do not certify external contract code or arbitrary prose.
+
+# Original job 7 delivery record
 
 Validated on 2026-10-21 against SPEC **1.25** and the production export. These are worker observations, not independent certification. Current evidence is in [tests/results/job7](tests/results/job7/), with the requirement-by-requirement and six-domain review in [REVIEW.md](tests/results/job7/REVIEW.md).
 

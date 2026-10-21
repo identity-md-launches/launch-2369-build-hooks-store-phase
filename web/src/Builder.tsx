@@ -97,7 +97,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const [correction] = useState(loadCorrection);
   const text = ownCode.prepared ? compose(ownCode.prepared, address) : 'Resolve your repository in Settings to compose the request from its pinned source.';
   const requestJson = ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null;
-  const check = useSwarmCheck(config.relayUrl, requestJson);
+  const check = useSwarmCheck(config.relayUrl, requestJson, address);
   const issues = useMemo(() => [...validate(draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [draft, address, config.enabledDeployChains]);
   const bytes = ownCode.prepared ? bodyBytes(body(ownCode.prepared, address)) : 0;
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);

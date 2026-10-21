@@ -1,0 +1,11 @@
+{
+  "capturedAt": "2026-10-21T23:24:13.490Z",
+  "passed": true,
+  "liveRpcElapsedMs": 8892,
+  "status": "Read from Ethereum and Robinhood Chain. Refreshes every 20 seconds.",
+  "logCalls": {
+    "https://rpc.mevblocker.io/": 3,
+    "https://rpc.mainnet.chain.robinhood.com/": 69
+  },
+  "transports": {}
+}

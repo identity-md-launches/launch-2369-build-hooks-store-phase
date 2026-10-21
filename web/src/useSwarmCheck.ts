@@ -8,7 +8,7 @@ const CHECK_KEY = 'hooks-store:check:v1', IMPORT_KEY = 'hooks-store:import:v1';
 function read<T>(key: string): T | null { try { return JSON.parse(sessionStorage.getItem(key) ?? 'null'); } catch { return null; } }
 function save(key: string, value: unknown) { try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* In-memory state still works for this page. */ } }
 let recentCheck: Checked | null = null;
-export function useSwarmCheck(relay: string | null, json: string | null) {
+export function useSwarmCheck(relay: string | null, json: string | null, payingWallet?: string) {
   const [checked, setChecked] = useState<Checked | null>(() => {
     const value = recentCheck ?? read<Checked>(CHECK_KEY);
     try {
@@ -24,7 +24,7 @@ export function useSwarmCheck(relay: string | null, json: string | null) {
   const result = stale ? null : relevant?.result ?? null;
   const input = json ? JSON.parse(json) : null;
   const consistency = input ? checkConsistency(input) : [];
-  const conflicts = input && result ? fixedFactConflicts(input, result.facts) : [];
+  const conflicts = input && result ? fixedFactConflicts(input, result.facts, payingWallet) : [];
   const currentError = error || (!stale ? relevant?.error ?? '' : '');
   const gate = consistency.length ? 'Fix the request consistency findings before continuing.' : conflicts.length ? 'Resolve the conflicting fixed facts in the request and check again before launching.' : !relay ? '' : busy ? 'Wait for the free check to finish.' : currentError ? 'Retry the free check before continuing.' : stale ? 'Your request changed. Check it again before continuing.' : result?.blockers.length ? 'Resolve the swarm’s blockers and check again before launching.' : '';
   const run = async () => {

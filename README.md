@@ -61,6 +61,8 @@ Yield blocks have no verified Aave/Morpho deployment in this project, so they ar
 
 Fixed facts are compared with the request. Conflicts remain visible under **What the swarm understood** and lock both continuation and payment, even after navigation/reload. IMD’s conversion default is resolved by the composer’s explicit opt-out. Other supported conflicts show the exact request opt-out to add and require a fresh check. A check for different bytes never unlocks the changed request.
 
+The job 7 revision also checks the fixed `token_split` pool allocation and remainder address, resolving “your wallet” from the connected payer. It catches the liquidity-lock/trading-hours and unrestricted-sells/swap-limit conflicts, ordinary “paid in” settlement wording, plural fee recipients, and named service/pool dependencies whose own address is missing. An unrelated payout address cannot identify a service. Fee prohibitions retain their buy/sell scope, so the supplied **Buy back and burn** example remains usable. These are deterministic checks of request wording and explicit addresses, not certification of user-entered contracts.
+
 After confirmation, the full draft and request are saved by payment chain and request id in this browser. A blocked Hook page reads `blockedReason` and failed nodes’ `failureReason` through relay `GET /jobs/:id`, displaying their text unchanged. **Fix in Builder** restores the submitted draft beside those questions and retains the old request in a disclosure. Older launches recover their token, blocks, words, pairing, pool share, recipient, owner and source from the on-chain request. Unknown rules remain editable and are never silently dropped; oversized custom text must be shortened before continuing. A corrected relaunch is a new paid request, not an answer sent to the stopped job. Stored drafts are local to this browser; the chain request remains available without local storage.
 
 ## Type C: open the pool
@@ -107,6 +109,8 @@ node --test relay/worker.test.mjs
 node scripts/check-delivery.mjs
 # Launch-safety cases and retained regressions:
 npm --prefix web run test:e2e -- tests/job5.spec.ts tests/job6.spec.ts tests/job7.spec.ts
+# Review regressions, including corrected requests at all three widths:
+npm --prefix web run test:e2e -- tests/job7-revision.spec.ts
 # One real free check from the production export; no wallet/transaction:
 HOOKS_LIVE_RELAY=1 npm --prefix web run test:e2e -- tests/live-relay.spec.ts
 # Tool-only accessibility dependencies, kept outside the project:
@@ -123,5 +127,7 @@ node web/scripts/run-launch-checks.mjs --all --live
 The fork runner uses a public fixture payer, impersonated only inside loopback Anvil. It mocks that account's IMD balance with `anvil_setStorageAt`, verifies `balanceOf`, and runs type A and B approvals/requests against the forked real contracts. It asserts exact preview bytes, cross-chain deployment selection and parsed request ids. Browser tests cover receipt gating, wrong chain, signature rejection, zero price, refresh recovery, copy, pool conversion and responsive layouts. The default browser suite skips network-dependent cases unless enabled. Two older Ethereum-management fork checks remain separately optional; their setup is in `web/scripts/fork-setup.mjs` and `check-fork.mjs`.
 
 Actual job 7 results, the live free-check request/response, real RPC timing, screenshots for all seven routes at 320/390/1440, six-domain review and limitations are in [VALIDATION.md](VALIDATION.md) and [tests/results/job7](tests/results/job7/). [DESIGN.md](DESIGN.md) documents the final implementation. Earlier evidence remains under `tests/results/job6/`, `job5/`, `job4/` and prior directories. Results are worker observations, not independent certification.
+
+Revision findings and decisions are recorded in [.imd-responses.json](.imd-responses.json). Current revision evidence uses the `revision-` prefix under `tests/results/job7/`; [REVISION.md](tests/results/job7/REVISION.md) distinguishes those runs from the original delivery.
 
 The final export must stay with source and `web/package-lock.json`. No private keys, contracts deployed by this job, live payments, vendored registry, dependency caches or submodules are required.

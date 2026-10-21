@@ -4,8 +4,17 @@ import { checkedPrice, launchBody, approveLaunch, requestLaunch, launchError } f
 import { body, addBlock, newDraft } from '../src/lib/compose.ts';
 import config from '../public/site-config.json' with {type:'json'};
 import { hexToString } from '../web/node_modules/viem/_esm/index.js';
+import { checkRequest } from '../web/src/relay.ts';
 const account='0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 const site={...config,inProgress:false};
+test('reported unsafe composed drafts are refused by the production serializer and free-check client', async () => {
+ for (const text of ['Every swap fee must be paid in ETH.', 'Send swap fees to Bob.', `Use Chainlink VRF to draw the pot and pay the winner at ${account}.`, 'Use the USDC/ETH pool for pricing.']) {
+  const d=newDraft();d.settings={...d.settings,chain:1,pool:50,rem:account};d.blocks.push({id:'custom',p:{text}});
+  assert.throws(()=>launchBody(d,site,account), error=>error.message.includes(text));
+  // A loopback URL is deliberately unreachable: the local guard must reject before fetch.
+  await assert.rejects(checkRequest('http://127.0.0.1:1',body(d,account)), error=>error.message.includes(text));
+ }
+});
 function draft(type='A'){let d=newDraft();d.type=type;d.settings={...d.settings,chain:1,pool:50,hname:'PondGuard'};d=addBlock(d,'pause');return d;}
 function ctx(overrides={}){return {config:site,chainId:4663,account,bytes:launchBody(draft(),site,account).bytes,client:{getChainId:async()=>4663,readContract:async({functionName})=>functionName==='priceOf'?500000000000000000n:1000000000000000000n,simulateContract:async()=>({request:{}})},wallet:{getChainId:async()=>4663,getAddresses:async()=>[account],writeContract:async()=>{throw Object.assign(new Error('User rejected the request'),{code:4001});}},...overrides};}
 test('the preview is the exact compact UTF-8 JSON used in a cross-chain A/B/C request',()=>{
