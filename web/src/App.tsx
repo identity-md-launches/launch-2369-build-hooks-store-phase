@@ -3,6 +3,7 @@ import { useAccount } from 'wagmi';
 import { Landing } from './Landing';
 import { Catalog, Featured } from './Catalog';
 import { Learn } from './Learn';
+import { Builder } from './Builder';
 import { Connect } from './wallet/Connect';
 import type { SiteConfig } from './config';
 
@@ -33,18 +34,18 @@ export function App({ config }: { config: SiteConfig }) {
   return <>
     <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
     <header className="top"><div className="wrap top-in">
-      <a className="brand" href="#store" aria-label="The Hooks Store, home"><span className="hook-mark" aria-hidden="true">ʃ</span><span>The Hooks Store</span></a>
+      <a className="brand" href="#store" aria-label="The Hooks Store, home"><span className="hook-mark" aria-hidden="true">ʃ</span><span className="wordmark">The Hooks Store</span></a>
       <nav className="nav" aria-label="Main">{NAV.map(([id, label]) => <a href={`#${id}`} key={id} aria-current={active === id ? 'page' : undefined}>{label}</a>)}</nav>
       <form className="search" role="search" id="searchform" onSubmit={event => { event.preventDefault(); if (route === 'catalog') document.getElementById('catalog')?.scrollIntoView({ block: 'start' }); else location.hash = '#catalog'; }}>
         <label className="sr" htmlFor="q">Search hooks by name, token, block or request</label>
         <input id="q" name="q" type="search" placeholder="Search name, token, block or request" autoComplete="off" value={query} onChange={event => { setQuery(event.target.value); if (!isStore) location.hash = '#catalog'; }} />
       </form>
-      <span className="chainpill" title={selectedChain ? `${selectedChain.name}${selectedChain.testnet ? ' · test phase' : ''}` : 'Unsupported wallet network'}>{selectedChain?.name.replace(' Chain', '') ?? 'Network'}</span>
+      <span className="chainpill" title={selectedChain ? `${selectedChain.name}${selectedChain.testnet ? ' · test phase' : ''}` : 'Unsupported wallet network'}>{selectedChain ? `${selectedChain.name.replace(' Chain', '')}${selectedChain.testnet ? ' · test phase' : ''}` : 'Network'}</span>
       <Connect config={config} />
     </div></header>
     {config.inProgress && <div className="progress-banner">This site is being built; launches open when the banner goes away</div>}
     <main id="main" tabIndex={-1}>
-      {isStore ? <><Landing config={config} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} /></div></> : route === 'learn' ? <Learn /> : <section className="wrap page placeholder" aria-labelledby="placeholder-h"><div className="box"><h1 id="placeholder-h">{route === 'mine' ? 'My hooks' : route[0].toUpperCase() + route.slice(1)}</h1><p>This page arrives in a later job.</p><a className="btn primary" href="#store">Return to Store</a></div></section>}
+      {isStore ? <><Landing config={config} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : <section className="wrap page placeholder" aria-labelledby="placeholder-h"><div className="box"><h1 id="placeholder-h">{route === 'mine' ? 'My hooks' : route[0].toUpperCase() + route.slice(1)}</h1><p>This page arrives in a later job.</p><a className="btn primary" href="#store">Return to Store</a></div></section>}
     </main>
   </>;
 }

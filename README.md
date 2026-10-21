@@ -1,8 +1,8 @@
 # The Hooks Store
 
-Phase 1, job 1: a static React storefront for Uniswap v4 hooks. The delivered application is in `dist/`; `mockup/index.html` remains the unchanged design reference, with its original sample data. The application never redirects to the mockup.
+Phase 1, jobs 1 and 2: a static React storefront and Builder for Uniswap v4 hooks. The delivered application is in `dist/`; `mockup/index.html` remains the unchanged design reference, with its original sample data. The application never redirects to the mockup.
 
-Store includes the live ASCII pond, describe form, open-slot #ad strip, real launch snapshot, keyword search and filter rail. Learn contains the seven answers, eight source links and fourteen permissions from the mockup, with the ad duration corrected to 24 hours. Builder, Launch, Hook and My hooks show the requested later-job placeholder.
+Store includes the live ASCII pond, describe form, open-slot #ad strip, keyword search and filter rail. The catalog lists only hooks launched through this site (SPEC 3.1); job 3 reads them from chain, so for now it shows the empty pond panel ("Nothing on the pond yet", Describe a hook) with **0 hooks**, and any search or filter shows the no-match state. Learn contains the seven answers, eight source links and fourteen permissions from the mockup, with the ad duration at 24 hours. **Builder** (job 2) implements SPEC 3.2, 4 and 5. Launch, Hook and My hooks still show the later-job placeholder.
 
 ## Install, develop and rebuild
 
@@ -20,7 +20,7 @@ npm --prefix web run typecheck
 npm --prefix web run build
 ```
 
-Vite's root is this repository, its base is `./`, and the output is root `dist/`. The build includes the committed launch snapshot, site configuration, local fonts, wallet marks, favicon and share image. It does not contact the launch API. There are no required environment variables, private keys, relay credentials or project IDs.
+Vite's root is this repository, its base is `./`, and the output is root `dist/`. The build includes the site configuration, the empty bundled tested-marks file, local fonts, wallet marks, favicon and share image. It does not contact the launch API. `web/package.json` still lists a `snapshot` script from job 1; its script was removed with the snapshot (package manifests are outside this job's write scope), so do not run it. There are no required environment variables, private keys, relay credentials or project IDs.
 
 Preview the finished export at a gateway-like subpath:
 
@@ -33,22 +33,21 @@ Alternatively use `npm --prefix web run preview`. Serve the contents of `dist/` 
 
 Do not include `node_modules`, package caches or temporary browser reports in a submission. No ignore file was changed. Keep the source, `web/package.json`, `web/package-lock.json`, runtime assets and complete `dist/` together.
 
-## Regenerate the catalog
+## Builder
 
-Run from the repository root:
+Open `#builder`. The canvas reads as three numbered questions:
 
-```sh
-node scripts/snapshot-launches.mjs
-npm --prefix web run build
-```
+1. **What are you launching?** Type cards A (hook + new token + pool), B (hook only), C (hook for my existing token). The type decides which blocks are allowed and which settings show.
+2. **How do you want to build it?** DESCRIBE IT | STACK BLOCKS. A first visit shows the two-card chooser. Describe mode has the 3,000-character text area, four example chips, the blocks added from the palette as removable chips and the rule "if your words and a rule disagree, the rule wins". Blocks mode shows the token card (type A, BRING MY OWN / USE STANDARD TOKEN) and one card per block with its number, short label, fields, up/down/remove, the Who uses it line and what it adds to the hook page. The palette works in both modes; switching never drops words or blocks. The first visit to the stack, with no blocks yet, starts from the reviewed default stack (Swap fee, Anti-sniper window, Buyback jar).
+3. **Settings.** Deploy chain (enabled chains from `site-config.json`, others “phase 2”), pair, pool share (type A, empty until the user chooses 10–90 in steps of 5), remainder address, existing token and symbol (C), hook name (B and C), owner, and ADVANCED: START FROM MY OWN CODE.
 
-The script fetches `https://api.imd.fun/launches?limit=500`, then `/launches/:id` for `univ4_hook` and `evm_contracts` candidates. It includes native hook launches and contract launches whose actual job objective mentions “Uniswap v4 hook.” The latter may include related contracts, as the assignment's inclusion rule requires. Two requests run concurrently, with bounded retries for rate limits and temporary server failures. Any failed detail fetch leaves the previous complete file intact; replacement is atomic.
+The preview lists Type, Token or Hook, Chain, Words, Rules, Owner and Pool, the exact text inside a disclosure, and the cost box (0.5 IMD, 2 transactions, length out of 7,500, body size out of 16 KiB). CHECK WITH THE SWARM (FREE) is disabled and says it needs the relay. CONTINUE TO LAUNCH stays disabled while any 4.10 rule or field check fails; every failure is shown inline next to its field and listed under the button.
 
-Commit both `public/launches.json` and rebuilt `dist/launches.json`. The delivered snapshot was generated at **2026-10-21 07:56:14 UTC** from 500 index entries and contains **72 launches**: 64 native hook launches and 8 matching contract launches. Those are snapshot facts, not hardcoded UI counters.
-
-Normalized records retain original requests, source statuses, available identifiers and addresses. Unknown numbers, symbols and addresses remain `null`. Unknown names display “Unnamed hook.” Recognized numbered sentence templates produce block labels; unrecognized prose produces “Custom.” The Own source filter groups custom/imported requests. Parked, rejected and failed records display Failed, with the original status retained. Cards do not assert a new independent audit. The build does not verify deployed bytecode or refresh chain logs; those are later-job features.
-
-Optional `--output path` writes elsewhere. `--fixture path` accepts a saved JSON map from complete API URLs to response objects for offline pipeline testing. Unit tests also exercise the pipeline with saved public response fixtures under `tests/fixtures/`.
+- `src/blocks/catalog.json`: all 35 entries of SPEC 4 (2 token blocks, 33 behavior blocks including Custom rule) with `id, group, title, blurb, types, params` (defaults, limits, steps, units), `short`, `sentence` (ending with the exact 4.11 functions), `ownerPower, requires, excludes, replaces, owner, anyone, user, view, risk, who`. Templates use `{k}`, `{k:1}` (one decimal), `{k:n}` (digit groups), `{k:rest}` (100 minus k), `{@symbol}`. The Prize pot is in the Games and lotteries group.
+- `src/lib/compose.ts`: the 5.1 text for A, B and C, the 5.2 body (`univ4_hook` for A with `economics` only once the pool share is chosen and `customToken` only with Bring your own token; `evm_contracts` for B and C; `repoUrl` and `baseCommit` when both own-code fields are filled), the 4.10 rules and draft normalisation. It is pure TypeScript, used by the Builder and by `node --test`.
+- Risk blocks (Anti-sniper window, Max buy per wallet, Max swap size, Cooldown, Circuit breaker, Prize pot) show a small yellow `!` next to their name in the palette, on the card and in the summary; hover or focus shows “Heads up: this block is easy to work around or needs care.” and the block's risk sentence.
+- Tested marks (SPEC 4.14): at load the Builder fetches `blocksVerifiedUrl` from `site-config.json` (the spec repository's `evidence/blocks-verified.json` on raw.githubusercontent.com) and falls back to the bundled `public/blocks-verified.json`, which ships as `[]`. A block with a `passed: true` entry shows “✓ tested on Sepolia” on its card; every other block says “Not yet tested on Sepolia.” in its tooltip.
+- Drafts (type, mode, words, blocks, settings) persist under `localStorage` **`hooks-store:draft:v2`** and reopen after a reload. Text from the landing box arrives in the describe editor.
 
 ## Configuration and interactions
 
@@ -91,17 +90,18 @@ npm --prefix web run test:e2e
 
 For an external browser directory, set `PLAYWRIGHT_BROWSERS_PATH` consistently for installation and tests. The suite runs against the production export under `/preview/`, not the development server. Build first. Tests create temporary reports in `artifacts/` and `test/scratch/`; delivered compact results are in `tests/results/`.
 
-Actual worker validation: production build and strict TypeScript check passed; **11 unit tests and 24 Playwright tests passed**. Store and Learn were checked at 320, 390 and 1440 px; the desktop bar additionally passed at 821 and 1024 px with a twelve-character address. Tests cover search, filters, reset, draft storage, errors/retry, placeholders, banner configuration, offline fonts/assets, wallet states, cast frames/timings, reduced motion, pointer flight, splash and observer pause/resize.
+Actual worker validation (job 2, 2026-10-21): `npm --prefix web run typecheck` and `npm --prefix web run build` passed; **16 unit tests** (`tests/compose.test.mjs`, `tests/scene-data.test.mjs`) and **34 Playwright tests** passed in Chromium headless shell. The Builder suite runs the type/mode/switch/add/reorder/remove/reload flow at 320, 390 and 1440 px, plus the pool share, the 4.10 rules, risk signs and tooltips, tested marks with a passing entry, the fallback to the bundled copy and the shipped empty copy. Unit tests cover every catalog block under every allowed type with its 4.11 function names, the three fixtures `tests/fixtures/compose-{A,B,C}.txt` byte for byte, bodies under 16 KiB, the 5% rule, the swap-fee dependencies and the buy/sell exclusion. Job 1's header tests still pass at 821, 1024 and 1440 px with a twelve-character address. Outputs are in `tests/results/`.
 
-The pinned design probe passed 12 of 16 checks. Four heuristic flags are documented exceptions to preserve the specified mockup: capitals, metric labels, marquee, and combined hard borders/shadows. All eight supplied audit findings reproduced against the original and have regression coverage in the application. See [VALIDATION.md](VALIDATION.md), [DESIGN.md](DESIGN.md), and [tests/results/](tests/results/) for evidence, fixes and limitations.
+The pinned design probe passed 11 of 16 checks; the five flags (capitals, kicker labels, type sizes, the marquee, border plus shadow) come from the mockup and the brief and are documented in [VALIDATION.md](VALIDATION.md). See [DESIGN.md](DESIGN.md) and [tests/results/](tests/results/) for evidence, fixes and limitations.
 
 Real wallet installations, signing, on-chain transactions, Safari/Firefox and a screen-reader session were not tested. Lighthouse was not run; no score is claimed. Connection behavior uses an EIP-6963 fixture with a real public address, without a private key. No production contract action was sent.
 
 ## Source map and attribution
 
-- `web/src/`: React pages, wallet adapter, draft interface and the single `styles.css`.
+- `web/src/`: React pages (`Builder.tsx` for job 2), wallet adapter, draft storage and the single `styles.css`.
 - `src/scene/`: canvas implementation, sprite data and cast integration.
-- `scripts/`: snapshot generator, static preview server and share-image renderer.
+- `src/blocks/catalog.json`, `src/lib/compose.ts`: block catalog, composer, body encoder and rules.
+- `scripts/`: static preview server and share-image renderer.
 - `public/`: complete local runtime assets and configuration.
 - `tests/` and `web/tests/`: fixture/unit tests and browser interactions.
 - `SPEC.md`, `mockup/`, `jobs/`, `evidence/`: original project inputs, preserved.

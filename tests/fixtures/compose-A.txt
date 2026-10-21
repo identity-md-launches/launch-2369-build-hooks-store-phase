@@ -1,0 +1,11 @@
+Launch Pondside (POND) with a Uniswap v4 hook on Sepolia, paired with ETH.
+Token: Pondside (POND), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.
+The hook does exactly the following, and nothing else:
+1. Take 1.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to my wallet. Expose claimFees() that anyone may call to redeem claims to the recipient.
+2. For the first 10 minutes after the pool opens, each wallet may buy at most 1.0% of the total supply in total; larger buys revert. Expose windowEndsAt() as a view.
+3. Collect 1.0% of the ETH side of every swap into a jar held by the hook. Whenever the jar holds at least 0.1 ETH, anyone may call buyback() to buy POND from this pool with the whole jar and burn the bought tokens. The swap that fills the jar does not revert if the buyback fails. Expose buyback() that anyone may call and jar() as a view.
+No owner functions, no backend signer, no upgrade path.
+Fees are always taken from the ETH (pair currency) side, never from POND; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.
+Enable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.
+Pool: 50% of my 90% share seeds the pool; the remainder goes to the paying wallet.
+Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.

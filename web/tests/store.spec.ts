@@ -1,13 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Launch } from '../src/types';
-const snapshot = JSON.parse(readFileSync(resolve('../public/launches.json'), 'utf8'));
-const launches: Launch[] = snapshot.launches;
 const config = JSON.parse(readFileSync(resolve('../public/site-config.json'), 'utf8'));
 const swarm = { health: { reachable: true, agentsOnline: 1044, jobsDoneLastDay: 144 }, counts: { launchesLive: 738 } }; // Saved public response fields, never production fallback.
 async function ready(page: Page, hash = '#store') {
   await page.route('https://api.imd.fun/swarm', route => route.fulfill({ json: swarm }));
+  await page.route('https://raw.githubusercontent.com/**', route => route.abort());
   await page.goto(hash);
   await expect(page.locator('main')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
@@ -23,7 +21,13 @@ for (const width of [320, 390, 1440]) {
     page.on('pageerror', error => errors.push(error.message));
     page.on('response', response => { if (response.url().startsWith('http://127.0.0.1:4173') && response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
     await ready(page); await noOverflow(page);
-    await expect(page.locator('.grid .card')).toHaveCount(launches.length);
+    await expect(page.locator('.grid .card')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Nothing on the pond yet' })).toBeVisible();
+    await expect(page.locator('.result-count')).toHaveText('0 hooks');
+    await expect(page.locator('.eyebrow')).toHaveText('Uniswap v4 hooks · built by the IMD swarm');
+    await expect(page.locator('.eyebrow')).toHaveCSS('font-family', /Press Start 2P/); await expect(page.locator('.eyebrow')).toHaveCSS('text-transform', 'uppercase');
+    await expect(page.locator('.eyebrow')).toHaveCSS('color', 'rgb(30, 90, 58)');
+    await expect(page.locator('.lede')).toHaveText('Describe the hook you want, or stack reviewed blocks. The swarm writes it, tests it, audits it and launches it. You pay 0.5 IMD and gas.');
     const button = await page.getByRole('button', { name: 'Describe it', exact: true }).boundingBox();
     expect(button!.y + button!.height).toBeLessThan(844);
     await expect(page.getByRole('heading', { name: 'Stack blocks. Cast a hook.' })).toBeVisible();
@@ -54,55 +58,57 @@ for (const width of [821, 1024, 1440]) {
     expect((await page.locator('#searchform').boundingBox())!.width).toBeGreaterThanOrEqual(120);
     expect(Math.max(...boxes.map(b => b.top))).toBeLessThan(Math.min(...boxes.map(b => b.bottom)));
     expect(Math.max(...boxes.map(b => b.right))).toBeLessThanOrEqual(width);
+    await expect(page.locator('.chainpill')).toHaveText('Sepolia · test phase');
+    if (width >= 1141) {
+      await expect(page.locator('.hook-mark')).toHaveCSS('font-size', '30px'); await expect(page.locator('.hook-mark')).toHaveCSS('font-family', /VT323/);
+      await expect(page.locator('.brand')).toHaveCSS('gap', '10px'); await expect(page.locator('.wordmark')).toHaveCSS('font-size', '12px');
+      await expect(page.locator('.nav a').first()).toHaveCSS('padding', '12px 10px'); await expect(page.locator('.wordmark')).toBeVisible();
+    }
     await noOverflow(page);
   });
 }
-test('keyword search indexes every word including request-only remainder; Enter scrolls to Results', async ({ page }) => {
-  await ready(page); await expect(page.locator('.card')).toHaveCount(launches.length);
+test('search shows the no-match state over the empty pond; Enter scrolls to Results', async ({ page }) => {
+  await ready(page); await expect(page.getByRole('heading', { name: 'Nothing on the pond yet' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Describe a hook' })).toHaveAttribute('href', '#builder');
   const search = page.getByRole('searchbox');
   await search.fill('hamster remainder');
-  await expect(page.locator('.card').filter({ hasText: 'HamsterHook' })).not.toHaveCount(0);
-  const matches = launches.filter(l => [l.name, l.symbol, l.summary, l.request, ...l.blocks].join(' ').toLowerCase().includes('hamster') && [l.name, l.symbol, l.summary, l.request, ...l.blocks].join(' ').toLowerCase().includes('remainder'));
-  await expect(page.locator('.card')).toHaveCount(matches.length);
+  await expect(page.getByText('No hooks match.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nothing on the pond yet' })).toHaveCount(0);
   await search.press('Enter'); await expect(page).toHaveURL(/#catalog$/);
   await expect(page.getByRole('heading', { name: 'Results for “hamster remainder”' })).toBeInViewport();
-  await search.fill('HAMSTER impossibleword'); await expect(page.locator('.card')).toHaveCount(0);
-  await expect(page.getByText('No hooks match.', { exact: false })).toBeVisible();
+  await expect(page.locator('.result-count')).toHaveText('0 hooks');
 });
-test('all filters and sorts change results immediately, and reset restores status, search and all groups/chains', async ({ page }) => {
-  await ready(page, '#catalog'); await expect(page.locator('.card')).toHaveCount(launches.length);
+test('a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains', async ({ page }) => {
+  await ready(page, '#catalog'); await expect(page.locator('.empty-pond')).toBeVisible();
   await page.getByRole('checkbox', { name: 'Ethereum', exact: true }).uncheck();
-  await expect(page.locator('.card')).toHaveCount(launches.filter(l => l.chainId !== 1).length);
+  await expect(page.getByText('No hooks match.', { exact: false })).toBeVisible();
   await page.getByRole('radio', { name: 'Live only', exact: true }).check();
-  await expect(page.locator('.card')).toHaveCount(launches.filter(l => l.chainId !== 1 && l.status === 'live').length);
   await page.getByRole('checkbox', { name: 'Own source', exact: true }).uncheck();
-  await expect(page.locator('.card')).toHaveCount(launches.filter(l => l.chainId !== 1 && l.status === 'live' && l.groups.some(g => g !== 'custom')).length);
-  await page.getByRole('radio', { name: 'In progress', exact: true }).check();
   await page.getByRole('searchbox').fill('no-such-hook');
   await page.getByRole('button', { name: 'Clear search and filters' }).click();
   await expect(page.getByRole('radio', { name: 'All', exact: true })).toBeChecked();
-  await expect(page.getByRole('searchbox')).toHaveValue(''); await expect(page.locator('.card')).toHaveCount(launches.length);
+  await expect(page.getByRole('searchbox')).toHaveValue('');
   await expect(page.getByRole('checkbox', { name: 'Ethereum', exact: true })).toBeChecked();
   await expect(page.getByRole('checkbox', { name: 'Own source', exact: true })).toBeChecked();
-  await page.getByRole('combobox', { name: 'Sort' }).selectOption('name');
-  const names = await page.locator('.card h3').allTextContents();
-  const expected = [...launches].sort((a, b) => a.name.localeCompare(b.name));
-  expect(names[0]).toContain(expected[0].name);
-  await page.getByRole('combobox', { name: 'Sort' }).selectOption('oldest');
-  expect(await page.locator('.card').first().getAttribute('data-launch-id')).toBe(launches.at(-1)!.id);
+  await expect(page.locator('.empty-pond')).toBeVisible(); await expect(page.locator('.card')).toHaveCount(0);
+  expect(await page.evaluate(() => performance.getEntriesByType('resource').some(r => r.name.includes('launches.json')))).toBe(false);
 });
-test('describe saves required draft key, preserves other fields and opens a placeholder', async ({ page }) => {
+test('describe saves required draft key, preserves other fields and opens the describe editor', async ({ page }) => {
   await ready(page);
   await page.evaluate(() => localStorage.setItem('hooks-store:draft:v2', JSON.stringify({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 11155111 } })));
   const prompt = 'Send 1% of every buy to a prize pot';
   await page.getByRole('textbox', { name: 'Describe your hook' }).fill(prompt);
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await expect(page).toHaveURL(/#builder$/);
-  await expect(page.getByText('This page arrives in a later job.')).toBeVisible();
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hooks-store:draft:v2')!))).toEqual({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 11155111 }, prompt, mode: 'prompt' });
+  await expect(page.getByRole('textbox', { name: /What should it do/ })).toHaveValue(prompt);
+  await expect(page.getByRole('button', { name: /Hook only/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.added .chip')).toHaveText(['owner can pause✕']);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('hooks-store:draft:v2')!));
+  expect(saved).toMatchObject({ type: 'B', mode: 'prompt', prompt, settings: { chain: 11155111 } });
+  expect(saved.blocks.map((b: { id: string }) => b.id)).toEqual(['token', 'pause']);
 });
 test('all deferred routes remain honest placeholders', async ({ page }) => {
-  for (const route of ['builder', 'launch', `hook/${launches[0].chainId}/${launches[0].id}`, 'mine']) {
+  for (const route of ['launch', 'hook/11155111/0x01', 'mine']) {
     await ready(page, '#' + route); await expect(page.getByText('This page arrives in a later job.')).toBeVisible();
     await expect(page.locator('main button')).toHaveCount(0);
   }
@@ -129,12 +135,6 @@ test('public config flag removes the in-progress banner', async ({ page }) => {
   await page.route('**/site-config.json', route => route.fulfill({ json: { ...config, inProgress: false } }));
   await ready(page); await expect(page.locator('.progress-banner')).toHaveCount(0);
 });
-test('catalog load failure offers a working retry without invented cards', async ({ page }) => {
-  let fail = true;
-  await page.route('**/launches.json', route => fail ? route.fulfill({ status: 503, body: 'Unavailable' }) : route.fulfill({ json: snapshot }));
-  await ready(page, '#catalog'); await expect(page.getByRole('button', { name: 'Retry catalog' })).toBeVisible(); await expect(page.locator('.card')).toHaveCount(0);
-  fail = false; await page.getByRole('button', { name: 'Retry catalog' }).click(); await expect(page.locator('.card')).toHaveCount(launches.length);
-});
 test('keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger', async ({ page }) => {
   await ready(page); await page.keyboard.press('Tab'); await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   await page.keyboard.press('Enter'); await expect(page.locator('main')).toBeFocused();
@@ -146,7 +146,7 @@ test('keyboard focus reaches main action; wallet dialog traps focus, closes on E
 test('export works offline at a gateway subpath with local fonts and a single beige theme', async ({ page }) => {
   await page.route('**/*', route => route.request().url().startsWith('http://127.0.0.1:4173/') ? route.continue() : route.abort());
   await page.emulateMedia({ colorScheme: 'dark' }); await page.goto('#store');
-  await expect(page.locator('.card')).toHaveCount(launches.length); await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator('.empty-pond')).toBeVisible(); await page.evaluate(() => document.fonts.ready);
   expect(await page.evaluate(() => ['Press Start 2P', 'Pixelify Sans', 'VT323'].every(f => document.fonts.check(`16px "${f}"`)))).toBe(true);
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(233, 223, 195)'); await expect(page.locator('.stats')).toHaveCount(0);
   const assets = await page.locator('script[src],link[rel=stylesheet]').evaluateAll(els => els.map(el => el.getAttribute('src') ?? el.getAttribute('href')));
@@ -166,16 +166,16 @@ test('empty or blocked storage never silently loses a description', async ({ pag
   await expect(page).toHaveURL(/#store$/); await expect(page.getByRole('textbox', { name: 'Describe your hook' })).toHaveValue('Keep this description');
   await expect(page.getByRole('alert')).toContainText('Allow site storage and try again.');
 });
-test('catalog navigation does not restore a stale Learn scroll when snapshot cards arrive', async ({ page }) => {
+test('catalog navigation does not restore a stale Learn scroll', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 }); await ready(page, '#learn');
   await page.evaluate(() => {
     document.querySelectorAll<HTMLDetailsElement>('.learn details').forEach(detail => { detail.open = true; });
     document.querySelector('.permissions')!.scrollIntoView({ block: 'start' });
   });
   expect(await page.evaluate(() => scrollY)).toBeGreaterThan(2000);
-  await page.goto('#catalog'); await expect(page.locator('.card')).toHaveCount(launches.length);
+  await page.goto('#catalog'); await expect(page.locator('.empty-pond')).toBeVisible();
   const top = await page.locator('#catalog').evaluate(el => el.getBoundingClientRect().top);
   const headerBottom = await page.locator('.top').evaluate(el => el.getBoundingClientRect().bottom);
   expect(top).toBeGreaterThanOrEqual(headerBottom);
-  await expect(page.getByRole('heading', { name: 'On the pond' })).toBeInViewport();
+  await expect(page.getByRole('heading', { name: 'On the pond', exact: true })).toBeInViewport();
 });

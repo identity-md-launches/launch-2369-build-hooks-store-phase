@@ -2,22 +2,27 @@
 > the-hooks-store@0.1.0 test
 > node --test ../tests/*.test.mjs
 
-✔ Pepe grids and all meta values match the reference character for character (8.954148ms)
-✔ Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction (4.091658ms)
-✔ exported cast integration delivers real messages and unsubscribes on route cleanup (69.416947ms)
-✔ saved API fixtures: include native hooks and contracts whose actual job objective mentions a v4 hook (1.503188ms)
-✔ preserve real identifiers, request text and addresses, without reward or verifier payloads (2.290115ms)
-✔ missing metadata remains absent; names use actual artifacts and never synthesize a symbol or launch number (1.344241ms)
-✔ parse the saved spec request into exact block labels, ignoring numeric amounts in the prose (78.560897ms)
-✔ status distinguishes failed and parked launches from work in progress (2.276665ms)
-✔ fetch index then candidate details, deduplicate, preserve sorting, skip unrelated kinds (2.108323ms)
-✔ a failed or mismatched detail rejects the snapshot; the last complete file survives (8.878266ms)
-✔ invalid index and chain metadata are rejected instead of becoming an empty success (1.053957ms)
-ℹ tests 11
+✔ catalog has every section 4 block with the required fields (1.844736ms)
+✔ every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions (6.102466ms)
+✔ blocks a launch type does not allow are dimmed in the palette and left out of the request (0.439687ms)
+✔ composed text equals the three fixtures byte for byte (3.712483ms)
+✔ words and rules together: numbered rules win; owner sentence names the functions; last line keeps names (0.252753ms)
+✔ request bodies follow 5.2 for every type and stay under 16 KiB (2.09449ms)
+✔ pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5 (1.045905ms)
+✔ the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot (0.471877ms)
+✔ swap-fee dependencies: fade, split and LP share need it and leave with it (0.517126ms)
+✔ buy/sell fees and the swap fee exclude each other; each block once (0.301684ms)
+✔ reorder keeps the token first; bring-your-own token replaces the standard one (0.412726ms)
+✔ field limits produce inline issues (0.397996ms)
+✔ job 1 landing drafts open in the describe editor (0.198492ms)
+✔ Pepe grids and all meta values match the reference character for character (6.477103ms)
+✔ Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction (5.282364ms)
+✔ exported cast integration delivers real messages and unsubscribes on route cleanup (27.784925ms)
+ℹ tests 16
 ℹ suites 0
-ℹ pass 11
+ℹ pass 16
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 475.857855
+exit 0

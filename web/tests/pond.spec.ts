@@ -62,7 +62,8 @@ test('scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flockin
   await page.mouse.move(box.x + fish.x + 2, box.y + fish.y); await page.clock.runFor(200);
   expect((await snapshot(page)).smallFish.some(f => f.panic > 0)).toBe(true);
   await waterClick(page, 180); expect((await snapshot(page)).splash.x).toBe(180);
-  await page.evaluate(() => { const host = document.getElementById('landing')!; scrollTo(0, host.offsetTop + host.offsetHeight + 200); }); await page.clock.runFor(200);
+  // The catalog is empty until job 3, so give the page room to scroll the landing out of view.
+  await page.evaluate(() => { document.body.style.paddingBottom = '2000px'; const host = document.getElementById('landing')!; scrollTo(0, host.offsetTop + host.offsetHeight + 200); }); await page.clock.runFor(200);
   await expect.poll(async () => (await snapshot(page)).visible).toBe(false);
   const paused = (await snapshot(page)).frames; await page.clock.runFor(3000); expect((await snapshot(page)).frames).toBe(paused);
   await page.evaluate(() => scrollTo(0, 0)); await page.clock.runFor(200);

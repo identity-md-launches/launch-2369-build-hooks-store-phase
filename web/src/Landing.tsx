@@ -56,9 +56,9 @@ export function Landing({ config }: { config: SiteConfig }) {
       cast('A cast on the pond · just for practice.');
     }} />
     <div className="landing-copy">
-      <p className="eyebrow">Uniswap v<span className="num">4</span> hooks · built by the IMD swarm</p>
+      <p className="eyebrow">Uniswap v4 hooks · built by the IMD swarm</p>
       <h1>Stack blocks.<br />Cast a hook.</h1>
-      <p className="lede">Describe a hook or stack reviewed blocks.<br className="desktop-break" /> The IMD swarm builds, tests, audits and launches it for <span className="num">0.5 IMD</span> and gas.</p>
+      <p className="lede">Describe the hook you want, or stack reviewed blocks. The swarm writes it, tests it, audits it and launches it. You pay <span className="num">0.5 IMD</span> and gas.</p>
       <form className="prompt" onSubmit={submit}>
         <label className="sr" htmlFor="landing-q">Describe your hook</label>
         <input ref={input} id="landing-q" name="prompt" maxLength={3000} value={prompt} onChange={e => { setPrompt(e.target.value); setError(''); }} aria-invalid={!!error} aria-describedby={error ? 'draft-error' : undefined} placeholder="What should your hook do? e.g. 1% of every buy goes to a prize pot" />

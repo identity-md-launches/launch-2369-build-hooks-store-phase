@@ -8,6 +8,7 @@
   "tradeUrlTemplates": {},
   "poolOpeningDefaults": null,
   "swarmUrl": "https://api.imd.fun/swarm",
+  "blocksVerifiedUrl": "https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json",
   "chains": [
     { "id": 11155111, "name": "Sepolia", "rpcUrl": "https://11155111.rpc.thirdweb.com", "explorerUrl": "https://sepolia.etherscan.io", "testnet": true },
     { "id": 4663, "name": "Robinhood Chain", "rpcUrl": "https://rpc.mainnet.chain.robinhood.com", "explorerUrl": "https://robinhoodchain.blockscout.com", "testnet": false },

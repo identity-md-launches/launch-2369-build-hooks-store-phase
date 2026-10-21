@@ -1,7 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
-const snapshot = JSON.parse(readFileSync('../public/launches.json', 'utf8'));
-const payer: string = snapshot.launches.find((l: { payer: string | null }) => l.payer).payer;
+// A real public payer address from job 1's saved launch snapshot; no private key is involved.
+const payer = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 async function walletFixture(page: Page, reject = false) {
   await page.addInitScript(({ account, shouldReject }) => {
     const testWindow = window as unknown as Window & { walletFixture: { reject: boolean; events: Record<string, ((value: unknown) => void)[]>; methods: string[] } };
