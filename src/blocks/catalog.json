@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "groups": [
     { "id": "token", "title": "Token" },
     { "id": "fees", "title": "Fees" },
@@ -35,10 +35,11 @@
       "params": [
         { "k": "rate", "label": "Rate", "type": "number", "default": 1.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "%" },
         { "k": "applies", "label": "Applies to", "type": "select", "default": "buy and sell", "options": ["buy and sell", "buy", "sell"] },
-        { "k": "to", "label": "Send to", "type": "select", "default": "my wallet", "options": ["my wallet", "treasury address", "burn (buy and burn)"] }
+        { "k": "to", "label": "Send to", "type": "select", "default": "my wallet", "options": ["my wallet", "IMD's treasury", "burn (buy and burn)"] }
       ],
       "short": "{rate:1}% on every {applies} → {to}",
-      "sentence": "Take {rate:1}% of the ETH side of every {applies} as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to {to}. Expose claimFees() that anyone may call to redeem claims to the recipient.",
+      "sentence": "Take {rate:1}% of the {@pair} side of every {applies} as a hook fee, settled in {@pair} inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and {@destination}. Expose claimFees() that anyone may call to redeem claims to the recipient.",
+      "legacySentences": ["Take {rate:1}% of the ETH side of every {applies} as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to {to}. Expose claimFees() that anyone may call to redeem claims to the recipient."],
       "anyone": [{ "sig": "claimFees()", "label": "Send collected fees to the recipient" }],
       "who": "Runs itself; fees reach the recipient automatically." },
     { "id": "fee-fade", "group": "fees", "title": "Fee that fades", "blurb": "Starts high at launch, settles to a floor.", "types": ["A", "B", "C"], "requires": "swap-fee",
@@ -48,26 +49,29 @@
         { "k": "mins", "label": "Over", "type": "number", "default": 30, "min": 1, "max": 1440, "step": 1, "unit": "minutes" }
       ],
       "short": "{start:1}% → {end:1}% over {mins} min",
-      "sentence": "The hook fee starts at {start:1}% of the ETH side of every swap when the pool opens and decreases linearly to {end:1}% over the first {mins} minutes, then stays at {end:1}%. Expose currentFeeBps() as a view.",
+      "sentence": "Replace the Swap fee block’s rate schedule: the hook fee starts at {start:1}% of the {@pair} side of every swap when the pool opens and decreases linearly to {end:1}% over the first {mins} minutes, then stays at {end:1}%, settled in {@pair} inside the swap that paid it and {@destination}. Expose currentFeeBps() as a view.",
+      "legacySentences": ["The hook fee starts at {start:1}% of the ETH side of every swap when the pool opens and decreases linearly to {end:1}% over the first {mins} minutes, then stays at {end:1}%. Expose currentFeeBps() as a view."],
       "view": [{ "sig": "currentFeeBps()", "label": "The fee right now" }],
       "who": "Runs itself." },
     { "id": "fee-dir", "group": "fees", "title": "Different buy and sell fees", "blurb": "One rate for buys, another for sells.", "types": ["A", "B", "C"], "excludes": "swap-fee",
       "params": [
         { "k": "buy", "label": "Buy fee", "type": "number", "default": 0.5, "min": 0, "max": 5, "step": 0.1, "unit": "%" },
         { "k": "sell", "label": "Sell fee", "type": "number", "default": 2.0, "min": 0, "max": 5, "step": 0.1, "unit": "%" },
-        { "k": "to", "label": "Send to", "type": "select", "default": "my wallet", "options": ["my wallet", "treasury address"] }
+        { "k": "to", "label": "Send to", "type": "select", "default": "my wallet", "options": ["my wallet", "IMD's treasury"] }
       ],
       "short": "buy {buy:1}%, sell {sell:1}% → {to}",
-      "sentence": "Take {buy:1}% of the ETH side of every buy and {sell:1}% of the ETH side of every sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to {to}. Expose claimFees() that anyone may call to redeem claims to the recipient.",
+      "sentence": "Take {buy:1}% of the {@pair} side of every buy and {sell:1}% of the {@pair} side of every sell as a hook fee, settled in {@pair} inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and {@destination}. Expose claimFees() that anyone may call to redeem claims to the recipient.",
+      "legacySentences": ["Take {buy:1}% of the ETH side of every buy and {sell:1}% of the ETH side of every sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to {to}. Expose claimFees() that anyone may call to redeem claims to the recipient."],
       "anyone": [{ "sig": "claimFees()", "label": "Send collected fees to the recipient" }],
       "who": "Runs itself." },
     { "id": "fee-size", "group": "fees", "title": "Whale fee", "blurb": "Big swaps pay an extra fee.", "types": ["A", "B", "C"],
       "params": [
-        { "k": "above", "label": "Swaps above", "type": "number", "default": 1, "min": 0.01, "max": 10000, "step": 0.01, "unit": "ETH" },
+        { "k": "above", "label": "Swaps above", "type": "number", "default": 1, "min": 0.01, "max": 10000, "step": 0.01, "unit": "{@pair}" },
         { "k": "extra", "label": "Extra fee", "type": "number", "default": 1.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "%" }
       ],
-      "short": "+{extra:1}% above {above} ETH",
-      "sentence": "Any swap whose ETH side is larger than {above} ETH pays an extra {extra:1}% of its ETH side as a hook fee, on top of any other hook fee, settled the same way and sent to the same recipient.",
+      "short": "+{extra:1}% above {above} {@pair}",
+      "sentence": "Any swap whose {@pair} side is larger than {above} {@pair} pays an extra {extra:1}% of its {@pair} side as a hook fee, on top of any other hook fee, settled in {@pair} inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and {@destination}.",
+      "legacySentences": ["Any swap whose ETH side is larger than {above} ETH pays an extra {extra:1}% of its ETH side as a hook fee, on top of any other hook fee, settled the same way and sent to the same recipient."],
       "who": "Runs itself." },
     { "id": "fee-vol", "group": "fees", "title": "Volatility fee", "blurb": "Fee rises when the price moves fast.", "types": ["A", "B", "C"],
       "params": [
@@ -76,7 +80,8 @@
         { "k": "fee", "label": "Fee while volatile", "type": "number", "default": 3, "min": 0.1, "max": 5, "step": 0.1, "unit": "%" }
       ],
       "short": "{fee:1}% when price moves {move:1}% in {blocks} blocks",
-      "sentence": "When the pool price has moved more than {move:1}% within the last {blocks} blocks, the hook fee on the ETH side of every swap is {fee:1}% until the move settles below that; otherwise the normal hook fee applies. Expose isVolatile() as a view.",
+      "sentence": "When the pool price has moved more than {move:1}% within the last {blocks} blocks, the hook fee on the {@pair} side of every swap is {fee:1}% until the move settles below that; otherwise the normal hook fee applies (zero if none was specified). This rate overrides the normal rate while volatile; settle in {@pair} inside the swap that paid it and {@destination}. Expose isVolatile() as a view.",
+      "legacySentences": ["When the pool price has moved more than {move:1}% within the last {blocks} blocks, the hook fee on the ETH side of every swap is {fee:1}% until the move settles below that; otherwise the normal hook fee applies. Expose isVolatile() as a view."],
       "view": [{ "sig": "isVolatile()", "label": "Whether the raised fee applies now" }],
       "who": "Runs itself." },
     { "id": "fee-split", "group": "fees", "title": "Split the fee", "blurb": "Send the hook fee to two places.", "types": ["A", "B", "C"], "requires": "swap-fee",
@@ -85,7 +90,8 @@
         { "k": "b", "label": "Second address", "type": "address", "default": "", "empty": "the second address (not set yet)" }
       ],
       "short": "{a}% me / {a:rest}% {b:short}",
-      "sentence": "Split every hook fee: {a}% to my wallet and {a:rest}% to {b}.",
+      "sentence": "Replace the Swap fee block’s destination: split every hook fee, settled in {@pair}, {a}% to {@wallet} and {a:rest}% to {b}. Apply LP sharing first if selected, and split only the remaining recipient fee.",
+      "legacySentences": ["Split every hook fee: {a}% to my wallet and {a:rest}% to {b}."],
       "who": "Runs itself." },
     { "id": "lp-fee", "group": "fees", "title": "Dynamic LP fee", "blurb": "The pool’s own fee tier moves with volatility. Own pools only.", "types": ["B", "C"],
       "params": [
@@ -145,19 +151,21 @@
 
     { "id": "jar", "group": "treasury", "title": "Buyback jar", "blurb": "Collect a cut, then buy your token with it.", "types": ["A", "B", "C"],
       "params": [
-        { "k": "rate", "label": "Jar rate", "type": "number", "default": 1.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "% of ETH side" },
-        { "k": "trig", "label": "Trigger at", "type": "number", "default": 0.1, "min": 0.01, "max": 100, "step": 0.01, "unit": "ETH" },
-        { "k": "act", "label": "Then", "type": "select", "default": "burn the bought tokens", "options": ["burn the bought tokens", "send them to the treasury address"] }
+        { "k": "rate", "label": "Jar rate", "type": "number", "default": 1.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "% of {@pair} side" },
+        { "k": "trig", "label": "Trigger at", "type": "number", "default": 0.1, "min": 0.01, "max": 100, "step": 0.01, "unit": "{@pair}" },
+        { "k": "act", "label": "Then", "type": "select", "default": "burn the bought tokens", "options": ["burn the bought tokens", "IMD's treasury"] }
       ],
-      "short": "{rate:1}% into a jar, buy back at {trig} ETH, {act:act}",
-      "sentence": "Collect {rate:1}% of the ETH side of every swap into a jar held by the hook. Whenever the jar holds at least {trig} ETH, anyone may call buyback() to buy {@symbol} from this pool with the whole jar and {act}. The swap that fills the jar does not revert if the buyback fails. Expose buyback() that anyone may call and jar() as a view.",
+      "short": "{rate:1}% into a jar, buy back at {trig} {@pair}, {act:act}",
+      "sentence": "Collect {rate:1}% of the {@pair} side of every swap into a jar held by the hook, settled in {@pair} inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly). Whenever the jar holds at least {trig} {@pair}, anyone may call buyback() to buy {@symbol} from this pool with the whole jar and {@jarAction}. The swap that fills the jar does not revert if the buyback fails. Expose buyback() that anyone may call and jar() as a view.",
+      "legacySentences": ["Collect {rate:1}% of the ETH side of every swap into a jar held by the hook. Whenever the jar holds at least {trig} ETH, anyone may call buyback() to buy {@symbol} from this pool with the whole jar and {act}. The swap that fills the jar does not revert if the buyback fails. Expose buyback() that anyone may call and jar() as a view."],
       "anyone": [{ "sig": "buyback()", "label": "Spend the jar when it is full" }],
-      "view": [{ "sig": "jar()", "label": "ETH in the jar" }],
+      "view": [{ "sig": "jar()", "label": "Pair currency in the jar" }],
       "who": "Runs itself; anyone presses the button when the jar is full." },
     { "id": "lp-share", "group": "treasury", "title": "Share fees with LPs", "blurb": "Part of the hook fee goes back to liquidity providers.", "types": ["A", "B", "C"], "requires": "swap-fee",
       "params": [{ "k": "pct", "label": "Share to LPs", "type": "number", "default": 50, "min": 1, "max": 100, "step": 1, "unit": "%" }],
       "short": "{pct}% of the hook fee to LPs",
-      "sentence": "Donate {pct}% of every hook fee back to the pool’s liquidity providers in proportion to their liquidity (through the PoolManager’s donate), and send the rest as the fee block says.",
+      "sentence": "Replace the Swap fee block’s distribution: donate {pct}% of every hook fee, settled in {@pair}, back to the pool’s liquidity providers in proportion to their liquidity (through the PoolManager’s donate), and send the rest as the fee block says.",
+      "legacySentences": ["Donate {pct}% of every hook fee back to the pool’s liquidity providers in proportion to their liquidity (through the PoolManager’s donate), and send the rest as the fee block says."],
       "who": "Runs itself." },
 
     { "id": "lp-lock", "group": "liquidity", "title": "Liquidity lock", "blurb": "Liquidity cannot be removed for a while.", "types": ["A", "B", "C"],
@@ -178,9 +186,10 @@
       "view": [{ "sig": "isLpAllowed(address)", "label": "Is a wallet on the list" }],
       "who": "You (the owner) keep the list up to date." },
     { "id": "lp-min", "group": "liquidity", "title": "Minimum position", "blurb": "No dust positions.", "types": ["A", "B", "C"],
-      "params": [{ "k": "eth", "label": "Minimum", "type": "number", "default": 0.05, "min": 0.001, "max": 1000, "step": 0.001, "unit": "ETH value" }],
-      "short": "positions of at least {eth} ETH",
-      "sentence": "Reject adding liquidity worth less than {eth} ETH at the current price. Removing is never blocked by this rule.",
+      "params": [{ "k": "eth", "label": "Minimum", "type": "number", "default": 0.05, "min": 0.001, "max": 1000, "step": 0.001, "unit": "{@pair} value" }],
+      "short": "positions of at least {eth} {@pair}",
+      "sentence": "Reject adding liquidity worth less than {eth} {@pair} at the current price. Removing is never blocked by this rule.",
+      "legacySentences": ["Reject adding liquidity worth less than {eth} ETH at the current price. Removing is never blocked by this rule."],
       "who": "Runs itself." },
 
     { "id": "open-at", "group": "timing", "title": "Scheduled open", "blurb": "No trading before a date and time.", "types": ["A", "B", "C"],
@@ -228,7 +237,7 @@
       "sentence": "Let users place limit orders in the hook that fill automatically when the pool price crosses the order price, and withdraw unfilled orders at any time (the LimitOrderHook pattern). Expose placeOrder(bool zeroForOne, int24 tick, uint256 amount) returning an id, cancelOrder(uint256 id) and claim(uint256 id).",
       "user": [{ "sig": "placeOrder(bool zeroForOne, int24 tick, uint256 amount)", "label": "Place an order" }, { "sig": "cancelOrder(uint256 id)", "label": "Cancel an unfilled order" }, { "sig": "claim(uint256 id)", "label": "Collect a filled order" }],
       "who": "For traders: they get an order form on your hook page." },
-    { "id": "yield", "group": "advanced", "title": "Yield on idle liquidity", "blurb": "Idle liquidity is lent out to earn yield.", "types": ["A", "B", "C"],
+    { "id": "yield", "group": "advanced", "title": "Yield on idle liquidity", "dependencies": [{ "name": "{proto}", "addresses": {} }], "blurb": "Idle liquidity is lent out to earn yield.", "types": ["A", "B", "C"],
       "params": [{ "k": "proto", "label": "Lending protocol", "type": "select", "default": "Aave", "options": ["Aave", "Morpho"] }],
       "short": "idle liquidity lent on {proto}",
       "sentence": "Liquidity the pool is not using at the current price is lent on {proto} and recalled when needed for swaps (the ReHypothecationHook pattern). If {proto} has no deployment on the chosen chain, the swarm must report that as a blocker instead of substituting another protocol. Expose rebalance() that anyone may call.",
@@ -258,13 +267,14 @@
 
     { "id": "pot", "group": "games", "title": "Prize pot", "blurb": "A cut of buys goes to a lucky buyer.", "types": ["A", "B", "C"],
       "params": [
-        { "k": "rate", "label": "Pot rate", "type": "number", "default": 2.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "% of ETH side of buys" },
+        { "k": "rate", "label": "Pot rate", "type": "number", "default": 2.0, "min": 0.1, "max": 5, "step": 0.1, "unit": "% of {@pair} side of buys" },
         { "k": "hours", "label": "Draw every", "type": "number", "default": 1, "min": 1, "max": 168, "step": 1, "unit": "hours" }
       ],
       "short": "{rate:1}% of buys to a pot, drawn every {hours}h",
-      "sentence": "Collect {rate:1}% of the ETH side of every buy into a prize pot. Every {hours} hour(s), anyone may call draw() to pay the whole pot to one buyer from that period chosen at random, weighted by how much ETH each buyer spent; randomness comes from recent block data, which is acceptable for small pots and must be stated in the README. Expose draw() that anyone may call, and pot() and nextDrawAt() as views.",
+      "sentence": "Collect {rate:1}% of the {@pair} side of every buy into a prize pot, settled in {@pair} inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly). Every {hours} hour(s), anyone may call draw() to pay the whole pot to one buyer from that period chosen at random, settled in {@pair} to that buyer’s address, weighted by how much {@pair} each buyer spent; randomness comes from recent block data, which is acceptable for small pots and must be stated in the README. Expose draw() that anyone may call, and pot() and nextDrawAt() as views.",
+      "legacySentences": ["Collect {rate:1}% of the ETH side of every buy into a prize pot. Every {hours} hour(s), anyone may call draw() to pay the whole pot to one buyer from that period chosen at random, weighted by how much ETH each buyer spent; randomness comes from recent block data, which is acceptable for small pots and must be stated in the README. Expose draw() that anyone may call, and pot() and nextDrawAt() as views."],
       "anyone": [{ "sig": "draw()", "label": "Run the draw when the period is over" }],
-      "view": [{ "sig": "pot()", "label": "ETH in the pot" }, { "sig": "nextDrawAt()", "label": "Next draw time" }],
+      "view": [{ "sig": "pot()", "label": "Pair currency in the pot" }, { "sig": "nextDrawAt()", "label": "Next draw time" }],
       "risk": "The draw uses block data for randomness. A well-funded player can tilt the odds. Keep pots small and say so on your token’s page.",
       "who": "Runs itself; anyone presses the button when the period ends." },
 

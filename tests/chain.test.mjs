@@ -36,9 +36,33 @@ test('requires launch action, accepted kind and an exact terminal marker; handle
  assert.equal(D.parseBody('0x6e6f742d6a736f6e'),null);
 });
 test('every numbered rule template matches its own rendered sentence; label parameters and repeated values survive',()=>{
- for(const def of C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)&&b.id!=='custom')){const block=C.entry(def.id),ctx={name:'Pond',symbol:'POND'};const rendered=C.sentenceOf(block,ctx);const match=D.matchRule(rendered,ctx);assert.equal(match?.id,def.id,rendered);assert.equal(C.shortOf(match,ctx),C.shortOf(block,ctx));}
+ for(const def of C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)&&b.id!=='custom')){const block=C.entry(def.id),ctx={name:'Pond',symbol:'POND',pair:'ETH',wallet:'0x6cba4751742f6989fa224b2dc5d5d52fcef98a34',destination:'send it to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34'};const rendered=C.sentenceOf(block,ctx);const match=D.matchRule(rendered,ctx);assert.equal(match?.id,def.id,rendered);assert.equal(C.shortOf(match,ctx),C.shortOf(block,ctx));}
  const row=launch();assert.deepEqual(row.blocks,['owner can pause','30s between swaps per wallet']);assert.deepEqual(row.matchedBlocks.map(b=>b.id),['pause','cooldown']);
  const altered=D.parseObjective(body().objective.replace('1. The owner','1. Extra wording. The owner'));assert.ok(altered.blocks.includes('Custom'));assert.equal(altered.matchedBlocks.some(b=>b.id==='pause'),false);
+});
+test('old fee templates remain readable and current IMD fees decode into the same management blocks',()=>{
+ const payer='0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
+ for(const pair of ['imd','eth'])for(const def of C.BLOCKS.filter(b=>b.legacySentences?.length)){
+  let d=C.newDraft();d.settings={...d.settings,chain:1,pair,pool:50};
+  if(def.requires)d=C.addBlock(d,def.requires);d=C.addBlock(d,def.id);
+  const block=d.blocks.find(b=>b.id===def.id),ctx=C.context(d,payer);
+  if(def.id==='fee-split')block.p.b=C.IMD_TREASURY;
+  assert.equal(D.matchRule(C.sentenceOf(block,ctx),ctx)?.id,def.id);
+  assert.equal(D.matchRule(C.fill(def.legacySentences[0],def,block.p,ctx),ctx)?.id,def.id);
+  if(def.params.some(p=>p.options?.includes("IMD's treasury"))){
+   const p=def.params.find(p=>p.options?.includes("IMD's treasury"));block.p[p.k]="IMD's treasury";
+   assert.equal(D.matchRule(C.sentenceOf(block,ctx),ctx)?.id,def.id);
+  }
+ }
+ assert.equal(formatReading('jar',10n**18n,'IMD'),'1 IMD');
+ assert.equal(formatReading('pot',10n**18n,'IMD'),'1 IMD');
+});
+test('fee recipients recovered from a request retain a literal address unless it was the paying wallet',()=>{
+ const payer='0x6cba4751742f6989fa224b2dc5d5d52fcef98a34', recipient='0x9a50fd22bcefd3774d796e775a467a7f743e0ab0';
+ let d=C.addBlock(C.newDraft(),'swap-fee');d.settings={...d.settings,chain:1,pool:50};
+ assert.equal(D.parseObjective(C.compose(d,payer),payer).matchedBlocks[0].p.to,'my wallet');
+ d.blocks[1].p.to=recipient;
+ assert.equal(D.parseObjective(C.compose(d,payer),payer).matchedBlocks[0].p.to,recipient);
 });
 test('request location is the payment chain; contract location comes from body.chainId',()=>{const row=launch();assert.equal(row.intakeChainId,1);assert.equal(row.chainId,4663);assert.match(row.id,/^1:/);assert.equal(row.name,'PondGuard');assert.match(D.pondMessage(row),/^PondGuard was requested on Robinhood Chain$/);});
 test('completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit',()=>{

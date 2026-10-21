@@ -1,0 +1,52 @@
+[WebServer] (node:162) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:174) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/live-rpc.spec.ts:3:1 › a fresh browser settles both real RPC histories within 30 seconds (23.4s)
+
+
+  1) tests/live-rpc.spec.ts:3:1 › a fresh browser settles both real RPC histories within 30 seconds 
+
+    TimeoutError: The operation was aborted due to timeout
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.read-status')
+    Expected substring: "Read from Ethereum and Robinhood Chain"
+    Received string:    "Reading Robinhood Chain launch history. Results appear as they are found."
+
+    Call log:
+      - Expect "toContainText" locator('.read-status') with timeout 29814ms
+      - waiting for locator('.read-status')
+        5 × locator resolved to <div role="status" class="read-status">…</div>
+          - unexpected value "Reading Robinhood Chain and Ethereum launch history. Results appear as they are found."
+        42 × locator resolved to <div role="status" class="read-status">…</div>
+           - unexpected value "Reading Robinhood Chain launch history. Results appear as they are found."
+      - Test ended.
+
+
+       7 |   page.on('request', request => { if (/rpc.mevblocker.io|rpc.mainnet.chain.robinhood.com/.test(request.url())) { const req = request.postDataJSON(); if (req?.method === 'eth_getLogs') calls[request.url()] = (calls[request.url()] ?? 0) + 1; } });
+       8 |   await page.goto('./#catalog');
+    >  9 |   await expect(page.locator('.read-status')).toContainText('Read from Ethereum and Robinhood Chain', { timeout: Math.max(1, 30000 - (Date.now() - start)) });
+         |                                              ^
+      10 |   const elapsed = Date.now() - start;
+      11 |   expect(elapsed).toBeLessThan(30000);
+      12 |   expect(Object.keys(calls)).toHaveLength(2);
+        at /tmp/hooks-job7/work/web/tests/live-rpc.spec.ts:9:46
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test/scratch/playwright/live-rpc-a-fresh-browser-s-c05ce-histories-within-30-seconds/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test/scratch/playwright/live-rpc-a-fresh-browser-s-c05ce-histories-within-30-seconds/error-context.md
+
+  1 failed
+    tests/live-rpc.spec.ts:3:1 › a fresh browser settles both real RPC histories within 30 seconds ─
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "launch-2-imd-fee-conversion",
+    "launch": 2,
+    "question": "The fee sentence says ETH while the pool is paired with IMD. Which IMD/ETH conversion pool should the builder use?",
+    "source": "SPEC.md 1.25, changes in 1.24 and decision 18 (summary of launch 2's question)",
+    "rule": "pair-currency-fee",
+    "requireImdOptOut": true,
+    "message": "Launch 2 stopped for an IMD/ETH conversion pool. Name IMD for the fee side and settlement, and explicitly forbid conversion and any other pool."
+  }
+]

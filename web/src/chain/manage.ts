@@ -40,11 +40,11 @@ export function argumentValues(abi: AbiFunction, values: string[]): unknown[] {
     throw new Error(`Unsupported argument type: ${input.type}`);
   });
 }
-export function formatReading(name: string, value: unknown): string {
+export function formatReading(name: string, value: unknown, pairCurrency = 'ETH'): string {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'bigint' || typeof value === 'number') {
     const n = BigInt(value);
-    if (name === 'jar' || name === 'pot') return `${formatEther(n)} ETH`;
+    if (name === 'jar' || name === 'pot') return `${formatEther(n)} ${pairCurrency}`;
     if (name === 'currentFeeBps') return `${Number(n) / 100}%`;
     if (name === 'currentLpFee') return `${Number(n) / 10000}%`;
     if (/At$|Until$/.test(name)) return n === 0n ? 'Not set (0)' : Number(n) < 8640000000000 ? `${new Date(Number(n) * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC')}` : String(n);

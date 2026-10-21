@@ -1,0 +1,22 @@
+[
+  {
+    "route": "store",
+    "mode": "navigation",
+    "finalUrl": "http://127.0.0.1:33785/preview/#store",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "route": "builder",
+    "mode": "navigation",
+    "finalUrl": "http://127.0.0.1:33785/preview/#builder",
+    "score": 100,
+    "failed": []
+  },
+  {
+    "route": "builder",
+    "mode": "checked response snapshot",
+    "score": 100,
+    "failed": []
+  }
+]

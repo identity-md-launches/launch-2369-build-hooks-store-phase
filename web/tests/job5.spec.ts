@@ -8,7 +8,7 @@ import { interceptChains, route, requestId, head, jsonResult, hook, owner, injec
 const relay = 'https://relay.hooks.test';
 const validDraft = (): Draft => {
   const d = newDraft(); d.mode = 'prompt'; d.prompt = 'Observe swaps without fees or owner powers.';
-  d.settings = { ...d.settings, chain: 1, pool: 50 }; return d;
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner }; return d;
 };
 async function setup(page: Page, options: { relay?: boolean; draft?: Draft; noLogs?: boolean; inProgress?: boolean; result?: unknown } = {}) {
   await interceptChains(page, { noLogs: options.noLogs, result: options.result });

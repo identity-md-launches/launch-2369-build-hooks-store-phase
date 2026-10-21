@@ -1,5 +1,6 @@
 import type { Body, Draft } from '../../src/lib/compose.ts';
 import type { Launch } from './types.ts';
+import { checkConsistency } from '../../src/lib/safety.ts';
 
 export type CheckResult = {
   facts: { id: string; label: string; state: string; required?: boolean; assumed?: string; example?: string }[];
@@ -34,6 +35,8 @@ export async function relayFetch(relay: string, path: string, input?: unknown, s
   try { return JSON.parse(text) as unknown; } catch { throw new Error(failure); }
 }
 export async function checkRequest(relay: string, input: Body, signal?: AbortSignal) {
+  const findings = checkConsistency(input);
+  if (findings.length) throw new Error(`${findings[0].message} Sentence: ${findings[0].sentence}`);
   return parseCheck(await relayFetch(relay, '/check', { action: 'launch.open', input }, signal));
 }
 export type ImportedSource = { repoUrl: string; baseCommit: string };
@@ -67,6 +70,13 @@ export const relativeTime = (date: string, now = Date.now()) => {
 };
 
 export type JobStage = { title: 'Building' | 'Audit panel' | 'Deploying'; state: 'active' | 'complete' | 'pending' | 'failed'; detail: string };
+export function jobAttention(value: unknown): { blocked: boolean; questions: string[] } {
+  const job = object(value), nodes = Array.isArray(job.nodes) ? job.nodes.map(object) : [];
+  const blocked = job.state === 'blocked' || nodes.some(n => n.state === 'failed' && typeof n.failureReason === 'string' && /needs_input|needs input/i.test(n.failureReason));
+  const questions = blocked ? [job.blockedReason, ...nodes.filter(n => n.state === 'failed').map(n => n.failureReason)]
+    .filter((q): q is string => typeof q === 'string' && q.trim().length > 0) : [];
+  return { blocked, questions: [...new Set(questions)] };
+}
 export function jobStages(value: unknown): JobStage[] {
   const job = object(value);
   if (!Array.isArray(job.nodes)) throw new Error('Job stages are unavailable.');

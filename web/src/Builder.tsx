@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 import {
   BLOCKS, BY_ID, CATALOG, CHAIN_NAMES, DEFAULT_STACK, MAX_TEXT, TOKEN_IDS, activeBlocks, addBlock, available, behaviorBlocks, blockedReason,
-  body, bodyBytes, cleanText, compose, context, has, moveBlock, powersOf, removeBlock, setParam, shortOf, validate,
+  body, bodyBytes, cleanText, compose, context, has, isAddress, moveBlock, powersOf, removeBlock, setParam, shortOf, validate,
   type BlockDef, type BlockEntry, type Draft, type Issue, type LaunchType, type Mode, type Param, type Settings,
 } from '../../src/lib/compose';
 import { assetUrl, type SiteConfig } from './config';
-import { loadDraft, storeDraft } from './draft';
+import { loadDraft, storeDraft, loadCorrection } from './draft';
 import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
 import { SwarmPanel } from './SwarmPanel';
+import { SafetyNotice } from './SafetyNotice';
+import { Text } from './Text';
 
 const TYPES: [LaunchType, string, string][] = [
   ['A', 'Hook + new token + pool', 'IMD launches your hook, a token and the trading pool together. The simplest path.'],
@@ -61,16 +63,18 @@ function ParamField({ param, value, index, issues, onChange }: { param: Param; v
   const id = `p-${index}-${param.k}`, field = `block:${index}:${param.k}`, invalid = issues.some(i => i.field === field);
   const label = `${param.label}${param.unit ? ` (${param.unit})` : ''}`;
   const common = { id, 'aria-invalid': invalid || undefined, 'aria-describedby': errId(issues, field) };
+  const keptRecipient = param.k === 'to' && isAddress(String(value));
   return <div className="param">
     <label htmlFor={id}>{label}</label>
     {param.type === 'select'
-      ? <select {...common} value={String(value)} onChange={e => onChange(e.target.value)}>{param.options!.map(o => <option key={o} value={o}>{o}</option>)}</select>
+      ? <select {...common} value={String(value)} onChange={e => onChange(e.target.value)}>{keptRecipient && <option value={String(value)}>Keep recipient from request</option>}{param.options!.map(o => <option key={o} value={o}>{o}</option>)}</select>
       : param.type === 'textarea'
         ? <textarea {...common} value={String(value)} maxLength={param.maxLength} onChange={e => onChange(e.target.value)} />
         : <input {...common} type={param.type === 'number' ? 'number' : 'text'} inputMode={param.type === 'number' ? 'decimal' : undefined}
           className={param.type === 'number' || param.type === 'address' || param.type === 'datetime' ? 'mono-input' : undefined}
           min={param.min} max={param.max} step={param.step} spellCheck={false} placeholder={param.type === 'address' ? '0x…' : param.type === 'datetime' ? 'YYYY-MM-DD HH:MM' : undefined}
           value={String(value)} onChange={e => onChange(param.type === 'number' && e.target.value !== '' && Number.isFinite(Number(e.target.value)) ? Number(e.target.value) : e.target.value)} />}
+    {keptRecipient && <p className="small">Recipient from the previous request: <code>{String(value)}</code></p>}
     <FieldError issues={issues} field={field} />
   </div>;
 }
@@ -89,7 +93,8 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     return () => { live = false; };
   }, [config.blocksVerifiedUrl]);
 
-  const ctx = context(draft), s = draft.settings;
+  const ctx = context(draft, address), s = draft.settings;
+  const [correction] = useState(loadCorrection);
   const text = ownCode.prepared ? compose(ownCode.prepared, address) : 'Resolve your repository in Settings to compose the request from its pinned source.';
   const requestJson = ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null;
   const check = useSwarmCheck(config.relayUrl, requestJson);
@@ -166,7 +171,8 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
           </div>
         </div>
         <p className="sentence">{shortOf(b, ctx)}</p>
-        {def.params.length > 0 && <div className="params">{def.params.map(x => <ParamField key={x.k} param={x} index={index} value={b.p[x.k]} issues={off ? [] : issues} onChange={v => update(setParam(draft, index, x.k, v))} />)}</div>}
+        {def.params.length > 0 && <div className="params">{def.params.map(x => <ParamField key={x.k} param={{ ...x, unit: x.unit?.replace('{@pair}', ctx.pair!) }} index={index} value={b.p[x.k]} issues={off ? [] : issues} onChange={v => update(setParam(draft, index, x.k, v))} />)}</div>}
+        {def.params.some(x => x.options?.some(o => o.includes("IMD's treasury"))) && <p className="small treasury-note">IMD's treasury: <code>0x3f252e859a277a86A3967c11D4E054B2f07a1F22</code> on both chains.</p>}
         {manageNote(def)}
         {!off && <FieldError issues={issues} field={`block:${index}`} />}
       </div>;
@@ -256,19 +262,21 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <div><span>Request body</span><strong>{(bytes / 1024).toFixed(1)} / 16 KiB</strong></div>
     </div>
     <div className="actions">
-      <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !ownCode.ready || issues.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
+      <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !ownCode.ready || issues.length > 0 || check.consistency.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
       <button className="btn primary" type="button" disabled={issues.length > 0 || !ownCode.ready || !!check.gate} aria-describedby={issues.length ? 'continue-note' : 'check-note'}
         onClick={() => { if (!issues.length && ownCode.ready && !check.gate) location.hash = '#launch'; }}>Continue to launch</button>
     </div>
     <p className="small muted" id="check-note" role="status">{!config.relayUrl ? 'The free check needs the relay, which is not set up yet.' : !ownCode.ready ? 'Resolve your repository in Settings before continuing.' : check.gate || 'The free check sends this request to IMD. No wallet, payment or launch.'}</p>
     {check.error && <p className="field-error" role="alert">{check.error}</p>}
     {issues.length > 0 && <div className="small continue-note" id="continue-note" role="status"><strong>Before you continue:</strong><ul>{[...new Set(issues.map(i => i.message))].slice(0, 6).map(m => <li key={m}>{m}</li>)}</ul></div>}
-    {check.result && <SwarmPanel result={check.result} />}
+    {check.result && <SwarmPanel result={check.result} conflicts={check.conflicts} objective={text} />}
   </aside>;
 
   return <section className="wrap page builder-page" aria-labelledby="builder-h">
     <div className="block-head"><h1 id="builder-h">Builder</h1><span className="small muted">Drafts save in this browser. Free checks send your request; launching needs payment.</span></div>
     {storageError && <div className="notice" role="alert">This browser is not saving your draft. Allow site storage to keep it after a reload.</div>}
+    {correction && <section className="notice correction" aria-labelledby="correction-h"><h2 id="correction-h">Needs attention</h2><p>IMD stopped the previous request with this question. Edit the draft below before relaunching; a new launch spends a new fee.</p>{correction.questions.map((question, i) => <blockquote key={i}><Text>{question}</Text></blockquote>)}<details><summary>Previous request as sent</summary><pre>{correction.request}</pre></details><a href={correction.hookRoute}>Return to the original launch</a></section>}
+    <SafetyNotice findings={check.consistency} />
     <div className="builder">
       {palette}
       <div className="canvas">

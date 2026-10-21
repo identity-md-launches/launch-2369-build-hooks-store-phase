@@ -1,0 +1,16 @@
+[WebServer] (node:30) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:42) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"capturedAt":"2026-10-21T22:27:25.844Z","passed":true,"liveRpcElapsedMs":26625,"status":"Read from Ethereum and Robinhood Chain. Refreshes every 20 seconds.","logCalls":{"https://rpc.mainnet.chain.robinhood.com/":331,"https://rpc.mevblocker.io/":4},"transports":{"https://rpc.mainnet.chain.robinhood.com":{"calls":335,"statuses":{"200":194,"500":140},"transportErrors":1},"https://rpc.mevblocker.io":{"calls":13,"statuses":{"200":13},"transportErrors":0}}}
+  ✓  1 tests/live-rpc.spec.ts:4:1 › a fresh browser settles both real RPC histories within 30 seconds (26.8s)
+
+  1 passed (28.1s)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

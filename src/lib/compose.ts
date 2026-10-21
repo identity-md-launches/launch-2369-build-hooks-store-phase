@@ -15,6 +15,8 @@ export type BlockDef = {
   id: string; group: string; title: string; blurb: string; types: LaunchType[]; params: Param[]; short: string; sentence: string;
   who: string; fixed?: boolean; ownerPower?: string; requires?: string; excludes?: string; replaces?: string; risk?: string;
   owner?: Fn[]; anyone?: Fn[]; user?: Fn[]; view?: Fn[];
+  dependencies?: { name: string; addresses: Record<string, string> }[];
+  legacySentences?: string[];
 };
 export type BlockEntry = { id: string; p: Record<string, ParamValue> };
 export type Settings = {
@@ -56,19 +58,29 @@ const grouped = (v: ParamValue) => {
 export const shortAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a) ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
 export const isAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a.trim());
 
-export type Context = { symbol: string; name: string };
+export const IMD_TREASURY = '0x3f252e859a277a86A3967c11D4E054B2f07a1F22';
+export const IMD_FEE_OPT_OUT = 'do not convert the fee to ETH and do not use any other pool';
+export const pairCurrency = (d: Draft) => d.type === 'A' && d.settings.pair === 'imd' ? 'IMD' : 'ETH';
+export type Context = { symbol: string; name: string; pair?: string; wallet?: string; destination?: string; jarAction?: string };
 export function tokenEntry(d: Draft) { return d.blocks.find(b => TOKEN_IDS.includes(b.id)); }
-export function context(d: Draft): Context {
+export function context(d: Draft, wallet?: string): Context {
   const t = tokenEntry(d), s = d.settings;
-  if (d.type === 'A' && t) return { symbol: String(t.p.symbol || 'TOKEN'), name: String(t.p.name || 'Untitled') };
-  if (d.type === 'C') return { symbol: s.tsym.trim() || 'the token', name: s.hname.trim() || 'Untitled hook' };
-  return { symbol: 'the pool’s token', name: s.hname.trim() || 'Untitled hook' };
+  const c: Context = d.type === 'A' && t ? { symbol: String(t.p.symbol || 'TOKEN'), name: String(t.p.name || 'Untitled') }
+    : d.type === 'C' ? { symbol: s.tsym.trim() || 'the token', name: s.hname.trim() || 'Untitled hook' }
+    : { symbol: 'the pool’s token', name: s.hname.trim() || 'Untitled hook' };
+  const payingWallet = wallet && isAddress(wallet) ? wallet : 'the paying wallet (connect to resolve its address)';
+  const fee = activeBlocks(d).find(b => b.id === 'swap-fee' || b.id === 'fee-dir');
+  const to = String(fee?.p.to ?? 'my wallet');
+  return { ...c, pair: pairCurrency(d), wallet: payingWallet,
+    destination: to.startsWith('burn') ? `use it to buy ${c.symbol} from this pool and burn the bought tokens`
+      : `send it to ${to === "IMD's treasury" || to === 'treasury address' ? IMD_TREASURY : to === 'my wallet' ? payingWallet : to}`,
+  };
 }
 
 /** Renders a catalog template: {k} raw, {k:1} one decimal, {k:n} digit groups, {k:rest} 100 minus k, {@symbol} from the launch. */
 export function fill(template: string, def: BlockDef, p: Record<string, ParamValue>, ctx: Context) {
   return template.replace(/\{(@?)(\w+)(?::(\w+))?\}/g, (_m, at: string, k: string, fmt?: string) => {
-    if (at) return ctx[k as keyof Context] ?? '';
+    if (at) return ctx[k as keyof Context] ?? (k === 'pair' ? 'ETH' : '');
     const param = def.params.find(x => x.k === k);
     const v = p[k] ?? param?.default ?? '';
     if (String(v).trim() === '' && fmt !== 'rest') return param?.empty ?? '';
@@ -84,7 +96,9 @@ export function fill(template: string, def: BlockDef, p: Record<string, ParamVal
     }
   });
 }
-export const sentenceOf = (b: BlockEntry, ctx: Context) => fill(BY_ID[b.id].sentence, BY_ID[b.id], b.p, ctx);
+export const sentenceOf = (b: BlockEntry, ctx: Context) => fill(BY_ID[b.id].sentence, BY_ID[b.id], b.p, {
+  ...ctx, jarAction: String(b.p.act ?? '').startsWith('burn') ? 'burn the bought tokens' : `send the bought tokens to ${IMD_TREASURY}`,
+});
 export const shortOf = (b: BlockEntry, ctx: Context) => fill(BY_ID[b.id].short, BY_ID[b.id], b.p, ctx);
 export const functionsOf = (def: BlockDef) => [...(def.owner ?? []), ...(def.anyone ?? []), ...(def.user ?? []), ...(def.view ?? [])];
 
@@ -112,6 +126,7 @@ export function blockedReason(d: Draft, def: BlockDef): string | null {
   if (def.fixed && d.type === 'A' && has(d, def.id)) return 'ALWAYS';
   if (has(d, def.id)) return 'ADDED';
   if (!available(def, d.type)) return def.group === 'token' ? 'TOKEN LAUNCH ONLY' : 'OWN POOLS ONLY';
+  if (d.settings.chain && def.dependencies?.some(dep => !isAddress(dep.addresses[String(d.settings.chain)] ?? ''))) return 'NO VERIFIED DEPLOYMENT';
   if (def.requires && !has(d, def.requires)) return `NEEDS ${BY_ID[def.requires].title.toUpperCase()}`;
   if (def.excludes && has(d, def.excludes)) return `REMOVE ${BY_ID[def.excludes].title.toUpperCase()} FIRST`;
   return null;
@@ -147,7 +162,7 @@ export function setParam(d: Draft, index: number, k: string, v: ParamValue): Dra
 
 /** Section 5.1, line for line. */
 export function compose(d: Draft, wallet?: string): string {
-  const c = context(d), s = d.settings, chain = (s.chain ? CHAIN_NAMES[s.chain] : null) ?? '(choose a chain)', pm = s.chain ? POOL_MANAGERS[s.chain] ?? '' : '';
+  const c = context(d, wallet), s = d.settings, chain = (s.chain ? CHAIN_NAMES[s.chain] : null) ?? '(choose a chain)', pm = s.chain ? POOL_MANAGERS[s.chain] ?? '' : '';
   const rules = activeBlocks(d).map(b => sentenceOf(b, c)), powers = powersOf(d);
   const words = cleanText(d.prompt).slice(0, MAX_WORDS), lines: string[] = [];
   if (d.type === 'A') {
@@ -169,6 +184,7 @@ export function compose(d: Draft, wallet?: string): string {
     ? `Owner ${walletOr(s.owner, wallet)} may only: ${powers.join(', ')}, through the functions named above. No other admin function, no backend signer, no upgrade path.`
     : 'No owner functions, no backend signer, no upgrade path.');
   lines.push(`Fees are always taken from the ${d.type === 'A' && s.pair === 'imd' ? 'IMD' : 'ETH'} (pair currency) side, never from ${c.symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.`);
+  if (pairCurrency(d) === 'IMD') lines.push(`Keep every hook fee in IMD: ${IMD_FEE_OPT_OUT}.`);
   if (d.type === 'A') {
     lines.push('Enable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.');
     if (s.pool !== null) lines.push(`Pool: ${s.pool}% of my 90% share seeds the pool; the remainder goes to ${walletOr(s.rem, wallet)}.`);
@@ -234,7 +250,7 @@ export function validate(d: Draft, wallet?: string): Issue[] {
   const ids = d.blocks.map(b => b.id);
   if (new Set(ids).size !== ids.length) issues.push({ field: 'rules', message: 'Each block can be added once.' });
   const rate = rateTotal(d);
-  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ETH-side fees together (swap fee or the larger buy/sell fee, whale fee, buyback jar, prize pot) must stay at or below 5%.` });
+  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ${pairCurrency(d)}-side fees together (swap fee or the larger buy/sell fee, whale fee, buyback jar, prize pot) must stay at or below 5%.` });
   if (d.type !== 'A' && !cleanText(d.prompt) && !activeBlocks(d).length) issues.push({ field: 'rules', message: 'Describe your hook or add at least one block.' });
   if (d.prompt.length > MAX_WORDS) issues.push({ field: 'prompt', message: 'Your description is longer than 3,000 characters.' });
   if (d.type === 'A') {
@@ -275,7 +291,10 @@ export function normalizeDraft(raw: unknown): Draft {
       seen.add(id);
       const p = (item as { p?: unknown }).p, given = p && typeof p === 'object' ? p as Record<string, unknown> : {};
       const values = defaults(BY_ID[id]);
-      for (const x of BY_ID[id].params) if (typeof given[x.k] === 'string' || typeof given[x.k] === 'number') values[x.k] = given[x.k] as ParamValue;
+      for (const x of BY_ID[id].params) if (typeof given[x.k] === 'string' || typeof given[x.k] === 'number') {
+        const value = given[x.k];
+        values[x.k] = typeof value === 'string' ? x.options?.includes("IMD's treasury") && /treasury/.test(value) ? "IMD's treasury" : value.replace('treasury address', "IMD's treasury") : value as number;
+      }
       blocks.push({ id, p: values });
     }
     if (!blocks.some(b => TOKEN_IDS.includes(b.id))) blocks.unshift(entry('token'));

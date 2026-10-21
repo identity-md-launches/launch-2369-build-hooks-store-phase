@@ -48,8 +48,8 @@ export function Landing({ config, launches = [] }: { config: SiteConfig; launche
     const row = relayRows.filter(r => r.status === 'live' && launches.some(l => matchesLaunch(r, l))).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
     if (row) {
       setTicker(`${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt, now)}`);
-    }
-  }, [relayRows, launches, now]);
+    } else if (config.relayUrl) setTicker('Quiet on the pond. Waiting for the next launch.');
+  }, [relayRows, launches, now, config.relayUrl]);
   useEffect(() => {
     const controller = new AbortController();
     fetch(config.swarmUrl, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]) })

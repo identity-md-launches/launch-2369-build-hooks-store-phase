@@ -1,6 +1,7 @@
-import { emptyIntake } from './chain-fixture';
+import { emptyIntake, injectedOwner, owner } from './chain-fixture';
+import { getAddress } from 'viem';
 import { test, expect, type Page } from '@playwright/test';
-test.beforeEach(async ({page}) => emptyIntake(page));
+test.beforeEach(async ({page}) => { await emptyIntake(page); await injectedOwner(page); });
 import catalog from '../../src/blocks/catalog.json' with { type: 'json' };
 
 const SPEC_URL = 'https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json';
@@ -13,6 +14,9 @@ async function open(page: Page, verified: Verified = 'fail', draft?: object) {
   await page.evaluate(d => { localStorage.clear(); if (d) localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)); }, draft ?? null);
   await page.goto('#builder'); await page.reload();
   await expect(page.getByRole('heading', { name: '1. What are you launching?' })).toBeVisible();
+  await page.locator('#connect').click();
+  await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
+  await expect(page.locator('#connect')).toHaveClass(/address/);
 }
 async function noOverflow(page: Page) {
   const w = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
@@ -62,7 +66,7 @@ for (const width of [320, 390, 1440]) {
     const text = await exact(page);
     expect(text).toContain(`<description>${words}</description>`);
     expect(text).toContain('If the description and a numbered rule disagree, the numbered rule wins.');
-    expect(text).toContain('2. Take 1.5% of the ETH side of every buy and sell');
+    expect(text).toContain('2. Take 1.5% of the IMD side of every buy and sell');
     // Back to Describe: nothing lost.
     await page.getByRole('button', { name: 'Describe it', exact: true }).click();
     await expect(page.getByRole('textbox', { name: /What should it do/ })).toHaveValue(words);
@@ -121,7 +125,7 @@ test('pool share has no default; Continue stays disabled until 10 to 90 in steps
   }
   await page.locator('#s-pool').fill('50');
   await expect(continueButton(page)).toBeEnabled();
-  expect(await exact(page)).toContain('Pool: 50% of my 90% share seeds the pool; the remainder goes to the paying wallet.');
+  expect(await exact(page)).toContain(`Pool: 50% of my 90% share seeds the pool; the remainder goes to ${getAddress(owner)}.`);
   await continueButton(page).click(); await expect(page).toHaveURL(/#launch$/);
 });
 
@@ -235,7 +239,7 @@ test('dependent-removal status describes the removed block and clears after the 
     ['mode', () => page.getByRole('button', { name: 'Describe it', exact: true }).click()],
     ['type', () => page.getByRole('button', { name: /^B: Hook only/ }).click()],
     ['setting', () => page.locator('#s-pool').fill('45')],
-    ['block field', () => page.locator('.blk[data-block="jar"]').getByLabel('Jar rate (% of ETH side)').fill('1.5')],
+    ['block field', () => page.locator('.blk[data-block="jar"]').getByLabel('Jar rate (% of IMD side)').fill('1.5')],
     ['reorder', () => page.getByRole('button', { name: 'Move Buyback jar up' }).click()],
     ['remove', () => page.getByRole('button', { name: 'Remove Buyback jar' }).click()],
   ];

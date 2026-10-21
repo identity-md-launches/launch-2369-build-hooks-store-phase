@@ -35,6 +35,12 @@ test('changed price, missing allowance, body over 16 KiB and the build banner fa
  await assert.rejects(approveLaunch(ctx({bytes:'0x'+'aa'.repeat(16385)})),/16 KiB/);
  await assert.rejects(approveLaunch(ctx({config:{...config,inProgress:true}})),/banner goes away/);
 });
+test('the final signing guard checks the actual composed bytes again before approving or launching',async()=>{
+ const input=body(draft(),account);input.objective=input.objective.replace('from the IMD (pair currency) side','from the ETH (pair currency) side');
+ const {stringToHex}=await import('../web/node_modules/viem/_esm/index.js');
+ const c=ctx({bytes:stringToHex(JSON.stringify(input))});let sends=0;c.wallet.writeContract=async()=>{sends++;};
+ await assert.rejects(approveLaunch(c),/fee side must be IMD/);await assert.rejects(requestLaunch(c,500000000000000000n),/fee side must be IMD/);assert.equal(sends,0);
+});
 
 test('approval receipts verify token events for EOAs and Smart Wallets, including replacement guards',async()=>{
  const {verifyApprovalReceipt}=await import('../web/src/chain/launch.ts');

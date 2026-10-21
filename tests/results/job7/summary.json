@@ -1,0 +1,136 @@
+{
+  "spec": "1.25",
+  "unit": {
+    "passed": 495,
+    "failed": 0
+  },
+  "relayWorker": {
+    "passed": 9,
+    "failed": 0
+  },
+  "playwright": {
+    "passed": 160,
+    "skipped": 7,
+    "failed": 0,
+    "flaky": 0,
+    "durationMs": 165251.302
+  },
+  "routeWidths": {
+    "routes": [
+      "Store",
+      "Catalog",
+      "Builder",
+      "Launch",
+      "Hook",
+      "My hooks",
+      "Learn"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "combinations": 21
+  },
+  "composerMatrix": {
+    "blocks": 35,
+    "types": [
+      "A",
+      "B",
+      "C"
+    ],
+    "pairings": [
+      "imd",
+      "eth"
+    ],
+    "chains": [
+      1,
+      4663
+    ],
+    "cases": 420,
+    "missingLendingDeployments": "refused"
+  },
+  "liveRpc": {
+    "capturedAt": "2026-10-21T22:27:25.844Z",
+    "passed": true,
+    "liveRpcElapsedMs": 26625,
+    "status": "Read from Ethereum and Robinhood Chain. Refreshes every 20 seconds.",
+    "logCalls": {
+      "https://rpc.mainnet.chain.robinhood.com/": 331,
+      "https://rpc.mevblocker.io/": 4
+    },
+    "transports": {
+      "https://rpc.mainnet.chain.robinhood.com": {
+        "calls": 335,
+        "statuses": {
+          "200": 194,
+          "500": 140
+        },
+        "transportErrors": 1
+      },
+      "https://rpc.mevblocker.io": {
+        "calls": 13,
+        "statuses": {
+          "200": 13
+        },
+        "transportErrors": 0
+      }
+    }
+  },
+  "liveCheck": {
+    "capturedAt": "2026-10-21T22:28:32.959Z",
+    "source": "https://hooks-store-relay.hooks-store.workers.dev/check",
+    "method": "POST",
+    "status": 200,
+    "elapsedMs": 599,
+    "requestSha256": "b9b8732c895842e743325e75203caa8289ec0d20afacb990e0261c15d4a220bb",
+    "responseSha256": "e95a93c28b861c34b8196e590cd2f37a617d6359ea0270595fc0938c094a2af5",
+    "browser": "Chromium",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "launchSubmitted": false,
+    "walletConnected": false,
+    "pageErrors": []
+  },
+  "lighthouse": {
+    "lighthouseVersion": "13.5.0",
+    "width": 390,
+    "results": [
+      {
+        "route": "store",
+        "mode": "navigation",
+        "finalUrl": "http://127.0.0.1:33785/preview/#store",
+        "score": 100,
+        "failed": []
+      },
+      {
+        "route": "builder",
+        "mode": "navigation",
+        "finalUrl": "http://127.0.0.1:33785/preview/#builder",
+        "score": 100,
+        "failed": []
+      },
+      {
+        "route": "builder",
+        "mode": "checked response snapshot",
+        "score": 100,
+        "failed": []
+      }
+    ],
+    "fixture": "Production export; deterministic empty chain history, unavailable swarm metrics, and a recorded IMD free-check response. No wallet or transaction."
+  },
+  "designProbe": {
+    "passed": 13,
+    "total": 16,
+    "remainingFlags": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ],
+    "mode": "offline; production export"
+  },
+  "realTransactionSubmitted": false,
+  "independentCertification": false
+}

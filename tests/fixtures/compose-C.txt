@@ -1,6 +1,6 @@
 Deploy one contract on Robinhood Chain: UniFeeHook, a Uniswap v4 hook for the existing token 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984 (UNI), paired with ETH. No new token and no pool created by the launch; the creator will initialize the pool with this hook afterwards on the PoolManager passed as a constructor argument (0x8366a39CC670B4001A1121B8F6A443A643e40951).
 The hook does exactly the following, and nothing else:
-1. Take 1.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to my wallet. Expose claimFees() that anyone may call to redeem claims to the recipient.
+1. Take 1.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34. Expose claimFees() that anyone may call to redeem claims to the recipient.
 No owner functions, no backend signer, no upgrade path.
 Fees are always taken from the ETH (pair currency) side, never from UNI; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.
 Take the PoolManager as a constructor argument and enable only the callbacks the behavior above needs. The deployed address must carry the correct hook permission bits (mine a CREATE2 salt). Owner, if any, is $owner.

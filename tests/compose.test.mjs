@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as C from '../src/lib/compose.ts';
 
+const fixtureWallet = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 const fixture = name => readFileSync(new URL(`fixtures/${name}`, import.meta.url), 'utf8');
 const draftOf = (type, ids, settings = {}) => {
   let d = { ...C.newDraft(), type };
@@ -60,9 +61,9 @@ test('blocks a launch type does not allow are dimmed in the palette and left out
 });
 
 test('composed text equals the three fixtures byte for byte', () => {
-  assert.equal(C.compose(fixtureA()) + '\n', fixture('compose-A.txt'));
-  assert.equal(C.compose(fixtureB()) + '\n', fixture('compose-B.txt'));
-  assert.equal(C.compose(fixtureC()) + '\n', fixture('compose-C.txt'));
+  assert.equal(C.compose(fixtureA(), fixtureWallet) + '\n', fixture('compose-A.txt'));
+  assert.equal(C.compose(fixtureB(), fixtureWallet) + '\n', fixture('compose-B.txt'));
+  assert.equal(C.compose(fixtureC(), fixtureWallet) + '\n', fixture('compose-C.txt'));
   for (const d of [fixtureA(), fixtureB(), fixtureC()]) assert.deepEqual(C.validate(d), []);
 });
 

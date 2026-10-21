@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { Launch } from './types';
-import { intakeJob, jobStages, relayFetch, type JobStage } from './relay';
+import { intakeJob, jobAttention, jobStages, relayFetch, type JobStage } from './relay';
 import { Text } from './Text';
 
-export function RelayTimeline({ launch, relay }: { launch: Launch; relay: string | null }) {
+export function RelayTimeline({ launch, relay, onFix }: { launch: Launch; relay: string | null; onFix: (questions: string[]) => void }) {
   const [stages, setStages] = useState<JobStage[] | null>(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
+  const [attention, setAttention] = useState<{ blocked: boolean; questions: string[] }>({ blocked: false, questions: [] });
   const ids = launch.jobIds.join(','), transaction = launch.txHashes[0];
   useEffect(() => {
-    setStages(null); setError('');
+    setStages(null); setAttention({ blocked: false, questions: [] }); setError('');
     if (!relay) return;
     const controller = new AbortController(); let busy = false, jobId = ids.split(',').find(Boolean);
     const poll = async () => {
@@ -23,7 +24,7 @@ export function RelayTimeline({ launch, relay }: { launch: Launch; relay: string
         const job = await relayFetch(relay, `/jobs/${encodeURIComponent(jobId)}`, undefined, controller.signal) as { id?: string };
         if (job.id !== jobId) throw new Error('Job id mismatch');
         const next = jobStages(job);
-        if (!controller.signal.aborted) { setStages(next); setError(''); }
+        if (!controller.signal.aborted) { setStages(next); setAttention(jobAttention(job)); setError(''); }
       } catch { if (!controller.signal.aborted) setError('Stage details are unavailable. Chain confirmations still appear below. Retry or wait for the next refresh.'); }
       finally { busy = false; }
     };
@@ -39,6 +40,7 @@ export function RelayTimeline({ launch, relay }: { launch: Launch; relay: string
   ];
   const current = terminal ? 4 : items.findIndex(i => i.state === 'active' || i.state === 'failed');
   return <>
+    {attention.blocked && <section className="notice bad needs-attention" aria-labelledby="attention-h"><h2 id="attention-h">Needs attention</h2><p>IMD stopped this job. The builder reported:</p>{attention.questions.length ? attention.questions.map((question, i) => <blockquote key={i}><Text>{question}</Text></blockquote>) : <p>IMD has not supplied a question yet. Retry stage details to read it.</p>}<button className="btn" type="button" onClick={() => onFix(attention.questions)}>Fix in Builder</button><p className="small">This request already spent its fee. A corrected relaunch is a new paid request.</p></section>}
     <ol className="timeline" aria-label="Launch timeline">{items.map((item, index) => <li key={item.title} className={item.state === 'complete' ? 'confirmed' : item.state === 'active' ? 'active' : item.state === 'failed' ? 'stage-failed' : ''} aria-current={index === current || current === -1 && index === 0 ? 'step' : undefined}>
       <span className="num">{index + 1}</span><strong>{item.title}</strong><small><Text>{item.detail}</Text>{item.state === 'active' && ' · In progress'}{item.state === 'failed' && ' · Needs attention'}</small>
     </li>)}</ol>

@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-21T22:28:32.959Z",
+  "source": "https://hooks-store-relay.hooks-store.workers.dev/check",
+  "method": "POST",
+  "status": 200,
+  "elapsedMs": 599,
+  "requestSha256": "b9b8732c895842e743325e75203caa8289ec0d20afacb990e0261c15d4a220bb",
+  "responseSha256": "e95a93c28b861c34b8196e590cd2f37a617d6359ea0270595fc0938c094a2af5",
+  "browser": "Chromium",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "launchSubmitted": false,
+  "walletConnected": false,
+  "pageErrors": []
+}

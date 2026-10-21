@@ -13,7 +13,7 @@ if (!toolRoot) throw new Error('Set HOOKS_A11Y_TOOLS to a directory with node_mo
 const toolRequire = createRequire(pathToFileURL(resolve(toolRoot, 'package.json')));
 const { default: lighthouse, snapshot } = await import(pathToFileURL(toolRequire.resolve('lighthouse')).href);
 const { default: puppeteer } = await import(pathToFileURL(toolRequire.resolve('puppeteer-core')).href);
-const output = resolve(process.env.HOOKS_A11Y_OUT ?? new URL('../../tests/results/job6/', import.meta.url).pathname);
+const output = resolve(process.env.HOOKS_A11Y_OUT ?? new URL('../../tests/results/job7/', import.meta.url).pathname);
 const checked = JSON.parse(await readFile(new URL('../../evidence/check-A-default-blocks.response.json', import.meta.url), 'utf8'));
 const server = await serve();
 const url = `http://127.0.0.1:${server.address().port}/preview/`;
@@ -23,6 +23,7 @@ try {
   browser = await puppeteer.launch({ executablePath: chromium.executablePath(), headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const page = await browser.newPage();
   const draft = newDraft(); draft.mode = 'prompt'; draft.prompt = 'Observe swaps with no fees or owner powers.'; draft.settings.chain = 1; draft.settings.pool = 50;
+  draft.settings.rem = '0x3f252e859a277a86A3967c11D4E054B2f07a1F22';
   await page.evaluateOnNewDocument(d => { try { localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)); } catch {} }, draft);
   await page.setRequestInterception(true);
   page.on('request', async request => {

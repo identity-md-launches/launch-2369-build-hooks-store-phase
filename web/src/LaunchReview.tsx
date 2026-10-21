@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
 import { formatUnits, keccak256, stringToHex, type Hex, type TransactionReceipt } from 'viem';
-import { loadDraft } from './draft';
-import { BY_ID, CHAIN_NAMES, activeBlocks, compose, context, powersOf, shortOf } from '../../src/lib/compose';
+import { loadDraft, saveSubmittedDraft, clearCorrection } from './draft';
+import { BY_ID, CHAIN_NAMES, activeBlocks, body, compose, context, powersOf, shortOf } from '../../src/lib/compose';
 import { Text } from './Text';
 import { WarnSign } from './Builder';
 import { AddressValue } from './AddressValue';
@@ -14,13 +14,15 @@ import { PENDING_KEY, pendingRequests } from './MyHooks';
 import { cast } from '../../src/scene/cast';
 import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
 import { SwarmPanel } from './SwarmPanel';
+import { SafetyNotice } from './SafetyNotice';
 
-type Step = { hash?: Hex; phase: 'idle' | 'wallet' | 'pending' | 'success' | 'failed'; error?: string; price?: bigint };
+type Step = { hash?: Hex; phase: 'idle' | 'wallet' | 'pending' | 'success' | 'failed'; error?: string; price?: bigint; replacement?: boolean };
 const idle: Step = { phase: 'idle' };
 const TYPES = { A: 'Hook + new token + pool', B: 'Hook only', C: 'Hook for my existing token' };
 export function LaunchReview({ config, store }: { config: SiteConfig; store: LaunchStore }) {
-  const [draft] = useState(loadDraft), ctx = context(draft);
+  const [draft] = useState(loadDraft);
   const { address, chainId, isConnected } = useAccount(), { data: wallet } = useWalletClient();
+  const ctx = context(draft, address);
   const ownCode = useOwnCode(draft, config.relayUrl);
   const { mutateAsync: switchChain, isPending: switching } = useSwitchChain();
   const [paymentChain, setPaymentChain] = useState(() => chainId && config.paymentChains.includes(chainId) ? chainId : config.paymentChains[0]);
@@ -32,7 +34,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     if (!ownCode.prepared) throw new Error('Resolve your repository in the Builder before launching.');
     return { ...launchBody(ownCode.prepared, config, address), error: '' };
   } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [ownCode.prepared, config, address]);
-  const check = useSwarmCheck(config.relayUrl, preview.json || null);
+  const check = useSwarmCheck(config.relayUrl, ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null);
   const identity = `${address}:${paymentChain}:${preview.bytes}`;
   const attemptKey = `hooks-store:launch-tx:${keccak256(stringToHex(identity))}`;
   const [storageNote, setStorageNote] = useState('');
@@ -44,8 +46,8 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     try {
       const saved = JSON.parse(localStorage.getItem(attemptKey) ?? 'null');
       if (!saved) return;
-      const restore = (value: { hash?: Hex; price?: string; phase?: string } | undefined): Step => value?.hash && /^0x[\da-f]{64}$/i.test(value.hash) && /^\d+$/.test(value.price ?? '') && value.phase !== 'failed'
-        ? { hash: value.hash, price: BigInt(value.price!), phase: 'pending', error: 'A submitted transaction is saved. Check its confirmation to continue.' } : idle;
+      const restore = (value: { hash?: Hex; price?: string; phase?: string; replacement?: boolean; error?: string } | undefined): Step => value?.hash && /^0x[\da-f]{64}$/i.test(value.hash) && /^\d+$/.test(value.price ?? '')
+        ? { hash: value.hash, price: BigInt(value.price!), phase: value.phase === 'failed' ? 'failed' : 'pending', replacement: value.replacement === true, error: value.phase === 'failed' ? value.error : 'A submitted transaction is saved. Check its confirmation to continue.' } : idle;
       setApproval(restore(saved.approval)); setLaunch(restore(saved.launch));
     } catch { /* A corrupt or unavailable cache never unlocks payments. */ }
   }, [attemptKey]);
@@ -64,6 +66,8 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const copy = async () => { try { await navigator.clipboard.writeText(preview.json); setCopyNote('Request copied.'); } catch { setCopyNote('Copy unavailable. Select the JSON in Exact request below.'); } };
   const finish = (receipt: TransactionReceipt, operation: LaunchContext, paid: bigint) => {
     const id = requestedId(receipt, operation, paid);
+    clearCorrection();
+    if (!saveSubmittedDraft(operation.chainId, id, ownCode.prepared ?? draft, compose(ownCode.prepared ?? draft, operation.account))) setStorageNote('The launch is confirmed, but this browser could not save its draft. The original request is still available on the Hook page.');
     const pending = { requestId: id, chainId: operation.chainId, payer: operation.account, txHash: receipt.transactionHash, createdAt: new Date().toISOString() };
     let saved = true;
     try { localStorage.setItem(PENDING_KEY, JSON.stringify([...pendingRequests().filter(p => p.requestId !== id || p.chainId !== operation.chainId), pending])); } catch { saved = false; }
@@ -86,16 +90,21 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
       if (kind === 'approve') { const sent = await approveLaunch(operation); hash = sent.hash; paid = sent.price; setPrice(sent.price); }
       else hash = await requestLaunch(operation, paid!);
       update({ phase: 'pending', hash, price: paid });
+      let replacementReason: string | undefined;
       const receipt = await client.waitForTransactionReceipt({ hash, timeout: 180000, onReplaced: replacement => {
         hash = replacement.transactionReceipt.transactionHash;
-        if (replacement.reason === 'cancelled' || replacement.reason === 'replaced') {
-          // This replacement has a confirmed receipt; the original is no longer pending.
-          terminalFailure = kind === 'approve';
-          throw new Error(kind === 'approve' ? 'The transaction was cancelled or replaced. You can retry this step.' : 'The transaction was cancelled or replaced. Check its hash before continuing.');
-        }
-        update({ phase: 'pending', hash, price: paid });
+        replacementReason = replacement.reason;
+        update({ phase: 'pending', hash, price: paid, replacement: replacement.reason === 'cancelled' || replacement.reason === 'replaced' });
       } });
       if (receipt.status !== 'success') { terminalFailure = true; throw new Error('The transaction reverted. You can retry this step.'); }
+      if (replacementReason === 'cancelled' || replacementReason === 'replaced') {
+        // A confirmed nonce cannot execute twice. First verify whether this
+        // replacement created the exact request before allowing another payment.
+        terminalFailure = true;
+        if (kind === 'approve') throw new Error('The transaction was cancelled or replaced. You can retry this step.');
+        try { requestedId(receipt, operation, paid!); }
+        catch { throw new Error('The launch transaction was cancelled or replaced without this request. You can retry Launch; price and allowance will be checked again.'); }
+      }
       if (kind === 'approve') {
         // A confirmed transaction without this approval cannot authorize the launch.
         terminalFailure = true;
@@ -103,7 +112,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
       }
       update({ phase: 'success', hash: receipt.transactionHash, price: paid });
       if (kind === 'launch') { finish(receipt, operation, paid!); try { localStorage.removeItem(savedKey); } catch { /* The request id is already displayed. */ } }
-    } catch (e) { update({ phase: hash && !terminalFailure ? 'pending' : 'failed', hash, price: paid, error: launchError(e) }); }
+    } catch (e) { update({ phase: hash && !terminalFailure ? 'pending' : 'failed', hash, price: paid, replacement: terminalFailure, error: launchError(e) }); }
     finally { flight.current = false; }
   };
   const checkReceipt = async (kind: 'approve' | 'launch') => {
@@ -119,7 +128,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
       if (kind === 'approve') { confirmedApproval = true; await verifyApprovalReceipt(receipt, operation, step.price!); }
       update({ ...step, phase: 'success', error: undefined });
       if (kind === 'launch') { finish(receipt, operation, step.price!); try { localStorage.removeItem(savedKey); } catch { /* Already confirmed. */ } }
-    } catch (e) { update({ ...step, phase: confirmedApproval ? 'failed' : step.phase, error: launchError(e) }); }
+    } catch (e) { update({ ...step, phase: confirmedApproval || step.replacement ? 'failed' : step.phase, error: step.replacement ? 'The confirmed replacement did not create this request. You can retry Launch; price and allowance will be checked again.' : launchError(e) }); }
     finally { flight.current = false; }
   };
   const feedback = (step: Step, kind: 'approve' | 'launch') => <>
@@ -143,11 +152,12 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
       {draft.type === 'A' ? <><tr><th scope="row">Token supply</th><td><Text>{`10% swarm / 90% you; ${draft.settings.pool ?? 'choose'}% of yours in the pool`}</Text></td></tr><tr><th scope="row">Pool trading fee</th><td><Text>1.25% (1% to you, 0.25% network) plus the hook’s own fee</Text></td></tr></> : <tr><th scope="row">Token and pool</th><td>None created. The swarm builds and reviews the hook contract.</td></tr>}
       {draft.type === 'C' && <tr><th scope="row">Opening the pool</th><td>One more transaction from your wallet after the hook is live, prepared by the site.</td></tr>}
       <tr><th scope="row">Deployment</th><td>Paid by IMD</td></tr>
-    </tbody></table><p className="small muted">USD context is unavailable. Gas is estimated by your wallet.</p></section></div>
+    </tbody></table><p className="small">A request the swarm has to stop on still spends the fee. These checks exist to make that rare.</p><p className="small muted">USD context is unavailable. Gas is estimated by your wallet.</p></section></div>
     <p className="notice"><strong>Payment happens on Robinhood Chain or Ethereum, in IMD.</strong> Your hook deploys on the chain you chose in the Builder, which can be the other one.</p>
     {draft.type === 'C' && <p>The site prepares the pool-opening call after your hook is live. Copy it into a v4 interface; sending it here opens in phase <Text>2b</Text>.</p>}
     {!config.relayUrl && <div className="notice"><strong>A refused request still spends the fee.</strong><p>The free check is unavailable without the relay. Read the exact request before paying.</p><button className="btn" disabled={!!preview.error} onClick={() => void copy()}>Copy request</button><span role="status" className="copy-status">{copyNote}</span></div>}
-    {config.relayUrl && <section className="box launch-check"><h2>Check before paying</h2><p>A refused request still spends the fee. A free check does not guarantee acceptance or replace the audit panel.</p><button className="btn" disabled={!!preview.error || check.busy || busy} onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button><p role="status" className="small">{check.gate || (check.result ? 'The check matches the exact request below.' : 'You can check this request with IMD before paying.')}</p>{check.error && <p role="alert" className="field-error">{check.error}</p>}{check.result && <SwarmPanel result={check.result} />}</section>}
+    <SafetyNotice findings={check.consistency} />
+    {config.relayUrl && <section className="box launch-check"><h2>Check before paying</h2><p>A refused request still spends the fee. A request the swarm has to stop on also spends the fee. These checks exist to make that rare. A free check does not guarantee acceptance or replace the audit panel.</p><button className="btn" disabled={!!preview.error || check.busy || busy || check.consistency.length > 0} onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button><p role="status" className="small">{check.gate || (check.result ? 'The check matches the exact request below.' : 'You can check this request with IMD before paying.')}</p>{check.error && <p role="alert" className="field-error">{check.error}</p>}{check.result && <SwarmPanel result={check.result} conflicts={check.conflicts} objective={compose(draft, address)} />}</section>}
     <details className="box exact-launch"><summary>Exact request the swarm receives</summary><div><pre data-testid="launch-json">{preview.json || (!ownCode.ready ? 'Resolve your repository in the Builder to compose the request from its pinned source.' : compose(draft, address))}</pre></div></details>
     {preview.error && <p className="form-error" role="alert">{preview.error} <a href="#builder">Edit in Builder</a></p>}
     {config.inProgress && <p className="notice">Launches open when the site banner goes away. You can review and copy your request now.</p>}

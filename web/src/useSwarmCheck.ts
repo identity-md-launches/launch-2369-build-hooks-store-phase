@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Draft } from '../../src/lib/compose';
 import { checkRequest, importSource, parseCheck, type CheckResult, type ImportedSource } from './relay';
+import { checkConsistency, fixedFactConflicts } from '../../src/lib/safety';
 
 type Checked = { relay: string; json: string; result: CheckResult | null; error?: string };
 const CHECK_KEY = 'hooks-store:check:v1', IMPORT_KEY = 'hooks-store:import:v1';
@@ -21,10 +22,13 @@ export function useSwarmCheck(relay: string | null, json: string | null) {
   const relevant = checked?.relay === relay ? checked : null;
   const stale = !!relevant && relevant.json !== json;
   const result = stale ? null : relevant?.result ?? null;
+  const input = json ? JSON.parse(json) : null;
+  const consistency = input ? checkConsistency(input) : [];
+  const conflicts = input && result ? fixedFactConflicts(input, result.facts) : [];
   const currentError = error || (!stale ? relevant?.error ?? '' : '');
-  const gate = !relay ? '' : busy ? 'Wait for the free check to finish.' : currentError ? 'Retry the free check before continuing.' : stale ? 'Your request changed. Check it again before continuing.' : result?.blockers.length ? 'Resolve the swarm’s blockers and check again before launching.' : '';
+  const gate = consistency.length ? 'Fix the request consistency findings before continuing.' : conflicts.length ? 'Resolve the conflicting fixed facts in the request and check again before launching.' : !relay ? '' : busy ? 'Wait for the free check to finish.' : currentError ? 'Retry the free check before continuing.' : stale ? 'Your request changed. Check it again before continuing.' : result?.blockers.length ? 'Resolve the swarm’s blockers and check again before launching.' : '';
   const run = async () => {
-    if (!relay || !json || flight.current && !flight.current.signal.aborted) return;
+    if (!relay || !json || checkConsistency(JSON.parse(json)).length || flight.current && !flight.current.signal.aborted) return;
     const controller = new AbortController(); flight.current = controller; setBusy(true); setError('');
     try {
       const result = await checkRequest(relay, JSON.parse(json), controller.signal);
@@ -39,7 +43,7 @@ export function useSwarmCheck(relay: string | null, json: string | null) {
     }
     finally { if (!controller.signal.aborted) { setBusy(false); flight.current = null; } }
   };
-  return { result, stale, busy, error: currentError, gate, run };
+  return { result, stale, busy, error: currentError, gate, run, consistency, conflicts };
 }
 
 type ImportRecord = { relay: string; repo: string; commit: string; source: ImportedSource };

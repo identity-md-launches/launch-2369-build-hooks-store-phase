@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseCheck, checkRequest, importSource, intakeJob, jobStages, parseLaunches, matchesLaunch, relativeTime, relayFetch } from '../web/src/relay.ts';
+import { parseCheck, checkRequest, importSource, intakeJob, jobAttention, jobStages, parseLaunches, matchesLaunch, relativeTime, relayFetch } from '../web/src/relay.ts';
 import { newDraft, body, normalizeDraft } from '../src/lib/compose.ts';
 
+const safeDraft = () => { const d = newDraft(); d.settings.chain = 1; return body(d); };
 const result = JSON.parse(readFileSync(new URL('../evidence/check-A-default-blocks.response.json', import.meta.url)));
 test('IMD facts, states, plan titles, blockers and suggestions are retained without inventing success', () => {
   const parsed = parseCheck(result); assert.equal(parsed.facts[0].state, 'stated'); assert.equal(parsed.plan[0].title, 'Build and test the contracts');
@@ -13,7 +14,7 @@ test('IMD facts, states, plan titles, blockers and suggestions are retained with
   assert.equal(parseCheck({ ...result, facts: [{ label: 'Safe optional text', state: 'unknown', assumed: { unsafe: true } }] }).facts[0].assumed, undefined);
 });
 test('free check sends the exact composer body inside the action envelope', async t => {
-  const input = body(newDraft()); let sent;
+  const input = safeDraft(); let sent;
   t.mock.method(globalThis, 'fetch', async (url, options) => { sent = { url, options }; return Response.json(result); });
   await checkRequest('https://relay.example/', input);
   assert.equal(sent.url, 'https://relay.example/check'); assert.equal(sent.options.method, 'POST');
@@ -31,7 +32,7 @@ test('own-code import uses the production API shape and only accepts a pinned Gi
 });
 test('IMD HTTP failures never become a clear check', async t => {
   t.mock.method(globalThis, 'fetch', async () => Response.json({ detail: 'Try later' }, { status: 503 }));
-  await assert.rejects(checkRequest('https://relay.example', {}), /503.*Try later/);
+  await assert.rejects(checkRequest('https://relay.example', safeDraft()), /503.*Try later/);
 });
 test('HTML, proxy text, empty and malformed JSON responses use a retryable status message', async t => {
   let response;
@@ -66,6 +67,23 @@ test('recorded live GET /jobs/:id response uses waiting, accepted and failed wit
   job.nodes.forEach(n => n.state = 'accepted'); job.state = 'completed';
   assert.deepEqual(jobStages(job).map(s => s.state), ['complete', 'complete', 'active']);
   job.launch.status = 'live'; assert.equal(jobStages(job)[2].state, 'complete');
+});
+test('blocked questions retain IMD blockedReason and every failed-node failureReason verbatim', () => {
+  const job = JSON.parse(readFileSync(new URL('fixtures/relay/job-live.response.json', import.meta.url)));
+  const attention = jobAttention(job);
+  assert.equal(attention.blocked, true);
+  assert.deepEqual(attention.questions, [job.blockedReason, ...job.nodes.filter(n => n.state === 'failed').map(n => n.failureReason)]);
+  assert.deepEqual(jobAttention({ state: 'completed', nodes: [] }), { blocked: false, questions: [] });
+  assert.deepEqual(jobAttention({ state: 'blocked', blockedReason: null, nodes: [] }), { blocked: true, questions: [] });
+  const question = 'needs_input: <script>literal question</script>\nWhich pool?';
+  assert.deepEqual(jobAttention({ state: 'executing', nodes: [{ state: 'failed', failureReason: question }] }), { blocked: true, questions: [question] });
+});
+test('an inconsistent composer body is refused locally without making a relay call', async t => {
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => { calls++; return Response.json(result); });
+  const input = safeDraft(); input.pairWith = 'imd'; input.objective = input.objective.replace('paired with IMD.', 'paired with ETH.');
+  await assert.rejects(checkRequest('https://relay.example', input), /request and launch body/);
+  assert.equal(calls, 0);
 });
 test('job nodes map real build, audit and deployment states, including failures', () => {
   const job = { state: 'executing', nodes: [{ key: 'build_contract_project', state: 'accepted' }, { key: 'write_foundry_tests', state: 'accepted' }, { key: 'audit_math', role: 'review', state: 'working' }, { key: 'audit_judge', state: 'waiting' }], launch: { status: null } };

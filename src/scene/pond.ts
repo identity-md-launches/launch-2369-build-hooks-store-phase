@@ -1,5 +1,5 @@
 /** Port of mockup/index.html pondScene. Character grids and fish/cast math are preserved.
- * Job 5 adds monochrome bank reeds, a fisher's hat, distant boat and canopy birds.
+ * Monochrome bank reeds, distant boat and canopy birds surround the unchanged Pepe sprite.
  */
 import PEPE from './pepe.json';
 export type CastState = 'idle' | 'windup' | 'fly' | 'splash' | 'sink' | 'wait' | 'bite' | 'reel' | 'cheer';
@@ -127,12 +127,6 @@ export function pondScene(host: HTMLElement, canvas: HTMLCanvasElement, onTick?:
     for (var c3 = boatL + 3; c3 < boatR - 2; c3++) put(c3, sr + 1, c3 === boatL + 3 ? "'" : c3 === boatR - 3 ? "'" : '-', 1);
   }
   function drawPepe() { var fr = PEPE[pepeFrame]; for (var r = 0; r < fr.length; r++) { var line = fr[r]; for (var c = 0; c < line.length; c++) if (line[c] !== ' ') put(pc + c, pr + r, line[c], 0); } }
-  function drawHat() {
-    // Draw over the empty cells above his head; the source sprite data stays exact.
-    text(pc + 12, pr + 2, '.SSS.', 0);
-    text(pc + 11, pr + 3, '/S###S\\', 0);
-    text(pc + 8, pr + 4, '___SSSSSSSS___', 0);
-  }
   function drawBanks() {
     // Sparse canopy at the edges leaves the landing copy and fishing line clear.
     for (var side = 0; side < 2; side++) {
@@ -229,7 +223,7 @@ export function pondScene(host: HTMLElement, canvas: HTMLCanvasElement, onTick?:
   function step(dt: number) { t += dt; stepBigFish(dt); stepSmall(dt); stepCast(dt); stepLife(dt); if (onTick) onTick(t); }
   function draw() {
     if (!N) return;
-    clearCells(); drawWater(); drawBanks(); drawBigFish(); drawSmall(); drawLife(); drawPepe(); drawHat(); drawBoat(); drawRod(); drawLine(); drawHook(); drawSplash();
+    clearCells(); drawWater(); drawBanks(); drawBigFish(); drawSmall(); drawLife(); drawPepe(); drawBoat(); drawRod(); drawLine(); drawHook(); drawSplash();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     ctx.font = '13px VT323, "Courier New", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (var lv = 1; lv <= 3; lv++) { ctx.fillStyle = 'rgba(21,19,15,' + ALPHA[lv] + ')'; for (var i = 0; i < N; i++) if (level[i] === lv) ctx.fillRect((i % cols) * CW, Math.floor(i / cols) * CH, CW, CH); }

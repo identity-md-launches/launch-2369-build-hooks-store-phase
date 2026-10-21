@@ -4,7 +4,7 @@ import { CHAINS, STATUSES, type Launch } from './types';
 import type { SiteConfig } from './config';
 import type { LaunchStore, StoreState } from './chain/store';
 import { matchRule, safeUrl } from './chain/decode';
-import { storeDraft } from './draft';
+import { storeDraft, submittedDraft, openCorrection, clearCorrection } from './draft';
 import { WarnSign } from './Builder';
 import { Text } from './Text';
 import { AddressValue } from './AddressValue';
@@ -18,7 +18,7 @@ export function copyLaunchDraft(launch: Launch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
   const token = entry('token'); token.p.name = launch.name; token.p.symbol = launch.symbol ?? 'TOKEN';
   const unknownRules = Array.from(launch.request.matchAll(/^\d+\. (.+)$/gm), m => m[1]).filter(rule =>
-    !matchRule(rule, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token') }));
+    !matchRule(rule, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token'), pair: launch.type === 'A' && /paired with IMD\./.test(launch.request) ? 'IMD' : 'ETH', wallet: launch.payer }));
   const blocks = [token, ...launch.matchedBlocks.map(b => ({ id: b.id, p: { ...b.p } }))];
   if (unknownRules.length) blocks.push({ id: 'custom', p: { text: unknownRules.join(' ') } });
   return { ...draft, type: launch.type, mode: words ? 'prompt' : 'blocks', prompt: words, blocks, seeded: true,
@@ -29,6 +29,21 @@ export function copyLaunchDraft(launch: Launch): Draft {
       pool: null,
     },
   };
+}
+/** Local submissions restore the exact draft. Older launches recover settings and
+ * all request rules from chain data; unknown rules remain editable, never dropped. */
+export function correctionDraft(launch: Launch): Draft {
+  const saved = submittedDraft(launch.intakeChainId, launch.requestId, launch.request);
+  if (saved) return saved;
+  const draft = copyLaunchDraft(launch), request = launch.request;
+  const ownToken = /^Token: my own token (.+?) \(([^)]+)\), supply ([\d,]+), (\d+) decimals,/m.exec(request);
+  if (ownToken && launch.type === 'A') draft.blocks[0] = { id: 'own-token', p: { name: ownToken[1], symbol: ownToken[2], supply: Number(ownToken[3].replaceAll(',', '')), dec: Number(ownToken[4]) } };
+  const pool = /Pool: ([\d.]+)% of my 90% share/.exec(request);
+  const remainder = /the remainder goes to (0x[\da-fA-F]{40})/.exec(request);
+  const owner = /^Owner (0x[\da-fA-F]{40}) may only:/m.exec(request);
+  const source = /own source at (https:\/\/github\.com\/\S+?)(?: commit ([\da-f]{40}))?: audit/.exec(request);
+  return { ...draft, settings: { ...draft.settings, pool: pool ? Number(pool[1]) : null,
+    rem: remainder?.[1] ?? '', owner: owner?.[1] ?? '', repo: source?.[1] ?? '', commit: source?.[2] ?? '' } };
 }
 export function Hook({ route, data, config, store }: { route: string; data: StoreState; config: SiteConfig; store: LaunchStore }) {
   const parts = route.replace(/^#/, '').split('?')[0].split('/'), chain = Number(parts[1]), id = parts[2]?.toLowerCase();
@@ -54,10 +69,12 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
     <div className="detail-head"><div><div className="detail-pills"><span className="pill chain">{CHAINS[launch.chainId]}</span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span>{launch.launchNumber && <span className="num">Launch #{launch.launchNumber}</span>}</div>
       <h1 id="hook-h"><Text>{launch.name}</Text></h1>{launch.symbol && <p className="hook-symbol num">${launch.symbol}</p>}
       <p className="small creator">by {launch.creatorName ? <span>{launch.creatorName}</span> : <code>{launch.payer}</code>}</p>
-    </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch))) location.hash = '#builder'; else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
+    </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
     {notice && <div className="notice launch-done" role="status"><strong>The swarm has your request…</strong><p>Watch this page for the build result. Your payment is confirmed on {CHAINS[chain]}.</p><AddressValue value={notice.requestId} label="confirmed request id" /><a href="https://explorer.imd.fun/" target="_blank" rel="noreferrer">Open IMD explorer</a> · <a href={`#hook/${chain}/${notice.requestId}`}>Hook page</a>{!notice.saved && <p className="field-error">Browser storage was unavailable. Copy the request id or bookmark this page.</p>}</div>}
     {error && <p className="form-error" role="alert">{error}</p>}
-    <RelayTimeline launch={launch} relay={config.relayUrl} />
+    <RelayTimeline launch={launch} relay={config.relayUrl} onFix={questions => {
+      if (!openCorrection(correctionDraft(launch), { questions, request: launch.request, hookRoute: `#hook/${chain}/${id}` })) setError('Could not save this correction. Allow site storage and try again.');
+    }} />
     {launch.status === 'in-progress' && <p className="notice">{launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
     {!!launch.completion?.status && <p className="notice" role="status">Failed: <code>{launch.completion.reason}</code></p>}
     {launch.resultError && <p className="notice" role="status">{launch.resultError} <button className="link-button" onClick={store.retry}>Retry result</button></p>}
@@ -84,4 +101,4 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
   </section>;
 }
 import { shortOf } from '../../src/lib/compose';
-const shortLabel = (block: Launch['matchedBlocks'][number], launch: Launch) => shortOf(block, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token') });
+const shortLabel = (block: Launch['matchedBlocks'][number], launch: Launch) => shortOf(block, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token'), pair: launch.type === 'A' && /paired with IMD\./.test(launch.request) ? 'IMD' : 'ETH' });

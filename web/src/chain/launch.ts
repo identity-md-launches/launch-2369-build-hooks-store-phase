@@ -1,7 +1,8 @@
-import { decodeEventLog, erc20Abi, stringToHex, zeroAddress, type Address, type Hex, type TransactionReceipt, type WalletClient } from 'viem';
+import { decodeEventLog, erc20Abi, hexToString, stringToHex, zeroAddress, type Address, type Hex, type TransactionReceipt, type WalletClient } from 'viem';
 import { body, MAX_BODY_BYTES, validate, type Draft } from '../../../src/lib/compose.ts';
 import type { SiteConfig } from '../config.ts';
 import type { ReadClient } from './clients.ts';
+import { checkConsistency } from '../../../src/lib/safety.ts';
 import { intakeAbi } from './decode.ts';
 
 export const MAX_LAUNCH_PRICE = 500000000000000000n;
@@ -9,7 +10,9 @@ export function launchBody(draft: Draft, config: SiteConfig, account?: string) {
   const issues = validate(draft, account);
   if (!draft.settings.chain || !config.enabledDeployChains.includes(draft.settings.chain)) issues.push({ field: 'settings.chain', message: 'Choose an enabled deploy chain in the Builder.' });
   if (issues.length) throw new Error(issues[0].message);
-  const json = JSON.stringify(body(draft, account));
+  const input = body(draft, account), findings = checkConsistency(input);
+  if (findings.length) throw new Error(`${findings[0].message} Sentence: ${findings[0].sentence}`);
+  const json = JSON.stringify(input);
   if (new TextEncoder().encode(json).length > MAX_BODY_BYTES) throw new Error('The request exceeds 16 KiB. Shorten it in the Builder.');
   return { json, bytes: stringToHex(json) };
 }
@@ -36,6 +39,10 @@ export async function assertWallet(ctx: LaunchContext) {
   const accounts = await ctx.wallet.getAddresses();
   if (accounts[0]?.toLowerCase() !== ctx.account.toLowerCase()) throw new Error('The connected wallet changed. Review the request again.');
   if ((ctx.bytes.length - 2) / 2 > MAX_BODY_BYTES) throw new Error('The request exceeds 16 KiB. Shorten it in the Builder.');
+  let input;
+  try { input = JSON.parse(hexToString(ctx.bytes)); } catch { throw new Error('The launch request is not valid JSON. Return to the Builder.'); }
+  const findings = checkConsistency(input);
+  if (findings.length) throw new Error(`${findings[0].message} Sentence: ${findings[0].sentence}`);
 }
 export async function approveLaunch(ctx: LaunchContext) {
   await assertWallet(ctx);

@@ -484,3 +484,9 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
   .launch-columns, .launch-steps { grid-template-columns: minmax(0, 1fr); }
   .launch-columns > .box, .launch-steps > .box { padding: 16px; }
 }
+/* Launch safety reuses the site's error palette and keeps every question/address readable. */
+.safety-notice, .needs-attention, .correction { overflow-wrap: anywhere; }
+.safety-notice h2, .needs-attention h2, .correction h2 { margin-block: 0 12px; }
+.safety-notice blockquote, .needs-attention blockquote, .correction blockquote, .swarm-panel blockquote { margin: 12px 0; padding-inline-start: 12px; border-inline-start: 3px solid currentColor; white-space: pre-wrap; overflow-wrap: anywhere; }
+.safety-notice li + li { margin-top: 16px; }
+.treasury-note code { overflow-wrap: anywhere; }

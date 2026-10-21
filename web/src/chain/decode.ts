@@ -1,6 +1,6 @@
 import { decodeEventLog, hexToString, isAddress, type Hex, type Abi } from 'viem';
 import intakeJson from '../../../src/abi/intake.json' with { type: 'json' };
-import { BLOCKS, BY_ID, TOKEN_IDS, defaults, shortOf, type BlockEntry, type Context } from '../../../src/lib/compose.ts';
+import { BLOCKS, BY_ID, IMD_TREASURY, TOKEN_IDS, defaults, shortOf, type BlockEntry, type Context } from '../../../src/lib/compose.ts';
 import { CHAINS, type Launch } from '../types.ts';
 
 export const intakeAbi = intakeJson as Abi;
@@ -21,42 +21,60 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Full sentence matching, including function signatures. Substring mentions never grant controls. */
 export function matchRule(rule: string, ctx: Context): BlockEntry | null {
   for (const def of BLOCKS.filter(b => !TOKEN_IDS.includes(b.id) && b.id !== 'custom')) {
+    for (const template of [def.sentence, ...(def.legacySentences ?? [])]) {
     const keys: { key: string; fmt?: string; at: boolean }[] = [];
     let pattern = '', from = 0;
-    for (const m of def.sentence.matchAll(/\{(@?)(\w+)(?::(\w+))?\}/g)) {
-      pattern += escape(def.sentence.slice(from, m.index));
+    for (const m of template.matchAll(/\{(@?)(\w+)(?::(\w+))?\}/g)) {
+      pattern += escape(template.slice(from, m.index));
       keys.push({ key: m[2], fmt: m[3], at: !!m[1] });
       pattern += '(.+?)'; from = m.index! + m[0].length;
     }
-    pattern += escape(def.sentence.slice(from));
+    pattern += escape(template.slice(from));
     const matched = new RegExp('^' + pattern + '$').exec(rule.trim());
     if (!matched) continue;
     const p = defaults(def); let valid = true;
     keys.forEach((key, i) => {
       const value = matched[i + 1];
-      if (key.at) { if (value !== ctx[key.key as keyof Context]) valid = false; return; }
+      if (key.at) {
+        if (key.key === 'destination') {
+          if (/^send it to 0x[\da-fA-F]{40}$/.test(value)) {
+            const recipient = value.slice('send it to '.length);
+            p.to = recipient.toLowerCase() === IMD_TREASURY.toLowerCase() ? "IMD's treasury" : recipient.toLowerCase() === ctx.wallet?.toLowerCase() ? 'my wallet' : recipient;
+          }
+          else if (value === `use it to buy ${ctx.symbol} from this pool and burn the bought tokens`) p.to = 'burn (buy and burn)';
+          else valid = false;
+        } else if (key.key === 'wallet') { if (!/^0x[\da-fA-F]{40}$/.test(value)) valid = false; }
+        else if (key.key === 'jarAction') {
+          if (value === 'burn the bought tokens') p.act = value;
+          else if (value === `send the bought tokens to ${IMD_TREASURY}`) p.act = "send them to the IMD's treasury";
+          else valid = false;
+        } else if (value !== (ctx[key.key as keyof Context] ?? (key.key === 'pair' ? 'ETH' : ''))) valid = false;
+        return;
+      }
       if (key.fmt === 'rest') { if (Number(value) !== 100 - Number(p[key.key])) valid = false; return; }
       const param = def.params.find(x => x.k === key.key);
-      const parsed = param?.type === 'number' ? Number(value.replaceAll(',', '')) : value;
+      let parsed = param?.type === 'number' ? Number(value.replaceAll(',', '')) : value.replace('treasury address', "IMD's treasury");
+      if (param?.options?.includes("IMD's treasury") && typeof parsed === 'string' && /treasury/.test(parsed)) parsed = "IMD's treasury";
       if (typeof parsed === 'number' && !Number.isFinite(parsed)) valid = false;
-      if (param?.options && !param.options.includes(value)) valid = false;
+      if (param?.options && !param.options.includes(String(parsed))) valid = false;
       // Repeated parameters must agree (e.g. the end rate of a fading fee).
       const earlier = keys.slice(0, i).findIndex(k => k.key === key.key && k.fmt !== 'rest');
       if (earlier !== -1 && matched[earlier + 1] !== value) valid = false;
       p[key.key] = parsed;
     });
     if (valid) return { id: def.id, p };
+    }
   }
   return null;
 }
-export function parseObjective(objective: string) {
+export function parseObjective(objective: string, payer?: string) {
   const first = objective.split('\n')[0];
   const a = /^Launch (.+?) \(([^)]+)\) with a Uniswap v4 hook on /.exec(first);
   const b = /^Deploy one contract: (.+?), a standalone Uniswap v4 hook/.exec(first);
   const c = /^Deploy one contract on .+?: (.+?), a Uniswap v4 hook for the existing token (0x[\da-fA-F]{40})(?: \(([^)]+)\))?/.exec(first);
   const name = a?.[1] ?? b?.[1] ?? c?.[1] ?? 'Untitled hook';
   const symbol = a?.[2] ?? c?.[3] ?? null;
-  const ctx = { name, symbol: symbol ?? (c ? 'the token' : 'the pool’s token') };
+  const ctx = { name, symbol: symbol ?? (c ? 'the token' : 'the pool’s token'), pair: a && /paired with IMD\./.test(first) ? 'IMD' : 'ETH', wallet: payer };
   const rules = Array.from(objective.matchAll(/^\d+\. (.+)$/gm), m => m[1]);
   const matchedBlocks: BlockEntry[] = [], blocks: string[] = [], groups = new Set<string>();
   for (const rule of rules) {
@@ -78,7 +96,7 @@ export function launchFromRequested(log: RawLog, intakeChainId: number, action: 
     if (args.action.toLowerCase() !== action.toLowerCase()) return null;
     const body = parseBody(args.body);
     if (!isStoreBody(body)) return null;
-    const parsed = parseObjective(body.objective), chainId = Number(body.chainId);
+    const parsed = parseObjective(body.objective, args.payer), chainId = Number(body.chainId);
     if (!CHAINS[chainId]) return null;
     const time = timestamp ?? (log.blockTimestamp ? Number(BigInt(log.blockTimestamp)) : undefined);
     return { ...parsed, id: `${intakeChainId}:${args.requestId}`, requestId: args.requestId, intakeChainId, chainId,

@@ -13,7 +13,7 @@ const relay = 'https://hooks-store-relay.hooks-store.workers.dev';
 const output = '../tests/results/job6';
 const validDraft = (): Draft => {
   const d = newDraft(); d.mode = 'prompt'; d.prompt = 'Observe swaps without fees or owner powers.';
-  d.settings = { ...d.settings, chain: 1, pool: 50 }; return d;
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner }; return d;
 };
 async function setup(page: Page, draft = validDraft()) {
   await interceptChains(page);

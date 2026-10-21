@@ -7,7 +7,7 @@ import { routeReadTransports } from './live-transport';
 test('one real free check from the production export through the owner relay; no wallet or launch', async ({ page }) => {
   test.skip(process.env.HOOKS_LIVE_RELAY !== '1', 'Opt in once with HOOKS_LIVE_RELAY=1. This makes a real free check.');
   test.setTimeout(60000);
-  const out = '../tests/results/job6'; fs.mkdirSync(out, { recursive: true });
+  const out = '../tests/results/job7'; fs.mkdirSync(out, { recursive: true });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await routeReadTransports(page);
   await page.setViewportSize({ width: 390, height: 844 }); await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -16,6 +16,9 @@ test('one real free check from the production export through the owner relay; no
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Builder', exact: true })).toBeVisible();
   await page.locator('#s-chain').selectOption('1'); await page.locator('#s-pool').fill('50');
+  // This read-only check has no connected payer. Use the owner-approved recipient
+  // explicitly so it never submits a request containing an unresolved wallet.
+  await page.locator('#s-rem').fill('0x3f252e859a277a86A3967c11D4E054B2f07a1F22');
   const button = page.getByRole('button', { name: 'Check with the swarm (free)', exact: true });
   await expect(button).toBeEnabled();
   const responsePromise = page.waitForResponse(r => r.url() === `${site.relayUrl}/check` && r.request().method() === 'POST');

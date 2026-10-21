@@ -1,3 +1,33 @@
+# Worker validation — job 7: launch safety
+
+Validated on 2026-10-21 against SPEC **1.25** and the production export. These are worker observations, not independent certification. Current evidence is in [tests/results/job7](tests/results/job7/), with the requirement-by-requirement and six-domain review in [REVIEW.md](tests/results/job7/REVIEW.md).
+
+| Check | Actual job 7 result | Evidence under tests/results/job7 |
+| --- | --- | --- |
+| Typecheck and production build | Exit 0; complete export matches the isolated build byte for byte | typecheck.txt, build.txt, export-integrity.json |
+| Unit suite | **495 passed**, zero failed/skipped | unit.txt |
+| Composer/check matrix | 420 cases: all 35 blocks × A/B/C × IMD/ETH settings × both deploy chains; unavailable blocks omitted, unverified lending refused; mutation and contradiction cases also pass | unit.txt; tests/safety.test.mjs |
+| Relay Worker | **9 passed**, zero failed/skipped; web relay parser/gates are also in the unit suite | relay-unit.txt |
+| Full Chromium suite | **160 passed**, seven optional skipped, zero failures/flaky | playwright.txt, playwright-results.json |
+| Route/width coverage | Store, Catalog, Builder, Launch, Hook, My hooks and Learn at **320, 390, 1440**; navigation/forms/filters/wallet/prepayment interactions, local resources and reflow | 21 route JPEGs |
+| Blocked-job correction | Both IMD question fields, exact local draft recovery and older ETH-fee/IMD-pair recovery at all three widths; original request retained; corrected relaunch bytes inspected | blocked-hook-*.jpg, fix-builder-*.jpg; browser report |
+| Receipt/reorg regressions | Cancelled/replaced Launch retries; matching replacement/repricing completes once; submitted unknown hash remains locked after reload; orphaned ticker announcement/age removed | Browser report; unit receipt tests |
+| Real free check | Owner relay **HTTP 200**, **599 ms**, 14 facts, nine plan steps, zero blockers; no wallet or launch | live-relay.txt, live-check.request.json, live-check.response.json, live-check-summary.json |
+| Live-RPC settle | Fresh browser settled both histories in **26,625 ms**; existing range splitting handled this verification provider's 100,000-block cap | live-rpc.txt, live-rpc.json; first-attempt limitation retained |
+| Accessibility measurement | Lighthouse **100 / 100 / 100** for Store, Builder, checked Builder response at 390 | lighthouse.txt, lighthouse-summary.json |
+| Design probe | Final deterministic offline run **13/16**; casing, eyebrows and hard border/shadow are inherited visual-spec exceptions | design-probe.json; earlier online result in design-probe-online.json |
+| Export and bundle budget | Relative runtime references, metadata and complete local assets checked; no protected-path changes, caches or submodules; complete standalone Git snapshot bundle under 8 MiB | export-integrity.json, submission-budget.json |
+
+The exact install/build/test commands are in README. Dependencies were installed in an isolated temporary copy using the unchanged package manifest and lockfile. Production `dist/` was copied back and compared by file hashes. The delivery script creates its measurement repository/bundle only in temporary storage; it never writes the workspace's .git. No ignore file was changed and no dependency/archive/cache directory was added to the submission.
+
+The shared check runs on the composed output before the free check and again on actual request bytes before approval/Launch. It quotes mismatched fee currencies, unresolved recipients, missing dependencies and contradictory rules. The fee recipient is the paying address or the supplied IMD treasury; IMD-paired requests explicitly forbid ETH conversion/other pools. Historical rule templates remain readable. Fixed-fact conflicts persist until the request opts out and is checked again. Questions from GET /jobs/:id appear unchanged beside the restored draft, and the original paid request is retained.
+
+Practical limits: safety rules do not formally prove arbitrary prose/imported code or certify user-entered external addresses. Yield remains unavailable until verified Aave/Morpho deployments are supplied. The first live-RPC attempt aborted because a verification route left a transport timeout unhandled; its helper now returns a retryable 502. The final fresh browser passed despite range-limit HTTP 500 replies and one transport timeout, with all observations retained. The build retains Vite's existing large-chunk warning. Five optional Anvil cases remain unperformed; the two opted-in live tests were run separately. WebKit/Safari, physical devices, screen readers and native zoom are unperformed. No real signature, approval, payment, launch, deployment or publication occurred. See REVIEW.md for exact coverage and remaining limits.
+
+---
+
+# Prior job 6 validation (historical)
+
 # Worker validation — phase 1, job 6
 
 Complete for the stated scope, validated on 2026-10-21. Current evidence is in [tests/results/job6](tests/results/job6/); the prior job 5 record below is historical. These are worker observations, not independent certification. The seven fixes and all six Better Interface domains are documented with source locations and limitations in [REVIEW.md](tests/results/job6/REVIEW.md).

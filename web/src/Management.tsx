@@ -28,13 +28,13 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
       if (running) return; running = true;
       try {
         const value = await client.readContract({ address: launch.hookAddress as Address, abi: [fn.abi], functionName: fn.abi.name, args: argumentValues(fn.abi, values) });
-        if (active) { setReading(formatReading(fn.abi.name, value)); setError(''); }
+        if (active) { setReading(formatReading(fn.abi.name, value, launch.type === 'A' && /paired with IMD\./.test(launch.request) ? 'IMD' : 'ETH')); setError(''); }
       } catch { if (active) { setReading(null); setError('Reading unavailable. Retry or check the contract on the explorer.'); } }
       finally { running = false; }
     };
     void read(); const timer = setInterval(read, 20000);
     return () => { active = false; clearInterval(timer); };
-  }, [view, live, client, launch.hookAddress, fn.sig, argsKey, revision]);
+  }, [view, live, client, launch.hookAddress, launch.request, fn.sig, argsKey, revision]);
   const allowed = fn.access !== 'owner' || ownerAllowed;
   const needsSwitch = isConnected && chainId !== launch.chainId;
   const send = async () => {
