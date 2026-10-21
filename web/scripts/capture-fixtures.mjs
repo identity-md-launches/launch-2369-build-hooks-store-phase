@@ -8,7 +8,7 @@ const completed = '0xd4ad2d2ef4e8ea9995103f34e322dbefb2534f3a52984a308f7db8e257b
 const action = '0x6c61756e63682e6f70656e406c61756e63682d31000000000000000000000000';
 const hex = n => '0x' + n.toString(16);
 await mkdir('tests/fixtures/chain', { recursive: true });
-await Promise.all([[1,'https://ethereum-rpc.publicnode.com'],[4663,'https://rpc.mainnet.chain.robinhood.com']].map(async ([chainId,url]) => {
+await Promise.all([[1,'https://rpc.mevblocker.io'],[4663,'https://rpc.mainnet.chain.robinhood.com']].map(async ([chainId,url]) => {
   const client = createPublicClient({ transport: http(url, { timeout: 20000, retryCount: 1 }) });
   if (await client.getChainId() !== chainId) throw Error('Wrong chain');
   const head = await client.getBlockNumber(), found = { Requested: [], Completed: [] };

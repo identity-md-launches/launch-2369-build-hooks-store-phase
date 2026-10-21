@@ -1,0 +1,22 @@
+
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/launch.spec.ts --grep launch review fits
+
+[WebServer] (node:30) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+(node:42) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/launch.spec.ts:167:39 › launch review fits 320px and keeps the complete summary, fees and wallet steps (3.2s)
+  ✓  2 tests/launch.spec.ts:167:39 › launch review fits 390px and keeps the complete summary, fees and wallet steps (2.2s)
+  ✓  3 tests/launch.spec.ts:167:39 › launch review fits 821px and keeps the complete summary, fees and wallet steps (2.3s)
+  ✓  4 tests/launch.spec.ts:167:39 › launch review fits 1440px and keeps the complete summary, fees and wallet steps (2.6s)
+
+  4 passed (22.0s)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

@@ -8,17 +8,14 @@ import { Hook } from './Hook';
 import { MyHooks } from './MyHooks';
 import { LaunchReview } from './LaunchReview';
 import { useLaunches } from './chain/store';
-import { loadDraft } from './draft';
 import type { SiteConfig } from './config';
 
 const NAV = [['store', 'Store'], ['builder', 'Builder'], ['mine', 'My hooks'], ['learn', 'Learn']];
 function routeName() { const hash = location.hash.slice(1).split(/[/?]/)[0]; return ['store', 'catalog', 'learn', 'builder', 'launch', 'hook', 'mine'].includes(hash) ? hash : 'store'; }
 export function App({ config }: { config: SiteConfig }) {
   const [route, setRoute] = useState(routeName), [query, setQuery] = useState('');
-  const [hash, setHash] = useState(location.hash), [chosenChain, setChosenChain] = useState(() => loadDraft().settings.chain);
+  const [hash, setHash] = useState(location.hash);
   const data = useLaunches(config);
-  const selectedChain = config.chains.find(chain => chain.id === chosenChain);
-  useEffect(() => { const change = () => setChosenChain(loadDraft().settings.chain); window.addEventListener('hooks:draft', change); window.addEventListener('storage', change); return () => { window.removeEventListener('hooks:draft', change); window.removeEventListener('storage', change); }; }, []);
   useEffect(() => {
     const changed = () => { setRoute(routeName()); setHash(location.hash); };
     window.addEventListener('hashchange', changed);
@@ -46,12 +43,11 @@ export function App({ config }: { config: SiteConfig }) {
         <label className="sr" htmlFor="q">Search hooks by name, token, block or request</label>
         <input id="q" name="q" type="search" placeholder="Search name, token, block or request" autoComplete="off" value={query} onChange={event => { setQuery(event.target.value); if (!isStore) location.hash = '#catalog'; }} />
       </form>
-      <span className="chainpill">{selectedChain ? selectedChain.name : 'ETHEREUM · ROBINHOOD'}</span>
       <Connect config={config} />
     </div></header>
     {config.inProgress && <div className="progress-banner">This site is being built; launches open when the banner goes away</div>}
     <main id="main" tabIndex={-1}>
-      {isStore ? <><Landing config={config} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview />}
+      {isStore ? <><Landing config={config} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
 
     </main>
   </>;

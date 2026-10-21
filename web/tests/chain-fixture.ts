@@ -59,7 +59,7 @@ export async function interceptChains(page: Page, options: {status?:number; noLo
     }));
     await r.fulfill({json:Array.isArray(payload)?results:results[0]});
   };
-  await page.route('https://ethereum-rpc.publicnode.com',intercept);
+  await page.route('https://rpc.mevblocker.io',intercept);
   await page.route('https://rpc.mainnet.chain.robinhood.com',intercept);
   return calls;
 }
@@ -90,6 +90,6 @@ export async function emptyIntake(page: Page) {
       : req.method === 'eth_getLogs' ? [] : '0x0'});
     await route.fulfill({json: Array.isArray(payload) ? payload.map(reply) : reply(payload)});
   };
-  await page.route('https://ethereum-rpc.publicnode.com', answer);
+  await page.route('https://rpc.mevblocker.io', answer);
   await page.route('https://rpc.mainnet.chain.robinhood.com', answer);
 }

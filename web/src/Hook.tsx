@@ -10,6 +10,8 @@ import { Text } from './Text';
 import { AddressValue } from './AddressValue';
 import { Management } from './Management';
 import { ReadStatus } from './ReadStatus';
+import { OpenPool } from './OpenPool';
+import { getLaunchNotice } from './LaunchReview';
 
 export function copyLaunchDraft(launch: Launch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
@@ -31,6 +33,7 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
   const parts = route.replace(/^#/, '').split('?')[0].split('/'), chain = Number(parts[1]), id = parts[2]?.toLowerCase();
   const launch = data.launches.find(l => l.intakeChainId === chain && l.requestId.toLowerCase() === id);
   const [error, setError] = useState('');
+  const notice = getLaunchNotice(chain, id ?? '');
   const manage = new URLSearchParams(route.split('?')[1] ?? '').get('manage') === '1';
   useEffect(() => {
     if (!launch || !manage) return;
@@ -52,6 +55,7 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
       <h1 id="hook-h"><Text>{launch.name}</Text></h1>{launch.symbol && <p className="hook-symbol num">${launch.symbol}</p>}
       <p className="small creator">by {launch.creatorName ? <span>{launch.creatorName}</span> : <code>{launch.payer}</code>}</p>
     </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch))) location.hash = '#builder'; else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
+    {notice && <div className="notice launch-done" role="status"><strong>The swarm has your request…</strong><p>Watch this page for the build result. Your payment is confirmed on {CHAINS[chain]}.</p><AddressValue value={notice.requestId} label="confirmed request id" /><a href="https://explorer.imd.fun/" target="_blank" rel="noreferrer">Open IMD explorer</a> · <a href={`#hook/${chain}/${notice.requestId}`}>Hook page</a>{!notice.saved && <p className="field-error">Browser storage was unavailable. Copy the request id or bookmark this page.</p>}</div>}
     {error && <p className="form-error" role="alert">{error}</p>}
     <ol className="timeline" aria-label="Launch timeline">{['Requested', 'Building', 'Audit panel', 'Deploying', final].map((step, index) => <li key={step} className={index === 0 || index === 4 && ['live', 'failed'].includes(launch.status) ? 'confirmed' : ''} aria-current={index === 4 && ['live','failed'].includes(launch.status) ? 'step' : index === 0 && launch.status === 'requested' ? 'step' : undefined}><span className="num">{index + 1}</span><strong>{step}</strong><small>{index === 0 ? 'Seen on chain' : index === 4 && launch.status === 'live' ? 'Addresses delivered' : index === 4 && launch.status === 'failed' ? 'Intake reported failure' : 'No separate chain event'}</small></li>)}</ol>
     {launch.status === 'in-progress' && <p className="notice">{launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
@@ -76,7 +80,7 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
       const match = launch.matchedBlocks.find(b => BY_ID[b.id] && label === shortLabel(b, launch));
       return <li key={`${index}:${label}`}><Text>{label}</Text>{match && <WarnSign def={BY_ID[match.id]} tested={true} />}</li>;
     })}</ul>{!launch.blocks.length && <p>This hook was described in words.</p>}<details><summary>Request text as sent</summary><div><pre>{launch.request}</pre></div></details></section>
-    {launch.type === 'C' && launch.status === 'live' && <section className="box pool-panel"><h2>Open the pool</h2><p>Pool opening arrives in phase 2b. This launch deploys the hook only; no pool has been created by the store.</p></section>}
+    {launch.type === 'C' && launch.status === 'live' && <OpenPool launch={launch} client={store.clients[launch.chainId]} explorer={deployment.explorerUrl} />}
   </section>;
 }
 import { shortOf } from '../../src/lib/compose';

@@ -1,0 +1,51 @@
+{
+  "forkBlock": 94480862,
+  "payer": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+  "localOnly": true,
+  "results": [
+    {
+      "type": "A",
+      "paymentChain": 4663,
+      "deployChain": 1,
+      "approvalHash": "0x39383c656b3fe139d50d9677c82b1dbedd9621778f9e9d87176cdcc3df89b250",
+      "requestHash": "0x6b161b77bd192b69f15c17c8b2fd47f1e45b750dd7b55cd7fe2a9bad20ae0309",
+      "requestId": "0x3c474bc27abafdd94216354e56caa9e56b13622aeb573b232f09aac59592c392",
+      "bodyBytes": 1431,
+      "bodyEqualsPreview": true,
+      "receiptStatus": "success"
+    },
+    {
+      "type": "B",
+      "paymentChain": 4663,
+      "deployChain": 1,
+      "approvalHash": "0x05b02358c30d09fa30d9d2b45962a596b0593c05841be8ed8438fdf20f8d3107",
+      "requestHash": "0x4d5aece2b9dba45de97188cfa9b95561b2d45b20f4af60a92e65ad4adaefc938",
+      "requestId": "0xc07fa2140543836a7a79bac068bb4a1706aa30b0893e7ee2122581ad697dc93d",
+      "bodyBytes": 1273,
+      "bodyEqualsPreview": true,
+      "receiptStatus": "success"
+    }
+  ]
+}
+[WebServer] (node:49) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 13 tests using 1 worker
+
+(node:61) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/launch.spec.ts:65:1 › wrong payment chain keeps approval and launch locked until switching (2.1s)
+  ✓   2 tests/launch.spec.ts:74:1 › zero price refuses approval and offers a read retry (1.7s)
+  ✓   3 tests/launch.spec.ts:83:1 › rejected approval signature recovers without unlocking launch (1.9s)
+  ✓   4 tests/launch.spec.ts:91:1 › in-progress flag keeps live payments locked while review and copy work (1.7s)
+  ✓   5 tests/launch.spec.ts:99:38 › Robinhood Anvil fork pays for type A, gates receipts, parses id and preserves preview bytes (6.6s)
+  ✓   6 tests/launch.spec.ts:99:38 › Robinhood Anvil fork pays for type B, gates receipts, parses id and preserves preview bytes (7.0s)
+  ✓   7 tests/launch.spec.ts:127:1 › type C live hook prepares a copy-only pool call with on-chain decimals (1.4s)
+  ✓   8 tests/launch.spec.ts:153:1 › a refresh recovers the approval receipt without another payment or approval (3.1s)
+  ✓   9 tests/launch.spec.ts:167:39 › launch review fits 320px and keeps the complete summary, fees and wallet steps (1.8s)
+  ✓  10 tests/launch.spec.ts:167:39 › launch review fits 390px and keeps the complete summary, fees and wallet steps (1.8s)
+  ✓  11 tests/launch.spec.ts:167:39 › launch review fits 821px and keeps the complete summary, fees and wallet steps (1.8s)
+  ✓  12 tests/launch.spec.ts:167:39 › launch review fits 1440px and keeps the complete summary, fees and wallet steps (1.8s)
+  ✓  13 tests/launch.spec.ts:180:1 › Copy request copies the exact compact preview JSON (1.5s)
+
+  13 passed (40.7s)

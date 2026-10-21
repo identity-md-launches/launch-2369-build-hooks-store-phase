@@ -1,0 +1,166 @@
+{
+  "passed": true,
+  "failures": [],
+  "metadata": {
+    "title": true,
+    "description": true,
+    "favicon": true,
+    "og:title": true,
+    "og:image": true
+  },
+  "htmlReferences": [
+    "./favicon.svg",
+    "./fonts/vt323-latin.woff2",
+    "./assets/index-U-P1jEvl.js",
+    "./assets/utils-DFnHSamt.js",
+    "./assets/sha2-BtPXGKXt.js",
+    "./assets/eventemitter3-CASeZv19.js",
+    "./assets/isAddressEqual-CZI2hc1A.js",
+    "./assets/call-B0R1bJad.js",
+    "./assets/secp256k1-DMk4gNp3.js",
+    "./assets/index-DbRXmRuN.css"
+  ],
+  "copiedPublicAssets": [
+    "site-config.json",
+    "favicon.svg",
+    "og.png",
+    "blocks-verified.json",
+    "wallets/phantomWallet.svg",
+    "wallets/coinbaseWallet.svg",
+    "wallets/metaMaskWallet.svg",
+    "wallets/LICENSE.txt",
+    "wallets/rabbyWallet.svg",
+    "fonts/vt323-latin.woff2",
+    "fonts/LICENSES.txt",
+    "fonts/pixelify-sans-latin.woff2",
+    "fonts/press-start-2p-latin.woff2"
+  ],
+  "distBytes": 1152144,
+  "files": [
+    {
+      "path": "assets/call-B0R1bJad.js",
+      "bytes": 97800,
+      "sha256": "9ead4df89205456d9b4c8ff19b921be6de8807aa12a1363fe31a16f23f73227b"
+    },
+    {
+      "path": "assets/ccip-C66m14d6.js",
+      "bytes": 2885,
+      "sha256": "c8ec63623f8c7cf6a8873c06ba2794c11388285f462a2ffbd5e4447638f6626d"
+    },
+    {
+      "path": "assets/dist-BVDjdYEl.js",
+      "bytes": 96295,
+      "sha256": "8390e249db96ab18e70c836afd260b1cbce0a240ec1a2b44358d8c17edaf8f08"
+    },
+    {
+      "path": "assets/eventemitter3-CASeZv19.js",
+      "bytes": 3407,
+      "sha256": "c98a155dab61d6ccc8680599552244af5e4e4a6153b4e0e4d4b3693aa1fc2a91"
+    },
+    {
+      "path": "assets/index-DbRXmRuN.css",
+      "bytes": 31357,
+      "sha256": "f132c8158ab7535c29b31a5212502963b6d11d85d742f0296fa465c6031a3f37"
+    },
+    {
+      "path": "assets/index-U-P1jEvl.js",
+      "bytes": 609959,
+      "sha256": "445e96e7bc77588a7f94cf8b2996fc45e6d265e76da01a325d991a3e41ae4cce"
+    },
+    {
+      "path": "assets/isAddressEqual-CZI2hc1A.js",
+      "bytes": 11453,
+      "sha256": "1d1a65b8eaa2e7a9633aca08f615d037862620a10fc6f93f80514c616af0dc9b"
+    },
+    {
+      "path": "assets/secp256k1-DD8PxkG2.js",
+      "bytes": 52,
+      "sha256": "a857b6fdf64b9fb2782320b2be3e7782a71ad138fc43c16b61645189e38ed41a"
+    },
+    {
+      "path": "assets/secp256k1-DMk4gNp3.js",
+      "bytes": 26342,
+      "sha256": "e536c850b7023142a1e86de0b4e101eeb196213deb0d7caf0759a7e128457dd0"
+    },
+    {
+      "path": "assets/sha2-BtPXGKXt.js",
+      "bytes": 3574,
+      "sha256": "f8378bc9c2468220643816359ec52dc4369fae5099c3a736edf93a284929e718"
+    },
+    {
+      "path": "assets/utils-DFnHSamt.js",
+      "bytes": 2439,
+      "sha256": "b8278644006806c9e7d5a945b7dc92e98e6746f77e4afe0b252ba09fc60078c7"
+    },
+    {
+      "path": "blocks-verified.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "favicon.svg",
+      "bytes": 225,
+      "sha256": "d52933cdc0a68ed43e49926b76510279b0550373c330f33f7ba11d9c233d42e6"
+    },
+    {
+      "path": "fonts/LICENSES.txt",
+      "bytes": 13309,
+      "sha256": "1956912e994d17a2640f0a83f595f0c63ca32b99aa14d1fc9cb015695afdb20d"
+    },
+    {
+      "path": "fonts/pixelify-sans-latin.woff2",
+      "bytes": 12016,
+      "sha256": "4a5633a0c9c1b73abd133a56d3716c2d8df2ed03cb987346f72194aeb224f382"
+    },
+    {
+      "path": "fonts/press-start-2p-latin.woff2",
+      "bytes": 12512,
+      "sha256": "afec86997fdaf54af1f59358fa2c1e2a0f1d04146edad18e5cd141d0384a7548"
+    },
+    {
+      "path": "fonts/vt323-latin.woff2",
+      "bytes": 17936,
+      "sha256": "8ddbebcc1048154132e1d78eb9b1f7850bca1b7d857035ccf1cb4318ebc615b6"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1805,
+      "sha256": "6b63a56dd6971891d8656763219019e503c54e63632e680d06a0c293681b54f5"
+    },
+    {
+      "path": "og.png",
+      "bytes": 201060,
+      "sha256": "7afb250de54b3be3321b6d8adf00aefd4954fe3afe142b862988ee86a3278a59"
+    },
+    {
+      "path": "site-config.json",
+      "bytes": 1297,
+      "sha256": "fac043c449988af37b77c2646917460e97818e904fe0223856cd5483ce08c4e4"
+    },
+    {
+      "path": "wallets/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "5095037afa1ba03be36e04305c01ec9ee600e14377738a026482b1a888c4e365"
+    },
+    {
+      "path": "wallets/coinbaseWallet.svg",
+      "bytes": 538,
+      "sha256": "74b55347075cbbb2a0292cca0f94459d531afd23586ecfd2fcc670236c590439"
+    },
+    {
+      "path": "wallets/metaMaskWallet.svg",
+      "bytes": 1665,
+      "sha256": "892c7dfab8c4ca5682878dda3f42f55a75195d7d365e4adb0832845f3a0a2135"
+    },
+    {
+      "path": "wallets/phantomWallet.svg",
+      "bytes": 861,
+      "sha256": "f841f8112e131259a2e5123177950099c79487e61e77971f4e193e6c374419eb"
+    },
+    {
+      "path": "wallets/rabbyWallet.svg",
+      "bytes": 2290,
+      "sha256": "dcae4de88ebfa10cffa1fe28df13d7c8c0b40736ef2b704f1f2fc348e777e443"
+    }
+  ]
+}

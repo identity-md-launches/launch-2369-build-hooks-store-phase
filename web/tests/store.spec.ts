@@ -60,7 +60,10 @@ for (const width of [821, 1024, 1440]) {
     expect((await page.locator('#searchform').boundingBox())!.width).toBeGreaterThanOrEqual(120);
     expect(Math.max(...boxes.map(b => b.top))).toBeLessThan(Math.min(...boxes.map(b => b.bottom)));
     expect(Math.max(...boxes.map(b => b.right))).toBeLessThanOrEqual(width);
-    await expect(page.locator('.chainpill')).toHaveText('ETHEREUM · ROBINHOOD');
+    await expect(page.locator('.chainpill')).toHaveCount(0);
+    expect(await page.locator('#searchform').evaluate(el => el.nextElementSibling?.id)).toBe('connect');
+    await expect(page.locator('.wordmark')).toBeVisible();
+    expect((await page.locator('.wordmark').boundingBox())!.width).toBeGreaterThan(100);
     if (width >= 1141) {
       await expect(page.locator('.brand svg.hook')).toHaveAttribute('viewBox', '0 0 12 16'); await expect(page.locator('.brand svg.hook')).toHaveAttribute('width', '24');
       await expect(page.locator('.brand')).toHaveCSS('gap', '10px'); await expect(page.locator('.wordmark')).toHaveCSS('font-size', '12px');

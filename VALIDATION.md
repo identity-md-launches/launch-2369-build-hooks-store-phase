@@ -1,98 +1,99 @@
-# Worker validation — phase 1, job 3
+# Worker validation — phase 1, job 4
 
-Validated on 2026-10-21 against the production `dist/` export. This is a record of worker checks, not independent certification. Prior-job reports remain under `tests/results/`; current reports are under **`tests/results/job3/`**.
+Validated on 2026-10-21 against the production static export. These are worker observations, not independent certification. Job 4 evidence is under `tests/results/job4/`; earlier job reports remain in their original directories.
 
-**Known evidence gap:** real Requested/Completed logs were captured on both chains, including a failed completion, and a real successful-build IPFS result was saved. That result and the other inspected launch results contain no deployed addresses. A captured **Live result.json with addresses** was therefore unavailable. Live-schema tests are explicitly synthetic; contract resolution and management transactions were exercised on a real mainnet fork. The application keeps a completed build without addresses In progress.
+## Build and interaction checks
 
-## Final checks
-
-| Check | Actual result | Delivered evidence |
+| Check | Actual result | Evidence under `tests/results/job4/` |
 | --- | --- | --- |
-| Install from existing lockfile | `npm --prefix web ci --ignore-scripts` succeeded; existing manifests/lockfile unchanged | Rebuild instructions in README |
-| TypeScript | `npm --prefix web run typecheck` passed | `typecheck.txt` |
-| Production build | `npm --prefix web run build` passed; includes `tsc --noEmit` | `build.txt`, complete root `dist/` |
-| Unit tests | `npm --prefix web test`: **29 passed**, none failed/skipped | `unit.txt` |
-| Builder browser suite | **12 passed**, plus **3 risk-tooltip tests passed** | `e2e-builder-final.txt`, `e2e-risk-final.txt` |
-| Store, wallet and pond browser suites | **22 passed** (16 Store, 2 wallet, 4 pond) | `e2e-store-wallet-pond-final.txt`, `cast-frames.json` |
-| Hook browser suite, with local fork | **13 passed**, including the two optional fork tests | `e2e-hook-final.txt`, `fork-results.json` |
-| Total Playwright | **50 passed**, 0 failed, 0 skipped, 0 flaky | `playwright-results.json` |
-| Pinned design probe | Measured all 16 checks: **12 passed**, 4 mockup-related flags reviewed below | `design-probe.json`, `design-probe-390.png` |
-| Export integrity and path/size review | Local references, public assets, metadata and bundle size checked | `export-integrity.json`, `submission-budget.json` |
+| Dependency install | Existing lockfile installed successfully in an isolated temporary copy; manifests and lockfiles unchanged | Rebuild commands in README |
+| TypeScript | Passed | `typecheck.txt` |
+| Production build | Passed; complete export copied to root `dist/` | `build.txt` |
+| Unit tests | 43 passed, zero failed/skipped | `unit-tests.txt` |
+| Launch browser suite, with Robinhood fork | 13 passed | `launch-browser.txt`, `launch-browser-results.json` |
+| Builder and Hook regressions | 26 passed; 2 optional Ethereum fork tests skipped | `builder-hook.txt`, `builder-hook-results.json` |
+| Store, wallet, pond and live RPC checks | 23 passed, including the real RPC check | `store-wallet-pond-live.txt`, `store-wallet-pond-live-results.json` |
+| Pinned design probe | 12 passed; 4 retained visual-spec exceptions, described below | `design-probe-output.json` |
+| Final rendered export | No page errors or horizontal overflow at 390, 821 and 1440px; full wordmark visible, Connect 168px | `rendered-export.json`, `store-*.png` |
+| Static export and submission budget | Local references/public assets checked; complete source and runtime assets retained | `export-integrity.json`, `submission-budget.json` |
 
-Reports in the table are relative to `tests/results/job3/`. Playwright used Chromium headless shell and the static preview under `/preview/`, not a development server. All suites ran after the final application-source change. The large JS entry produces Vite's advisory >500 kB chunk warning; the build succeeds and required wallet/runtime chunks remain included.
+Build commands were `npm --prefix web run typecheck`, `npm --prefix web test`, and `npm --prefix web run build`, executed against the isolated copy. The build retains Vite's advisory that the main JS chunk exceeds 500 kB; it succeeds. Dependencies, caches and browser binaries are outside the submitted repository.
 
-Browser commands were split into bounded batches, preserving one complete result per batch:
+**Final unique Chromium total: 62 passed, 2 optional tests skipped, 0 failed or flaky.** The three completed reports cover all 64 tests. The later screenshot-only repeat is not added to that total.
+
+Chromium checks use the production export under `/preview/`, with the existing static server. Final browser batches use:
 
 ```sh
-PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/builder.spec.ts --grep-invert 'risk tooltips'
-PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/builder.spec.ts --grep 'risk tooltips'
-PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/store.spec.ts tests/wallet.spec.ts tests/pond.spec.ts
-HOOKS_FORK_URL=http://127.0.0.1:8545 PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/hook.spec.ts
+node web/scripts/run-launch-checks.mjs
+npm --prefix web run test:e2e -- tests/builder.spec.ts tests/hook.spec.ts
+HOOKS_LIVE_RPC=1 npm --prefix web run test:e2e -- tests/store.spec.ts tests/wallet.spec.ts tests/pond.spec.ts tests/live-rpc.spec.ts
 ```
 
-Some earlier long-running tool sessions ended with exit 143. They are not counted as completed checks. Final batches above completed with exit 0. Intermediate test failures exposed a missing keyword match, result-retry delay and fixture/setup mistakes; these were repaired and the affected suites rerun. No passing result is inferred from an interrupted command.
+`PLAYWRIGHT_BROWSERS_PATH` pointed to the temporary browser installation. A longer combined run ended with exit 143; it is not counted as a completed suite. Bounded batches provide the final results. Earlier setup failures included a stale preview, a stopped standalone fork and selecting an already-selected disabled chain field in a refresh test. The preview was rebuilt, the fork is now owned and cleaned up by the check runner, and the refresh fixture only switches when necessary. No passing result is inferred from an interrupted command.
 
-## Functional coverage
+## History corrections and real RPC validation
 
-- Real ABI decoding: at least two original Requested and two original Completed log objects from each RPC; action/body parsing, both exact terminal store markers, rejection of unrelated launches and malformed data. The Robinhood fixture also contains a real status-2 failure with no supplied reason. A synthetic nonempty bytes32 reason verifies ASCII decoding.
-- Every catalog sentence round-trips through template matching with its parameters; unfamiliar prose remains Custom and cannot introduce owner controls. Payment-chain request IDs and deployment-chain contracts stay distinct.
-- 40-hex matching covers hook, token, distributor and pool currencies; 64-hex matching covers IDs and hashes. Keywords include block titles as well as short labels and prose. Unknown-address lookup runs on both supported chains and distinguishes an unavailable RPC from no matching contract.
-- Inclusive backward ranges are gap-free and no larger than 10,000 blocks. Poll tests cover new store requests, unrelated requests, deduplication, cached restarts and queued head polling while a read is in flight. Only a newly observed matching request casts. ENS reverse names and expiry are tested with an isolated client/storage fixture.
-- Successful-result parsing preserves UUID launch IDs for evidence links independently of numeric launch labels; it never manufactures addresses. Unsupported result URIs and mismatched-chain results stay unusable; an unavailable result has a working immediate retry. The real IPFS result with null launch details stays In progress.
-- Hook pages render at **320, 390 and 1440px**, with no horizontal overflow or page errors. Tests exercise risk-sign focus, address copying, matched-block cloning, owner lockout, query-param read-only viewing, per-argument validation, public controls, and a simulated 20-second reading refresh.
-- My hooks filters the real request payer from the test event, links Live hooks to Manage, scrolls to the panel, and supports draft discard/undo. A query parameter never grants owner privileges.
-- Wallet tests cover EIP-6963 discovery, rejection recovery, connection/disconnection, focus trap/Escape/restore, mobile wallet-browser choices and Coinbase. A wallet on an unsupported chain switches to Ethereum; an already supported chain stays connected. No relay project ID is used.
-- Job-2 regressions cover Builder modes/types/fields, chain and allocation requirements, composition, dependency removal, risk signs, verified-mark fallback, layout, navigation, offline fonts, gateway-subpath URLs, metrics failure, storage failure, first-screen action, scene timings and reduced motion.
+The refreshed upstream `SPEC.md` is version **1.15**. Ethereum reads, including ENS, use `https://rpc.mevblocker.io`; Robinhood keeps its requested endpoint. Starts are **26164897** and **85300000**, with **100000** and **400000** block windows respectively. Unit tests check the actual configured sizes, inclusive/gap-free ranges, shared Requested/Completed reads, matching a completion encountered before its older request, and splitting arbitrary failures until a window is at most 1,000 blocks. A failed group does not advance its saved cursor. The v2 cache restarts older browser caches at the corrected bounds.
 
-## Fork evidence
+The opt-in Playwright test uses a fresh browser context and real public RPCs, with no log/chain interception. It waits for the exact status **Read from Ethereum and Robinhood Chain**, bounded by 30 seconds including navigation. A completed earlier standalone run took **1,866 ms**, with **2 Ethereum** and **46 Robinhood** log calls. A later run observed **4,704 ms**, including retry calls. The final batch took **2,622 ms**, with **2 Ethereum** and **46 Robinhood** log calls (`store-wallet-pond-live.txt`). These are measurements on this machine, not a latency guarantee. Timestamp, ENS and result-file enrichment run separately from completion of the history scan.
 
-The final local fork used the requested Ethereum public RPC, with chain ID 1 and fork block **26241048**. Anvil received the only transactions. `tests/fork/ControlHook.sol` was compiled with Solidity 0.8.26 and deployed locally at `0x1f23570d3abdc47512f9718b923a7e236e7a4bbc`; deployment block 26241049 and transaction hash are recorded in `fork-results.json`. The mock was not deployed to Ethereum or Robinhood.
+Read-only checks on both configured chains found code at Intake and the configured PoolManagers. Both IMD contracts returned symbol `IMD`, 18 decimals and launch price `500000000000000000`. The readings are saved in `public-contract-reads.jsonl`. No public transaction was submitted.
 
-`node web/scripts/check-fork.mjs` used the application's actual resolver to identify the real Hamster Hour hook `0x82f636a92364d13754d7b3e72d460f0be20a28cc`, its canonical PoolManager and six enabled permission flags. It identified token `0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86` as Hamster Hour / HAMSTER. The browser also resolved those contracts and handed the token into Builder type C. The management test connected the mock's local owner, sent `pause()`, waited for a successful receipt, observed `paused() == true`, then unpaused and observed false.
+## Launch and pool coverage
 
-Fixture provenance, including the distinction between captured data and synthetic store-marked events, is documented in `tests/fixtures/chain/README.md`. The captured logs are never imported by production pages. No private key or public-chain transaction was used.
+The guarded fork runner checks loopback URL, Anvil client identity, chain 4663 and the Robinhood fork origin before any mutation. Its final fork block is recorded in `launch-fork-results.json`. It impersonates the public payer from the supplied fixture only inside Anvil, mocks native gas and IMD balance, verifies `balanceOf`, and uses the application's actual approve/request functions against the forked Intake and token contracts. It does not create or replace either contract or use a private key.
+
+Both **type A and type B** run approval and request end to end. The body selects Ethereum deployment while payment occurs on Robinhood. Assertions compare transaction calldata and emitted body bytes to the exact preview, verify callback/asset/amount, and parse the matching `Requested` id. Browser tests additionally check successful approval receipt gating, request receipt gating, pending storage, the done notice, explorer link, pond integration and `#hook/4663/<requestId>` navigation. Delayed receipts keep the next action disabled.
+
+Other checks cover:
+
+- Unsupported payment chain and switching, changed account, rejected signature, zero/excessive price, insufficient allowance, price changes after approval, over-16-KiB bodies and the existing in-progress lock.
+- Exact clipboard JSON equality, enabled deploy-chain validation, no duplicate approval after reload, saved transaction receipt recovery, and matching token Approval events for both direct and Smart Wallet-style outer receipts.
+- Type C live-page rendering with a **synthetic** result and mocked contract reads, real component input validation, copy-only controls, and six-decimal token conversion. Unit tests cover integer roots, decimal/inverted ratios, v4 bounds, fee/tick-spacing choices, sorted currencies and encoded initialize calldata. No initialize transaction is sent.
+- Existing Builder, Store, Hook, wallet and pond behaviors: navigation, search/filter reset, responsive panels, wallet discovery/rejection/disconnect/focus, mobile links, Coinbase choice, draft persistence, management lockouts, risk signs, offline fonts, gateway-subpath assets, motion timing and reduced motion.
+
+The committed `inProgress: true` remains as delivered. Launch review/copy and wallet connection work; live payments stay disabled until the operator removes the banner. The test fixture opens launches only on its local fork. The relay remains absent, with the refused-body fee warning and Copy request action. Pool sending remains phase 2b.
 
 ## Better Interface review
 
-The pinned Better Interface workflow, the core principles of all six domains, and document-web-design guidance were applied. Source inspection covered semantics, tokens, interaction states and copy. Rendered coverage used the actual export in Chromium, the probe, screenshots and keyboard/pointer interaction tests. The final 390px first-screen screenshot was inspected: the product explanation, describe input and **DESCRIBE IT** action are visible without scrolling. Hook header and management screenshots were also inspected at mobile and desktop widths.
+The pinned workflow, core principles in all six domains and document-web-design section were applied. Source review covered semantics, tokens, state transitions and copy. Rendered review used Chromium, interaction tests, the provided probe and final screenshots. The 390px Store screenshot was inspected: the product description, input and **Describe it** button are visible without scrolling. The 821px header shows the full wordmark, nav, search and Connect on one row. Launch tables and actions stack on phones. `DESIGN.md` documents the actual final source.
 
-| Domain | Coverage and final implementation | Findings and repairs |
+| Domain | Coverage | Findings and fixes |
 | --- | --- | --- |
-| Accessibility | Native labeled fields, fieldsets, semantic regions, named copy actions, polite reading/transaction feedback, keyboard-focusable risk signs, wallet focus behavior. `web/src/AddressValue.tsx:7`, `web/src/Management.tsx:60`, `web/src/App.tsx:41`. | Empty argument fields originally showed red errors immediately. `Management.tsx:71` now gives neutral guidance until values are entered. Invalid entered addresses remain explicit. Owner lockout is enforced by address equality at `Management.tsx:86`; the query parameter is never used there. |
-| Layout | Sticky shared bar, wrapping hashes, five-stage timeline, two management columns and mobile stacking. `web/src/styles.css:389`, `:403`, `:439`. No overflow at 320/390/1440. | Duplicate open-slot content and unwanted animation were removed at `web/src/Catalog.tsx:77`; only actual placements enable the loop. Manage links now scroll with sticky-header clearance at `web/src/Hook.tsx:37`. |
-| Writing | Exact empty-pond line and payment notice; plain function labels; explicit Unknown, In progress, Failed and retry states. `web/src/Catalog.tsx:60`, `web/src/LaunchReview.tsx:8`, `web/src/Hook.tsx:53`. | Completed build files without addresses no longer imply Live (`web/src/chain/decode.ts:119`). Intermediate timeline stages make no invented claim. Practice copy no longer says chain reads belong to a future job. |
-| Typography | Self-hosted Press Start 2P / Pixelify Sans / VT323. Addresses, signatures, quantities and readings use the terminal face. Six shared tokens plus the specified bar/eyebrow exceptions are documented in DESIGN.md. | The unsupported character logo was replaced with the exact pixel SVG at `web/src/App.tsx:43`; the 10px gap and wordmark remain. No remote font request was needed by the export. |
-| Colors | Existing paper/ink/pine palette, status text alongside color, visible focus, no new decorative palette. Prior token-pair calculations remain in `tests/results/contrast.json`; the new probe measured rendered solid backgrounds. | All measured solid-background text passed the probe threshold. The 34 boxes over canvas/gradients were not numerically certified; they were visually inspected. New pages use opaque paper panels. |
-| UI | Explicit chain choice, disabled invalid actions, owner gating, simulated writes, receipt states, immediate retry, retained inputs and reversible draft discard. `web/src/Builder.tsx:205`, `web/src/Management.tsx:40`, `web/src/MyHooks.tsx:30`. | Keyword search now includes catalog block titles (`web/src/chain/decode.ts:152`). Retry clears the result delay (`web/src/chain/store.ts:84`). Successful partial history is cached even after a later RPC failure (`store.ts:115`), and a pending head poll takes precedence (`store.ts:117`). Cloning uses complete rule matching so unfamiliar rules are not dropped (`Hook.tsx:17`). |
+| Accessibility | Semantic summary/fee tables with row headers, labeled selects/price input, native disclosures, status/alert feedback, named hash/address copying and existing keyboard wallet modal. | Disabled later steps now explain their prerequisite (`web/src/LaunchReview.tsx:150`). Invalid pool input is connected through `aria-describedby` and `aria-invalid` (`web/src/OpenPool.tsx:34`). Risk signs reuse the keyboard-accessible Builder component. |
+| Layout | Launch summary/fee columns and three steps stack at 820px; long JSON/hashes wrap. Rendered checks at 320/390/821/1440 for Launch and 821/1024/1440 for the bar. | Removed the chain pill and its state (`web/src/App.tsx:38`); removed its CSS and the intermediate-width wordmark hiding rule (`web/src/styles.css:208`). Measured 821px header has 180px wordmark, 120px search and 168px Connect. |
+| Writing | Explicit deploy/pay distinction, type-specific fees, refused-body warning, receipt states, retry guidance and copy-only pool explanation. | External hook copy now says “A v4 hook not launched through this store” (`web/src/Catalog.tsx:53`). A proposed transaction-specific IMD explorer path returned 404; the done notice uses the verified explorer home instead (`web/src/Hook.tsx:58`). |
+| Typography | Existing self-hosted Press Start 2P / Pixelify Sans / VT323 and six shared size tokens. Numerical amounts, addresses, tiers and computed prices use terminal text. | New tables and controls reuse existing typography; row headers use the existing variable body face at 600. No new font assets or size system. See `web/src/styles.css:449` and `web/src/OpenPool.tsx:29`. |
+| Colors | Existing paper/ink/pine palette and opaque panels. State meaning is expressed in text as well as color. | Probe-measured solid-background text passes contrast thresholds. No new decorative colors. Canvas/gradient text is visually reviewed but not numerically certified. |
+| UI | Distinct wallet/pending/success/error states, rechecked wallet identity and price, receipt-gated actions, preserved inputs and recovery after refresh. | Approval verification now uses the matching token event so Smart Wallet receipts are supported (`web/src/chain/launch.ts:66`). Submitted hashes are saved and reverified after reload (`web/src/LaunchReview.tsx:31`). Failed history windows split and retry without silently advancing (`web/src/chain/store.ts:22`). |
 
-The review also caught and removed a stray rendered `0` next to a successful completion and restored the existing compact-button style instead of overriding it globally. The final source uses the existing warning component for Hook-page risks and retains the job-2 visual direction.
+The review retained job 3's requested visual direction. The new launch/pool UI uses existing tokens, panels, warning signs and controls. No unrequested palette or navigation redesign was introduced.
 
-### Probe result and retained mockup exceptions
+### Required probe and exceptions
 
-The exact required probe was run from the repository root, with its supplied script and scratch output:
+Run from the repository root, using the supplied script:
 
 ```sh
-IMD_PLAYWRIGHT="$PWD/web/node_modules/playwright/index.mjs" PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste
+IMD_PLAYWRIGHT=/tmp/hooks-job4/web/node_modules/playwright/index.mjs \
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers \
+node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste
 ```
 
-It completed with no script errors or missing local files. Layout, target spacing, measured contrast, tracking, font families, glyphs, slogans, repetition, copy budget, motion and sharing checks passed. The open-slot duplication flag from the previous delivery is resolved.
+The probe completed all **16 checks**: **12 passed**, **4 flagged**. No script errors, missing local files, horizontal overflow, text overlap, obstructing floating controls or clipped text were found at 320/390/1440. All 26 measured controls meet the 24px-or-spacing rule; 19 are below the 44px comfort size. The specified compact existing controls are retained; new launch actions are at least 44px high. All measured solid-background text meets 4.5:1 (3:1 for large text); 34 canvas/gradient boxes were not measured. Sharing metadata, tracking, font families, glyphs, copy budget and reduced motion pass.
 
-Four flags remain because the assignment explicitly retains the mockup and the rest of job 2:
+Four retained exceptions follow the explicit visual specification and “everything else stays as delivered” scope:
 
-1. **Casing:** the pixel headings, navigation and actions use the mockup's capitals. The probe reports 14 content boxes. Body text remains sentence case.
-2. **Eyebrows:** the requested landing eyebrow is retained. Other reported examples include actual fieldset legends, the brand, action labels and the featured section rather than newly added ornamental labels.
-3. **Type sizes:** the site uses six common tokens, while the exact 9px desktop navigation/eyebrow and 12px wordmark produce seven repeated sizes at desktop and eight total including one-offs. These dimensions are explicitly requested; the new Hook UI reuses existing tokens.
-4. **Chrome:** three first-screen controls have both an ink border and a hard shadow, matching SPEC 8. Removing those would change the requested pixel treatment.
+1. **Casing:** the specified pixel headings and actions remain uppercase (14 reported content boxes).
+2. **Eyebrows:** the existing landing eyebrow remains. Other reported items include functional fieldset legends, action labels and section labels rather than newly introduced decorative text.
+3. **Type sizes:** six shared tokens plus the explicitly specified wordmark/nav/eyebrow values produce seven repeated sizes at desktop and eight with one-offs. New Launch UI reuses shared tokens.
+4. **Chrome:** three existing first-screen controls combine an ink border and hard shadow, as required by SPEC section 8.
 
-These are recorded exceptions, not claimed passes. All 27 first-screen controls meet the probe's 24px-or-spacing rule; 20 are below the 44px comfort target. The compact mockup controls are retained. There is no new first-screen obstruction, overflow or missing main action.
+These are recorded exceptions, not passing checks. The supplied probe and screenshot evidence are not a formal accessibility audit.
 
-## Remaining limitations
+## Limitations and delivery integrity
 
-- **Real Live fixture:** unavailable as explained above. The real captured build result's deployment fields are null. Synthetic schema coverage and real fork transactions are reported separately.
-- **Public RPC history:** the requested Ethereum endpoint returned “Archive requests require a personal token” for older log windows. Historical-state requests used while finding deployment/fork blocks also returned unavailable state. Some secondary public endpoints returned pruned history. Recent logs and final live-head fork reads worked. A complete historical scan could not be established; the UI shows partial/cached data and a retry action without silently skipping rejected ranges. No deployment start block, key or alternate backend was invented.
-- **Result/timeline data:** immutable result files can lack deployment details even when other IMD services later show a live launch. This job does not substitute the browser-restricted API for the required chain/IPFS source. Building, audit and deployment milestones remain unknown without the later relay. Missing audit/trade links are explicit; empty operator templates are not guessed.
-- **Later scope:** payment/launch submission, pool opening and promotion contracts remain later jobs. The review page has the requested payment notice; no pretend wallet payment is implemented.
-- **Browser/accessibility coverage:** Chromium screenshots, keyboard interactions and the fork fixture were exercised. A WebKit binary was downloaded but could not launch because required shared libraries were absent. Safari/Firefox, actual mobile wallet apps, hardware wallets, screen-reader output, forced-colors rendering and real public-wallet transactions were not tested. No Lighthouse score or formal accessibility certification is claimed.
-- The hosting name and Open Graph image URL are configured from the brief. Publication and the live domain were outside this task.
-
-The export and source remain complete. Existing dependency/build configuration and prohibited paths were not edited; no ignore file was changed, no dependency archive or git submodule is included, and temporary installations were removed from the repository after verification. See `submission-budget.json` for the final byte accounting against 8 MiB.
+- Chromium is the completed browser target. WebKit was installed and its missing libraries investigated in temporary directories, but the runtime stopped at **“Could not create EGL display: no supported platform available”**. WebKit/Safari, Firefox, physical phones, hardware wallets, real Coinbase passkey approval, screen-reader output and forced-colors rendering were not exercised. Smart Wallet event handling and the connector UI are tested; no live wallet payment is claimed.
+- Type C live results and selected management fixtures remain synthetic where captured job-3 result files lack deployment addresses. Live public chain history and local fork payment tests are distinct evidence. The two optional older Ethereum management-fork browser tests are skipped in this job's final batches; their prior job-3 results remain available.
+- Public RPC and IPFS availability can change. Failed readings retain cached data and retry controls. Unknown addresses or missing build/result stages are not invented. The fee/receipt checks do not certify that the eventual swarm deployment succeeds.
+- `inProgress` remains enabled, no relay is configured, and initialize is copy-only. Hosting/publication and phase-2 behavior are outside this delivery.
+- Final source, existing lockfile and complete `dist/` are retained. No protected dependency/build configuration, `.git/`, `.github/`, `.env`, ignore file or submodule was changed. No dependency/cache directory, registry mirror or archive is part of the submission. Final byte accounting is in `submission-budget.json`.

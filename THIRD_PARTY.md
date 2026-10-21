@@ -8,3 +8,5 @@
 - **Pond and Pepe**: ported from this assignment's `mockup/index.html` as requested. The sprite grids and meta are retained verbatim in `src/scene/pepe.json`. The Open Graph image is rendered from that canvas. No code or artwork was taken from the ASCII Sharks demo.
 
 Runtime and development dependencies are pinned by `web/package-lock.json`. Dependency packages and caches are not included in the submission; only their necessary production bundle is included in `dist/assets/`.
+
+- **Wallet layer**: reused the existing adaptation of the requested [identity-md-launches wallet source at `11f246fd8751b48cee018f8d5aa1c6a282e40e0e`](https://github.com/identity-md-launches/launch-2254-build-hooks-store-polished/tree/11f246fd8751b48cee018f8d5aa1c6a282e40e0e/src/wallet). The local implementation retains EIP-6963 discovery, the injected fallback, Coinbase and mobile open-in links, extends configuration to Ethereum and Robinhood Chain, and uses the existing native dialog with keyboard focus restoration. No remote wallet source is fetched at runtime.

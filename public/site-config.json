@@ -22,21 +22,24 @@
       "rpcUrl": "https://rpc.mainnet.chain.robinhood.com",
       "explorerUrl": "https://robin.etherscan.io",
       "testnet": false,
-      "intakeFromBlock": 0
+      "intakeFromBlock": 85300000,
+      "logRange": 400000,
+      "imdAddress": "0x5f7bb59365ce557c26dbcaa4ee9d39a4b95b7127"
     },
     {
       "id": 1,
       "name": "Ethereum",
-      "rpcUrl": "https://ethereum-rpc.publicnode.com",
+      "rpcUrl": "https://rpc.mevblocker.io",
       "explorerUrl": "https://etherscan.io",
       "testnet": false,
-      "intakeFromBlock": 0
+      "intakeFromBlock": 26164897,
+      "logRange": 100000,
+      "imdAddress": "0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7"
     }
   ],
   "intake": {
     "address": "0xa43e6f75ee006411f79ac1c84120606c2330de82",
     "launchAction": "0x6c61756e63682e6f70656e406c61756e63682d31000000000000000000000000",
-    "rangeSize": 10000,
     "pollIntervalMs": 20000,
     "ipfsGateway": "https://ipfs.imd.fun/ipfs/"
   }

@@ -42,7 +42,7 @@ test('EIP-6963 lists a named wallet, handles rejection, connects a real fixture 
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.locator('#connect')).toHaveClass(/address/); expect((await page.locator('#connect').textContent())!.length).toBe(12);
   expect((await page.locator('#connect').boundingBox())!.width).toBe(168);
-  await expect(page.locator('.chainpill')).toHaveText('ETHEREUM · ROBINHOOD');
+  await expect(page.locator('.chainpill')).toHaveCount(0);
   await page.locator('#connect').click(); await expect(page.locator('#connect')).toHaveText('Connect');
   const methods = await page.evaluate(() => (window as unknown as Window & { walletFixture: { methods: string[] } }).walletFixture.methods);
   expect(methods.some(m => /sendTransaction|sign/i.test(m))).toBe(false);

@@ -1,0 +1,32 @@
+[
+  {
+    "width": 390,
+    "scrollWidth": 390,
+    "brandWidth": 182,
+    "wordmarkWidth": 112,
+    "searchWidth": 358,
+    "connectWidth": 168,
+    "stylesheet": "./assets/index-DbRXmRuN.css",
+    "errors": []
+  },
+  {
+    "width": 821,
+    "scrollWidth": 821,
+    "brandWidth": 214,
+    "wordmarkWidth": 180,
+    "searchWidth": 120,
+    "connectWidth": 168,
+    "stylesheet": "./assets/index-DbRXmRuN.css",
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "scrollWidth": 1440,
+    "brandWidth": 214,
+    "wordmarkWidth": 180,
+    "searchWidth": 397,
+    "connectWidth": 168,
+    "stylesheet": "./assets/index-DbRXmRuN.css",
+    "errors": []
+  }
+]

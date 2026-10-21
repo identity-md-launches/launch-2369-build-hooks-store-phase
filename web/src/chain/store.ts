@@ -8,14 +8,15 @@ import { publicClients, readCache, writeCache, type ReadClient } from './clients
 import { creatorName } from './ens.ts';
 export const REQUEST_TOPIC = '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41fe2a576074379063';
 export const COMPLETE_TOPIC = '0xd4ad2d2ef4e8ea9995103f34e322dbefb2534f3a52984a308f7db8e257b76fa1';
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 export const cacheKey = (chainId: number) => `hooks-store:intake:v${CACHE_VERSION}:${chainId}`;
-type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; completionCursor?: string; timestamp?: number };
-type ChainCache = { version: number; head: string; cursor: string; records: Record<string, RecordEntry> };
+type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number };
+type ChainCache = { version: number; head: string; cursor: string; records: Record<string, RecordEntry>; completions: Record<string, RawLog> };
 export type ChainState = { chainId: number; loading: boolean; backfilling: boolean; error: string | null; head?: string; cursor?: string };
 export type StoreState = { launches: Launch[]; chains: ChainState[] };
-/** Inclusive, gap-free windows, newest first. All eth_getLogs calls stay at or below 10,000 blocks. */
+/** Inclusive, gap-free windows, newest first. Callers supply the chain's configured range. */
 export function* backwardsRanges(from: bigint, to: bigint, size = 10000n): Generator<[bigint, bigint]> {
+  if (size < 1n) throw new Error('Log range must be positive');
   while (to >= from) { const start = to - size + 1n > from ? to - size + 1n : from; yield [start, to]; to = start - 1n; }
 }
 export async function readLogs(client: ReadClient, address: string, topics: (Hex | Hex[] | null)[], from: bigint, to: bigint): Promise<RawLog[]> {
@@ -25,8 +26,8 @@ export async function readLogs(client: ReadClient, address: string, topics: (Hex
     if (logs.length >= 10000 && from < to) throw new Error('Possible RPC result cap');
     return logs as RawLog[];
   } catch (error) {
-    // Providers may impose a smaller range. Never skip a rejected interval.
-    if (to - from < 500n || !/limit|range|size|too many|cap/i.test(String(error))) throw error;
+    // Any failure (including HTTP/timeout/archive errors) gets smaller windows. Never skip blocks.
+    if (to - from + 1n <= 1000n) throw error;
     const middle = (from + to) / 2n;
     return [...await readLogs(client, address, topics, from, middle), ...await readLogs(client, address, topics, middle + 1n, to)];
   }
@@ -46,13 +47,12 @@ export class LaunchStore {
   readonly config: SiteConfig;
   private onCast: typeof cast;
   constructor(config: SiteConfig, clients = publicClients(config), onCast = cast) {
-    this.config = config; this.onCast = onCast;
-    this.clients = clients;
+    this.config = config; this.onCast = onCast; this.clients = clients;
     this.state = { launches: [], chains: config.chains.map(c => ({ chainId: c.id, loading: true, backfilling: true, error: null })) };
     for (const chain of config.chains) {
       const saved = readCache<ChainCache>(cacheKey(chain.id));
       const valid = saved?.version === CACHE_VERSION && /^\d+$/.test(saved.head) && /^-?\d+$/.test(saved.cursor) && saved.records && typeof saved.records === 'object';
-      const cache = valid ? saved : { version: CACHE_VERSION, head: '0', cursor: '-1', records: {} };
+      const cache: ChainCache = valid ? { ...saved, completions: saved.completions ?? {} } : { version: CACHE_VERSION, head: '0', cursor: '-1', records: {}, completions: {} };
       this.caches.set(chain.id, cache);
       for (const [id, entry] of Object.entries(cache.records)) {
         const row = this.hydrate(entry, chain.id);
@@ -66,7 +66,7 @@ export class LaunchStore {
   private emit() { this.state = { ...this.state, launches: [...this.rows.values()].sort((a,b) => (Date.parse(b.createdAt ?? '') || 0) - (Date.parse(a.createdAt ?? '') || 0) || a.id.localeCompare(b.id)) }; this.listeners.forEach(fn => fn()); }
   private status(chainId: number, patch: Partial<ChainState>) { this.state = { ...this.state, chains: this.state.chains.map(c => c.chainId === chainId ? { ...c, ...patch } : c) }; this.emit(); }
   private hydrate(entry: RecordEntry, chain: number) {
-    if (!entry || !entry.requested) return null;
+    if (!entry?.requested) return null;
     let row = launchFromRequested(entry.requested, chain, this.config.intake.launchAction, entry.timestamp);
     if (!row) return null;
     if (entry.completed) row = applyCompleted(row, entry.completed);
@@ -74,94 +74,97 @@ export class LaunchStore {
     if (row.completion) row.resultUrl = resultUrl(row.completion.uri, this.config.intake.ipfsGateway);
     return row;
   }
+  /** Add a confirmed local receipt immediately; later polling deduplicates the same request. */
+  acceptReceipt(chainId: number, logs: RawLog[]) {
+    this.accept(chainId, logs, []);
+    writeCache(cacheKey(chainId), this.caches.get(chainId));
+  }
   start() {
     const epoch = ++this.epoch;
-    for (const chain of this.config.chains) void this.run(chain.id, epoch, false);
+    for (const chain of this.config.chains) void this.run(chain.id, epoch);
     this.timer = setInterval(() => this.poll(), this.config.intake.pollIntervalMs);
     return () => { ++this.epoch; clearInterval(this.timer); };
   }
-  private poll = () => { for (const chain of this.config.chains) void this.run(chain.id, this.epoch, false); };
+  private poll = () => { for (const chain of this.config.chains) void this.run(chain.id, this.epoch); };
   retry = () => { this.resultDue.clear(); this.poll(); };
-  private async run(chainId: number, epoch: number, history: boolean) {
-    if (this.busy.has(chainId)) { if (!history) this.pendingHead.add(chainId); return; }
+  private async run(chainId: number, epoch: number) {
+    if (this.busy.has(chainId)) { this.pendingHead.add(chainId); return; }
     this.busy.add(chainId);
     const chain = this.config.chains.find(c => c.id === chainId)!, client = this.clients[chainId], cache = this.caches.get(chainId)!;
     try {
-      const previous = BigInt(cache.head), floor = BigInt(chain.intakeFromBlock);
-      if (!history && await client.getChainId() !== chainId) throw new Error('RPC returned the wrong chain');
-      const head = history ? previous : await client.getBlockNumber({ cacheTime: 0 });
-      // Replay a short overlap for delayed indexing; deduplication is by request id.
-      const from = previous > floor ? (previous - 12n > floor ? previous - 12n : floor) : head - 9999n > floor ? head - 9999n : floor;
-      if (!history) for (const [start, end] of backwardsRanges(from, head)) {
+      const previous = BigInt(cache.head), floor = BigInt(chain.intakeFromBlock), size = BigInt(chain.logRange);
+      if (await client.getChainId() !== chainId) throw new Error('RPC returned the wrong chain');
+      const head = await client.getBlockNumber({ cacheTime: 0 });
+      const from = previous > floor ? (previous - 12n > floor ? previous - 12n : floor) : head - size + 1n > floor ? head - size + 1n : floor;
+      // The head overlaps twelve blocks; history resumes independently from its saved cursor.
+      for (const [start, end] of backwardsRanges(from, head, size)) {
         if (epoch !== this.epoch) return;
-        await this.requestRange(chainId, start, end, previous > 0n ? previous : undefined);
+        const [requests, completions] = await this.window(chainId, start, end);
+        this.accept(chainId, requests, completions, previous > 0n ? previous : undefined);
       }
       if (previous === 0n) cache.cursor = String(from - 1n);
       cache.head = String(head);
-      // A restart resumes the historical cursor; no old log moves the pond.
-      let ranges = history ? 4 : 0;
-      while (BigInt(cache.cursor) >= floor && ranges-- > 0 && epoch === this.epoch) {
-        const to = BigInt(cache.cursor), start = to - 9999n > floor ? to - 9999n : floor;
-        await this.requestRange(chainId, start, to); cache.cursor = String(start - 1n);
+      const history = [...backwardsRanges(floor, BigInt(cache.cursor), size)];
+      // Four windows in flight keeps a fresh browser quick without an unbounded RPC fan-out.
+      for (let i = 0; i < history.length; i += 4) {
+        if (epoch !== this.epoch) return;
+        const group = history.slice(i, i + 4);
+        const results = await Promise.allSettled(group.map(([start, end]) => this.window(chainId, start, end)));
+        for (let j = 0; j < results.length; j++) {
+          const result = results[j];
+          if (result.status === 'fulfilled') this.accept(chainId, ...result.value);
+        }
+        // Advance only a completely read group. A retry safely deduplicates successful siblings.
+        const failed = results.find(r => r.status === 'rejected');
+        if (failed?.status === 'rejected') throw failed.reason;
+        cache.cursor = String(group.at(-1)![0] - 1n);
+        writeCache(cacheKey(chainId), cache);
       }
-      await this.completions(chainId, head, epoch);
       if (epoch !== this.epoch) return;
-      this.status(chainId, { loading: false, error: null, backfilling: BigInt(cache.cursor) >= floor, head: cache.head, cursor: cache.cursor });
-      writeCache(cacheKey(chainId), cache);
+      cache.completions = {}; // All known requests have been matched; discard unrelated completions.
+      this.status(chainId, { loading: false, error: null, backfilling: false, head: cache.head, cursor: cache.cursor });
+      // Optional names, timestamps and IPFS files never hold the chain-read status hostage.
+      void this.enrich(chainId, epoch);
     } catch {
       if (epoch === this.epoch) this.status(chainId, { loading: false, error: `Could not finish reading ${CHAINS[chainId]}. Showing what is cached. Retry the chain reads.` });
     } finally {
-      // Persist successful subranges even if a later RPC request failed.
-      writeCache(cacheKey(chainId), cache);
-      this.busy.delete(chainId);
-      if (epoch === this.epoch && this.pendingHead.delete(chainId)) {
-        void this.run(chainId, epoch, false); return;
-      }
-      if (epoch === this.epoch && !this.state.chains.find(c => c.chainId === chainId)?.error && BigInt(cache.cursor) >= BigInt(chain.intakeFromBlock)) {
-        // Cooperative history traversal; the head poll stays independent and no overlap runs in parallel.
-        setTimeout(() => { if (epoch === this.epoch) void this.run(chainId, epoch, true); }, 500);
-      } else if (epoch !== this.epoch && this.listeners.size) {
-        setTimeout(() => { if (this.listeners.size) void this.run(chainId, this.epoch, false); }, 0);
-      }
+      writeCache(cacheKey(chainId), cache); this.busy.delete(chainId);
+      if (epoch === this.epoch && this.pendingHead.delete(chainId)) void this.run(chainId, epoch);
+      else if (epoch !== this.epoch && this.listeners.size) void this.run(chainId, this.epoch);
     }
   }
-  private async requestRange(chainId: number, from: bigint, to: bigint, castAfter?: bigint) {
-    const client = this.clients[chainId], cache = this.caches.get(chainId)!;
-    const logs = await readLogs(client, this.config.intake.address, [REQUEST_TOPIC, null, null, this.config.intake.launchAction as Hex], from, to);
-    for (const log of logs) {
-      let row = launchFromRequested(log, chainId, this.config.intake.launchAction);
+  private window(chainId: number, from: bigint, to: bigint): Promise<[RawLog[], RawLog[]]> {
+    return Promise.all([
+      readLogs(this.clients[chainId], this.config.intake.address, [REQUEST_TOPIC, null, null, this.config.intake.launchAction as Hex], from, to),
+      readLogs(this.clients[chainId], this.config.intake.address, [COMPLETE_TOPIC], from, to),
+    ]);
+  }
+  private accept(chainId: number, requests: RawLog[], completions: RawLog[], castAfter?: bigint) {
+    const cache = this.caches.get(chainId)!;
+    // Backwards traversal can see a completion before its request. Retain it until history finishes.
+    for (const log of completions) if (!log.removed && log.topics[1]) cache.completions[log.topics[1].toLowerCase()] = log;
+    for (const log of requests) {
+      const row = launchFromRequested(log, chainId, this.config.intake.launchAction);
       if (!row) continue;
       const existed = cache.records[row.requestId];
-      const entry = existed ?? { requested: log, completionCursor: row.blockNumber };
-      if (!row.createdAt) {
-        try { entry.timestamp ??= Number((await client.getBlock({ blockNumber: BigInt(log.blockNumber) })).timestamp); } catch { /* Dates can remain unknown; no invented times. */ }
-      }
-      entry.requested = log; cache.records[row.requestId] = entry;
-      row = this.hydrate(entry, chainId)!;
-      const old = this.rows.get(row.id); row.creatorName = old?.creatorName;
-      this.rows.set(row.id, row);
+      cache.records[row.requestId] = { ...existed, requested: log };
       if (!existed && castAfter !== undefined && BigInt(log.blockNumber) > castAfter) this.onCast(pondMessage(row));
-      if (!this.named.has(row.payer.toLowerCase())) {
-        this.named.add(row.payer.toLowerCase());
-        void creatorName(this.clients[1], row.payer).then(name => { for (const [key, value] of this.rows) if (value.payer.toLowerCase() === row!.payer.toLowerCase()) this.rows.set(key, { ...value, creatorName: name }); this.emit(); });
-      }
+    }
+    for (const [id, entry] of Object.entries(cache.records)) {
+      entry.completed = cache.completions[id.toLowerCase()] ?? entry.completed;
+      const row = this.hydrate(entry, chainId);
+      if (row) { const old = this.rows.get(row.id); this.rows.set(row.id, { ...row, creatorName: old?.creatorName, resultError: row.resultError ?? old?.resultError }); }
     }
     this.emit();
   }
-  private async completions(chainId: number, head: bigint, epoch: number) {
-    const cache = this.caches.get(chainId)!, client = this.clients[chainId];
-    for (const [requestId, entry] of Object.entries(cache.records)) {
-      if (epoch !== this.epoch) return;
-      if (!entry.completed) {
-        let cursor = BigInt(entry.completionCursor ?? entry.requested.blockNumber), budget = 4;
-        while (cursor <= head && budget-- > 0) {
-          const end = cursor + 9999n < head ? cursor + 9999n : head;
-          const logs = await readLogs(client, this.config.intake.address, [COMPLETE_TOPIC, requestId as Hex], cursor, end);
-          if (logs.length) { entry.completed = logs.at(-1); break; }
-          cursor = end + 1n; entry.completionCursor = String(cursor);
-        }
-      }
+  private async enrich(chainId: number, epoch: number) {
+    const cache = this.caches.get(chainId)!, entries = Object.values(cache.records);
+    for (let i = 0; i < entries.length && epoch === this.epoch; i += 4) await Promise.all(entries.slice(i, i + 4).map(async entry => {
       let row = this.hydrate(entry, chainId)!;
+      if (!row.createdAt) {
+        try { entry.timestamp ??= Number((await this.clients[chainId].getBlock({ blockNumber: BigInt(entry.requested.blockNumber) })).timestamp); } catch { /* Leave dates unknown. */ }
+        row = this.hydrate(entry, chainId)!;
+      }
       if (!this.named.has(row.payer.toLowerCase())) {
         this.named.add(row.payer.toLowerCase());
         void creatorName(this.clients[1], row.payer).then(name => { for (const [key, value] of this.rows) if (value.payer.toLowerCase() === row.payer.toLowerCase()) this.rows.set(key, { ...value, creatorName: name }); this.emit(); });
@@ -179,11 +182,10 @@ export class LaunchStore {
           } catch { row.resultError = 'The result file is unavailable. It will be retried on the next refresh.'; }
         } else row.resultError = 'Intake completed this request without a supported IPFS result URI.';
       }
-      const old = this.rows.get(row.id); row.creatorName = old?.creatorName; row.resultError ??= old?.resultError;
-      if (row.resultLoaded && !this.hydrate(entry, chainId)?.resultError) row.resultError = undefined;
-      this.rows.set(row.id, row);
-    }
-    this.emit();
+      const old = this.rows.get(row.id); row.creatorName = old?.creatorName;
+      this.rows.set(row.id, row); this.emit();
+    }));
+    writeCache(cacheKey(chainId), cache);
   }
 }
 export function useLaunches(config: SiteConfig) {

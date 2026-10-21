@@ -1,0 +1,1149 @@
+{
+  "config": {
+    "argv": [
+      "/opt/imd-worker/node-v24.21.0-linux-x64/bin/node",
+      "/tmp/hooks-job4/web/node_modules/.bin/playwright",
+      "test",
+      "tests/builder.spec.ts",
+      "tests/hook.spec.ts"
+    ],
+    "configFile": "/tmp/hooks-job4/web/playwright.config.ts",
+    "rootDir": "/tmp/hooks-job4/web/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/hooks-job4/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/tmp/hooks-job4/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 35000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/tmp/hooks-job4/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/tmp/hooks-job4/web/tests",
+        "snapshotDir": "/tmp/hooks-job4/web/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 35000,
+        "use": {
+          "baseURL": "http://127.0.0.1:4173/preview/",
+          "headless": true,
+          "trace": "off",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../artifacts/playwright-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node ../scripts/serve.mjs --port 4173",
+      "url": "http://127.0.0.1:4173/preview/",
+      "reuseExistingServer": true,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "builder.spec.ts",
+      "file": "builder.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5474,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:06.506Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-c4e104b7255211fce0cd",
+          "file": "builder.spec.ts",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "title": "Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5257,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:12.656Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-9693a09e249b3c201675",
+          "file": "builder.spec.ts",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "title": "Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4831,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:17.965Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-080d13e5485cd62247cf",
+          "file": "builder.spec.ts",
+          "line": 26,
+          "column": 3
+        },
+        {
+          "title": "first visit to the stack starts from the default stack; preview, cost box and disabled check",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1982,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:22.846Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-a7ee76d6d75618301530",
+          "file": "builder.spec.ts",
+          "line": 89,
+          "column": 1
+        },
+        {
+          "title": "pool share has no default; Continue stays disabled until 10 to 90 in steps of 5",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2353,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:24.847Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-81770532b7057ff6cba5",
+          "file": "builder.spec.ts",
+          "line": 108,
+          "column": 1
+        },
+        {
+          "title": "4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3088,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:27.224Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-d232f896628c350b9d0e",
+          "file": "builder.spec.ts",
+          "line": 128,
+          "column": 1
+        },
+        {
+          "title": "risk tooltips at 320px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7943,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:30.357Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-5be64903cf96d972f5ae",
+          "file": "builder.spec.ts",
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "risk tooltips at 390px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9495,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:38.348Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-9812f8073e0376036c65",
+          "file": "builder.spec.ts",
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "risk tooltips at 1440px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9070,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:47.863Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-c698f234525e1032b28f",
+          "file": "builder.spec.ts",
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "untested block names expose the status to assistive technology without a risk sign",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1367,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:12:57.039Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-a254e4c0ea25104a2c44",
+          "file": "builder.spec.ts",
+          "line": 219,
+          "column": 1
+        },
+        {
+          "title": "dependent-removal status describes the removed block and clears after the next draft edit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9679,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "add",
+                      "duration": 1759
+                    },
+                    {
+                      "title": "mode",
+                      "duration": 1213
+                    },
+                    {
+                      "title": "type",
+                      "duration": 1196
+                    },
+                    {
+                      "title": "setting",
+                      "duration": 1093
+                    },
+                    {
+                      "title": "block field",
+                      "duration": 1338
+                    },
+                    {
+                      "title": "reorder",
+                      "duration": 1718
+                    },
+                    {
+                      "title": "remove",
+                      "duration": 1129
+                    }
+                  ],
+                  "startTime": "2026-10-21T18:12:58.445Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-d41a76e59fe1b71a1719",
+          "file": "builder.spec.ts",
+          "line": 232,
+          "column": 1
+        },
+        {
+          "title": "tested marks: a passing entry shows the tick, others say not yet tested",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1540,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:08.148Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-125c5192226e1416fcf0",
+          "file": "builder.spec.ts",
+          "line": 253,
+          "column": 1
+        },
+        {
+          "title": "tested marks fall back to the bundled copy when the spec repository cannot be read",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:09.711Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-6361851ff10e202a9e4d",
+          "file": "builder.spec.ts",
+          "line": 262,
+          "column": 1
+        },
+        {
+          "title": "the shipped bundled copy is empty, so nothing shows a tick offline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1394,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:11.249Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-3282ddc440291c893557",
+          "file": "builder.spec.ts",
+          "line": 269,
+          "column": 1
+        },
+        {
+          "title": "type C and B settings, own code and the request shape",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1835,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:12.661Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-caae1fec1e3773560c2a",
+          "file": "builder.spec.ts",
+          "line": 275,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "hook.spec.ts",
+      "file": "hook.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1902,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:14.563Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-d83a0192507570613fb3",
+          "file": "hook.spec.ts",
+          "line": 4,
+          "column": 35
+        },
+        {
+          "title": "Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1972,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:16.491Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-eb068a326713edde60b0",
+          "file": "hook.spec.ts",
+          "line": 4,
+          "column": 35
+        },
+        {
+          "title": "Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1900,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:18.546Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-e35cba2f124863228490",
+          "file": "hook.spec.ts",
+          "line": 4,
+          "column": 35
+        },
+        {
+          "title": "owner forms validate address arrays and booleans; query-param viewing never unlocks controls",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2291,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:20.466Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-afe26bb8e341f80b4ef2",
+          "file": "hook.spec.ts",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2372,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:22.779Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-3df5d8984c93047ab1c3",
+          "file": "hook.spec.ts",
+          "line": 30,
+          "column": 1
+        },
+        {
+          "title": "catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1754,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:25.181Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-056d08381d58902782a7",
+          "file": "hook.spec.ts",
+          "line": 35,
+          "column": 1
+        },
+        {
+          "title": "failed completion and unavailable result remain explicit, with addresses unknown",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1130,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:26.974Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-35fe12529b09129697d6",
+          "file": "hook.spec.ts",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "result failures are retryable without inventing a live deployment",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1488,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:28.198Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-5c8cff847d2a37ebe6e1",
+          "file": "hook.spec.ts",
+          "line": 44,
+          "column": 1
+        },
+        {
+          "title": "header switches an unsupported wallet to Ethereum",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1696,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:29.765Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-58db5e795d77bf5eee58",
+          "file": "hook.spec.ts",
+          "line": 47,
+          "column": 1
+        },
+        {
+          "title": "Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Run with HOOKS_FORK_URL after the documented local fork setup.",
+                  "location": {
+                    "file": "/tmp/hooks-job4/web/tests/hook.spec.ts",
+                    "line": 51,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 291,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:31.487Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Run with HOOKS_FORK_URL after the documented local fork setup.",
+                      "location": {
+                        "file": "/tmp/hooks-job4/web/tests/hook.spec.ts",
+                        "line": 51,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-fe979826fb6cfce17e9c",
+          "file": "hook.spec.ts",
+          "line": 50,
+          "column": 1
+        },
+        {
+          "title": "readings refresh after 20 seconds, and a connected non-owner stays locked",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1485,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:31.809Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-e8aa1054a824a640093f",
+          "file": "hook.spec.ts",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "unknown-address lookup shows a known fork hook and prefills type C for a known token",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Requires the documented Ethereum fork.",
+                  "location": {
+                    "file": "/tmp/hooks-job4/web/tests/hook.spec.ts",
+                    "line": 66,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 225,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:33.347Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Requires the documented Ethereum fork.",
+                      "location": {
+                        "file": "/tmp/hooks-job4/web/tests/hook.spec.ts",
+                        "line": 66,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-adeaa7ed216a66270995",
+          "file": "hook.spec.ts",
+          "line": 65,
+          "column": 1
+        },
+        {
+          "title": "Connect keeps a wallet already on Robinhood Chain connected without a switch",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1468,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T18:13:33.597Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3787db49bcd2fffd9ac5-b8c295dfd0d2e9c55013",
+          "file": "hook.spec.ts",
+          "line": 74,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-21T18:12:02.192Z",
+    "duration": 93099.994,
+    "expected": 26,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

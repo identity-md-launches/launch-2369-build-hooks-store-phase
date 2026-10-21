@@ -32,7 +32,7 @@ test('My hooks query param lists payer requests, Manage routes live hooks, draft
   await page.evaluate(()=>localStorage.setItem('hooks-store:draft:v2',JSON.stringify({type:'B',settings:{chain:1,hname:'SavedHook'}})));await page.reload();await expect(page.locator('.saved-draft')).toContainText('SavedHook');await page.getByRole('button',{name:'Discard',exact:true}).click();await expect(page.locator('.saved-draft')).toContainText('No saved draft');await page.getByRole('button',{name:'Undo discard'}).click();await expect(page.locator('.saved-draft')).toContainText('SavedHook');
   await page.getByRole('link',{name:'Manage',exact:true}).click();await expect(page.getByRole('heading',{name:'Owner controls'})).toBeInViewport();await expect(page.locator('[data-function="pause"] button')).toBeDisabled();
 });
-test('catalog searches exact known addresses, request ids and keywords; reads only 10k ranges',async({page})=>{
+test('catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges',async({page})=>{
   const calls=await interceptChains(page);await page.goto('#catalog');await expect(page.locator('.grid .card')).toHaveCount(1);
   for(const query of [hook,token,requestId,'PondGuard cooldown']){await page.getByRole('searchbox').fill(query);await expect(page.locator('.grid .card')).toHaveCount(1);}
   await expect(page.getByText('Built here',{exact:true})).toHaveCount(0);await page.getByRole('searchbox').fill('unrelated');await expect(page.locator('.grid .card')).toHaveCount(0);
@@ -65,7 +65,7 @@ test('readings refresh after 20 seconds, and a connected non-owner stays locked'
 test('unknown-address lookup shows a known fork hook and prefills type C for a known token',async({page})=>{
   test.skip(!process.env.HOOKS_FORK_URL,'Requires the documented Ethereum fork.');
   await interceptChains(page,{noLogs:true,fork:process.env.HOOKS_FORK_URL});await page.goto('#catalog');await page.getByRole('searchbox').fill(hook);
-  await expect(page.getByText('a v4 hook not launched through IMD',{exact:false})).toBeVisible();await expect(page.getByText('beforeSwap',{exact:true})).toBeVisible();
+  await expect(page.getByText('A v4 hook not launched through this store',{exact:false})).toBeVisible();await expect(page.getByText('beforeSwap',{exact:true})).toBeVisible();
   await expect(page.getByText('Managed outside the store',{exact:true})).toBeVisible();await page.getByRole('searchbox').fill(token);
   await expect(page.getByRole('heading',{name:/Hamster\s?Hour/})).toBeVisible();await page.getByRole('button',{name:'Build a hook for this token'}).click();
   await expect(page).toHaveURL(/#builder$/);await page.getByRole('group',{name:'Builder mode'}).getByRole('button',{name:'Describe it',exact:true}).click();await expect(page.getByLabel('Existing token address')).toHaveValue(new RegExp('^'+token+'$','i'));await expect(page.locator('#s-chain')).toHaveValue('1');

@@ -1,0 +1,43 @@
+{
+  "batches": [
+    {
+      "report": "launch-browser-results.json",
+      "stats": {
+        "startTime": "2026-10-21T18:11:11.195Z",
+        "duration": 40745.254,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "report": "builder-hook-results.json",
+      "stats": {
+        "startTime": "2026-10-21T18:12:02.192Z",
+        "duration": 93099.994,
+        "expected": 26,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "report": "store-wallet-pond-live-results.json",
+      "stats": {
+        "startTime": "2026-10-21T18:15:04.940Z",
+        "duration": 74450.223,
+        "expected": 23,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "totals": {
+    "expected": 62,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 2
+  }
+}

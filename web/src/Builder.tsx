@@ -88,7 +88,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
 
   const ctx = context(draft), s = draft.settings;
   const text = useMemo(() => compose(draft, address), [draft, address]);
-  const issues = useMemo(() => validate(draft, address), [draft, address]);
+  const issues = useMemo(() => [...validate(draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [draft, address, config.enabledDeployChains]);
   const bytes = useMemo(() => bodyBytes(body(draft, address)), [draft, address]);
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);
   const tested = (id: string) => verified.has(id);

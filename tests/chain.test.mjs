@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { encodeAbiParameters, encodeEventTopics, stringToHex, parseAbiParameters } from '../web/node_modules/viem/_esm/index.js';
 import * as D from '../web/src/chain/decode.ts';
-import { backwardsRanges, LaunchStore, cacheKey } from '../web/src/chain/store.ts';
+import { backwardsRanges, LaunchStore, cacheKey, REQUEST_TOPIC, COMPLETE_TOPIC } from '../web/src/chain/store.ts';
 import { creatorName } from '../web/src/chain/ens.ts';
 import { functionAbi, argumentValues, managementFunctions, formatReading } from '../web/src/chain/manage.ts';
 import { searchAddress } from '../web/src/chain/resolve.ts';
@@ -84,7 +84,7 @@ test('ENS reverse results cache by lowercase payer for a day, including negative
 });
 test('cache construction re-filters unrelated launches; storage corruption stays usable',()=>{
  const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
- const row=requested();storage.set(cacheKey(1),JSON.stringify({version:1,head:'100',cursor:'50',records:{[realRequest.requestId]:{requested:row},outside:{requested:base}}}));
+ const row=requested();storage.set(cacheKey(1),JSON.stringify({version:2,head:'100',cursor:'50',records:{[realRequest.requestId]:{requested:row},outside:{requested:base}}}));
  const store=new LaunchStore(config,{});assert.equal(store.getSnapshot().launches.length,1);assert.equal(store.getSnapshot().launches[0].name,'PondGuard');
  storage.set(cacheKey(1),'bad json');assert.equal(new LaunchStore(config,{}).getSnapshot().launches.length,0);delete globalThis.localStorage;
 });
@@ -117,4 +117,27 @@ test('result launch UUIDs are preserved for evidence without inventing a numeric
  const id='702e6c9d-37ee-41ef-afcb-5d5e1af9f31b'; // Public Hamster Hour launch id, not a generated stand-in.
  const row=D.applyResult(launch(),{launch:{id}});assert.equal(row.launchId,id);assert.equal(row.launchNumber,null);
  assert.equal(D.applyResult(launch(),{launch:{id:'../../not-a-launch'}}).launchId,null);
+});
+
+test('configured windows start at Intake deployment and use 100,000 / 400,000 inclusive blocks',()=>{
+ const ethereum=config.chains.find(c=>c.id===1), robinhood=config.chains.find(c=>c.id===4663);
+ assert.equal(ethereum.rpcUrl,'https://rpc.mevblocker.io');assert.equal(ethereum.intakeFromBlock,26164897);assert.equal(ethereum.logRange,100000);
+ assert.equal(robinhood.intakeFromBlock,85300000);assert.equal(robinhood.logRange,400000);
+ for(const c of config.chains){const floor=BigInt(c.intakeFromBlock),size=BigInt(c.logRange),head=floor+size*3n+123n,ranges=[...backwardsRanges(floor,head,size)];
+ assert.equal(ranges[0][1]-ranges[0][0]+1n,size);assert.equal(ranges.at(-1)[0],floor);for(let i=1;i<ranges.length;i++)assert.equal(ranges[i][1]+1n,ranges[i-1][0]);}
+});
+test('every failure splits logs to at most 1,000 blocks, including non-range HTTP errors',async()=>{
+ const {readLogs}=await import('../web/src/chain/store.ts');const calls=[];
+ const client={request:async({params:[q]})=>{const n=BigInt(q.toBlock)-BigInt(q.fromBlock)+1n;calls.push(n);if(n>1000n)throw new Error('HTTP 403 Archive requests require a personal token');return[];}};
+ assert.deepEqual(await readLogs(client,config.intake.address,[],0n,7999n),[]);assert.deepEqual(calls,[8000n,4000n,2000n,1000n,1000n,2000n,1000n,1000n,4000n,2000n,1000n,1000n,2000n,1000n,1000n]);
+ calls.length=0;client.request=async({params:[q]})=>{calls.push(BigInt(q.toBlock)-BigInt(q.fromBlock)+1n);throw new Error('offline');};await assert.rejects(readLogs(client,config.intake.address,[],0n,7999n),/offline/);assert.deepEqual(calls,[8000n,4000n,2000n,1000n]);
+});
+test('Completed is fetched once per shared window and matched even when seen before its older request',async()=>{
+ const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
+ const requestedLog={...requested(),blockNumber:'0x5b'},completedLog={...completed(1,'REFUSED'),blockNumber:'0x6e'};const calls=[];
+ const client={getChainId:async()=>1,getBlockNumber:async()=>119n,getBlock:async()=>({timestamp:1792563203n}),getEnsName:async()=>null,request:async({params:[q]})=>{calls.push(q);return (q.topics[0]===REQUEST_TOPIC?[requestedLog]:[completedLog]).filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock));}};
+ const site={...config,chains:[{...config.chains.find(c=>c.id===1),intakeFromBlock:90,logRange:10}],intake:{...config.intake,pollIntervalMs:60000}};
+ const store=new LaunchStore(site,{1:client}),stop=store.start();
+ try{for(let i=0;i<100&&store.getSnapshot().chains[0].loading;i++)await new Promise(r=>setTimeout(r,5));const state=store.getSnapshot();assert.equal(state.chains[0].error,null);assert.equal(state.chains[0].backfilling,false);assert.equal(state.launches[0].status,'failed');assert.equal(calls.length,6);assert.ok(calls.filter(c=>c.topics[0]===COMPLETE_TOPIC).every(c=>c.topics.length===1));}
+ finally{stop();delete globalThis.localStorage;}
 });
