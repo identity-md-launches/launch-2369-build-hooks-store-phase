@@ -7,7 +7,7 @@ export async function loadConfig(): Promise<SiteConfig> {
     const response = await fetch(assetUrl('site-config.json'), { signal: AbortSignal.timeout(8000) });
     if (!response.ok) throw new Error('Configuration unavailable');
     const data = await response.json();
-    if (data.schemaVersion !== 1 || typeof data.inProgress !== 'boolean' || !Array.isArray(data.chains) || data.chains.length !== 3) throw new Error('Invalid configuration');
+    if (data.schemaVersion !== 1 || typeof data.inProgress !== 'boolean' || !Array.isArray(data.chains) || data.chains.length !== 2 || !data.chains.every((c: { id: number }) => c.id === 1 || c.id === 4663)) throw new Error('Invalid configuration');
     return { ...defaults, ...data };
   } catch { return defaults; } // Fail closed: the committed in-progress flag is true.
 }

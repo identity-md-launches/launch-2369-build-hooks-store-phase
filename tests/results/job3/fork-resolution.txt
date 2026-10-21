@@ -1,0 +1,2 @@
+{"chainId":1,"address":"0x82f636a92364d13754d7b3e72d460f0be20a28cc","kind":"hook","poolManager":"0x000000000004444c5dc75cB358380D2e3dE08A90","permissions":["beforeInitialize","beforeAddLiquidity","beforeSwap","afterSwap","beforeSwapReturnDelta","afterSwapReturnDelta"]}
+{"chainId":1,"address":"0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86","kind":"token","name":"Hamster Hour","symbol":"HAMSTER"}

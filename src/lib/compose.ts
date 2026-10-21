@@ -18,7 +18,7 @@ export type BlockDef = {
 };
 export type BlockEntry = { id: string; p: Record<string, ParamValue> };
 export type Settings = {
-  chain: number; pair: 'eth' | 'imd'; pool: number | null; rem: string; owner: string;
+  chain: number | null; pair: 'eth' | 'imd'; pool: number | null; rem: string; owner: string;
   token: string; tsym: string; hname: string; repo: string; commit: string;
 };
 export type Draft = { v: 2; type: LaunchType; mode: Mode | null; prompt: string; blocks: BlockEntry[]; settings: Settings; seeded: boolean };
@@ -28,9 +28,8 @@ export const CATALOG = catalogJson as { version: number; groups: { id: string; t
 export const BLOCKS: BlockDef[] = CATALOG.blocks;
 export const BY_ID: Record<string, BlockDef> = Object.fromEntries(BLOCKS.map(b => [b.id, b]));
 export const TOKEN_IDS = ['token', 'own-token'];
-export const CHAIN_NAMES: Record<number, string> = { 11155111: 'Sepolia', 4663: 'Robinhood Chain', 1: 'Ethereum' };
+export const CHAIN_NAMES: Record<number, string> = { 4663: 'Robinhood Chain', 1: 'Ethereum' };
 export const POOL_MANAGERS: Record<number, string> = {
-  11155111: '0xE03A1074c86CFeDd5C142C4F04F1a1536e203543',
   1: '0x000000000004444c5dc75cB358380D2e3dE08A90',
   4663: '0x8366a39CC670B4001A1121B8F6A443A643e40951',
 };
@@ -42,7 +41,7 @@ export const DEFAULT_STACK = ['swap-fee', 'anti-sniper', 'jar'];
 
 export const defaults = (def: BlockDef): Record<string, ParamValue> => Object.fromEntries(def.params.map(x => [x.k, x.default]));
 export const entry = (id: string): BlockEntry => ({ id, p: defaults(BY_ID[id]) });
-export const emptySettings = (): Settings => ({ chain: 11155111, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' });
+export const emptySettings = (): Settings => ({ chain: null, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' });
 export const newDraft = (): Draft => ({ v: 2, type: 'A', mode: null, prompt: '', blocks: [entry('token')], settings: emptySettings(), seeded: false });
 
 /** Quotes, backslashes, angle brackets and line breaks become spaces (5.1). */
@@ -148,7 +147,7 @@ export function setParam(d: Draft, index: number, k: string, v: ParamValue): Dra
 
 /** Section 5.1, line for line. */
 export function compose(d: Draft, wallet?: string): string {
-  const c = context(d), s = d.settings, chain = CHAIN_NAMES[s.chain] ?? `chain ${s.chain}`, pm = POOL_MANAGERS[s.chain] ?? '';
+  const c = context(d), s = d.settings, chain = (s.chain ? CHAIN_NAMES[s.chain] : null) ?? '(choose a chain)', pm = s.chain ? POOL_MANAGERS[s.chain] ?? '' : '';
   const rules = activeBlocks(d).map(b => sentenceOf(b, c)), powers = powersOf(d);
   const words = cleanText(d.prompt).slice(0, MAX_WORDS), lines: string[] = [];
   if (d.type === 'A') {
@@ -231,6 +230,7 @@ export function validate(d: Draft, wallet?: string): Issue[] {
     if (def.requires && !has(d, def.requires)) issues.push({ field: `block:${i}`, message: `${def.title} needs ${BY_ID[def.requires].title}.` });
     if (def.excludes && has(d, def.excludes)) issues.push({ field: `block:${i}`, message: `${def.title} cannot be combined with ${BY_ID[def.excludes].title}.` });
   });
+  if (s.chain === null || !CHAIN_NAMES[s.chain]) issues.push({ field: 'settings.chain', message: 'Choose a deploy chain: Robinhood Chain or Ethereum.' });
   const ids = d.blocks.map(b => b.id);
   if (new Set(ids).size !== ids.length) issues.push({ field: 'rules', message: 'Each block can be added once.' });
   const rate = rateTotal(d);
@@ -240,7 +240,6 @@ export function validate(d: Draft, wallet?: string): Issue[] {
   if (d.type === 'A') {
     if (!validPool(s.pool)) issues.push({ field: 'settings.pool', message: 'Choose the pool share: 10 to 90, in steps of 5.' });
     if (s.rem.trim() && !isAddress(s.rem)) issues.push({ field: 'settings.rem', message: 'Remainder: enter a full 0x address, or leave it empty for the paying wallet.' });
-    if (s.pair !== 'eth' && s.chain === 11155111) issues.push({ field: 'settings.pair', message: 'Sepolia pools pair with ETH.' });
   } else {
     if (!/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(s.hname.trim())) issues.push({ field: 'settings.hname', message: 'Hook name: letters and digits, starting with a letter, up to 40.' });
   }

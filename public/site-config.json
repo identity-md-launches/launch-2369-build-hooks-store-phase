@@ -1,8 +1,14 @@
 {
   "schemaVersion": 1,
   "inProgress": true,
-  "enabledDeployChains": [11155111],
-  "paymentChains": [1, 4663],
+  "enabledDeployChains": [
+    4663,
+    1
+  ],
+  "paymentChains": [
+    1,
+    4663
+  ],
   "relayUrl": null,
   "featuredRequestId": null,
   "tradeUrlTemplates": {},
@@ -10,8 +16,28 @@
   "swarmUrl": "https://api.imd.fun/swarm",
   "blocksVerifiedUrl": "https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json",
   "chains": [
-    { "id": 11155111, "name": "Sepolia", "rpcUrl": "https://11155111.rpc.thirdweb.com", "explorerUrl": "https://sepolia.etherscan.io", "testnet": true },
-    { "id": 4663, "name": "Robinhood Chain", "rpcUrl": "https://rpc.mainnet.chain.robinhood.com", "explorerUrl": "https://robinhoodchain.blockscout.com", "testnet": false },
-    { "id": 1, "name": "Ethereum", "rpcUrl": "https://ethereum.reth.rs/rpc", "explorerUrl": "https://etherscan.io", "testnet": false }
-  ]
+    {
+      "id": 4663,
+      "name": "Robinhood Chain",
+      "rpcUrl": "https://rpc.mainnet.chain.robinhood.com",
+      "explorerUrl": "https://robin.etherscan.io",
+      "testnet": false,
+      "intakeFromBlock": 0
+    },
+    {
+      "id": 1,
+      "name": "Ethereum",
+      "rpcUrl": "https://ethereum-rpc.publicnode.com",
+      "explorerUrl": "https://etherscan.io",
+      "testnet": false,
+      "intakeFromBlock": 0
+    }
+  ],
+  "intake": {
+    "address": "0xa43e6f75ee006411f79ac1c84120606c2330de82",
+    "launchAction": "0x6c61756e63682e6f70656e406c61756e63682d31000000000000000000000000",
+    "rangeSize": 10000,
+    "pollIntervalMs": 20000,
+    "ipfsGateway": "https://ipfs.imd.fun/ipfs/"
+  }
 }

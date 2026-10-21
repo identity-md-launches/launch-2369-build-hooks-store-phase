@@ -28,7 +28,7 @@ export function Landing({ config }: { config: SiteConfig }) {
     if (!host.current || !canvas.current) return;
     let nextSample = 3;
     const scene = pondScene(host.current, canvas.current, elapsed => {
-      if (elapsed >= nextSample) { nextSample = elapsed + 18; cast('Practice cast · real launch updates arrive in a later job.'); }
+      if (elapsed >= nextSample) { nextSample = elapsed + 18; cast('Practice cast · waiting for the next store launch.'); }
     });
     pond.current = scene;
     scene.onMotionChange(setStill);

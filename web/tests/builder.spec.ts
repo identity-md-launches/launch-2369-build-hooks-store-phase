@@ -1,4 +1,6 @@
+import { emptyIntake } from './chain-fixture';
 import { test, expect, type Page } from '@playwright/test';
+test.beforeEach(async ({page}) => emptyIntake(page));
 import catalog from '../../src/blocks/catalog.json' with { type: 'json' };
 
 const SPEC_URL = 'https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json';
@@ -105,7 +107,10 @@ test('first visit to the stack starts from the default stack; preview, cost box 
 
 test('pool share has no default; Continue stays disabled until 10 to 90 in steps of 5', async ({ page }) => {
   await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }] });
+  await expect(page.locator('#s-chain')).toHaveValue('');
+  await expect(page.locator('#s-chain option')).toHaveText(['Choose a chain', 'Robinhood Chain', 'Ethereum']);
   await expect(page.locator('#s-pool')).toHaveValue('');
+  await page.locator('#s-chain').selectOption('4663');
   await expect(continueButton(page)).toBeDisabled();
   await expect(page.locator('.sum')).toContainText('Not chosen yet');
   expect(await exact(page)).not.toContain('Pool:');
@@ -121,7 +126,7 @@ test('pool share has no default; Continue stays disabled until 10 to 90 in steps
 });
 
 test('4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks', async ({ page }) => {
-  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }, { id: 'jar' }], settings: { pool: 50 } });
+  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }, { id: 'jar' }], settings: { chain: 4663, pool: 50 } });
   await expect(continueButton(page)).toBeEnabled();
   await page.locator('.palette summary', { hasText: 'Games and lotteries' }).click();
   await page.getByRole('button', { name: 'Add Prize pot' }).click();
@@ -161,10 +166,10 @@ test(`risk tooltips at ${width}px: every sign stays readable on hover and keyboa
   await page.setViewportSize({ width, height: 900 });
   const risky = catalog.blocks.filter(b => 'risk' in b && b.risk);
   expect(risky.map(b => b.id).sort()).toEqual(['anti-sniper', 'breaker', 'cooldown', 'max-buy', 'max-swap', 'pot']);
-  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, ...risky.map(b => ({ id: b.id }))], settings: { pool: 50 } });
+  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, ...risky.map(b => ({ id: b.id }))], settings: { chain: 4663, pool: 50 } });
   await expect(page.locator('details', { hasText: 'Games and lotteries' }).locator('.pal-item[data-block="pot"]')).toHaveCount(1);
   for (const b of risky) {
-    const tip = `${HEADS_UP} ${(b as { risk: string }).risk} Not yet tested on Sepolia.`;
+    const tip = `${HEADS_UP} ${(b as { risk: string }).risk} not yet proven in a live launch`;
     for (const where of [`.pal-item[data-block="${b.id}"]`, `.blk[data-block="${b.id}"]`, `.sum li[data-block="${b.id}"]`]) {
       const sign = page.locator(`${where} .warn`);
       await expect(sign).toHaveCount(1);
@@ -216,10 +221,10 @@ test('untested block names expose the status to assistive technology without a r
   await open(page, [{ block: 'jar', passed: true }], { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'jar' }, { id: 'swap-fee' }] });
   for (const where of ['.pal-item', '.blk']) {
     const untested = page.locator(`${where}[data-block="swap-fee"] .block-name`);
-    await expect(untested).toHaveAttribute('title', 'Not yet tested on Sepolia.');
-    await expect(untested.locator('.sr')).toHaveText(', Not yet tested on Sepolia.');
+    await expect(untested).toHaveAttribute('title', 'not yet proven in a live launch');
+    await expect(untested.locator('.sr')).toHaveText(', not yet proven in a live launch');
     // ariaSnapshot checks the accessible text rather than only the native hover title.
-    expect(await untested.ariaSnapshot()).toContain('Not yet tested on Sepolia.');
+    expect(await untested.ariaSnapshot()).toContain('not yet proven in a live launch');
     await expect(page.locator(`${where}[data-block="jar"] .block-name .sr`)).toHaveCount(0);
   }
 });
@@ -247,23 +252,23 @@ test('dependent-removal status describes the removed block and clears after the 
 
 test('tested marks: a passing entry shows the tick, others say not yet tested', async ({ page }) => {
   await open(page, [{ block: 'swap-fee', passed: true }, { block: 'cooldown', passed: false }], { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }, { id: 'cooldown' }] });
-  await expect(page.locator('.blk[data-block="swap-fee"] .tested')).toHaveText('✓ tested on Sepolia');
+  await expect(page.locator('.blk[data-block="swap-fee"] .tested')).toHaveText('✓ proven in a live launch');
   await expect(page.locator('.blk[data-block="cooldown"] .tested')).toHaveCount(0);
-  await expect(page.locator('.blk[data-block="cooldown"] .warn')).toHaveAttribute('data-tip', /Not yet tested on Sepolia\.$/);
-  await expect(page.locator('.blk[data-block="cooldown"] .block-name')).toHaveAttribute('title', 'Not yet tested on Sepolia.');
-  await expect(page.locator('.blk[data-block="swap-fee"] .block-name')).toHaveAttribute('title', 'Tested on Sepolia');
+  await expect(page.locator('.blk[data-block="cooldown"] .warn')).toHaveAttribute('data-tip', /not yet proven in a live launch$/);
+  await expect(page.locator('.blk[data-block="cooldown"] .block-name')).toHaveAttribute('title', 'not yet proven in a live launch');
+  await expect(page.locator('.blk[data-block="swap-fee"] .block-name')).toHaveAttribute('title', 'proven in a live launch');
 });
 
 test('tested marks fall back to the bundled copy when the spec repository cannot be read', async ({ page }) => {
   await page.route('**/blocks-verified.json', route => route.request().url().startsWith('http://127.0.0.1') ? route.fulfill({ json: [{ block: 'jar', passed: true }] }) : route.abort());
   await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'jar' }, { id: 'swap-fee' }] });
-  await expect(page.locator('.blk[data-block="jar"] .tested')).toHaveText('✓ tested on Sepolia');
+  await expect(page.locator('.blk[data-block="jar"] .tested')).toHaveText('✓ proven in a live launch');
   await expect(page.locator('.blk[data-block="swap-fee"] .tested')).toHaveCount(0);
 });
 
 test('the shipped bundled copy is empty, so nothing shows a tick offline', async ({ page }) => {
   await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'jar' }] });
-  await expect(page.locator('.blk[data-block="jar"] .block-name')).toHaveAttribute('title', 'Not yet tested on Sepolia.');
+  await expect(page.locator('.blk[data-block="jar"] .block-name')).toHaveAttribute('title', 'not yet proven in a live launch');
   await expect(page.locator('.tested')).toHaveCount(0);
 });
 
@@ -273,6 +278,7 @@ test('type C and B settings, own code and the request shape', async ({ page }) =
   await page.getByLabel('Existing token address').fill('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984');
   await page.getByLabel('Its symbol (optional)').fill('UNI');
   await page.getByLabel('Hook name').fill('UniFeeHook');
+  await page.locator('#s-chain').selectOption('4663');
   await expect(continueButton(page)).toBeEnabled();
   await expect(page.locator('.palette details', { hasText: /^Token/ })).toHaveCount(0);
   await page.getByText('Advanced: start from my own code').click();

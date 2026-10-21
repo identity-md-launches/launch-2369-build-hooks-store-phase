@@ -1,0 +1,11 @@
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/builder.spec.ts --grep risk tooltips
+
+
+Running 3 tests using 1 worker
+
+  ✓  1 tests/builder.spec.ts:165:1 › risk tooltips at 320px: every sign stays readable on hover and keyboard focus (11.4s)
+  ✓  2 tests/builder.spec.ts:165:1 › risk tooltips at 390px: every sign stays readable on hover and keyboard focus (10.5s)
+  ✓  3 tests/builder.spec.ts:165:1 › risk tooltips at 1440px: every sign stays readable on hover and keyboard focus (11.9s)
+
+  3 passed (39.5s)

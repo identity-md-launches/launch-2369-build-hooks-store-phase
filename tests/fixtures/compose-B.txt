@@ -1,4 +1,4 @@
-Deploy one contract: PondGuardHook, a standalone Uniswap v4 hook with no token and no pool of its own, on Sepolia. It must be usable by anyone initializing a new pool with it on the PoolManager passed as a constructor argument (Sepolia PoolManager 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543).
+Deploy one contract: PondGuardHook, a standalone Uniswap v4 hook with no token and no pool of its own, on Robinhood Chain. It must be usable by anyone initializing a new pool with it on the PoolManager passed as a constructor argument (Robinhood Chain PoolManager 0x8366a39CC670B4001A1121B8F6A443A643e40951).
 The hook does exactly the following, and nothing else:
 1. For the first 10 minutes after the pool opens, each wallet may buy at most 1.0% of the total supply in total; larger buys revert. Expose windowEndsAt() as a view.
 2. A wallet must wait at least 30 seconds between its swaps in this pool. Expose nextSwapAt(address) as a view.

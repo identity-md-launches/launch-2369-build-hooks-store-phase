@@ -1,0 +1,95 @@
+import { type Page } from '@playwright/test';
+import { encodeAbiParameters, encodeEventTopics, parseAbiParameters, stringToHex, encodeFunctionResult, parseAbi, toHex, toFunctionSelector } from 'viem';
+import real from '../../tests/fixtures/chain/1-intake.json' with { type: 'json' };
+import abi from '../../src/abi/intake.json' with { type: 'json' };
+import site from '../../public/site-config.json' with { type: 'json' };
+import { addBlock, body, newDraft } from '../../src/lib/compose';
+import { REQUEST_TOPIC, COMPLETE_TOPIC } from '../src/chain/store';
+export const owner = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
+export const hook = '0x82f636a92364d13754d7b3e72d460f0be20a28cc';
+export const token = '0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86';
+export const requestId = real.logs[0].topics[1];
+export const route = `#hook/1/${requestId}`;
+export const head = Number(BigInt(real.logs[0].blockNumber)) + 10;
+export const jsonResult = { complete: true, jobId: 'ba9d232e-9213-459b-963d-811773f73376', launch: { id: '702e6c9d-37ee-41ef-afcb-5d5e1af9f31b', chainId: 1, launchNumber: 2336, hookAddress: hook, tokenAddress: token, distributorAddress: '0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', poolKey: { currency0: token, currency1: '0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7' } }, delivery: { repoUrl: 'https://github.com/identity-md-launches/launch-2336-hamster-hour' } };
+export function storeLogs(status = 0) {
+  let draft = newDraft(); draft.settings = { ...draft.settings, chain: 1, pool: 50 }; draft.blocks[0].p.name = 'PondGuard'; draft.blocks[0].p.symbol = 'POND';
+  for (const id of ['pause', 'allowlist', 'jar', 'cooldown', 'oracle']) draft = addBlock(draft,id);
+  const base = real.logs[0];
+  const requested = { ...base, blockNumber: toHex(head - 8), topics: encodeEventTopics({ abi, eventName:'Requested', args: { requestId, payer:owner, action:site.intake.launchAction } }), data: encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'),[stringToHex(JSON.stringify(body(draft))),owner,'0x00000000',token,500000000000000000n]) };
+  const completed = { ...base, blockNumber:toHex(head - 5), logIndex:'0x1', topics:encodeEventTopics({abi,eventName:'Completed',args:{requestId}}), data:encodeAbiParameters(parseAbiParameters('uint8,bytes32,string,bool'),[status,stringToHex(status ? 'BUILD_REFUSED' : '',{size:32}),'ipfs://bafybeiehm6g5f64gnapfl2elqikvaxb2paxsljvhrow43dxoidn6macbpm/result.json',false]) };
+  return {requested,completed};
+}
+export async function interceptChains(page: Page, options: {status?:number; noLogs?:boolean; fork?:string; deployedHook?:string; result?:unknown; resultFailure?:boolean; paused?:boolean}={}) {
+  const logs=storeLogs(options.status);
+  const calls: {method:string;params:any[]}[]=[];
+  const config={...site,chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))};
+  await page.route('**/site-config.json',r=>r.fulfill({json:config}));
+  await page.route('https://api.imd.fun/swarm',r=>r.fulfill({status:503}));
+  await page.route('https://raw.githubusercontent.com/**',r=>r.abort());
+  await page.route('https://ipfs.imd.fun/**',r=>options.resultFailure?r.fulfill({status:503}):r.fulfill({json:options.result??{...jsonResult,launch:{...jsonResult.launch,hookAddress:options.deployedHook??hook}}}));
+  const intercept=async (r: any) => {
+    const payload=r.request().postDataJSON();
+    const items=Array.isArray(payload)?payload:[payload];
+    const results=await Promise.all(items.map(async (req:any)=>{
+      calls.push(req);let result:unknown;
+      const chain=r.request().url().includes('robinhood')?4663:1;
+      if(req.method==='eth_chainId')result=toHex(chain);
+      else if(req.method==='eth_blockNumber')result=toHex(head);
+      else if(req.method==='eth_getLogs'){
+        const q=req.params[0], candidates=q.topics[0]===REQUEST_TOPIC?[logs.requested]:q.topics[0]===COMPLETE_TOPIC?[logs.completed]:[];
+        result=chain===1&&!options.noLogs?candidates.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock)&&(!q.topics[1]||q.topics[1].toLowerCase()===String(l.topics[1]).toLowerCase())):[];
+      } else if(req.method==='eth_getCode'&&chain===4663){ result='0x';
+      } else if(req.method==='eth_call'&&options.fork){
+        const response=await fetch(options.fork,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(req)});return response.json();
+      } else if(req.method==='eth_call') {
+        const data=req.params[0].data;
+        const fn=data.slice(0,10);
+        if(fn==='0x8da5cb5b')result=encodeFunctionResult({abi:parseAbi(['function owner() view returns(address)']),functionName:'owner',result:owner});
+        else if(fn==='0x5c975abb')result=encodeAbiParameters(parseAbiParameters('bool'),[options.paused??false]);
+        else if(fn===toFunctionSelector('jar()'))result=encodeAbiParameters(parseAbiParameters('uint256'),[1000000000000000000n]);
+        else if(fn===toFunctionSelector('twap(uint32)'))result=encodeAbiParameters(parseAbiParameters('uint160'),[2n**96n]);
+        else if(fn===toFunctionSelector('nextSwapAt(address)'))result=encodeAbiParameters(parseAbiParameters('uint256'),[0n]);
+        else if(fn===toFunctionSelector('isAllowed(address)'))result=encodeAbiParameters(parseAbiParameters('bool'),[false]);
+        else return {jsonrpc:'2.0',id:req.id,error:{code:3,message:'execution reverted'}};
+      } else if(options.fork){const response=await fetch(options.fork,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(req)});return response.json();}
+      else if(req.method==='eth_getCode') result='0x';
+      else return {jsonrpc:'2.0',id:req.id,error:{code:-32601,message:'Fixture method unavailable'}};
+      return {jsonrpc:'2.0',id:req.id,result};
+    }));
+    await r.fulfill({json:Array.isArray(payload)?results:results[0]});
+  };
+  await page.route('https://ethereum-rpc.publicnode.com',intercept);
+  await page.route('https://rpc.mainnet.chain.robinhood.com',intercept);
+  return calls;
+}
+export async function injectedOwner(page: Page, account=owner, rpc?:string, initialChain='0x1') {
+  await page.addInitScript(({account,rpc,initialChain})=>{
+    const events:Record<string,((v:unknown)=>void)[]>={};let authorized=false,chain=initialChain;
+    const provider={on:(e:string,f:(v:unknown)=>void)=>{(events[e]??=[]).push(f);},removeListener:(e:string,f:(v:unknown)=>void)=>{events[e]=(events[e]??[]).filter(fn=>fn!==f);},async request(req:{method:string;params?:any[]}){
+      if(req.method==='eth_requestAccounts'){authorized=true;return[account];}
+      if(req.method==='eth_accounts')return authorized?[account]:[];
+      if(req.method==='eth_chainId')return chain;
+      if(req.method==='wallet_switchEthereumChain'){chain=req.params![0].chainId;events.chainChanged?.forEach(fn=>fn(chain));return null;}
+      if(req.method==='wallet_revokePermissions')return null;
+      if(req.method==='wallet_requestPermissions')throw Object.assign(new Error('Unsupported fixture method'),{code:4200});
+      if(rpc){const response=await fetch(rpc,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,...req})});const data=await response.json();if(data.error)throw new Error(data.error.message);return data.result;}
+      throw Object.assign(new Error('Unsupported fixture method'),{code:4200});
+    }};
+    const announce=()=>dispatchEvent(new CustomEvent('eip6963:announceProvider',{detail:{info:{uuid:'26a04a43-28d9-490b-84f7-bc02ef1be771',name:'Fork Wallet',rdns:'test.hooks.fork',icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><path d="M4 4h20v20H4z"/></svg>'},provider}}));
+    addEventListener('eip6963:requestProvider',announce);announce();
+  },{account,rpc,initialChain});
+}
+
+// Existing-page regression tests have no network dependency or sample catalog cards.
+export async function emptyIntake(page: Page) {
+  const answer = async (route: any) => {
+    const payload = route.request().postDataJSON();
+    const reply = (req: any) => ({jsonrpc: '2.0', id: req.id, result: req.method === 'eth_chainId'
+      ? route.request().url().includes('robinhood') ? '0x1237' : '0x1'
+      : req.method === 'eth_getLogs' ? [] : '0x0'});
+    await route.fulfill({json: Array.isArray(payload) ? payload.map(reply) : reply(payload)});
+  };
+  await page.route('https://ethereum-rpc.publicnode.com', answer);
+  await page.route('https://rpc.mainnet.chain.robinhood.com', answer);
+}

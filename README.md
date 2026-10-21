@@ -1,111 +1,111 @@
 # The Hooks Store
 
-Phase 1, jobs 1 and 2: a static React storefront and Builder for Uniswap v4 hooks. The delivered application is in `dist/`; `mockup/index.html` remains the unchanged design reference, with its original sample data. The application never redirects to the mockup.
+Phase 1, jobs 1–3: a static React storefront and Builder for Uniswap v4 hooks, now with Intake chain reads, address search, Hook management and My hooks. The finished application is in `dist/`. Hash routes work on static hosting and at an IPFS gateway subpath.
 
-Store includes the live ASCII pond, describe form, open-slot #ad strip, keyword search and filter rail. The catalog lists only hooks launched through this site (SPEC 3.1); job 3 reads them from chain, so for now it shows the empty pond panel ("Nothing on the pond yet", Describe a hook) with **0 hooks**, and any search or filter shows the no-match state. Learn contains the seven answers, eight source links and fourteen permissions from the mockup, with the ad duration at 24 hours. **Builder** (job 2) implements SPEC 3.2, 4 and 5. Launch, Hook and My hooks still show the later-job placeholder.
+The catalog includes **only requests composed through this store**. There is no bundled launch snapshot or sample catalog. With no matching requests it keeps the empty pond panel. Ethereum and Robinhood Chain are the only supported chains; a new Builder draft has no selected chain or pool share. The pixel hook is an inline SVG and all application fonts are self-hosted.
 
-## Install, develop and rebuild
+`SPEC.md` and `mockup/index.html` were refreshed from the requested upstream URLs on 2026-10-21. Upstream returned version **1.13**, including the owner's two-mainnet decision. These reference files retain upstream historical notes and mockup data; the application does not execute or redirect to the mockup.
 
-Use Node.js 24 or newer and npm. Frontend manifests and tooling live in `web/` to preserve existing repository build configuration.
+## Install, preview and rebuild
+
+Use Node.js 24 or newer and npm. Existing dependency manifests and build configuration in `web/` are unchanged.
 
 ```sh
 npm --prefix web ci
 npm --prefix web run dev -- --host 127.0.0.1
-```
-
-Build and typecheck:
-
-```sh
 npm --prefix web run typecheck
 npm --prefix web run build
-```
-
-Vite's root is this repository, its base is `./`, and the output is root `dist/`. The build includes the site configuration, the empty bundled tested-marks file, local fonts, wallet marks, favicon and share image. It does not contact the launch API. `web/package.json` still lists a `snapshot` script from job 1; its script was removed with the snapshot (package manifests are outside this job's write scope), so do not run it. There are no required environment variables, private keys, relay credentials or project IDs.
-
-Preview the finished export at a gateway-like subpath:
-
-```sh
 node scripts/serve.mjs --port 4173
 # Open http://127.0.0.1:4173/preview/#store
 ```
 
-Alternatively use `npm --prefix web run preview`. Serve the contents of `dist/` without route rewrites. Application assets use relative URLs. The absolute Open Graph image URL uses the site name supplied in `SPEC.md`: `https://the-hooks-store.sites.imd.fun/og.png`. This job did not publish the site or verify that domain's deployment.
+`npm --prefix web run preview` also previews the export. Vite uses root `index.html`, `base: './'` and root `dist/`. Serve that directory without route rewrites. Fonts, wallet marks, favicon, share image, configuration and all JS/CSS chunks are local. The Open Graph image uses the supplied canonical site name, `https://the-hooks-store.sites.imd.fun/og.png`; this task did not publish or verify that deployment.
 
-Do not include `node_modules`, package caches or temporary browser reports in a submission. No ignore file was changed. Keep the source, `web/package.json`, `web/package-lock.json`, runtime assets and complete `dist/` together.
+Keep source, the existing `web/package.json` and `web/package-lock.json`, runtime assets and complete `dist/` together. Do not submit dependency installations, caches or temporary browser reports. No ignore file was changed. The old locked `snapshot` script is obsolete: its job-1 snapshot generator was already removed; do not run it.
 
-## Builder
+## Pages and interactions
 
-Open `#builder`. The canvas reads as three numbered questions:
+- **Store / Catalog:** describe a hook, browse, filter and search as you type. Keywords require every word to match. A 40-hex value matches known hook, token, distributor or pool currency addresses; a 64-hex value matches request IDs or transaction hashes. Both accept the `0x` prefix or bare hex. An unmatched address is read on both chains. Hook results show PoolManager and permissions; token results offer **Build a hook for this token**, prefilled as type C. Failed lookups have a retry action and never claim that an unavailable chain contains no contract.
+- **Builder:** the delivered job-2 blocks, rules, custom prose, risk tooltips, draft persistence and exact request composition remain. Deploy chain starts at **Choose a chain** and offers Robinhood Chain / Ethereum. Continue requires that choice, the applicable pool share and all other valid fields. The top bar follows the draft chain. Proven marks say “proven in a live launch”; unproven blocks expose “not yet proven in a live launch” to assistive technology. The bundled verification evidence remains empty.
+- **Hook:** `#hook/<intakeChainId>/<requestId>`. The route identifies the payment-chain request; its contracts may deploy on the other supported chain. The page shows status, available evidence, copyable addresses, matched rules and the original request. **Build one like this** copies rules/words into a fresh draft; allocation and owner must be chosen anew. Manage links scroll to the panels.
+- **Owner controls:** functions come only from completely matched catalog sentence templates. `owner()` must equal the connected wallet. Query parameters never authorize transactions. Argument forms validate addresses, address arrays, booleans and integer ranges. Writes simulate first, request the wallet transaction, wait for its receipt and then refresh readings; cancellation, reverts and connection failures stay visible. Public functions require a connected wallet; the relevant chain switch appears when needed. Views and ownership refresh every 20 seconds.
+- **My hooks:** `#mine` filters by the connected payer. For read-only inspection before the launch-payment job, use `#mine?address=<wallet-address>` or `?address=<wallet-address>#mine`. Live rows have Manage links. Saved drafts support Resume, Discard and Undo. Pending requests use the storage format below. Promotions remain the later placements job, with the specified terms shown.
+- **Launch / Learn:** Launch has the mockup's payment notice and draft review; payment submission is job 4. Learn has the requested **Which chains?** answer and the existing source links and permissions table.
 
-1. **What are you launching?** Type cards A (hook + new token + pool), B (hook only), C (hook for my existing token). The type decides which blocks are allowed and which settings show.
-2. **How do you want to build it?** DESCRIBE IT | STACK BLOCKS. A first visit shows the two-card chooser. Describe mode has the 3,000-character text area, four example chips, the blocks added from the palette as removable chips and the rule "if your words and a rule disagree, the rule wins". Blocks mode shows the token card (type A, BRING MY OWN / USE STANDARD TOKEN) and one card per block with its number, short label, fields, up/down/remove, the Who uses it line and what it adds to the hook page. The palette works in both modes; switching never drops words or blocks. The first visit to the stack, with no blocks yet, starts from the reviewed default stack (Swap fee, Anti-sniper window, Buyback jar).
-3. **Settings.** Deploy chain (enabled chains from `site-config.json`, others “phase 2”), pair, pool share (type A, empty until the user chooses 10–90 in steps of 5), remainder address, existing token and symbol (C), hook name (B and C), owner, and ADVANCED: START FROM MY OWN CODE.
+The shared Connect control retains EIP-6963 wallet discovery, injected fallback, wallet-browser phone links and Coinbase Wallet / Smart Wallet. It offers **Switch to Ethereum** only on an unsupported wallet chain. Hook actions separately switch to the hook's deployment chain. There is no WalletConnect relay or project ID.
 
-The preview lists Type, Token or Hook, Chain, Words, Rules, Owner and Pool, the exact text inside a disclosure, and the cost box (0.5 IMD, 2 transactions, length out of 7,500, body size out of 16 KiB). CHECK WITH THE SWARM (FREE) is disabled and says it needs the relay. CONTINUE TO LAUNCH stays disabled while any 4.10 rule or field check fails; every failure is shown inline next to its field and listed under the button.
+## Chain data and configuration
 
-- `src/blocks/catalog.json`: all 35 entries of SPEC 4 (2 token blocks, 33 behavior blocks including Custom rule) with `id, group, title, blurb, types, params` (defaults, limits, steps, units), `short`, `sentence` (ending with the exact 4.11 functions), `ownerPower, requires, excludes, replaces, owner, anyone, user, view, risk, who`. Templates use `{k}`, `{k:1}` (one decimal), `{k:n}` (digit groups), `{k:rest}` (100 minus k), `{@symbol}`. The Prize pot is in the Games and lotteries group.
-- `src/lib/compose.ts`: the 5.1 text for A, B and C, the 5.2 body (`univ4_hook` for A with `economics` only once the pool share is chosen and `customToken` only with Bring your own token; `evm_contracts` for B and C; `repoUrl` and `baseCommit` when both own-code fields are filled), the 4.10 rules and draft normalisation. It is pure TypeScript, used by the Builder and by `node --test`.
-- Risk blocks (Anti-sniper window, Max buy per wallet, Max swap size, Cooldown, Circuit breaker, Prize pot) show a small yellow `!` next to their name in the palette, on the card and in the summary; hover or focus shows “Heads up: this block is easy to work around or needs care.” and the block's risk sentence.
-- Tested marks (SPEC 4.14): at load the Builder fetches `blocksVerifiedUrl` from `site-config.json` (the spec repository's `evidence/blocks-verified.json` on raw.githubusercontent.com) and falls back to the bundled `public/blocks-verified.json`, which ships as `[]`. A block with a `passed: true` entry shows “✓ tested on Sepolia” on its card; every other block says “Not yet tested on Sepolia.” in its tooltip.
-- Drafts (type, mode, words, blocks, settings) persist under `localStorage` **`hooks-store:draft:v2`** and reopen after a reload. Text from the landing box arrives in the describe editor.
+`public/site-config.json` is the single application configuration. Rebuild after changing it; the exported file is also read on load. Committed defaults are used if loading fails. Defaults:
 
-## Configuration and interactions
+| Chain | ID | Public RPC |
+| --- | --- | --- |
+| Robinhood Chain | 4663 | `https://rpc.mainnet.chain.robinhood.com` |
+| Ethereum | 1 | `https://ethereum-rpc.publicnode.com` |
 
-`public/site-config.json` is the single application configuration. Set `inProgress` to control the exact banner: “This site is being built; launches open when the banner goes away”. Rebuild after changing source configuration. The exported JSON is also read on load; committed defaults remain available if loading fails.
+Intake is `0xa43e6f75ee006411f79ac1c84120606c2330de82` on both chains. `src/abi/intake.json` is copied from the assignment's foundation commit `46e17ea70534e8a7ac2c4ff78501a3c183d32da8`. The indexed action is the bytes32 encoding of `launch.open@launch-1`.
 
-The file contains enabled deploy chains, payment chains, public RPCs, `relayUrl`, `featuredRequestId`, trade URL templates and pool-opening defaults. Unassigned later-job settings are explicitly null or empty. No made-up contract address is supplied. This phase has no payment or deployment action; removing the banner does not implement one.
+`web/src/chain/store.ts` starts with the latest 10,000 blocks, then walks backwards in inclusive, non-overlapping windows of at most 10,000 blocks. It persists its cursor and matching raw logs; smaller provider limits split a rejected range without skipping it. Four historical windows are processed at a time, with cooperative pauses. A separate 20-second head poll takes priority, overlapping the previous 12 blocks and deduplicating request IDs. Successful subranges survive later errors. History starts at zero unless a verified Intake deployment block is configured; no deployment block was guessed.
 
-Submitting the landing form preserves the entered text as `prompt`, sets `mode: "prompt"`, merges existing draft fields and stores JSON under **`hooks-store:draft:v2`** before navigating to `#builder`. The block-builder link sets `mode: "blocks"`. Empty input and failed browser storage have visible, recoverable errors.
+Only `univ4_hook` / `evm_contracts` JSON bodies ending in `Composed with The Hooks Store block builder.` or `Composed with The Hooks Store.` survive. Other requests are discarded before fetching their completions, displaying cards or triggering the pond. Matched numbered rules produce parameterized labels and 4.11 minimal ABIs; unfamiliar rules stay Custom. The same risk warning component appears next to Hook-page block labels.
 
-Keyword search matches every word, case-insensitively, across name, symbol, chain, summary, block labels and the full request. Enter opens `#catalog`. All filters apply immediately; the empty-state reset also clears status and sort. Address resolution is intentionally deferred to job 3.
+Completed status 1 or 2 means Failed; its bytes32 reason is decoded as ASCII. Status 0 with a supported IPFS URI fetches `https://ipfs.imd.fun/ipfs/<cid>/result.json`. Live requires a reported hook address on the requested chain. The parser accepts named `launch` fields, address maps and contract artifacts; unknown addresses, pool IDs, launch numbers, audit links and intermediate stages remain unknown. UUID launch IDs are preserved for evidence links even when a numeric launch number is absent. There is no fabricated success and no browser dependency on the CORS-restricted launch API.
 
-The live metrics read `/swarm`: `health.agentsOnline`, `counts.launchesLive`, and `health.jobsDoneLastDay`, labeled Agents online, Launches live and Jobs done · 24h. The endpoint does not provide hook-only or launches-today counts. Missing, invalid or failed responses hide the entire metrics group; there is no numeric fallback.
+Each payer gets an Ethereum-mainnet ENS reverse lookup, cached for one day. ENS names are display-only. They appear on Hook pages and in the featured component when placements are supplied. The strip currently has one stationary open-slot card; its seamless 42-second marquee runs only with placements.
 
-One Connect control supports EIP-6963 browser wallets, the injected fallback, mobile wallet-browser links and Coinbase Wallet/Smart Wallet. Phone links offer MetaMask, Rabby, Phantom and Coinbase. Connections request accounts only. There is no WalletConnect relay, signature, approval or fund transfer in this phase.
+New store requests call `src/scene/cast.ts` with the parsed hook name and chain, or the generic new-request message. Initial history, cached history, duplicate logs and unrelated launches do not cast. Job-2 practice/manual casts and reduced-motion controls remain. `/swarm` supplies the three labeled network metrics; failure hides them without a numeric fallback.
 
-## Pond integration
+| Browser key | Content |
+| --- | --- |
+| `hooks-store:draft:v2` | Existing Builder type, mode, words, blocks, settings |
+| `hooks-store:intake:v1:<chainId>` | Version, observed head, backward cursor, matching raw requests/completions and results |
+| `hooks-store:ens:v1:<lowercase payer>` | Name or negative lookup, expiry timestamp |
+| `hooks-store:pending` | Array of `{requestId, chainId, payer, txHash?, createdAt?}`; chainId is the payment chain. The `:v1` key is also accepted. |
 
-`src/scene/pepe.json` is copied character for character, including meta, from the mockup. `src/scene/pond.ts` ports `pondScene`, preserving fish geometry, drawing order, cell grid, tile shades, boat, rod, line, water fields and flocking. It adds typed lifecycle cleanup, motion controls and read-only test diagnostics.
+Deleting an Intake key restarts that chain's history scan. Storage failures fall back to the current in-memory store. RPC errors keep cached data and offer Retry. Missing IPFS results retry on refresh or immediately on **Retry result**.
 
-Later jobs can call the exported integration function (adjust the import relative to the caller):
-
-```ts
-import { cast } from './src/scene/cast';
-cast('A new hook was requested on Sepolia');
-```
-
-When Store is mounted this updates the ticker and starts or queues a cast. The queue holds at most three pending casts. With reduced motion it updates the ticker without animation. The eight animated states plus idle are windup, fly, splash, sink, wait, bite, reel, cheer, idle. Durations are 0.35 / 0.55 / 0.45 / 0.6 / 1.3 / 0.5 / 0.6 / 0.9 seconds; the 33 ms timer rounds transitions to a frame. Practice casts run after three active seconds and then every eighteen, explicitly labeled as practice. Real log triggers belong to job 3.
-
-The pond pauses offscreen and in hidden tabs, responds to ResizeObserver, caps device-pixel ratio at two, supports a pause control and starts still under reduced motion. Its reduced-motion opt-in works with pointer and keyboard for that visit.
-
-To regenerate the share image from the built pond, install Chromium as below, run `node scripts/generate-og.mjs`, then rebuild. The existing image is already included.
-
-## Tests and recorded results
+## Tests and fork checks
 
 ```sh
 npm --prefix web test
-npm --prefix web exec -- playwright install chromium
-npm --prefix web run test:e2e
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers web/node_modules/.bin/playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e
 ```
 
-For an external browser directory, set `PLAYWRIGHT_BROWSERS_PATH` consistently for installation and tests. The suite runs against the production export under `/preview/`, not the development server. Build first. Tests create temporary reports in `artifacts/` and `test/scratch/`; delivered compact results are in `tests/results/`.
+Build first. Browser tests use the production export under `/preview/`; RPC/IPFS responses are intercepted except in explicitly enabled fork checks. Fork tests skip by default, so the normal tests do not depend on public RPC availability. Reports are generated under `artifacts/` and `test/scratch/`; delivered reports are copied to `tests/results/job3/` because temporary artifacts are excluded by the existing repository rules.
 
-Actual worker validation (job 2, 2026-10-21): `npm --prefix web run typecheck` and `npm --prefix web run build` passed; **16 unit tests** (`tests/compose.test.mjs`, `tests/scene-data.test.mjs`) and **34 Playwright tests** passed in Chromium headless shell. The Builder suite runs the type/mode/switch/add/reorder/remove/reload flow at 320, 390 and 1440 px, plus the pool share, the 4.10 rules, risk signs and tooltips, tested marks with a passing entry, the fallback to the bundled copy and the shipped empty copy. Unit tests cover every catalog block under every allowed type with its 4.11 function names, the three fixtures `tests/fixtures/compose-{A,B,C}.txt` byte for byte, bodies under 16 KiB, the 5% rule, the swap-fee dependencies and the buy/sell exclusion. Job 1's header tests still pass at 821, 1024 and 1440 px with a twelve-character address. Outputs are in `tests/results/`.
+For the optional fork checks, install Anvil and Solidity 0.8.26, then run a local mainnet fork in one terminal:
 
-The pinned design probe passed 11 of 16 checks; the five flags (capitals, kicker labels, type sizes, the marquee, border plus shadow) come from the mockup and the brief and are documented in [VALIDATION.md](VALIDATION.md). See [DESIGN.md](DESIGN.md) and [tests/results/](tests/results/) for evidence, fixes and limitations.
+```sh
+anvil --fork-url https://ethereum-rpc.publicnode.com --chain-id 1 --port 8545 --no-storage-caching --silent
+```
 
-Job 2 revision: all three reviewer findings were reproduced and fixed. Risk tooltips stay within their rows on phones; untested block names expose their status to assistive technology; dependency-removal notes clear on the next draft edit. The production build, typecheck, 16 unit tests and 38 Chromium interaction tests passed. Regression coverage exercises all six risk blocks in the palette, cards and summary at 320, 390 and 1440px with hover and keyboard focus. Current reports and screenshots use the `tests/results/revision-` prefix; reviewer answers are in [.imd-responses.json](.imd-responses.json). WebKit and screen-reader output remain unverified; see [VALIDATION.md](VALIDATION.md).
+In a second terminal, from the repository root:
 
-Real wallet installations, signing, on-chain transactions, Safari/Firefox and a screen-reader session were not tested. Lighthouse was not run; no score is claimed. Connection behavior uses an EIP-6963 fixture with a real public address, without a private key. No production contract action was sent.
+```sh
+mkdir -p test/scratch/fork/compiled
+solc --bin --abi --overwrite -o test/scratch/fork/compiled tests/fork/ControlHook.sol
+node web/scripts/fork-setup.mjs
+node web/scripts/check-fork.mjs
+HOOKS_FORK_URL=http://127.0.0.1:8545 PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/hook.spec.ts
+```
+
+The setup impersonates a public fixture payer **inside local Anvil**, deploys the explicit mock and writes its generated address to scratch. It uses no private key. `check-fork.mjs` resolves the real Hamster Hour hook and token. Playwright connects the local mock wallet, calls pause/unpause, waits for successful receipts and verifies `paused()`, then exercises token resolution and type-C prefill. No public-chain transaction is sent.
+
+Raw fixture provenance and the live-result limitation are in `tests/fixtures/chain/README.md`. `web/scripts/capture-fixtures.mjs` is an optional network capture utility, not part of the default tests or production catalog.
+
+The production build and typecheck passed, with **29 unit tests and 50 Chromium interaction tests passing** (including both optional fork checks). Actual commands, screenshots, Better Interface coverage and remaining limitations are recorded in [VALIDATION.md](VALIDATION.md). Final implementation tokens, typography, components and responsive behavior are in [DESIGN.md](DESIGN.md).
+
+## Known limits
+
+The supplied public Ethereum RPC rejected older history with “Archive requests require a personal token”; historical-state fork requests also sometimes failed. The UI retains partial data and retries, but a complete genesis-to-head scan was not established on this machine. No secret or alternate backend was added.
+
+The captured successful IPFS result reports a completed contract build but **null launch details and no deployed addresses**. Other inspected launch results had the same gap. Consequently, a captured real **Live result.json with addresses** was unavailable. Real-log decoding, a real failed completion and the real result file are tested; Live mapping uses a clearly identified synthetic schema fixture, while management transactions and known-address resolution are tested on a real mainnet fork. This limitation is not presented as a passed real-Live-fixture check. The site cannot infer missing deployment details from that immutable result.
+
+Intermediate Building / Audit panel / Deploying events need the later relay. Payment submission, own-code import/check, pool opening and paid placements remain their assigned later jobs. Trade URL templates are empty and no trade destination is invented. Physical wallet apps, Safari/WebKit and assistive-technology sessions were not certified; Chromium interactions and local-fork transactions were exercised.
 
 ## Source map and attribution
 
-- `web/src/`: React pages (`Builder.tsx` for job 2), wallet adapter, draft storage and the single `styles.css`.
-- `src/scene/`: canvas implementation, sprite data and cast integration.
-- `src/blocks/catalog.json`, `src/lib/compose.ts`: block catalog, composer, body encoder and rules.
-- `scripts/`: static preview server and share-image renderer.
-- `public/`: complete local runtime assets and configuration.
-- `tests/` and `web/tests/`: fixture/unit tests and browser interactions.
-- `SPEC.md`, `mockup/`, `jobs/`, `evidence/`: original project inputs, preserved.
+`web/src/chain/` contains chain clients, decoding, caches, resolution and minimal ABIs. `web/src/` contains the pages, existing wallet adapter and stylesheet. `src/blocks/catalog.json` and `src/lib/compose.ts` contain the catalog and composer; `src/scene/` retains the pond. `public/` and `dist/` contain the complete runtime assets. Tests are in `tests/` and `web/tests/`.
 
 Design guidance uses pinned Better Interface material by Jakub Krehel (MIT), with documentation guidance adapted from Paul Bakaus's Impeccable (Apache-2.0). Official wallet marks and fonts retain their notices. See [THIRD_PARTY.md](THIRD_PARTY.md).

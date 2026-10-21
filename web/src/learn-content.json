@@ -21,8 +21,8 @@
       "answer": "0.5 IMD plus gas for two transactions. The audit panel is included in that fee. Deployment gas is paid by IMD. A request the swarm refuses still costs the fee, which is why the builder checks it for free first. A featured #ad slot is 0.1 IMD for 24 hours and is optional."
     },
     {
-      "question": "WHY SEPOLIA FIRST?",
-      "answer": "Sepolia is a test network. Hooks launched there cost the same swarm fee but trade play money, so we can prove the whole path before opening Robinhood Chain and Ethereum."
+      "question": "WHICH CHAINS?",
+      "answer": "Robinhood Chain or Ethereum, your choice in the Builder. There is no test network: every launch is real, paid in IMD on Ethereum or Robinhood Chain, and the swarm writes, tests and audits the hook before it deploys."
     },
     {
       "question": "WHO AUDITS IT?",

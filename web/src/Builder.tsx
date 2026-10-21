@@ -21,7 +21,7 @@ const EXAMPLES = [
 ];
 const EXAMPLE_LABELS = ['Prize pot for buyers', 'Buy back and burn', 'Fair launch limits', 'Locked liquidity'];
 const HEADS_UP = 'Heads up: this block is easy to work around or needs care.';
-const UNTESTED = 'Not yet tested on Sepolia.';
+const UNTESTED = 'not yet proven in a live launch';
 
 /** SPEC 4.14: the spec repository's record first, then the bundled copy. */
 async function loadVerified(url: string): Promise<Set<string>> {
@@ -36,13 +36,13 @@ async function loadVerified(url: string): Promise<Set<string>> {
   try { return await read(assetUrl('blocks-verified.json')); } catch { return new Set(); }
 }
 
-function WarnSign({ def, tested }: { def: BlockDef; tested: boolean }) {
+export function WarnSign({ def, tested }: { def: BlockDef; tested: boolean }) {
   if (!def.risk) return null;
   const tip = `${HEADS_UP} ${def.risk}${tested ? '' : ` ${UNTESTED}`}`;
   return <span className="warn" tabIndex={0} role="img" aria-label={tip} data-tip={tip}>!</span>;
 }
 function BlockName({ def, tested, children }: { def: BlockDef; tested: boolean; children?: ReactNode }) {
-  return <><span className="block-name" title={tested ? 'Tested on Sepolia' : UNTESTED}>{children ?? def.title}{!tested && <span className="sr">, {UNTESTED}</span>}</span><WarnSign def={def} tested={tested} /></>;
+  return <><span className="block-name" title={tested ? 'proven in a live launch' : UNTESTED}>{children ?? def.title}{!tested && <span className="sr">, {UNTESTED}</span>}</span><WarnSign def={def} tested={tested} /></>;
 }
 function manageNote(def: BlockDef) {
   const lower = (list?: { label: string }[]) => (list ?? []).map(f => f.label.toLowerCase()).join(', ');
@@ -134,7 +134,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     if (!t) return null;
     const def = BY_ID[t.id];
     return <div className="blk token" data-block={t.id}>
-      <div className="blk-head"><h3>Token{tested(t.id) && <span className="tested">✓ tested on Sepolia</span>}</h3>
+      <div className="blk-head"><h3>Token{tested(t.id) && <span className="tested">✓ proven in a live launch</span>}</h3>
         <div className="order">{t.id === 'own-token'
           ? <button className="btn tiny" type="button" onClick={() => add('token')}>Use standard token</button>
           : <button className="btn tiny" type="button" onClick={() => add('own-token')}>Bring my own</button>}</div></div>
@@ -153,7 +153,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       if (!off) n++;
       return <div className={`blk${off ? ' off' : ''}`} key={b.id} data-block={b.id}>
         <div className="blk-head">
-          <h3>{!off && <span className="num">{n}.</span>} <BlockName def={def} tested={tested(def.id)} />{tested(def.id) && <span className="tested">✓ tested on Sepolia</span>}{off && <span className="pill state">Not for this launch type</span>}</h3>
+          <h3>{!off && <span className="num">{n}.</span>} <BlockName def={def} tested={tested(def.id)} />{tested(def.id) && <span className="tested">✓ proven in a live launch</span>}{off && <span className="pill state">Not for this launch type</span>}</h3>
           <div className="order">
             <button className="btn tiny" type="button" onClick={() => update(moveBlock(draft, index, -1))} aria-label={`Move ${def.title} up`}>▲</button>
             <button className="btn tiny" type="button" onClick={() => update(moveBlock(draft, index, 1))} aria-label={`Move ${def.title} down`}>▼</button>
@@ -201,11 +201,11 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       </div>}
       {draft.type !== 'A' && <div className="field-row">{setting('hname', 'Hook name', textInput('hname', 'e.g. PondGuardHook'))}<div /></div>}
       <div className="field-row">
-        {setting('chain', 'Deploy on', <select id="s-chain" value={s.chain} onChange={e => settings({ chain: Number(e.target.value) })}>
-          {[11155111, 4663, 1].map(id => <option key={id} value={id} disabled={!enabledChains.includes(id)}>{CHAIN_NAMES[id]}{id === 11155111 ? ' (test phase)' : enabledChains.includes(id) ? '' : ' (phase 2)'}</option>)}
+        {setting('chain', 'Deploy on', <select id="s-chain" value={s.chain ?? ''} onChange={e => settings({ chain: e.target.value === '' ? null : Number(e.target.value) })}>
+          <option value="">Choose a chain</option>{[4663, 1].filter(id => enabledChains.includes(id)).map(id => <option key={id} value={id}>{CHAIN_NAMES[id]}</option>)}
         </select>)}
         {draft.type === 'A' && setting('pair', 'Pair with', <select id="s-pair" value={s.pair} onChange={e => settings({ pair: e.target.value as 'eth' | 'imd' })}>
-          <option value="eth">ETH</option><option value="imd" disabled>IMD (Robinhood and Ethereum only)</option>
+          <option value="eth">ETH</option><option value="imd">IMD</option>
         </select>)}
       </div>
       {draft.type === 'A' && <div className="field-row">
@@ -234,7 +234,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     <ul className="sum">
       <li><b>Type</b><span>{typeLabel}</span></li>
       {draft.type === 'A' ? <li><b>Token</b><span>{ctx.name} (${ctx.symbol}){has(draft, 'own-token') ? ', your own' : ', standard'}</span></li> : <li><b>Hook</b><span>{ctx.name}</span></li>}
-      <li><b>Chain</b><span>{CHAIN_NAMES[s.chain]}{draft.type === 'A' ? `, paired with ${s.pair.toUpperCase()}` : ''}</span></li>
+      <li><b>Chain</b><span>{s.chain ? CHAIN_NAMES[s.chain] : 'Choose a chain in Settings'}{draft.type === 'A' ? `, paired with ${s.pair.toUpperCase()}` : ''}</span></li>
       <li><b>Words</b><span className="muted">{words ? `“${words.slice(0, 110)}${words.length > 110 ? '…' : ''}”` : 'none'}</span></li>
       <li><b>Rules</b>{rules.length ? <ol>{rules.map(b => <li key={b.id} data-block={b.id}>{shortOf(b, ctx)}<WarnSign def={BY_ID[b.id]} tested={tested(b.id)} /></li>)}</ol> : <span className="muted">none</span>}</li>
       <li><b>Owner</b><span>{powers.length ? `${s.owner.trim() || address || 'the paying wallet'} may ${powers.join(', ')}` : 'no owner powers'}</span></li>

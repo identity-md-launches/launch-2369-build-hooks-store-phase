@@ -1,0 +1,120 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { encodeAbiParameters, encodeEventTopics, stringToHex, parseAbiParameters } from '../web/node_modules/viem/_esm/index.js';
+import * as D from '../web/src/chain/decode.ts';
+import { backwardsRanges, LaunchStore, cacheKey } from '../web/src/chain/store.ts';
+import { creatorName } from '../web/src/chain/ens.ts';
+import { functionAbi, argumentValues, managementFunctions, formatReading } from '../web/src/chain/manage.ts';
+import { searchAddress } from '../web/src/chain/resolve.ts';
+import * as C from '../src/lib/compose.ts';
+import config from '../public/site-config.json' with { type: 'json' };
+const fixtures = [1,4663].map(chain => JSON.parse(fs.readFileSync(new URL(`fixtures/chain/${chain}-intake.json`, import.meta.url),'utf8')));
+const base = fixtures[0].logs.find(l=>D.decodeIntake(l).eventName==='Requested');
+const realRequest = D.decodeIntake(base).args;
+const body = (type='B', ids=['pause','cooldown']) => {let d={...C.newDraft(),type,settings:{...C.emptySettings(),chain:4663,hname:'PondGuard',pool:50}};for(const id of ids)d=C.addBlock(d,id);return C.body(d);};
+// Only this helper creates a synthetic store request. Captured files remain unmodified.
+const requested = (b=body(), requestId=realRequest.requestId, action=config.intake.launchAction) => ({...base,
+ topics:encodeEventTopics({abi:D.intakeAbi,eventName:'Requested',args:{requestId,payer:realRequest.payer,action}}),
+ data:encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'),[stringToHex(JSON.stringify(b)),realRequest.callbackTarget,realRequest.callbackSelector,realRequest.asset,realRequest.amount]),
+});
+const completed = (status=0, reason='') => ({...base,topics:encodeEventTopics({abi:D.intakeAbi,eventName:'Completed',args:{requestId:realRequest.requestId}}),
+ data:encodeAbiParameters(parseAbiParameters('uint8,bytes32,string,bool'),[status,stringToHex(reason,{size:32}),'ipfs://bafybeiehm6g5f64gnapfl2elqikvaxb2paxsljvhrow43dxoidn6macbpm/result.json',false])});
+const launch = () => D.launchFromRequested(requested(),1,config.intake.launchAction,1792563203);
+
+test('decodes at least two real Requested and two Completed logs from each chain',()=>{
+ for(const fixture of fixtures){const events=fixture.logs.map(D.decodeIntake);assert.ok(events.filter(e=>e.eventName==='Requested').length>=2);assert.ok(events.filter(e=>e.eventName==='Completed').length>=2);
+ for(const e of events) if(e.eventName==='Requested'){assert.equal(e.args.action,config.intake.launchAction);assert.equal(typeof D.parseBody(e.args.body)?.objective,'string');}
+ for(const log of fixture.logs) assert.equal(D.launchFromRequested(log,fixture.chainId,config.intake.launchAction),null,'Other IMD launches never become store cards');
+ }
+});
+test('requires launch action, accepted kind and an exact terminal marker; handles both composer endings',()=>{
+ assert.ok(launch()); assert.ok(D.launchFromRequested(requested(body('B',[])),1,config.intake.launchAction));
+ const b=body();for(const invalid of [{...b,onchain:'custom_token'},{...b,objective:b.objective+' More text.'},{...b,objective:'Composed with the hooks store.'},{...b,chainId:10}])assert.equal(D.launchFromRequested(requested(invalid),1,config.intake.launchAction),null);
+ assert.equal(D.launchFromRequested(requested(b,realRequest.requestId,stringToHex('other',{size:32})),1,config.intake.launchAction),null);
+ assert.equal(D.launchFromRequested({...requested(),data:'0x00'},1,config.intake.launchAction),null);
+ assert.equal(D.parseBody('0x6e6f742d6a736f6e'),null);
+});
+test('every numbered rule template matches its own rendered sentence; label parameters and repeated values survive',()=>{
+ for(const def of C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)&&b.id!=='custom')){const block=C.entry(def.id),ctx={name:'Pond',symbol:'POND'};const rendered=C.sentenceOf(block,ctx);const match=D.matchRule(rendered,ctx);assert.equal(match?.id,def.id,rendered);assert.equal(C.shortOf(match,ctx),C.shortOf(block,ctx));}
+ const row=launch();assert.deepEqual(row.blocks,['owner can pause','30s between swaps per wallet']);assert.deepEqual(row.matchedBlocks.map(b=>b.id),['pause','cooldown']);
+ const altered=D.parseObjective(body().objective.replace('1. The owner','1. Extra wording. The owner'));assert.ok(altered.blocks.includes('Custom'));assert.equal(altered.matchedBlocks.some(b=>b.id==='pause'),false);
+});
+test('request location is the payment chain; contract location comes from body.chainId',()=>{const row=launch();assert.equal(row.intakeChainId,1);assert.equal(row.chainId,4663);assert.match(row.id,/^1:/);assert.equal(row.name,'PondGuard');assert.match(D.pondMessage(row),/^PondGuard was requested on Robinhood Chain$/);});
+test('completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit',()=>{
+ for(const status of [1,2]){const row=D.applyCompleted(launch(),completed(status,'BUILD_REFUSED'));assert.equal(row.status,'failed');assert.equal(row.completion.reason,'BUILD_REFUSED');}
+ const real=fixtures[1].logs.find(l=>D.decodeIntake(l).eventName==='Completed'&&D.decodeIntake(l).args.status>0);const args=D.decodeIntake(real).args;
+ const row=D.applyCompleted({...launch(),requestId:args.requestId},real);assert.equal(row.status,'failed');assert.equal(row.completion.reason,'No reason supplied by Intake');
+});
+test('real result JSON for a completed build without addresses never fabricates Live',()=>{
+ const fixture=JSON.parse(fs.readFileSync(new URL('fixtures/chain/completed-build-result.json',import.meta.url),'utf8'));
+ const row=D.applyResult(D.applyCompleted(launch(),completed()),fixture.result);assert.equal(row.status,'in-progress');assert.equal(row.hookAddress,null);assert.equal(row.launchNumber,null);assert.ok(row.resultLoaded);assert.equal(row.jobIds[0],fixture.result.jobId);
+ assert.equal(D.resultUrl('ipfs://bafybeiehm6g5f64gnapfl2elqikvaxb2paxsljvhrow43dxoidn6macbpm/result.json',config.intake.ipfsGateway),fixture.source.url);
+ for(const bad of ['https://evil.example/result.json','ipfs://../../bad','ipfs://CID/other.json'])assert.equal(D.resultUrl(bad,config.intake.ipfsGateway),null);
+ assert.equal(D.safeUrl('javascript:alert(1)'),null);
+});
+test('Live result mapping and 40/64-hex searches use exact launch addresses and hashes',()=>{
+ // Schema fixture uses only real observed addresses; it is deliberately not represented as a captured result.json.
+ const hook='0x82f636a92364d13754d7b3e72d460f0be20a28cc', token='0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86', dist='0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', currency='0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7';
+ const row=D.applyResult(launch(),{launch:{launchNumber:2336,hookAddress:hook,tokenAddress:token,distributorAddress:dist,poolKey:{currency0:token,currency1:currency}}});
+ assert.equal(row.status,'live');assert.equal(row.launchNumber,2336);
+ for(const q of [hook,token,dist,currency,row.requestId,row.txHashes[0],token.slice(2)])assert.equal(D.matchesQuery(row,q),true,q);
+ assert.equal(D.matchesQuery(row,'GUARD pause'),true);assert.equal(D.matchesQuery(row,'missing pause'),false);
+ assert.equal(searchAddress(token.slice(2))?.toLowerCase(),token);assert.equal(searchAddress('0x1234'),null);
+});
+test('owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings',()=>{
+ const all=managementFunctions(C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)).map(b=>C.entry(b.id)));
+ assert.equal(all.filter(f=>f.sig==='claimFees()').length,1);
+ const args=functionAbi('setAllowed(address[] accounts, bool allowed)',false), addr=realRequest.payer;
+ assert.deepEqual(argumentValues(args,[`${addr}, ${addr}`,'false']),[[addr,addr],false]);
+ assert.throws(()=>argumentValues(args,['bad','true']),/address/);assert.throws(()=>argumentValues(args,[addr,'']),/choose true or false/);
+ const order=functionAbi('placeOrder(bool zeroForOne, int24 tick, uint256 amount)',false);
+ assert.deepEqual(argumentValues(order,['true','-2','1000000000000000000']),[true,-2,1000000000000000000n]);
+ assert.throws(()=>argumentValues(order,['true','8388608','1']),/int24/);assert.throws(()=>argumentValues(order,['true','1','-1']),/uint256/);
+ assert.equal(formatReading('jar',10n**18n),'1 ETH');assert.equal(formatReading('paused',false),'No');
+});
+test('inclusive backwards ranges are gap-free, non-overlapping and never exceed 10,000 blocks',()=>{
+ const ranges=[...backwardsRanges(17n,25312n)];assert.deepEqual(ranges,[[15313n,25312n],[5313n,15312n],[17n,5312n]]);assert.deepEqual([...backwardsRanges(1n,0n)],[]);
+});
+test('ENS reverse results cache by lowercase payer for a day, including negative lookups',async()=>{
+ const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
+ let calls=0;const client={getEnsName:async()=>{calls++;return 'fixture.eth';}};
+ assert.equal(await creatorName(client,realRequest.payer,1000),'fixture.eth');assert.equal(await creatorName(client,realRequest.payer.toLowerCase(),2000),'fixture.eth');assert.equal(calls,1);
+ await creatorName(client,realRequest.payer,86402000);assert.equal(calls,2);delete globalThis.localStorage;
+});
+test('cache construction re-filters unrelated launches; storage corruption stays usable',()=>{
+ const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
+ const row=requested();storage.set(cacheKey(1),JSON.stringify({version:1,head:'100',cursor:'50',records:{[realRequest.requestId]:{requested:row},outside:{requested:base}}}));
+ const store=new LaunchStore(config,{});assert.equal(store.getSnapshot().launches.length,1);assert.equal(store.getSnapshot().launches[0].name,'PondGuard');
+ storage.set(cacheKey(1),'bad json');assert.equal(new LaunchStore(config,{}).getSnapshot().launches.length,0);delete globalThis.localStorage;
+});
+
+test('head polling casts only newly observed store launches and resumes from the saved cursor', async () => {
+ const storage = new Map(); globalThis.localStorage = { getItem:k=>storage.get(k)??null, setItem:(k,v)=>storage.set(k,v) };
+ const first = {...requested(), blockNumber:'0x64'}, nextId=fixtures[0].logs.filter(l=>D.decodeIntake(l).eventName==='Requested')[1].topics[1];
+ const second = {...requested(body(),nextId),blockNumber:'0x65'};
+ let head=100n, logs=[first], release, calls=[]; const casts=[];
+ const client={ getChainId:async()=>1, getBlockNumber:async()=>head, getBlock:async()=>({timestamp:1792563203n}), getEnsName:async()=>null,
+  request:async(req)=>{calls.push(req);const q=req.params[0];if(release) {const wait=release;release=null;await wait;} return q.topics[0] === '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41fe2a576074379063' ? logs.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock)) : [];}};
+ const localConfig={...config,chains:[{...config.chains.find(c=>c.id===1),intakeFromBlock:90}],intake:{...config.intake,pollIntervalMs:60000}};
+ const waitFor = async predicate => {for(let i=0;i<100&&!predicate();i++)await new Promise(r=>setTimeout(r,5));assert.ok(predicate());};
+ const store=new LaunchStore(localConfig,{1:client},text=>casts.push(text));const stop=store.start();
+ try {
+  await waitFor(()=>!store.getSnapshot().chains[0].loading);assert.equal(store.getSnapshot().launches.length,1);assert.deepEqual(casts,[]);
+  head=101n;logs=[first,{...base,blockNumber:'0x65'},second];
+  let unblock;release=new Promise(r=>unblock=r);store.retry();await new Promise(r=>setTimeout(r,0));store.retry();unblock();
+  await waitFor(()=>store.getSnapshot().launches.length===2&&JSON.parse(storage.get(cacheKey(1))).head==='101');
+  assert.equal(casts.length,1);assert.match(casts[0],/PondGuard was requested on Robinhood Chain/);
+  store.retry();await new Promise(r=>setTimeout(r,15));assert.equal(casts.length,1);
+  const restored=new LaunchStore(localConfig,{1:client});assert.equal(restored.getSnapshot().launches.length,2);
+  assert.equal(JSON.parse(storage.get(cacheKey(1))).cursor,'89');
+  assert.ok(calls.every(c=>BigInt(c.params[0].toBlock)-BigInt(c.params[0].fromBlock)<10000n));
+ } finally {stop();delete globalThis.localStorage;}
+});
+
+
+test('result launch UUIDs are preserved for evidence without inventing a numeric launch number',()=>{
+ const id='702e6c9d-37ee-41ef-afcb-5d5e1af9f31b'; // Public Hamster Hour launch id, not a generated stand-in.
+ const row=D.applyResult(launch(),{launch:{id}});assert.equal(row.launchId,id);assert.equal(row.launchNumber,null);
+ assert.equal(D.applyResult(launch(),{launch:{id:'../../not-a-launch'}}).launchId,null);
+});

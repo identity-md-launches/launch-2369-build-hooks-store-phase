@@ -1,17 +1,33 @@
-import { useMemo, useState } from 'react';
-import { CHAINS, GROUPS, type Launch } from './types';
+import { useEffect, useMemo, useState } from 'react';
+import { CHAINS, GROUPS, STATUSES, hookHref, type Launch } from './types';
+import { matchesQuery } from './chain/decode';
+import { resolveAddress, searchAddress, type ResolvedAddress } from './chain/resolve';
+import type { LaunchStore, StoreState } from './chain/store';
+import { ReadStatus } from './ReadStatus';
+import { AddressValue } from './AddressValue';
+import { newDraft, shortAddress } from '../../src/lib/compose';
+import { storeDraft } from './draft';
+export { matchesQuery } from './chain/decode';
 import { Text } from './Text';
 
-export function matchesQuery(launch: Launch, query: string) {
-  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const haystack = [launch.name, launch.symbol, CHAINS[launch.chainId], launch.summary, ...launch.blocks, launch.request].join(' ').toLowerCase();
-  return words.every(word => haystack.includes(word));
-}
-const STATUSES = { live: 'Live', requested: 'Requested', 'in-progress': 'In progress', failed: 'Failed' };
-const ALL_GROUPS: string[] = GROUPS.map(([id]) => id), ALL_CHAINS = [11155111, 4663, 1];
-/** Only hooks launched through this site belong here (SPEC 3.1). Job 3 reads them from the Intake logs on chain; until then the list is empty. */
-const LAUNCHES: Launch[] = [];
-export function Catalog({ query, clearQuery, launches = LAUNCHES }: { query: string; clearQuery: () => void; launches?: Launch[] }) {
+const ALL_GROUPS: string[] = GROUPS.map(([id]) => id), ALL_CHAINS = [4663, 1];
+export function Catalog({ query, clearQuery, data, store }: { query: string; clearQuery: () => void; data: StoreState; store: LaunchStore }) {
+  const launches = data.launches;
+  const address = searchAddress(query), known = address ? launches.some(l => matchesQuery(l, address)) : false;
+  const [resolution, setResolution] = useState<{ found: ResolvedAddress[]; unavailable: number[] } | null>(null), [resolving, setResolving] = useState(false), [attempt, setAttempt] = useState(0), [error, setError] = useState('');
+  useEffect(() => {
+    setResolution(null); setResolving(false); setError('');
+    if (!address || known) return;
+    let active = true;
+    setResolving(true);
+    const timer = setTimeout(() => { void resolveAddress(store.clients, address).then(value => { if (active) { setResolution(value); setResolving(false); } }); }, 300);
+    return () => { active = false; clearTimeout(timer); };
+  }, [address, known, attempt, store]);
+  const buildFor = (token: Extract<ResolvedAddress, { kind: 'token' }>) => {
+    const draft = newDraft();
+    const saved = storeDraft({ ...draft, type: 'C', settings: { ...draft.settings, chain: token.chainId, token: token.address, tsym: token.symbol } });
+    if (saved) location.hash = '#builder'; else setError('Could not save this token to a draft. Allow site storage and try again.');
+  };
   const [groups, setGroups] = useState<string[]>(ALL_GROUPS);
   const [chains, setChains] = useState(ALL_CHAINS);
   const [status, setStatus] = useState('all'), [sort, setSort] = useState('newest');
@@ -31,25 +47,36 @@ export function Catalog({ query, clearQuery, launches = LAUNCHES }: { query: str
     </aside>
     <div className="catalog-results">
       <div className="catalog-head"><h2 id="catalog-h">{query.trim() ? <>Results for “<Text>{query.trim()}</Text>”</> : 'On the pond'}</h2><span className="result-count" role="status"><span className="num">{rows.length}</span> {rows.length === 1 ? 'hook' : 'hooks'}</span></div>
-      {rows.length === 0 && (filtered || launches.length > 0
+      <ReadStatus data={data} retry={store.retry} />
+      {address && !known && <div className="address-results" aria-live="polite">
+        {resolving && <p>Looking up this address on Robinhood Chain and Ethereum…</p>}
+        {resolution?.found.map(found => <article className="card resolved-card" key={found.chainId}><span className="pill chain">{CHAINS[found.chainId]}</span><h3>{found.kind === 'hook' ? 'A v4 hook not launched through IMD' : <Text>{`${found.name} (${found.symbol})`}</Text>}</h3><AddressValue value={found.address} label="resolved address" explorer={store.config.chains.find(c => c.id === found.chainId)?.explorerUrl} />{found.kind === 'hook' ? <><p>Managed outside the store</p><p>PoolManager</p><AddressValue value={found.poolManager} label="PoolManager" explorer={store.config.chains.find(c => c.id === found.chainId)?.explorerUrl} /><ul className="permission-list">{found.permissions.map(p => <li key={p}><code>{p}</code></li>)}</ul>{!found.permissions.length && <p>No hook permissions enabled.</p>}</> : <button className="btn primary" onClick={() => buildFor(found)}>Build a hook for this token</button>}</article>)}
+        {resolution && !resolution.found.length && !resolution.unavailable.length && <p className="notice">No contract found at this address on Robinhood Chain or Ethereum</p>}
+        {!!resolution?.unavailable.length && <p className="notice">Could not resolve this address on {resolution.unavailable.map(id => CHAINS[id]).join(' and ')}. <button className="link-button" onClick={() => setAttempt(n => n + 1)}>Retry address lookup</button></p>}
+        {error && <p role="alert" className="field-error">{error}</p>}
+      </div>}
+      {rows.length === 0 && (!address || known) && (filtered || launches.length > 0
         ? <div className="empty box"><p>No hooks match. <button className="link-button" onClick={clear}>Clear search and filters</button> or <a href="#builder">build the first one</a>.</p></div>
-        : <div className="empty-pond box"><h3>Nothing on the pond yet</h3><p>Hooks launched through this site show up here once the swarm has them.</p><a className="btn primary" href="#builder">Describe a hook</a></div>)}
+        : <div className="empty-pond box"><h3>Nothing on the pond yet</h3><p>Hooks launched through this store appear here. Be the first to cast.</p><a className="btn primary" href="#builder">Describe a hook</a></div>)}
       <div className="grid">{rows.map(launch => <article className="card" key={launch.id} data-launch-id={launch.id}>
         <div className="card-top"><span className="pill chain"><Text>{CHAINS[launch.chainId] ?? `Chain ${launch.chainId}`}</Text></span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span></div>
         <h3><Text>{launch.name}</Text>{launch.symbol && <small>${launch.symbol}</small>}</h3>
         <p><Text>{launch.summary}</Text></p>
         <ul className="blocks" aria-label="Request blocks">{launch.blocks.map(label => <li key={label}><Text>{label}</Text></li>)}</ul>
-        {launch.builtHere && <span className="built-here">Built here</span>}
-        <div className="card-foot"><span className="muted">{launch.status === 'live' && launch.launchNumber !== null && <>Launch <span className="num">#{launch.launchNumber}</span></>}</span><a href={`#hook/${launch.chainId}/${launch.requestId ?? launch.id}`} aria-label={`View ${launch.name}`}>View</a></div>
+        <div className="card-foot"><span className="muted">{launch.status === 'live' && launch.launchNumber !== null && <>Launch <span className="num">#{launch.launchNumber}</span></>}</span><a href={hookHref(launch)} aria-label={`View ${launch.name}`}>View</a></div>
       </article>)}</div>
     </div>
   </section>;
 }
-export function Featured() {
+export type Placement = { launch: Launch; totalPaid: bigint; purchasedAt: number; expiresAt: number };
+export function Featured({ placements = [] }: { placements?: Placement[] }) {
+  const active = placements.filter(p => p.expiresAt > Date.now()).sort((a,b) => a.totalPaid === b.totalPaid ? a.purchasedAt - b.purchasedAt : a.totalPaid > b.totalPaid ? -1 : 1);
+  const scrolling = active.length > 0;
   return <section className="ads" aria-labelledby="featured-h">
     <div className="ads-head"><h2 id="featured-h">Featured <span className="pill ad">#AD</span></h2><p className="muted">Paid placements, <span className="num">0.1 IMD</span> for <span className="num">24</span> hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</p></div>
-    <div className="marquee" aria-label="Featured placement slots"><div className="marquee-track">
-      {[false, true].map(duplicate => <div key={String(duplicate)} className="marquee-group" aria-hidden={duplicate || undefined}>
+    <div className={`marquee ${scrolling ? 'has-placements' : 'slot-only'}`} aria-label="Featured placement slots"><div className="marquee-track">
+      {(scrolling ? [false, true] : [false]).map(duplicate => <div key={String(duplicate)} className="marquee-group" aria-hidden={duplicate || undefined}>
+        {active.map(p => <a className="adcard" href={hookHref(p.launch)} key={p.launch.id} tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><Text>{p.launch.name}</Text>{p.launch.symbol && <span className="num">${p.launch.symbol}</span>}<span>by {p.launch.creatorName || shortAddress(p.launch.payer)}</span><span className="num">{Math.ceil((p.expiresAt - Date.now()) / 3600000)}h left</span></a>)}
         <a className="adcard slot" href="#mine" tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><span className="slot-title">Open slot</span><span className="num">0.1 IMD / 24h</span><span>· promote from My hooks</span></a>
       </div>)}
     </div></div>

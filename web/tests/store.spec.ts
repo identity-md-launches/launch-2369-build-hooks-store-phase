@@ -1,4 +1,6 @@
+import { emptyIntake } from './chain-fixture';
 import { test, expect, type Page } from '@playwright/test';
+test.beforeEach(async ({page}) => emptyIntake(page));
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 const config = JSON.parse(readFileSync(resolve('../public/site-config.json'), 'utf8'));
@@ -58,9 +60,9 @@ for (const width of [821, 1024, 1440]) {
     expect((await page.locator('#searchform').boundingBox())!.width).toBeGreaterThanOrEqual(120);
     expect(Math.max(...boxes.map(b => b.top))).toBeLessThan(Math.min(...boxes.map(b => b.bottom)));
     expect(Math.max(...boxes.map(b => b.right))).toBeLessThanOrEqual(width);
-    await expect(page.locator('.chainpill')).toHaveText('Sepolia · test phase');
+    await expect(page.locator('.chainpill')).toHaveText('ETHEREUM · ROBINHOOD');
     if (width >= 1141) {
-      await expect(page.locator('.hook-mark')).toHaveCSS('font-size', '30px'); await expect(page.locator('.hook-mark')).toHaveCSS('font-family', /VT323/);
+      await expect(page.locator('.brand svg.hook')).toHaveAttribute('viewBox', '0 0 12 16'); await expect(page.locator('.brand svg.hook')).toHaveAttribute('width', '24');
       await expect(page.locator('.brand')).toHaveCSS('gap', '10px'); await expect(page.locator('.wordmark')).toHaveCSS('font-size', '12px');
       await expect(page.locator('.nav a').first()).toHaveCSS('padding', '12px 10px'); await expect(page.locator('.wordmark')).toBeVisible();
     }
@@ -95,7 +97,7 @@ test('a filter shows the no-match state, and reset restores the empty pond, stat
 });
 test('describe saves required draft key, preserves other fields and opens the describe editor', async ({ page }) => {
   await ready(page);
-  await page.evaluate(() => localStorage.setItem('hooks-store:draft:v2', JSON.stringify({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 11155111 } })));
+  await page.evaluate(() => localStorage.setItem('hooks-store:draft:v2', JSON.stringify({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 4663 } })));
   const prompt = 'Send 1% of every buy to a prize pot';
   await page.getByRole('textbox', { name: 'Describe your hook' }).fill(prompt);
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
@@ -104,18 +106,13 @@ test('describe saves required draft key, preserves other fields and opens the de
   await expect(page.getByRole('button', { name: /Hook only/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.added .chip')).toHaveText(['owner can pause✕']);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('hooks-store:draft:v2')!));
-  expect(saved).toMatchObject({ type: 'B', mode: 'prompt', prompt, settings: { chain: 11155111 } });
+  expect(saved).toMatchObject({ type: 'B', mode: 'prompt', prompt, settings: { chain: 4663 } });
   expect(saved.blocks.map((b: { id: string }) => b.id)).toEqual(['token', 'pause']);
-});
-test('all deferred routes remain honest placeholders', async ({ page }) => {
-  for (const route of ['launch', 'hook/11155111/0x01', 'mine']) {
-    await ready(page, '#' + route); await expect(page.getByText('This page arrives in a later job.')).toBeVisible();
-    await expect(page.locator('main button')).toHaveCount(0);
-  }
 });
 test('only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn', async ({ page }) => {
   await ready(page); await expect(page.locator('.adcard:not([aria-hidden])').first()).toContainText('Open slot');
-  expect(await page.locator('.adcard').count()).toBe(2); // One semantic slot plus a seamless visual copy.
+  expect(await page.locator('.adcard').count()).toBe(1);
+  await expect(page.locator('.marquee-track')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.ads')).toContainText('24 hours');
   await page.locator('.marquee').hover(); await expect(page.locator('.marquee-track')).toHaveCSS('animation-play-state', 'paused');
   await page.mouse.move(0, 0); await page.locator('.adcard').first().focus(); await expect(page.locator('.marquee-track')).toHaveCSS('animation-play-state', 'paused');

@@ -1,0 +1,20 @@
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/builder.spec.ts --grep-invert risk tooltips
+
+
+Running 12 tests using 1 worker
+
+  ✓   1 tests/builder.spec.ts:26:3 › Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload (5.3s)
+  ✓   2 tests/builder.spec.ts:26:3 › Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload (6.0s)
+  ✓   3 tests/builder.spec.ts:26:3 › Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload (5.8s)
+  ✓   4 tests/builder.spec.ts:89:1 › first visit to the stack starts from the default stack; preview, cost box and disabled check (2.7s)
+  ✓   5 tests/builder.spec.ts:108:1 › pool share has no default; Continue stays disabled until 10 to 90 in steps of 5 (2.2s)
+  ✓   6 tests/builder.spec.ts:128:1 › 4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks (5.2s)
+  ✓   7 tests/builder.spec.ts:219:1 › untested block names expose the status to assistive technology without a risk sign (2.5s)
+  ✓   8 tests/builder.spec.ts:232:1 › dependent-removal status describes the removed block and clears after the next draft edit (10.6s)
+  ✓   9 tests/builder.spec.ts:253:1 › tested marks: a passing entry shows the tick, others say not yet tested (1.7s)
+  ✓  10 tests/builder.spec.ts:262:1 › tested marks fall back to the bundled copy when the spec repository cannot be read (1.8s)
+  ✓  11 tests/builder.spec.ts:269:1 › the shipped bundled copy is empty, so nothing shows a tick offline (1.5s)
+  ✓  12 tests/builder.spec.ts:275:1 › type C and B settings, own code and the request shape (2.4s)
+
+  12 passed (53.8s)

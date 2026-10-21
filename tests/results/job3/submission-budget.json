@@ -1,0 +1,27 @@
+{
+  "limitBytes": 8388608,
+  "accounting": "Sum of current tracked files plus unignored untracked files; removed task inputs and scratch excluded. Conservative uncompressed size, not a compressed Git bundle.",
+  "files": 211,
+  "totalBytes": 4694347,
+  "byTopLevel": {
+    "DESIGN.md": 15171,
+    "LICENSES": 13449,
+    "README.md": 13125,
+    "SPEC.md": 70452,
+    "THIRD_PARTY.md": 2109,
+    "VALIDATION.md": 15331,
+    "dist": 1128013,
+    "evidence": 62633,
+    "index.html": 1229,
+    "jobs": 21578,
+    "mockup": 135595,
+    "public": 264612,
+    "scripts": 3652,
+    "src": 92877,
+    "tests": 2565908,
+    "web": 288613
+  },
+  "dependencyAndCacheDirectories": [],
+  "ignoreFilesChanged": false,
+  "prohibitedFilesChanged": []
+}

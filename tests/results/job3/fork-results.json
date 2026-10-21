@@ -1,0 +1,33 @@
+{
+  "owner": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+  "hook": "0x1f23570d3abdc47512f9718b923a7e236e7a4bbc",
+  "tx": "0xf843cb23e112c198238fc74c366275076642d8a5474e37739cdefcbba0d75a02",
+  "block": "26241049",
+  "chainId": 1,
+  "forkBlock": "26241048",
+  "scope": "local Anvil only; public RPC fork; no public transaction",
+  "mockSource": "tests/fork/ControlHook.sol",
+  "resolution": [
+    {
+      "chainId": 1,
+      "address": "0x82f636a92364d13754d7b3e72d460f0be20a28cc",
+      "kind": "hook",
+      "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+      "permissions": [
+        "beforeInitialize",
+        "beforeAddLiquidity",
+        "beforeSwap",
+        "afterSwap",
+        "beforeSwapReturnDelta",
+        "afterSwapReturnDelta"
+      ]
+    },
+    {
+      "chainId": 1,
+      "address": "0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86",
+      "kind": "token",
+      "name": "Hamster Hour",
+      "symbol": "HAMSTER"
+    }
+  ]
+}

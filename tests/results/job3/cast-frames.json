@@ -1,0 +1,92 @@
+{
+  "frames": [
+    {
+      "state": "windup",
+      "time": 0.066,
+      "sha256": "13215e806718bfce678b80a75e27bec7a82444746f58ea2afafb373c7e15fe90"
+    },
+    {
+      "state": "fly",
+      "time": 0.42900000000000016,
+      "sha256": "41098b277b61f83f26cf71b87ab23e55d923286e77b5a26b5a9ca01fcf2425b7"
+    },
+    {
+      "state": "splash",
+      "time": 0.9900000000000007,
+      "sha256": "7a3d121f978f41a919ab8bf1a2f6629ff030c2526085d779cfe1e5ef576b180b"
+    },
+    {
+      "state": "sink",
+      "time": 1.4519999999999995,
+      "sha256": "6ae536b6c4bbd30d02d6eb9cd4dc177874fe438b7172341167746d86c6054c80"
+    },
+    {
+      "state": "wait",
+      "time": 2.078999999999998,
+      "sha256": "2a71b7b7e2a38267617f99b464ea0af889cbb45484d997aa4c5d0db2a2e291ec"
+    },
+    {
+      "state": "bite",
+      "time": 3.3989999999999947,
+      "sha256": "37b8052da4c877f8b0d9f4f16e91a84911389743410cd77bd3b686950132c42c"
+    },
+    {
+      "state": "reel",
+      "time": 3.9269999999999934,
+      "sha256": "f5f71549c8ef9acfcfdff67b9fa1089b6ddf30f6234c017381ec67b7262c0b58"
+    },
+    {
+      "state": "cheer",
+      "time": 4.553999999999999,
+      "sha256": "6486b5f8d2ea692e18f32b10ffff9fe8c96668df48cdf0aa93254ccf3bb56104"
+    }
+  ],
+  "transitions": [
+    {
+      "state": "windup",
+      "time": 0
+    },
+    {
+      "state": "fly",
+      "time": 0.3630000000000001
+    },
+    {
+      "state": "splash",
+      "time": 0.9240000000000006
+    },
+    {
+      "state": "sink",
+      "time": 1.3859999999999997
+    },
+    {
+      "state": "wait",
+      "time": 2.012999999999998
+    },
+    {
+      "state": "bite",
+      "time": 3.332999999999995
+    },
+    {
+      "state": "reel",
+      "time": 3.8609999999999935
+    },
+    {
+      "state": "cheer",
+      "time": 4.487999999999999
+    },
+    {
+      "state": "idle",
+      "time": 5.412000000000009
+    }
+  ],
+  "durations": [
+    0.35,
+    0.55,
+    0.45,
+    0.6,
+    1.3,
+    0.5,
+    0.6,
+    0.9
+  ]
+}

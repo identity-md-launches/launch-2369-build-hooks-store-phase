@@ -15,5 +15,5 @@ export function loadDraft(): Draft {
   try { return normalizeDraft(JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null')); } catch { return normalizeDraft(null); }
 }
 export function storeDraft(draft: Draft) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); return true; } catch { return false; }
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); window.dispatchEvent(new Event('hooks:draft')); return true; } catch { return false; }
 }

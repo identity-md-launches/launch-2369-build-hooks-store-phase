@@ -95,7 +95,7 @@ details > div { padding: 0 14px 14px; }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--pine); color: var(--on-pine); border-bottom: 3px solid var(--ink); }
 .top-in { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-block: 8px; flex-wrap: nowrap; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--on-pine); text-decoration: none; font: 400 12px/1 var(--display); flex: 0 0 auto; }
-.brand .hook { font-family: var(--mono); font-size: 30px; line-height: 1; }
+.brand .hook { display: block; width: 24px; height: 32px; flex: 0 0 auto; }
 .nav { display: flex; gap: 2px; flex: 0 0 auto; }
 .nav a { color: var(--on-pine); text-decoration: none; font: 400 9px/1 var(--display); padding: 12px 10px; border: 2px solid transparent; white-space: nowrap; }
 .nav a:hover { border-color: var(--on-pine); color: var(--on-pine); }
@@ -239,11 +239,11 @@ section.view { padding-block: 8px 24px; }
 </style>
 </head>
 <body>
-<div class="mock"><div class="wrap"><b>DESIGN MOCKUP</b><span>Sample data. Nothing here connects a wallet or sends a transaction. Four hook cards are real IMD launches; the rest are marked as examples. Click the water to see a cast.</span></div></div>
+<div class="mock"><div class="wrap"><b>DESIGN MOCKUP</b><span>Sample data. Nothing here connects a wallet or sends a transaction. The hook cards are examples of hooks launched through this store; none is a real launch. Click the water to see a cast.</span></div></div>
 
 <header class="top">
   <div class="wrap top-in">
-    <a class="brand" href="#store" aria-label="The Hooks Store, home"><span class="hook" aria-hidden="true">&#x0283;</span><span>THE HOOKS STORE</span></a>
+    <a class="brand" href="#store" aria-label="The Hooks Store, home"><svg class="hook" viewBox="0 0 12 16" width="24" height="32" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 0h4v1h-4zM6 1h6v1h-6zM6 2h2v1h-2zM10 2h2v1h-2zM6 3h2v1h-2zM10 3h2v1h-2zM6 4h6v1h-6zM7 5h4v1h-4zM7 6h2v1h-2zM7 7h2v1h-2zM7 8h2v1h-2zM3 9h1v1h-1zM7 9h2v1h-2zM2 10h2v1h-2zM7 10h2v1h-2zM2 11h3v1h-3zM7 11h2v1h-2zM2 12h2v1h-2zM7 12h2v1h-2zM2 13h2v1h-2zM7 13h2v1h-2zM3 14h2v1h-2zM6 14h3v1h-3zM4 15h4v1h-4z"/></svg><span>THE HOOKS STORE</span></a>
     <nav class="nav" aria-label="Main">
       <a href="#store" data-nav="store">STORE</a>
       <a href="#builder" data-nav="builder">BUILDER</a>
@@ -251,7 +251,7 @@ section.view { padding-block: 8px 24px; }
       <a href="#learn" data-nav="learn">LEARN</a>
     </nav>
     <form class="search" role="search" id="searchform"><label class="sr" for="q">Search hooks by name, token, block or address</label><input id="q" type="search" placeholder="Search name, token, block or 0x address" autocomplete="off"></form>
-    <span class="chainpill" id="chainpill">SEPOLIA &middot; TEST PHASE</span>
+    <span class="chainpill" id="chainpill">ETHEREUM &middot; ROBINHOOD</span>
     <button class="btn tiny connect" id="connect" type="button" title="Connect a wallet">CONNECT</button>
   </div>
 </header>
@@ -289,7 +289,6 @@ section.view { padding-block: 8px 24px; }
         <h4>BLOCK TYPE</h4>
         <div id="f-groups"></div>
         <h4>CHAIN</h4>
-        <label><input type="checkbox" class="f-chain" value="11155111" checked> Sepolia (test)</label>
         <label><input type="checkbox" class="f-chain" value="4663" checked> Robinhood Chain</label>
         <label><input type="checkbox" class="f-chain" value="1" checked> Ethereum</label>
         <h4>STATUS</h4>
@@ -350,7 +349,7 @@ section.view { padding-block: 8px 24px; }
             <div></div>
           </div>
           <div class="field-row">
-            <div><label for="s-chain">DEPLOY ON</label><select id="s-chain"><option value="11155111">Sepolia (test phase)</option><option value="4663" disabled>Robinhood Chain (phase 2)</option><option value="1" disabled>Ethereum (phase 2)</option></select></div>
+            <div><label for="s-chain">DEPLOY ON</label><select id="s-chain"><option value="">Choose a chain</option><option value="4663">Robinhood Chain</option><option value="1">Ethereum</option></select></div>
             <div id="pair-field"><label for="s-pair">PAIR WITH</label><select id="s-pair"><option value="eth">ETH</option><option value="imd" disabled>IMD (Robinhood and Ethereum only)</option></select></div>
           </div>
           <div class="field-row" id="pool-fields">
@@ -389,7 +388,7 @@ section.view { padding-block: 8px 24px; }
     <div>
       <div class="box" style="padding:14px;margin-bottom:20px"><h2>SUMMARY</h2><dl class="kv" id="summary"></dl></div>
       <div class="box" style="padding:14px;margin-bottom:20px"><h2>WHAT YOU PAY AND GET</h2><table class="fees" id="fees"></table></div>
-      <div class="notice warn"><strong>Payment happens on Robinhood Chain or Ethereum.</strong> IMD lives there. Your hook still deploys on the chain you chose (Sepolia in the test phase).</div>
+      <div class="notice warn"><strong>Payment happens on Robinhood Chain or Ethereum, in IMD.</strong> Your hook deploys on the chain you chose in the Builder, which can be the other one.</div>
       <div class="notice" id="type-c-note" hidden><strong>After the hook is live:</strong> open the pool. We prepare the one transaction that creates the token / ETH pool with your hook and hand it to your wallet. Then add liquidity from any v4 interface.</div>
     </div>
     <div>
@@ -446,8 +445,8 @@ section.view { padding-block: 8px 24px; }
   <details><summary>DESCRIBE IT OR STACK BLOCKS?</summary><div><p>Both produce the same kind of request. Blocks are reviewed patterns with numbers to fill in, so the swarm gets an exact rule. Your own words give you freedom; the swarm reads them as requirements and the free check tells you what it understood before you pay. You can mix them.</p></div></details>
   <details><summary>WHAT HAPPENS AFTER I PAY?</summary><div><p>Your request goes to the IMD swarm. One agent writes the contracts, another tests them, a panel of four auditors and a judge review them, and IMD's deployer launches them. You can watch every step on the IMD explorer.</p></div></details>
   <details><summary>WHAT HAPPENS TO A FEATURE AFTER LAUNCH?</summary><div><p>Most blocks run by themselves inside the pool. A few give the owner a switch (pause, allowlists, donation rules): those appear under Owner controls on your hook page, for your wallet only. A few give traders or anyone a button (place a limit order, trigger a buyback, run a prize draw) and a few only publish a reading (an average price, a jar balance): those appear under Traders, anyone, and readings. Every block card in the builder says which of these it is.</p></div></details>
-  <details><summary>WHAT DOES IT COST?</summary><div><p><b class="num">0.5 IMD</b> plus gas for two transactions. The audit panel is included in that fee. Deployment gas is paid by IMD. A request the swarm refuses still costs the fee, which is why the builder checks it for free first. A featured #ad slot is <b class="num">0.1 IMD</b> for 7 days and is optional.</p></div></details>
-  <details><summary>WHY SEPOLIA FIRST?</summary><div><p>Sepolia is a test network. Hooks launched there cost the same swarm fee but trade play money, so we can prove the whole path before opening Robinhood Chain and Ethereum.</p></div></details>
+  <details><summary>WHAT DOES IT COST?</summary><div><p><b class="num">0.5 IMD</b> plus gas for two transactions. The audit panel is included in that fee. Deployment gas is paid by IMD. A request the swarm refuses still costs the fee, which is why the builder checks it for free first. A featured #ad slot is <b class="num">0.1 IMD</b> for 24 hours and is optional.</p></div></details>
+  <details><summary>WHICH CHAINS?</summary><div><p>Robinhood Chain or Ethereum, your choice in the Builder. There is no test network: every launch is real, paid in IMD on Ethereum or Robinhood Chain, and the swarm writes, tests and audits the hook before it deploys.</p></div></details>
   <details><summary>WHO AUDITS IT?</summary><div><p>IMD's audit panel: four specialist agents (math, permissions, economics, control flow) and a judge who reproduces their findings. Nothing deploys with an unresolved finding. This is an automated review, not a guarantee.</p></div></details>
   <h2 style="margin-top:24px">READ THE SOURCES</h2>
   <div class="box" style="padding:14px;margin-bottom:20px">
@@ -481,23 +480,25 @@ section.view { padding-block: 8px 24px; }
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var CHAINS = { 1: 'Ethereum', 4663: 'Robinhood Chain', 11155111: 'Sepolia' };
-  var PM = { 1: '0x000000000004444c5dc75cB358380D2e3dE08A90', 4663: '0x8366a39CC670B4001A1121B8F6A443A643e40951', 11155111: '0xE03A1074c86CFeDd5C142C4F04F1a1536e203543' };
+  var CHAINS = { 1: 'Ethereum', 4663: 'Robinhood Chain' };
+  function chainLabel(s) { return s.chain ? chainLabel(s) : '(choose a chain)'; }
+  function renderPill() { $('chainpill').textContent = state.settings.chain ? CHAINS[state.settings.chain].toUpperCase() : 'ETHEREUM \u00b7 ROBINHOOD'; }
+  var PM = { 1: '0x000000000004444c5dc75cB358380D2e3dE08A90', 4663: '0x8366a39CC670B4001A1121B8F6A443A643e40951' };
   var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
 
   // ------------------------------------------------------------ sample catalog
   var HOOKS = [
-    { id: 'hamster', name: 'HamsterHook', symbol: 'HAMSTER', chain: 1, status: 'live', n: 2336, groups: ['fees', 'treasury'], blocks: ['Swap fee 1.1%', 'Treasury'], ids: ['custom'], text: '1.1% of the IMD side of every swap goes to the HamsterVault reward pot.', real: true, t: 1, by: 'hamsterhour.eth', hook: '0x82f636a92364d13754d7b3e72d460f0be20a28cc', token: '0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86', dist: '0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', tx: '0x847c6b2faf49eea8f6e36c0327de0041d592eb400755799b57a05778d37fafc3', job: '863eba48-5cac-4fee-a772-9695de63efd2', req: 'Ethereum, paired with IMD. Token is a plain ERC-20 (no tax, mint, burn or owner). Send the 80% remainder to HamsterVault if the launch allows it. HOOK FEE: 1.1% of the actual IMD leg of every swap (buy input or sell output), all swap modes, real deltas. 0.5% to depositRewards...', ad: true, adHours: 14, boost: 0.35 },
-    { id: 'anti', name: 'AntiSniperHook', symbol: 'HAMSTER', chain: 1, status: 'live', n: 2315, groups: ['protection', 'fees'], blocks: ['Anti-sniper window', 'Fee that fades'], ids: ['anti-sniper', 'swap-fee', 'fee-fade'], text: 'A decaying anti-sniper fee on a fixed-supply token. No game, no lottery.', real: true, t: 2, job: '1fe27d94-91f4-45d2-94df-a4ec33117059', req: 'Hamster Hour: fixed-supply launch token with a decaying anti-sniper hook on Ethereum mainnet. No game, no betting, no lottery: this launch is the token and its hook only...' },
-    { id: 'idm', name: 'IDM Sequencer', symbol: 'IDM', chain: 4663, status: 'live', n: 2303, groups: ['custom'], blocks: ['Own source'], ids: [], text: 'A zero-fee sequencer hook imported from the creator\u2019s own repository and reviewed before launch.', real: true, t: 3, job: '18ac1075-a6ce-4487-83f3-17e3d795c1f1', req: 'Review and launch the token named Intelligent Dance Market (IDM) from github.com/discodirector/idm-hook on Robinhood Chain with its immutable zero-fee Uniswap v4 sequencer hook...' },
-    { id: 'jar', name: 'Sherwood Jar', symbol: 'JAR', chain: 4663, status: 'live', n: 2279, groups: ['treasury'], blocks: ['Buyback jar 1%', 'Burn'], ids: ['jar'], text: '1% of the ETH side of every swap fills a jar; when it tips over it buys into the Sherwood game and burns the IMD.', real: true, sampleName: true, t: 4, by: '0x3b1f\u2026a92c', job: '3622d85b-c97e-441b-98d5-4503fcf5e5ba', req: 'Build a v4 hook that plays Sherwood for us: a small cut of every trade of this coin goes into a jar, and when it fills up, it buys into Sherwood. On every swap, take 1% of the ETH side into the hook...', ad: true, adHours: 21, boost: 0.1 },
-    { id: 'pond', name: 'Pondside', symbol: 'POND', chain: 11155111, status: 'prog', n: null, groups: ['fees', 'protection', 'treasury'], blocks: ['Swap fee 1%', 'Anti-sniper window', 'Buyback jar'], ids: ['swap-fee', 'anti-sniper', 'jar'], text: 'Example: a test-phase hook now at the audit panel.', real: false, t: 5 },
+    { id: 'tide', name: 'Tide Fee', symbol: 'TIDE', chain: 1, status: 'live', n: 2410, groups: ['fees', 'treasury'], blocks: ['Swap fee 1%', 'Treasury'], ids: ['swap-fee', 'treasury'], text: 'Example: 1% of the ETH side of every swap goes to the creator treasury.', real: false, t: 1, by: 'tidefee.eth', hook: '0x7100000000000000000000000000000000000a11', token: '0x7100000000000000000000000000000000000a12', dist: '0x7100000000000000000000000000000000000a13', tx: '0x7100000000000000000000000000000000000000000000000000000000000a14', job: '00000000-0000-4000-8000-000000000a15', req: 'Token: standard token Tide Fee (TIDE), supply 1,000,000,000, 18 decimals. 1. Swap fee: 1% of the ETH side of every swap. 2. Treasury: the fee goes to the creator treasury address...', ad: true, adHours: 14, boost: 0.35 },
+    { id: 'lantern', name: 'Lantern', symbol: 'LNTN', chain: 1, status: 'live', n: 2398, groups: ['protection', 'fees'], blocks: ['Anti-sniper window', 'Fee that fades'], ids: ['anti-sniper', 'swap-fee', 'fee-fade'], text: 'Example: a fading anti-sniper fee for the first ten minutes, then a flat 0.5%.', real: false, t: 2, job: '00000000-0000-4000-8000-000000000a25', req: '1. Anti-sniper window: for 10 minutes after the pool opens the swap fee starts at 20% and fades to 0.5%. 2. Swap fee: 0.5% of the ETH side after that...' },
+    { id: 'otter', name: 'Otter Sequencer', symbol: 'OTTR', chain: 4663, status: 'live', n: 2377, groups: ['custom'], blocks: ['Own source'], ids: [], text: 'Example: a zero-fee hook brought from the creator’s own repository and reviewed before launch.', real: false, t: 3, job: '00000000-0000-4000-8000-000000000a35', req: 'Start from the creator’s own source at github.com/example/otter-hook commit 0a35: audit it as imported code, adapt it to this launch, and keep its behavior...' },
+    { id: 'jar', name: 'Pike Jar', symbol: 'PIKE', chain: 4663, status: 'live', n: 2360, groups: ['treasury'], blocks: ['Buyback jar 1%', 'Burn'], ids: ['jar'], text: 'Example: 1% of the ETH side of every swap fills a jar; when it tips over it buys PIKE from the pool and burns it.', real: false, t: 4, by: '0x3b1f…a92c', job: '00000000-0000-4000-8000-000000000a45', req: '1. Buyback jar: 1% of the ETH side of every swap collects in the hook; at 0.5 ETH it buys PIKE from the pool and burns it...', ad: true, adHours: 21, boost: 0.1 },
+    { id: 'pond', name: 'Pondside', symbol: 'POND', chain: 4663, status: 'prog', n: null, groups: ['fees', 'protection', 'treasury'], blocks: ['Swap fee 1%', 'Anti-sniper window', 'Buyback jar'], ids: ['swap-fee', 'anti-sniper', 'jar'], text: 'Example: a test-phase hook now at the audit panel.', real: false, t: 5 },
     { id: 'reel', name: 'Reel', symbol: 'REEL', chain: 4663, status: 'live', n: 2290, groups: ['protection', 'timing', 'advanced'], blocks: ['Cooldown 30s', 'Pause switch', 'Allowlist opening', 'Price oracle'], ids: ['cooldown', 'pause', 'allowlist', 'oracle'], text: 'Example: an owner-managed hook with a pause switch, an allowlist opening and an on-chain price oracle.', real: false, t: 6, mine: true, by: '0x5a7e\u2026f00d', ad: true, adHours: 6, boost: 0.2 }
   ];
   var GROUPS = [['fees', 'Fees'], ['protection', 'Protection'], ['treasury', 'Treasury and rewards'], ['liquidity', 'Liquidity rules'], ['timing', 'Timing and access'], ['advanced', 'Advanced'], ['games', 'Games and lotteries'], ['custom', 'Own source']];
   function statusPill(s) { return s === 'live' ? '<span class="pill live">LIVE</span>' : s === 'prog' ? '<span class="pill prog">AUDIT PANEL</span>' : s === 'bad' ? '<span class="pill bad">FAILED</span>' : '<span class="pill prog">REQUESTED</span>'; }
   var filters = { groups: {}, chains: {}, status: 'all', sort: 'new', q: '' };
-  GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663, 11155111].forEach(function (c) { filters.chains[c] = true; });
+  GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663].forEach(function (c) { filters.chains[c] = true; });
   $('f-groups').innerHTML = GROUPS.map(function (g) { return '<label><input type="checkbox" class="f-group" value="' + g[0] + '" checked> ' + g[1] + '</label>'; }).join('');
   var isAddr = function (s) { return /^0x[0-9a-fA-F]{40}$/.test(s.trim()); };
   function matchesQuery(h, q) {
@@ -539,7 +540,7 @@ section.view { padding-block: 8px 24px; }
   document.querySelectorAll('.f-chain').forEach(function (c) { c.addEventListener('change', function () { filters.chains[Number(c.value)] = c.checked; renderCards(); }); });
   document.querySelectorAll('input[name=st]').forEach(function (r) { r.addEventListener('change', function () { filters.status = r.value; renderCards(); }); });
   $('f-sort').addEventListener('change', function () { filters.sort = $('f-sort').value; renderCards(); });
-  $('no-cards').addEventListener('click', function (e) { if (e.target.id === 'clear') { filters.q = ''; $('q').value = ''; document.querySelectorAll('.f-group,.f-chain').forEach(function (c) { c.checked = true; }); GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663, 11155111].forEach(function (c) { filters.chains[c] = true; }); renderCards(); } });
+  $('no-cards').addEventListener('click', function (e) { if (e.target.id === 'clear') { filters.q = ''; $('q').value = ''; document.querySelectorAll('.f-group,.f-chain').forEach(function (c) { c.checked = true; }); GROUPS.forEach(function (g) { filters.groups[g[0]] = true; }); [1, 4663].forEach(function (c) { filters.chains[c] = true; }); renderCards(); } });
 
   // ------------------------------------------------------------ block catalog (mirrors SPEC section 4; manage = functions the request asks for)
   var CATALOG = [
@@ -688,7 +689,7 @@ section.view { padding-block: 8px 24px; }
     'Liquidity is locked for 30 days and anyone who adds and removes liquidity within 10 blocks forfeits their fees.'
   ];
 
-  var state = { mode: null, type: 'A', prompt: '', blocks: [], settings: { chain: 11155111, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' }, wallet: null };
+  var state = { mode: null, type: 'A', prompt: '', blocks: [], settings: { chain: null, pair: 'eth', pool: null, rem: '', owner: '', token: '', tsym: '', hname: '', repo: '', commit: '' }, wallet: null };
   function defaults(b) { var p = {}; b.params.forEach(function (x) { p[x.k] = x.d; }); return p; }
   function seedBlocks() { state.blocks = [{ id: 'token', p: defaults(byId.token) }, { id: 'swap-fee', p: defaults(byId['swap-fee']) }, { id: 'anti-sniper', p: defaults(byId['anti-sniper']) }, { id: 'jar', p: defaults(byId.jar) }]; }
   try { var saved = JSON.parse(localStorage.getItem('hooks-store:mockup-draft:v3') || 'null'); if (saved && saved.blocks && saved.settings) { state = saved; state.wallet = null; } else seedBlocks(); } catch (e) { seedBlocks(); }
@@ -710,9 +711,9 @@ section.view { padding-block: 8px 24px; }
     var c = ctx(), s = state.settings, lines = [], powers = [], rules = [];
     behaviorBlocks().forEach(function (b) { var def = byId[b.id]; if (!available(def)) return; if (def.power) powers.push(def.power); rules.push(def.s(b.p, c)); });
     var prompt = cleanText(state.prompt).slice(0, 3000);
-    if (state.type === 'A') { lines.push('Launch ' + c.name + ' (' + c.symbol + ') with a Uniswap v4 hook on ' + CHAINS[s.chain] + ', paired with ' + s.pair.toUpperCase() + '.'); var t = tokenBlock(); lines.push(byId[t.id].s(t.p, c)); }
-    else if (state.type === 'B') { lines.push('Deploy one contract: ' + c.name + ', a standalone Uniswap v4 hook with no token and no pool of its own, on ' + CHAINS[s.chain] + '. It must be usable by anyone initializing a new pool with it on the PoolManager passed as a constructor argument (' + CHAINS[s.chain] + ' PoolManager ' + PM[s.chain] + ').'); }
-    else { lines.push('Deploy one contract on ' + CHAINS[s.chain] + ': ' + c.name + ', a Uniswap v4 hook for the existing token ' + (s.token || '0x…') + (s.tsym ? ' (' + s.tsym + ')' : '') + ', paired with ETH. No new token and no pool created by the launch; the creator will initialize the pool with this hook afterwards on the PoolManager passed as a constructor argument (' + PM[s.chain] + ').'); }
+    if (state.type === 'A') { lines.push('Launch ' + c.name + ' (' + c.symbol + ') with a Uniswap v4 hook on ' + chainLabel(s) + ', paired with ' + s.pair.toUpperCase() + '.'); var t = tokenBlock(); lines.push(byId[t.id].s(t.p, c)); }
+    else if (state.type === 'B') { lines.push('Deploy one contract: ' + c.name + ', a standalone Uniswap v4 hook with no token and no pool of its own, on ' + chainLabel(s) + '. It must be usable by anyone initializing a new pool with it on the PoolManager passed as a constructor argument (' + chainLabel(s) + ' PoolManager ' + (s.chain ? PM[s.chain] : '0x…') + ').'); }
+    else { lines.push('Deploy one contract on ' + chainLabel(s) + ': ' + c.name + ', a Uniswap v4 hook for the existing token ' + (s.token || '0x…') + (s.tsym ? ' (' + s.tsym + ')' : '') + ', paired with ETH. No new token and no pool created by the launch; the creator will initialize the pool with this hook afterwards on the PoolManager passed as a constructor argument (' + (s.chain ? PM[s.chain] : '0x…') + ').'); }
     if (prompt && rules.length) lines.push('The hook does exactly what the creator describes, plus the numbered rules, and nothing else. If the description and a numbered rule disagree, the numbered rule wins.');
     else if (prompt) lines.push('The hook does exactly what the creator describes below, and nothing else.');
     else lines.push('The hook does exactly the following, and nothing else:');
@@ -787,7 +788,7 @@ section.view { padding-block: 8px 24px; }
     var sum = [];
     sum.push(['TYPE', state.type === 'A' ? 'Hook + new token + pool' : state.type === 'B' ? 'Hook only, no token' : 'Hook for existing token ' + (s.token ? s.token.slice(0, 10) + '\u2026' : '(address missing)')]);
     if (state.type === 'A') sum.push(['TOKEN', esc(c.name) + ' ($' + esc(c.symbol) + ')' + (has('own-token') ? ', your own' : ', standard')]); else sum.push(['HOOK', esc(c.name)]);
-    sum.push(['CHAIN', CHAINS[s.chain] + (state.type === 'A' ? ', paired with ' + s.pair.toUpperCase() : '')]);
+    sum.push(['CHAIN', (s.chain === null ? '<span style="color:var(--bad)">not chosen yet: choose the deploy chain in settings</span>' : CHAINS[s.chain]) + (state.type === 'A' ? ', paired with ' + s.pair.toUpperCase() : '')]);
     sum.push(['WORDS', cleanText(state.prompt) ? '<span class="muted">\u201C' + esc(cleanText(state.prompt).slice(0, 110)) + (state.prompt.length > 110 ? '\u2026' : '') + '\u201D</span>' : '<span class="muted">none</span>']);
     sum.push(['RULES', items.length ? '<ol>' + items.join('') + '</ol>' : '<span class="muted">none</span>']);
     sum.push(['OWNER', powers.length ? esc(walletOr(s.owner)) + ' may ' + esc(powers.join(', ')) : 'no owner powers']);
@@ -799,11 +800,12 @@ section.view { padding-block: 8px 24px; }
     $('facts').innerHTML = [['FEE RULE', rateTotal() > 0 || /fee|%/.test(state.prompt) ? 'stated' : 'none'], ['FEE DESTINATION', /wallet|treasury|burn|pot|jar|LP/i.test(text) ? 'stated' : 'unknown'], ['ADMIN', powers.length ? 'stated' : 'none'], ['TOKEN NAME AND SYMBOL', state.type === 'A' ? 'stated' : 'not applicable'], ['CALLBACKS', 'fixed by the launch'], ['DEPENDENCIES', has('yield') ? 'unknown: lending protocol' : 'none']].map(function (f) { return '<li><b>' + f[0] + '</b>' + f[1] + '</li>'; }).join('');
   }
   function renderSummary() {
+    renderPill();
     var c = ctx(), s = state.settings, rows = [];
     rows.push(['LAUNCH TYPE', state.type === 'A' ? 'Hook + new token + pool' : state.type === 'B' ? 'Hook only' : 'Hook for existing token']);
     rows.push([state.type === 'A' ? 'TOKEN' : 'HOOK', esc(c.name) + (state.type === 'A' ? ' ($' + esc(c.symbol) + ')' : '')]);
     if (state.type === 'C') rows.push(['EXISTING TOKEN', esc(s.token || '(missing)')]);
-    rows.push(['DEPLOY ON', CHAINS[s.chain]]);
+    rows.push(['DEPLOY ON', s.chain === null ? '<span style="color:var(--bad)">not chosen</span>' : CHAINS[s.chain]]);
     if (state.type === 'A') { rows.push(['PAIRED WITH', s.pair.toUpperCase()]); rows.push(['POOL SHARE', s.pool === null ? '<span style="color:var(--bad)">not chosen</span>' : '<span class="num">' + s.pool + '%</span> of your 90%']); rows.push(['REMAINDER TO', esc(walletOr(s.rem))]); }
     rows.push(['OWNER', esc(walletOr(s.owner))]); rows.push(['RULES', String(behaviorBlocks().length) + (cleanText(state.prompt) ? ' blocks + your words' : ' blocks')]); rows.push(['DESCRIPTION', '<span class="num">' + compose().length.toLocaleString('en-US') + '</span> characters']);
     $('summary').innerHTML = rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('');
@@ -812,7 +814,7 @@ section.view { padding-block: 8px 24px; }
     else { fees.push(['Token and pool', 'None created. You get the audited hook contract only.']); if (state.type === 'C') fees.push(['Opening the pool', 'One more transaction from your wallet after the hook is live, prepared by the site. Liquidity is yours to add.']); }
     fees.push(['Deployment', 'Paid by IMD. No deployment gas for you.']);
     $('fees').innerHTML = fees.map(function (f) { return '<tr><th>' + f[0] + '</th><td>' + f[1] + '</td></tr>'; }).join('');
-    $('l-launch').title = state.type === 'A' && s.pool === null ? 'Choose the pool share first' : '';
+    $('l-launch').title = s.chain === null ? 'Choose the deploy chain first' : state.type === 'A' && s.pool === null ? 'Choose the pool share first' : '';
     $('type-c-note').hidden = state.type !== 'C';
   }
   function renderMode() {
@@ -830,7 +832,7 @@ section.view { padding-block: 8px 24px; }
 
   ['chain', 'pair', 'pool', 'rem', 'owner', 'token', 'tsym', 'hname', 'repo', 'commit'].forEach(function (k) {
     var el = $('s-' + k); el.value = state.settings[k] === null || state.settings[k] === undefined ? '' : state.settings[k];
-    el.addEventListener('input', function () { state.settings[k] = k === 'chain' ? Number(el.value) : k === 'pool' ? (el.value === '' ? null : Number(el.value)) : el.value; renderCanvas(); renderPreview(); renderSummary(); save(); });
+    el.addEventListener('input', function () { state.settings[k] = k === 'chain' ? (el.value === '' ? null : Number(el.value)) : k === 'pool' ? (el.value === '' ? null : Number(el.value)) : el.value; renderCanvas(); renderPreview(); renderSummary(); renderPill(); save(); });
   });
   $('p-text').value = state.prompt;
   $('p-text').addEventListener('input', function () { state.prompt = $('p-text').value; renderPreview(); renderSummary(); save(); });
@@ -1138,7 +1140,7 @@ section.view { padding-block: 8px 24px; }
 
   var pond = pondScene($('landing'), $('pond'), PEPE), castCount = 0;
   function cast(msg) { castCount++; if (msg) $('ticker').textContent = msg; pond.cast(); }
-  var DEMO = ['HamsterHook was launched on Ethereum \u00b7 4 min ago', 'A new hook was requested on Robinhood Chain \u00b7 just now', 'Sherwood Jar was launched on Robinhood Chain \u00b7 12 min ago', 'AntiSniperHook was launched on Ethereum \u00b7 31 min ago'], demoI = 0;
+  var DEMO = ['Tide Fee was launched on Ethereum \u00b7 4 min ago', 'A new hook was requested on Robinhood Chain \u00b7 just now', 'Pike Jar was launched on Robinhood Chain \u00b7 12 min ago', 'Lantern was launched on Ethereum \u00b7 31 min ago'], demoI = 0;
   function demoCast() { if (location.hash === '' || location.hash === '#store' || location.hash === '#catalog') cast(DEMO[demoI++ % DEMO.length] + ' (sample)'); }
   $('landing').addEventListener('click', function (e) { if (e.target.closest('.landing-copy') || e.target.closest('.ticker')) return; var b = $('landing').getBoundingClientRect(); pond.splashAt(e.clientX - b.left); cast(DEMO[demoI++ % DEMO.length] + ' (sample)'); });
   if (pond.reduced()) { var go = document.createElement('button'); go.type = 'button'; go.textContent = '\u25b6 animate the pond'; go.addEventListener('click', function () { pond.animateAnyway(); go.remove(); setTimeout(demoCast, 1500); setInterval(demoCast, 18000); }); $('ticker').parentNode.appendChild(go); }

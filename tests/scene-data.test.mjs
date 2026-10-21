@@ -21,6 +21,6 @@ test('exported cast integration delivers real messages and unsubscribes on route
   const { cast, subscribeToCasts } = await import('../src/scene/cast.ts');
   const calls = [];
   const unsubscribe = subscribeToCasts(message => calls.push(message));
-  cast('A new hook was requested on Sepolia'); unsubscribe(); cast('Must not reach the destroyed scene');
-  assert.deepEqual(calls, ['A new hook was requested on Sepolia']);
+  cast('A new hook was requested on Robinhood Chain'); unsubscribe(); cast('Must not reach the destroyed scene');
+  assert.deepEqual(calls, ['A new hook was requested on Robinhood Chain']);
 });

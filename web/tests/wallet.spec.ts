@@ -1,4 +1,6 @@
+import { emptyIntake } from './chain-fixture';
 import { test, expect, type Page } from '@playwright/test';
+test.beforeEach(async ({page}) => emptyIntake(page));
 // A real public payer address from job 1's saved launch snapshot; no private key is involved.
 const payer = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 async function walletFixture(page: Page, reject = false) {
@@ -40,7 +42,7 @@ test('EIP-6963 lists a named wallet, handles rejection, connects a real fixture 
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.locator('#connect')).toHaveClass(/address/); expect((await page.locator('#connect').textContent())!.length).toBe(12);
   expect((await page.locator('#connect').boundingBox())!.width).toBe(168);
-  await expect(page.locator('.chainpill')).toHaveText('Ethereum');
+  await expect(page.locator('.chainpill')).toHaveText('ETHEREUM · ROBINHOOD');
   await page.locator('#connect').click(); await expect(page.locator('#connect')).toHaveText('Connect');
   const methods = await page.evaluate(() => (window as unknown as Window & { walletFixture: { methods: string[] } }).walletFixture.methods);
   expect(methods.some(m => /sendTransaction|sign/i.test(m))).toBe(false);

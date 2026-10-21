@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
+import { emptyIntake } from './chain-fixture';
+test.beforeEach(async ({page}) => emptyIntake(page));
 import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 type Snapshot = { state: string; time: number; frames: number; queue: number; visible: boolean; reduced: boolean; cols: number; rows: number; surface: number; smallFish: { x: number; y: number; panic: number }[]; bigFish: { L: number }[]; splash: { x: number; t: number } };

@@ -1,0 +1,30 @@
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/store.spec.ts tests/wallet.spec.ts tests/pond.spec.ts
+
+
+Running 22 tests using 1 worker
+
+  ✓   1 tests/pond.spec.ts:24:1 › water click draws every cast frame in order with specified timings, then returns through idle (7.8s)
+  ✓   2 tests/pond.spec.ts:47:1 › reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it (2.4s)
+  ✓   3 tests/pond.spec.ts:58:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (2.3s)
+  ✓   4 tests/pond.spec.ts:77:1 › cast queue is capped at three and a keyboard press on the water also casts (2.1s)
+  ✓   5 tests/store.spec.ts:20:3 › Store and Learn fit 320px; product and describe action visible (3.1s)
+  ✓   6 tests/store.spec.ts:20:3 › Store and Learn fit 390px; product and describe action visible (3.2s)
+  ✓   7 tests/store.spec.ts:20:3 › Store and Learn fit 1440px; product and describe action visible (3.7s)
+  ✓   8 tests/store.spec.ts:52:3 › Desktop bar remains one row at 821px, search >=120 and connected width unchanged (2.1s)
+  ✓   9 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1024px, search >=120 and connected width unchanged (2.1s)
+  ✓  10 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1440px, search >=120 and connected width unchanged (2.0s)
+  ✓  11 tests/store.spec.ts:72:1 › search shows the no-match state over the empty pond; Enter scrolls to Results (1.4s)
+  ✓  12 tests/store.spec.ts:83:1 › a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains (1.5s)
+  ✓  13 tests/store.spec.ts:98:1 › describe saves required draft key, preserves other fields and opens the describe editor (2.2s)
+  ✓  14 tests/store.spec.ts:112:1 › only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn (2.1s)
+  ✓  15 tests/store.spec.ts:124:1 › swarm failure hides all metrics; successful response uses actual fields with honest labels (3.0s)
+  ✓  16 tests/store.spec.ts:131:1 › public config flag removes the in-progress banner (1.3s)
+  ✓  17 tests/store.spec.ts:135:1 › keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger (2.1s)
+  ✓  18 tests/store.spec.ts:143:1 › export works offline at a gateway subpath with local fonts and a single beige theme (1.8s)
+  ✓  19 tests/store.spec.ts:155:1 › empty or blocked storage never silently loses a description (5.0s)
+  ✓  20 tests/store.spec.ts:166:1 › catalog navigation does not restore a stale Learn scroll (1.6s)
+  ✓  21 tests/wallet.spec.ts:34:1 › EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects (3.0s)
+  ✓  22 tests/wallet.spec.ts:50:1 › mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay (2.0s)
+
+  22 passed (1.1m)

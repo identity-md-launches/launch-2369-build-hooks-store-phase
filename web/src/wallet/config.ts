@@ -12,7 +12,7 @@ export function createWalletConfig(site: SiteConfig) {
     blockExplorers: { default: { name: `${chain.name} explorer`, url: chain.explorerUrl } },
   }));
   return createConfig({
-    chains: [chains[0], chains[1], chains[2]],
+    chains: [chains[0], chains[1]],
     multiInjectedProviderDiscovery: true,
     connectors: [injected(), coinbaseWallet({ appName: 'The Hooks Store', appLogoUrl: new URL('favicon.svg', document.baseURI).href, preference: { options: 'all' } })],
     transports: Object.fromEntries(chains.map(chain => [chain.id, http(chain.rpcUrls.default.http[0])])),

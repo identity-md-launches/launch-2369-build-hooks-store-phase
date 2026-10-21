@@ -8,7 +8,7 @@ const fixture = name => readFileSync(new URL(`fixtures/${name}`, import.meta.url
 const draftOf = (type, ids, settings = {}) => {
   let d = { ...C.newDraft(), type };
   for (const id of ids) d = C.addBlock(d, id);
-  return { ...d, settings: { ...d.settings, ...settings } };
+  return { ...d, settings: { ...d.settings, chain: 4663, ...settings } };
 };
 const fixtureA = () => draftOf('A', ['swap-fee', 'anti-sniper', 'jar'], { pool: 50 });
 const fixtureB = () => draftOf('B', ['anti-sniper', 'cooldown'], { hname: 'PondGuardHook' });
@@ -183,7 +183,7 @@ test('job 1 landing drafts open in the describe editor', () => {
   const d = C.normalizeDraft({ prompt: 'Send 1% of every buy to a prize pot', mode: 'prompt' });
   assert.equal(d.mode, 'prompt'); assert.equal(d.prompt, 'Send 1% of every buy to a prize pot'); assert.equal(d.type, 'A');
   assert.deepEqual(d.blocks.map(b => b.id), ['token']);
-  const old = C.normalizeDraft({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 11155111 } });
+  const old = C.normalizeDraft({ type: 'B', blocks: [{ id: 'pause' }], settings: { chain: 4663 } });
   assert.deepEqual(old.blocks.map(b => b.id), ['token', 'pause']);
   assert.deepEqual(C.normalizeDraft('garbage'), C.newDraft());
 });

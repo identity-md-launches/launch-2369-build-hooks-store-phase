@@ -1,4 +1,4 @@
-Launch Pondside (POND) with a Uniswap v4 hook on Sepolia, paired with ETH.
+Launch Pondside (POND) with a Uniswap v4 hook on Robinhood Chain, paired with ETH.
 Token: Pondside (POND), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.
 The hook does exactly the following, and nothing else:
 1. Take 1.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to my wallet. Expose claimFees() that anyone may call to redeem claims to the recipient.

@@ -1,125 +1,98 @@
-# Worker validation
+# Worker validation — phase 1, job 3
 
-## Job 2 revision — 2026-10-21
+Validated on 2026-10-21 against the production `dist/` export. This is a record of worker checks, not independent certification. Prior-job reports remain under `tests/results/`; current reports are under **`tests/results/job3/`**.
 
-Scope: reproduce the three reopened findings against the accepted production export, then correct only the shared warning tooltip, block-name accessibility and dependency-removal status. The existing catalog, composer, fixtures, landing, header, wallet configuration and draft format were preserved. This section is the current revision record; the earlier job 1 record below is historical.
+**Known evidence gap:** real Requested/Completed logs were captured on both chains, including a failed completion, and a real successful-build IPFS result was saved. That result and the other inspected launch results contain no deployed addresses. A captured **Live result.json with addresses** was therefore unavailable. Live-schema tests are explicitly synthetic; contract resolution and management transactions were exercised on a real mainnet fork. The application keeps a completed build without addresses In progress.
 
-| Finding | Reproduction and fix | Recheck |
+## Final checks
+
+| Check | Actual result | Delivered evidence |
 | --- | --- | --- |
-| `22df7d2199184612d30d27e01b126f897deb4599b442eb85dd8630775876660a` | Reproduced: focusing Anti-sniper widened the document from 390 to 531px, and from 320 to 495px. `web/src/styles.css:276` now positions each tooltip within its palette row, card header or summary rule and caps its border-box width to that row. This also protects signs near the left edge. | All six risky blocks, all three locations, hover and actual Shift+Tab/Tab focus at 320/390/1440px: tooltip edges remain inside the viewport and document width never exceeds it. Manual screenshots confirm complete text and visible keyboard focus. Anti-sniper now spans x=33–293 at 390px and x=33–257 at 320px. |
-| `f22e23455785cafb3fb0169a7c8cced56f5e22d35631331ad2cf396210bc63ee` | Reproduced: Swap fee's untested status existed only in the native title on a non-focusable span. `web/src/Builder.tsx:44` adds the same status to the name using the existing `.sr` utility, while retaining the title. | Accessible-text snapshots include “Not yet tested on Sepolia.” in untested palette/card names without risk signs; a passing block has no stale untested text. No screen-reader session is claimed. |
-| `0454f5576e44be76f81e910bbd1b9f6109d2c38490ff8d9b7b1de5f33512e825` | Reproduced: after removing Swap fee and Fee that fades, the dependency note survived re-adding Swap fee and switching modes. `web/src/Builder.tsx:95` clears the notice on each draft update; `:104` then creates a new notice for a dependency removal, using the removed block's catalog title. | Note lists both removed dependants and clears on add, mode/type change, setting change, block-field change, reorder and another removal. |
+| Install from existing lockfile | `npm --prefix web ci --ignore-scripts` succeeded; existing manifests/lockfile unchanged | Rebuild instructions in README |
+| TypeScript | `npm --prefix web run typecheck` passed | `typecheck.txt` |
+| Production build | `npm --prefix web run build` passed; includes `tsc --noEmit` | `build.txt`, complete root `dist/` |
+| Unit tests | `npm --prefix web test`: **29 passed**, none failed/skipped | `unit.txt` |
+| Builder browser suite | **12 passed**, plus **3 risk-tooltip tests passed** | `e2e-builder-final.txt`, `e2e-risk-final.txt` |
+| Store, wallet and pond browser suites | **22 passed** (16 Store, 2 wallet, 4 pond) | `e2e-store-wallet-pond-final.txt`, `cast-frames.json` |
+| Hook browser suite, with local fork | **13 passed**, including the two optional fork tests | `e2e-hook-final.txt`, `fork-results.json` |
+| Total Playwright | **50 passed**, 0 failed, 0 skipped, 0 flaky | `playwright-results.json` |
+| Pinned design probe | Measured all 16 checks: **12 passed**, 4 mockup-related flags reviewed below | `design-probe.json`, `design-probe-390.png` |
+| Export integrity and path/size review | Local references, public assets, metadata and bundle size checked | `export-integrity.json`, `submission-budget.json` |
 
-### Commands and results
+Reports in the table are relative to `tests/results/job3/`. Playwright used Chromium headless shell and the static preview under `/preview/`, not a development server. All suites ran after the final application-source change. The large JS entry produces Vite's advisory >500 kB chunk warning; the build succeeds and required wallet/runtime chunks remain included.
 
-- `npm --prefix web ci --cache /tmp/hooks-store-revision-npm-cache --no-audit --no-fund`: installed the locked frontend dependencies without changing manifests or configuration.
-- `npm --prefix web run typecheck`: passed (`tests/results/revision-typecheck.txt`).
-- `npm --prefix web run build`: passed; rebuilt the complete relative-URL `dist/` (`tests/results/revision-build-results.txt`).
-- `npm --prefix web test`: 16 passed, 0 failed (`tests/results/revision-unit-results.txt`), including the unchanged A/B/C fixtures.
-- `npm --prefix web run test:e2e -- --reporter=list,json`: 38 passed, 0 failed in Chromium, one worker (`tests/results/revision-playwright-results.json`, `revision-playwright-list.txt`). Tests used the production export under `/preview/`. Browser binaries were installed in a temporary directory outside the submission.
-- Pinned probe: `node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste` with explicit local Playwright resolution: **11/16** passed. Render, layout, targets, contrast, tracking, type faces, glyphs, slogans, copy budget, motion and metadata passed. The five remaining flags are the specified capitals, heading/label heuristics, mockup's extra header/eyebrow sizes, required marquee, and hard border/shadow treatment. These established choices were preserved. Raw results are `tests/results/revision-design-probe.json`.
-- Browser-tool review of the final export: Store's product and primary action at 390×900 (button bottom y=627); focused Anti-sniper tooltips at 320/390; hovered Cooldown palette tooltip at 320/390; full Prize pot summary tooltip at 320; Builder at 1440×1000. Images are `tests/results/revision-*.png`. No console messages or missing local resources were observed during this manual review.
+Browser commands were split into bounded batches, preserving one complete result per batch:
 
-The first focused run passed the tooltip and accessible-name tests but exposed a wrong label in the new status test (“Rate” instead of the existing “Jar rate”). Only that test selector was corrected; the final suite above is the completed result. Before-change measurements are retained in `tests/results/revision-reproduction.json`.
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/builder.spec.ts --grep-invert 'risk tooltips'
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/builder.spec.ts --grep 'risk tooltips'
+PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/store.spec.ts tests/wallet.spec.ts tests/pond.spec.ts
+HOOKS_FORK_URL=http://127.0.0.1:8545 PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers npm --prefix web run test:e2e -- tests/hook.spec.ts
+```
 
-One intermediate full run passed all Builder regressions but the unchanged pond resize test read 160 columns immediately after requesting a 390px resize (expected 44). The same test then passed three isolated repetitions without source or test changes (`tests/results/revision-pond-recheck.*`). The intermediate failure is retained in `revision-intermediate-playwright.json`; the final full-suite result above is a separate run. The pond implementation and its test were preserved.
+Some earlier long-running tool sessions ended with exit 143. They are not counted as completed checks. Final batches above completed with exit 0. Intermediate test failures exposed a missing keyword match, result-retry delay and fixture/setup mistakes; these were repaired and the affected suites rerun. No passing result is inferred from an interrupted command.
 
-### Better Interface review of changed surfaces
+## Functional coverage
 
-| Domain | Coverage and outcome |
-| --- | --- |
-| Accessibility | Checked focusable risk signs, visible keyboard rings and full accessible warning names; verified hidden untested text in the accessibility tree. Existing mouse titles and tested ticks remain. Physical touch, screen-reader speech and forced-colors rendering were not verified. |
-| Layout | Checked tooltip bounds and document width across all risk blocks and locations at 320, 390 and 1440px. Viewed the final mobile first screen and desktop Builder; retained the accepted header and responsive grids. Native browser zoom and RTL were not verified. |
-| Writing | Preserved exact SPEC 4.13 warning and risk sentences. Removal feedback now describes the current removal, names its source and disappears after a later edit. |
-| Typography | Reused the existing body face, 16px tooltip size and wrapping; complete risk text is visible in mobile screenshots. No type tokens changed. |
-| Colors | Reused ink/paper tooltip colors and yellow `--ad` sign; no new color or red risk label. The probe's measured solid text pairs pass; canvas/gradient pairs remain outside its measurements. |
-| UI | Checked inactive, hovered and keyboard-focused warnings, tested/untested/fallback states, and transient removal feedback. Existing type/mode/add/reorder/remove/reload flows still pass. No new motion or transaction behavior. |
+- Real ABI decoding: at least two original Requested and two original Completed log objects from each RPC; action/body parsing, both exact terminal store markers, rejection of unrelated launches and malformed data. The Robinhood fixture also contains a real status-2 failure with no supplied reason. A synthetic nonempty bytes32 reason verifies ASCII decoding.
+- Every catalog sentence round-trips through template matching with its parameters; unfamiliar prose remains Custom and cannot introduce owner controls. Payment-chain request IDs and deployment-chain contracts stay distinct.
+- 40-hex matching covers hook, token, distributor and pool currencies; 64-hex matching covers IDs and hashes. Keywords include block titles as well as short labels and prose. Unknown-address lookup runs on both supported chains and distinguishes an unavailable RPC from no matching contract.
+- Inclusive backward ranges are gap-free and no larger than 10,000 blocks. Poll tests cover new store requests, unrelated requests, deduplication, cached restarts and queued head polling while a read is in flight. Only a newly observed matching request casts. ENS reverse names and expiry are tested with an isolated client/storage fixture.
+- Successful-result parsing preserves UUID launch IDs for evidence links independently of numeric launch labels; it never manufactures addresses. Unsupported result URIs and mismatched-chain results stay unusable; an unavailable result has a working immediate retry. The real IPFS result with null launch details stays In progress.
+- Hook pages render at **320, 390 and 1440px**, with no horizontal overflow or page errors. Tests exercise risk-sign focus, address copying, matched-block cloning, owner lockout, query-param read-only viewing, per-argument validation, public controls, and a simulated 20-second reading refresh.
+- My hooks filters the real request payer from the test event, links Live hooks to Manage, scrolls to the panel, and supports draft discard/undo. A query parameter never grants owner privileges.
+- Wallet tests cover EIP-6963 discovery, rejection recovery, connection/disconnection, focus trap/Escape/restore, mobile wallet-browser choices and Coinbase. A wallet on an unsupported chain switches to Ethereum; an already supported chain stays connected. No relay project ID is used.
+- Job-2 regressions cover Builder modes/types/fields, chain and allocation requirements, composition, dependency removal, risk signs, verified-mark fallback, layout, navigation, offline fonts, gateway-subpath URLs, metrics failure, storage failure, first-screen action, scene timings and reduced motion.
 
-Complete for the revision's stated scope. WebKit could not launch with the available browser runtime, so no Safari/WebKit rendering result is claimed. Real wallets, signing, transactions, physical devices, native zoom and screen-reader speech remain untested. No deployment was performed. Final export/file accounting is in `tests/results/revision-export-integrity.json`; no ignore file or protected configuration was changed.
+## Fork evidence
 
-## Earlier job 1 evidence (historical, retained)
+The final local fork used the requested Ethereum public RPC, with chain ID 1 and fork block **26241048**. Anvil received the only transactions. `tests/fork/ControlHook.sol` was compiled with Solidity 0.8.26 and deployed locally at `0x1f23570d3abdc47512f9718b923a7e236e7a4bbc`; deployment block 26241049 and transaction hash are recorded in `fork-results.json`. The mock was not deployed to Ethereum or Robinhood.
 
-Validation date: **2026-10-21**. These are checks performed by the implementing worker, not an independent audit or deployment certification. The production export was tested at a subpath with the local preview server. Runtime assets, fonts and launch data are bundled; only the optional live metrics call requires the public API for normal browsing.
+`node web/scripts/check-fork.mjs` used the application's actual resolver to identify the real Hamster Hour hook `0x82f636a92364d13754d7b3e72d460f0be20a28cc`, its canonical PoolManager and six enabled permission flags. It identified token `0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86` as Hamster Hour / HAMSTER. The browser also resolved those contracts and handed the token into Builder type C. The management test connected the mock's local owner, sent `pause()`, waited for a successful receipt, observed `paused() == true`, then unpaused and observed false.
 
-## Commands and actual results
+Fixture provenance, including the distinction between captured data and synthetic store-marked events, is documented in `tests/fixtures/chain/README.md`. The captured logs are never imported by production pages. No private key or public-chain transaction was used.
 
-| Check | Command or evidence | Result |
+## Better Interface review
+
+The pinned Better Interface workflow, the core principles of all six domains, and document-web-design guidance were applied. Source inspection covered semantics, tokens, interaction states and copy. Rendered coverage used the actual export in Chromium, the probe, screenshots and keyboard/pointer interaction tests. The final 390px first-screen screenshot was inspected: the product explanation, describe input and **DESCRIBE IT** action are visible without scrolling. Hook header and management screenshots were also inspected at mobile and desktop widths.
+
+| Domain | Coverage and final implementation | Findings and repairs |
 | --- | --- | --- |
-| Strict TypeScript | `npm --prefix web run typecheck`; also included in build | Passed |
-| Production export | `npm --prefix web run build` | Passed, Vite 8.3.5; relative HTML/CSS/JS/font assets |
-| Unit tests | `npm --prefix web test` | 11 passed, 0 failed |
-| Browser interactions | `npm --prefix web run test:e2e` | 24 passed, 0 failed, Chromium, one worker |
-| Original audit reproduction | `node tests/audit-baseline.mjs` | All 8 findings reproduced, 9 observations including both narrow Learn widths |
-| Pinned design probe | `node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste` | 12 of 16 checks passed; 4 specified-design exceptions below |
-| Manual rendered review | Actual export, desktop/mobile screenshots and browser inspection | Store first screen, catalog, Learn permissions, navigation and readable controls inspected |
-| Public snapshot | `node scripts/snapshot-launches.mjs` | 500 index entries inspected; 72 relevant launches saved; snapshot timestamp 07:56:14 UTC |
+| Accessibility | Native labeled fields, fieldsets, semantic regions, named copy actions, polite reading/transaction feedback, keyboard-focusable risk signs, wallet focus behavior. `web/src/AddressValue.tsx:7`, `web/src/Management.tsx:60`, `web/src/App.tsx:41`. | Empty argument fields originally showed red errors immediately. `Management.tsx:71` now gives neutral guidance until values are entered. Invalid entered addresses remain explicit. Owner lockout is enforced by address equality at `Management.tsx:86`; the query parameter is never used there. |
+| Layout | Sticky shared bar, wrapping hashes, five-stage timeline, two management columns and mobile stacking. `web/src/styles.css:389`, `:403`, `:439`. No overflow at 320/390/1440. | Duplicate open-slot content and unwanted animation were removed at `web/src/Catalog.tsx:77`; only actual placements enable the loop. Manage links now scroll with sticky-header clearance at `web/src/Hook.tsx:37`. |
+| Writing | Exact empty-pond line and payment notice; plain function labels; explicit Unknown, In progress, Failed and retry states. `web/src/Catalog.tsx:60`, `web/src/LaunchReview.tsx:8`, `web/src/Hook.tsx:53`. | Completed build files without addresses no longer imply Live (`web/src/chain/decode.ts:119`). Intermediate timeline stages make no invented claim. Practice copy no longer says chain reads belong to a future job. |
+| Typography | Self-hosted Press Start 2P / Pixelify Sans / VT323. Addresses, signatures, quantities and readings use the terminal face. Six shared tokens plus the specified bar/eyebrow exceptions are documented in DESIGN.md. | The unsupported character logo was replaced with the exact pixel SVG at `web/src/App.tsx:43`; the 10px gap and wordmark remain. No remote font request was needed by the export. |
+| Colors | Existing paper/ink/pine palette, status text alongside color, visible focus, no new decorative palette. Prior token-pair calculations remain in `tests/results/contrast.json`; the new probe measured rendered solid backgrounds. | All measured solid-background text passed the probe threshold. The 34 boxes over canvas/gradients were not numerically certified; they were visually inspected. New pages use opaque paper panels. |
+| UI | Explicit chain choice, disabled invalid actions, owner gating, simulated writes, receipt states, immediate retry, retained inputs and reversible draft discard. `web/src/Builder.tsx:205`, `web/src/Management.tsx:40`, `web/src/MyHooks.tsx:30`. | Keyword search now includes catalog block titles (`web/src/chain/decode.ts:152`). Retry clears the result delay (`web/src/chain/store.ts:84`). Successful partial history is cached even after a later RPC failure (`store.ts:115`), and a pending head poll takes precedence (`store.ts:117`). Cloning uses complete rule matching so unfamiliar rules are not dropped (`Hook.tsx:17`). |
 
-Chromium was installed outside the submission. Tests used `PLAYWRIGHT_BROWSERS_PATH`; the pinned probe used `IMD_PLAYWRIGHT` pointing to the installed Playwright module. The guide/probe input is removed before submission, so its exact runner remains an assignment-provided tool, not an extra runtime dependency. The complete results summary, frame hashes, audit observations and selected screenshots are retained under `tests/results/`.
+The review also caught and removed a stray rendered `0` next to a successful completion and restored the existing compact-button style instead of overriding it globally. The final source uses the existing warning component for Hook-page risks and retains the job-2 visual direction.
 
-An initial browser run hit Chromium target crashes while a separate browser session was open. Closing that session and running one browser worker resolved the resource contention. The final suite completed normally; no crash is counted as a pass. Intermediate failures also exposed the dialog focus loop and catalog scroll offset, both corrected and rechecked. Final manual review caught stale scroll anchoring across Learn/catalog; the added regression passes.
+### Probe result and retained mockup exceptions
 
-## Interaction coverage
+The exact required probe was run from the repository root, with its supplied script and scratch output:
 
-- Store and Learn at **320, 390, 1440px**: no horizontal document/body overflow, all seven disclosures open without overflow, all fourteen callback names present, no script errors or missing local assets. At 390px the headline and Describe it action appear on the first screen.
-- Header at **821, 1024, 1440px**: one row, search at least 120px, Connect stays 168px with and without a twelve-character address, right edge inside the viewport.
-- Search: all words, case-insensitive, original request-only “remainder” finds the real HamsterHook record; Enter scrolls to Results. Filters cover chain, block group, status and sorting. Reset restores all selections and clears query/status/sort.
-- Describe form: exact draft key and prompt, existing draft fields preserved, route placeholder, empty input, and failed storage retaining text. All four deferred route types show the later-job panel.
-- Data states: `/swarm` success uses saved actual response fields; failure hides metrics. Catalog failure renders no invented cards and Retry works. Public config turns the banner off. Offline browsing works under `/preview/` with local fonts and a beige theme despite dark preference.
-- Ads/Learn: only the open slot plus an aria-hidden loop copy; hover/focus pause; both pages say 0.1 IMD for 24 hours. Seven FAQ texts and all fourteen permission explanations are compared against the unchanged mockup, allowing only the specified 7-day-to-24-hour correction.
-- Pond: all **eight animated states plus idle**, eight distinct sampled canvas hashes, specified durations within one 33ms frame; queue cap three; mouse/keyboard casts; click splash; 42 schooling fish, three silhouettes of 100/136/172px; pointer panic; offscreen pause, ResizeObserver and DPR cap. This covers the brief's “seven frames” wording by testing the complete nine-state sequence required by SPEC §9.
-- Reduced motion: identical canvas pixels after 26 simulated seconds and a water click; no marquee animation; actual pointer click on opt-in starts movement. Timer tests advance Playwright's clock rather than waiting in real time.
-- Wallet: named EIP-6963 discovery, rejection/retry, connect/disconnect and fixed address width, using an actual public fixture address without a key. Mobile offers four wallet-browser links and Coinbase Smart Wallet. Keyboard Tab stays in the dialog; Escape restores trigger focus.
-- Snapshot units: native hook inclusion, contract objective matching, unrelated-kind exclusion, request preservation, real fields/nulls, conservative numbered-block parsing, statuses, deduplication/sorting, mismatched details, failure preserving the prior file, invalid input rejection. Pepe data and meta are compared character for character.
+```sh
+IMD_PLAYWRIGHT="$PWD/web/node_modules/playwright/index.mjs" PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-browsers node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste
+```
 
-## Supplied audit: reproduced and fixed
+It completed with no script errors or missing local files. Layout, target spacing, measured contrast, tracking, font families, glyphs, slogans, repetition, copy budget, motion and sharing checks passed. The open-slot duplication flag from the previous delivery is resolved.
 
-All eight findings reproduced. None were dismissed as unreproducible. `mockup/index.html` remains unchanged to preserve the visual reference; the corrections are in the delivered application.
+Four flags remain because the assignment explicitly retains the mockup and the rest of job 2:
 
-| Audit ID prefix | Reproduced observation | Correction and regression coverage |
-| --- | --- | --- |
-| `db6ce245` | Root redirect, absent app/export, sample metrics and paid placements | `index.html:1`, `web/src/App.tsx:11`, `Landing.tsx:15`, `Catalog.tsx:57`; real Vite export, public data, flag and placeholders. Build, offline export, metrics, ads and route tests. Original entry preserved in `tests/fixtures/initial-entry.html`. |
-| `d4cc2a79` | Learn document 434px at 320/390px; table 401px | `web/src/styles.css:179` and `:242`; fixed table layout, wrappable callback names and stacked mobile rows. Store/Learn test at all three required widths. |
-| `bb19b26d` | Request-only “remainder” yielded zero cards | `web/src/Catalog.tsx:6`; full request included in all-word keyword matching. Real HamsterHook regression. |
-| `e43738dd` | Required draft key null; mockup key populated | `web/src/draft.ts:1`, `Landing.tsx:44`; save required JSON interface before navigation. Draft preservation and blocked-storage tests. |
-| `3638d058` | At 821px, search 0px and Connect ended at 959px | `web/src/styles.css:86`; fixed compact sibling widths, flexible search minimum 120px, stable 168px Connect. Geometry checks at 821/1024/1440px. |
-| `da6a3411` | Clear left In progress selected with one card | `web/src/Catalog.tsx:32`; clear resets groups, chains, status, sort and query. Full reset regression. |
-| `581fdbf2` | Opt-in inherited pointer-events none; landing intercepted it | `web/src/styles.css:122`; ticker button restores pointer events. Real pointer opt-in test checks pixel movement. |
-| `bd049d81` | Learn cost answer said seven days | `web/src/learn-content.json`; 24-hour wording follows SPEC. Exact FAQ comparison and Store/Learn term test. |
+1. **Casing:** the pixel headings, navigation and actions use the mockup's capitals. The probe reports 14 content boxes. Body text remains sentence case.
+2. **Eyebrows:** the requested landing eyebrow is retained. Other reported examples include actual fieldset legends, the brand, action labels and the featured section rather than newly added ornamental labels.
+3. **Type sizes:** the site uses six common tokens, while the exact 9px desktop navigation/eyebrow and 12px wordmark produce seven repeated sizes at desktop and eight total including one-offs. These dimensions are explicitly requested; the new Hook UI reuses existing tokens.
+4. **Chrome:** three first-screen controls have both an ink border and a hard shadow, matching SPEC 8. Removing those would change the requested pixel treatment.
 
-## Better Interface review: six domains
+These are recorded exceptions, not claimed passes. All 27 first-screen controls meet the probe's 24px-or-spacing rule; 20 are below the 44px comfort target. The compact mockup controls are retained. There is no new first-screen obstruction, overflow or missing main action.
 
-The pinned workflow and core principles of all six domains were read and used during construction. Source review was followed by rendered inspection and regression checks; source alone is not treated as visual evidence.
+## Remaining limitations
 
-| Domain | Coverage and findings | Fixes / evidence / limits |
-| --- | --- | --- |
-| Accessibility | Landmarks, labels, fieldsets, table headers, live regions, focus, target spacing, motion | `App.tsx:34` skip link; `Learn.tsx:23` row headers; `wallet/Connect.tsx:37` explicit Tab wrap after a reproduced focus escape; `styles.css:122` pointer opt-in. Keyboard and reduced-motion tests pass. Screen reader and physical assistive devices untested. |
-| Layout | First-screen action, header compression, container widths, long data, mobile Learn table, scrolling | `styles.css:86`, `:129`, `:242`; fixed 821px bar, responsive marquee group, stacked permissions. Removed duplicated scroll offset so #catalog heading clears sticky bar. Final rendered review reproduced stale Learn scroll restoration when cards arrived; `styles.css:40` disables root scroll anchoring, with a cross-route regression test. Screenshots and width tests confirm. |
-| Writing | Exact Learn copy, short landing explanation, verbs, failures and honest status/data | `Landing.tsx:15`, `:29`, `Catalog.tsx:43`; actual metric labels, explicit practice casts, recoverable messages. Corrected 24-hour term. No sample paid launch or fabricated count in production. |
-| Typography | Three local faces, six-size scale, paragraph measure, numeric separation, wrapping | `styles.css:1`, `:29`, `Text.tsx:1`; all fonts load offline, probe confirms six sizes / three families / two used weights. Callback code uses readable VT323 and wraps. Required small pixel navigation is retained. |
-| Colors | Exact token palette, one theme, solid pair contrast, status text and focus | `styles.css:29`, `:69`; pine-2 hover fill would yield 4.44:1, so kept pine text background and used pine-2 border/underline. Solid pairs pass; canvas/glow pairs remain unmeasured. Dark preference test confirms beige. |
-| UI | Default/hover/focus/disabled/loading/error/empty states; reversible input; dialog | `Catalog.tsx:20`, `:40`, `Landing.tsx:44`, `wallet/Connect.tsx:10`; retry, reset, storage errors, pending connection and rejection covered. `.pill[class*="status-"]` caps at 96px and wraps. No payment UI is simulated. |
+- **Real Live fixture:** unavailable as explained above. The real captured build result's deployment fields are null. Synthetic schema coverage and real fork transactions are reported separately.
+- **Public RPC history:** the requested Ethereum endpoint returned “Archive requests require a personal token” for older log windows. Historical-state requests used while finding deployment/fork blocks also returned unavailable state. Some secondary public endpoints returned pruned history. Recent logs and final live-head fork reads worked. A complete historical scan could not be established; the UI shows partial/cached data and a retry action without silently skipping rejected ranges. No deployment start block, key or alternate backend was invented.
+- **Result/timeline data:** immutable result files can lack deployment details even when other IMD services later show a live launch. This job does not substitute the browser-restricted API for the required chain/IPFS source. Building, audit and deployment milestones remain unknown without the later relay. Missing audit/trade links are explicit; empty operator templates are not guessed.
+- **Later scope:** payment/launch submission, pool opening and promotion contracts remain later jobs. The review page has the requested payment notice; no pretend wallet payment is implemented.
+- **Browser/accessibility coverage:** Chromium screenshots, keyboard interactions and the fork fixture were exercised. A WebKit binary was downloaded but could not launch because required shared libraries were absent. Safari/Firefox, actual mobile wallet apps, hardware wallets, screen-reader output, forced-colors rendering and real public-wallet transactions were not tested. No Lighthouse score or formal accessibility certification is claimed.
+- The hosting name and Open Graph image URL are configured from the brief. Publication and the live domain were outside this task.
 
-### Pinned probe findings
-
-The final probe's passing checks are render, layout, targets, contrast, tracking, type sizes, type faces, glyphs, slogans, copy budget, motion and share metadata. No script errors or missing local assets were reported. It measured no horizontal scroll at 320/390/1440px, no text-box overlap, no floating control covering text and no clipped text. Two intentional ellipses (search/ticker) were reported without failure.
-
-Four checks remain flagged because the user's SPEC/mockup wins over these generic heuristics:
-
-1. **Casing:** pixel button/heading/pill/rail capitals are specified, while paragraphs remain mixed case.
-2. **Eyebrows:** the heuristic treats the three semantic metric `dt` labels above their numeric `dd` values as kicker headings. These are the requested live-number group, not decorative headings.
-3. **Repetition:** the explicitly required 42-second featured marquee is identified as an endless ticker. Hover/focus pauses it; reduced motion removes it.
-4. **Chrome:** Connect and the describe form intentionally combine ink borders with hard offset shadows from SPEC §8. They are not accidental nested decoration.
-
-The probe reports controls meeting its 24px-or-spacing threshold; many compact navigation/catalog links are below its preferred 44px comfort target. The main submit and wallet rows are at least 44px high. Its contrast pass excludes 36 text boxes over canvas/gradients. Those were visually inspected, not assigned a fabricated contrast score. The first screen uses 39 prose words at 390px and 65 at 1440px, within probe thresholds.
-
-## Scope and remaining limitations
-
-This is job 1. Address resolution, live Intake logs, transaction flows, Builder composition, Hook management, My hooks data and paid placements are later jobs. Snapshot status is public API state at generation time, not a continuously verified chain state. Unavailable request IDs stay null; placeholder View routes use actual launch UUIDs until later resolution. Unknown block prose stays Custom rather than claiming a supported template. `/swarm` counts are network-wide and honestly labeled.
-
-No live transaction, signature or approval was sent. Installed wallet apps, a real Coinbase session, Safari/Firefox, screen-reader output, forced-colors rendering, native browser zoom and Lighthouse were not exercised. No Lighthouse accessibility score is claimed. The supplied domain's publication and social-crawler fetch were not tested. All required metadata and its local OG asset are present. Probe source and temporary browser binaries are intentionally not packaged.
-
-`DESIGN.md` records the final implemented values and reuse points. `README.md` records installation, preview, rebuild, snapshot regeneration and integration boundaries. Required source, lockfile and static assets remain complete; generated dependency/cache directories are removed before delivery. File/byte accounting is recorded in `tests/results/export-integrity.json`.
-
-The production export is **1,067,311 bytes**. The complete candidate file tree measured **3,062,564 bytes** before the small integrity report; its temporary compressed snapshot was **1,813,342 bytes**. Including separate artifact copies and a 1 MiB report/packaging reserve totals **4,774,793 bytes**, below the 8 MiB limit. The temporary archive remains outside the repository. No ignore file was changed, no submodule was added, and only README/index were modified among pre-existing files.
-
-An additional attempt to measure the original repository's complete history bundle was blocked by its read-only Git object database: the partial clone tried to fetch a missing historical object, and Git reported “Unable to create temporary file … .git/objects/pack/tmp_pack_XXXXXX: Read-only file system” followed by “index-pack failed.” No permissions or Git configuration were changed. The file-tree measurements cover the complete deliverable; the publisher-generated Git history bundle was not measured. This packaging-check limitation does not affect the tested static export.
+The export and source remain complete. Existing dependency/build configuration and prohibited paths were not edited; no ignore file was changed, no dependency archive or git submodule is included, and temporary installations were removed from the repository after verification. See `submission-budget.json` for the final byte accounting against 8 MiB.

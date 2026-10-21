@@ -1,0 +1,21 @@
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/hook.spec.ts
+
+
+Running 13 tests using 1 worker
+
+  ✓   1 tests/hook.spec.ts:4:35 › Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning (2.8s)
+  ✓   2 tests/hook.spec.ts:4:35 › Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning (2.8s)
+  ✓   3 tests/hook.spec.ts:4:35 › Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning (2.8s)
+  ✓   4 tests/hook.spec.ts:22:1 › owner forms validate address arrays and booleans; query-param viewing never unlocks controls (3.0s)
+  ✓   5 tests/hook.spec.ts:30:1 › My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo (2.6s)
+  ✓   6 tests/hook.spec.ts:35:1 › catalog searches exact known addresses, request ids and keywords; reads only 10k ranges (1.9s)
+  ✓   7 tests/hook.spec.ts:41:1 › failed completion and unavailable result remain explicit, with addresses unknown (1.7s)
+  ✓   8 tests/hook.spec.ts:44:1 › result failures are retryable without inventing a live deployment (1.8s)
+  ✓   9 tests/hook.spec.ts:47:1 › header switches an unsupported wallet to Ethereum (2.3s)
+  ✓  10 tests/hook.spec.ts:50:1 › Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused() (3.4s)
+  ✓  11 tests/hook.spec.ts:59:1 › readings refresh after 20 seconds, and a connected non-owner stays locked (2.0s)
+  ✓  12 tests/hook.spec.ts:65:1 › unknown-address lookup shows a known fork hook and prefills type C for a known token (4.2s)
+  ✓  13 tests/hook.spec.ts:74:1 › Connect keeps a wallet already on Robinhood Chain connected without a switch (2.7s)
+
+  13 passed (40.8s)

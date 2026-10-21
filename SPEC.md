@@ -1,8 +1,16 @@
 # The Hooks Store — product and build specification
 
-Version 1.9 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
+Version 1.13 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
 
 This document is a specification, not a wish list. Every section says exactly what to build, what data it uses, and how to tell when it is done. The clickable mockup in `mockup/index.html` is the visual reference; where the mockup and this text disagree, this text wins.
+
+Changes in 1.13 (2026-10-21): no test network. Hooks deploy on Robinhood Chain or Ethereum from the first launch (owner's decision 12 in section 14): Sepolia leaves the chain lists, the filters, the Builder, the Learn page and the go-live path; the deploy chain is a required choice with no default; the tested marks record real launches instead of a verification round; IMD's free check accepts the sample launch bodies for both mainnets (5.3); job 3 carries the change.
+
+Changes in 1.12 (2026-10-21): the brand mark is a drawn pixel fishing hook (inline SVG in the mockup's top bar) instead of the ʃ character, because VT323 has no glyph for ʃ and the character fell back to a different system font on every machine (owner's decision 11 in section 14); job 3 carries the swap.
+
+Changes in 1.11 (2026-10-21): the catalog lists only hooks launched through this site (owner's decision 9 in section 14); IMD's other launches are no longer snapshotted or shown, the featured strip and the pond ticker follow the same rule, and the catalog gets an empty pond panel; 7.2 reads only this site's launches from chain; job 2 removes the snapshot catalog and keeps the top bar exactly as the mockup; job 3 follows.
+
+Changes in 1.10 (2026-10-21): job 1 is delivered and live at the-hooks-store.sites.imd.fun (jobs/log.md); the mockup's Learn cost answer says 24 hours for a featured slot (the delivery's critic caught the stale 7 days); the two cosmetic deviations found in the delivery are carried at the top of job 2's objective.
 
 Changes in 1.9: the landing scene is rebuilt as a live ASCII canvas in the manner of the ascii-sharks demo: IMD's Pepe (converted to tiles, three poses) fishing from a rowboat, drawn fish silhouettes and a flocking school, a hook on the line, and a full cast, splash, bite, reel and cheer sequence on every launch; the anime pond composition and the DOM tile layers are gone (section 9).
 
@@ -36,7 +44,7 @@ Goals, in priority order:
 2. Every launch made through the site is a standard IMD launch: audited by IMD's panel, deployed by IMD's factory, listed on IMD's explorer. The site adds no trust assumptions of its own.
 3. Browsing and search show real hooks launched through IMD, read from chain, with honest status.
 4. The site is a static export (IPFS) that works on phones.
-5. Phase 1 deploys hooks on Sepolia. Phase 2 opens Robinhood Chain and Ethereum on the same day.
+5. Hooks deploy on Robinhood Chain or Ethereum from the first launch. There is no test-network phase: testing happens with real launches on those chains (decision 12).
 
 Non-goals for version 1:
 
@@ -59,7 +67,7 @@ All pages are hash routes on one static page: `#store` (home), `#catalog` (scrol
 
 ### 3.0 Top bar
 
-Logo, Store, Builder, My hooks, Learn, the search box, the active chain pill, Connect. On desktop (above 820 px) nothing wraps: the nav links and the chain pill have fixed widths, the search box shrinks first (minimum 120 px), and the Connect button keeps one width (168 px) whether it shows "CONNECT" or the shortened address `0x5a7e…f00d`; disconnect is a tooltip and click on that same button. Below 820 px the bar intentionally stacks into three rows (brand and connect, nav, search).
+Logo, Store, Builder, My hooks, Learn, the search box, the active chain pill, Connect. The logo is the drawn pixel fishing hook from the mockup's top bar (an inline SVG with class `hook`: a 12 by 16 cell grid drawn at 2 px per cell, 24 by 32 px, `fill="currentColor"`, `shape-rendering="crispEdges"`), followed by the wordmark THE HOOKS STORE in Press Start 2P at 12 px with a 10 px gap. The mark is not a font character: VT323 has no glyph for ʃ, so a character mark depends on each visitor's system fonts. On desktop (above 820 px) nothing wraps: the nav links and the chain pill have fixed widths, the search box shrinks first (minimum 120 px), and the Connect button keeps one width (168 px) whether it shows "CONNECT" or the shortened address `0x5a7e…f00d`; disconnect is a tooltip and click on that same button. Below 820 px the bar intentionally stacks into three rows (brand and connect, nav, search).
 
 ### 3.1 Store (home)
 
@@ -67,17 +75,17 @@ Logo, Store, Builder, My hooks, Learn, the search box, the active chain pill, Co
 
 **Featured strip (#ad).** Directly under the landing, inside the content column: a heading "FEATURED #AD", the sentence "Paid placements, 0.1 IMD for 24 hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.", and a strip that scrolls by itself (a seamless marquee, about 42 s per loop, paused on hover or keyboard focus, a plain scrollable row under reduced motion). Each card is one compact line: the #AD pill, the hook name, the symbol, "by {creator}" (the launch payer as an ENS name when reverse lookup on Ethereum mainnet finds one, else the shortened address) and the hours left. No chain, no description, no block labels, no buttons; the card links to the hook page. Cards are sorted by total paid (base price plus boosts), ties by the earlier purchase, and the strip ends with an open-slot card ("OPEN SLOT · 0.1 IMD / 24h · promote from My hooks"). Buying, boosting and cancelling happen only in My hooks (3.5). Cards come from `FeaturedPlacementsV2` (6.6) once it is deployed in phase 2; until then only the open-slot card shows.
 
-**Catalog.** Below the carousel, Steam layout: a left rail of filters and a card grid.
+**Catalog.** Below the carousel, Steam layout: a left rail of filters and a card grid. The grid lists only hooks launched through this site: launch requests whose description ends with the fixed last sentence of 5.1. Hooks launched elsewhere on IMD never appear in the grid, in the search results or in the featured strip, and the site ships no snapshot of them; the address search below can still describe one when its address is typed. While the pond has no hooks the grid is replaced by one panel in the Learn style (paper-3, 3 px ink border, hard shadow): the heading NOTHING ON THE POND YET, the line "Hooks launched through this store appear here. Be the first to cast.", and a primary button DESCRIBE A HOOK that opens #builder; the count beside the heading reads 0 hooks.
 
-- Filters: block type (Fees, Protection, Treasury and rewards, Liquidity rules, Timing and access, Advanced, Own source), chain (Sepolia, Robinhood, Ethereum), status (All, Live only, In progress), sort (Newest, Oldest, Name). Every filter changes the grid immediately.
+- Filters: block type (Fees, Protection, Treasury and rewards, Liquidity rules, Timing and access, Advanced, Own source), chain (Robinhood Chain, Ethereum), status (All, Live only, In progress), sort (Newest, Oldest, Name). Every filter changes the grid immediately.
 - A card: name and symbol (or hook name for token-less hooks), chain pill, status pill (Requested, In progress, Live, Failed), the block labels parsed from the request, one sentence, launch number when live, View.
-- Empty state: "No hooks match. Clear search and filters or build the first one."
+- Empty state for a search or filter with no match: "No hooks match. Clear search and filters or build the first one." (The empty pond panel above is for a catalog with no hooks at all.)
 
 **Search.** The top-bar box searches as you type and shows results in the catalog grid under the heading "Results for …":
 
 - Keywords match name, symbol, chain, block labels and the request text; all words must match.
 - A 40-hex address matches the hook address, the token address, the distributor address or the pool id's currencies of any known launch. A 64-hex value matches a request id or a transaction hash.
-- An address that matches nothing is resolved on chain through the public RPCs: if it answers `poolManager()` and `getHookPermissions()` it is shown as "a v4 hook not launched through IMD" with its permissions decoded; if it answers `name()` and `symbol()` it is shown as a token with "Build a hook for this token" (opens the Builder with launch type C and the address filled in); otherwise "No contract found at this address on Sepolia, Robinhood Chain or Ethereum".
+- An address that matches nothing is resolved on chain through the public RPCs: if it answers `poolManager()` and `getHookPermissions()` it is shown as "a v4 hook not launched through IMD" with its permissions decoded; if it answers `name()` and `symbol()` it is shown as a token with "Build a hook for this token" (opens the Builder with launch type C and the address filled in); otherwise "No contract found at this address on Robinhood Chain or Ethereum".
 - Enter also navigates to `#catalog`.
 
 ### 3.2 Builder
@@ -91,7 +99,7 @@ The canvas reads top to bottom as three numbered questions, so the launch type i
 - Describe mode: a text area (3,000 characters), four example chips that fill it, then "Blocks added from the palette" as chips with an × to remove each one, and the rule in one sentence: blocks become numbered rules under your words; if your words and a rule disagree, the rule wins. The palette stays available in this mode, so a block can be added or removed without leaving it.
 - Blocks mode: the stack. The token block (type A only) sits first with a pine stripe and a BRING MY OWN / USE STANDARD TOKEN switch. Each behavior block shows its number, title, the short label with the numbers filled in, its fields, up, down and remove, and a "Who uses it" line (4.12) followed by what the block adds to the hook page after launch ("On the hook page: owner buttons: pause swaps, resume swaps"). A block the launch type does not allow is dimmed with a pill and left out of the request.
 
-**3. Settings.** Deploy chain (Sepolia enabled in phase 1), pair with, the pool share (no default: the user must choose 10–90% in steps of 5, and Continue stays disabled until they do) and the remainder address (type A), existing token address and symbol (type C), hook name (B and C), owner address (used only when a block adds a power), and a collapsed ADVANCED: START FROM MY OWN CODE with repository URL and commit. Rule errors appear in a red notice under the stack (4.10).
+**3. Settings.** Deploy chain (Robinhood Chain or Ethereum; no default: the select starts on "Choose a chain", Continue stays disabled until the user picks one, and the top bar's chain pill shows the chosen chain, reading ETHEREUM · ROBINHOOD before a choice), pair with, the pool share (no default: the user must choose 10–90% in steps of 5, and Continue stays disabled until they do) and the remainder address (type A), existing token address and symbol (type C), hook name (B and C), owner address (used only when a block adds a power), and a collapsed ADVANCED: START FROM MY OWN CODE with repository URL and commit. Rule errors appear in a red notice under the stack (4.10).
 
 **Layout.** Three columns on desktop (palette 280 px, canvas, preview 340 px); stacked on phones in the order canvas, palette, preview. The palette stays available in Describe mode so a user can add a block to their words.
 
@@ -122,7 +130,7 @@ Requires a connected wallet. Lists every launch request whose payer is the conne
 
 ### 3.6 Learn
 
-Seven short answers (What is a hook? Describe it or stack blocks? What happens after I pay? What happens to a feature after launch? What does it cost? Why Sepolia first? Who audits it?), then **Read the sources**: links to the IMD docs, the Uniswap v4 overview, the hooks concept page, the PoolManager page, dynamic fees, "Your first hook", hook deployment and address mining, and the Hooks library reference (all at docs.uniswap.org/contracts/v4/…, checked live on 2026-10-21), then **What a hook can do: the 14 permissions**, a table that explains each callback in plain words (beforeInitialize/afterInitialize, beforeSwap, afterSwap, before/afterAddLiquidity, before/afterRemoveLiquidity, before/afterDonate, beforeSwapReturnDelta, afterSwapReturnDelta, afterAddLiquidityReturnDelta/afterRemoveLiquidityReturnDelta) and names the builder blocks that use each, ending with the note that a hook's address encodes its permissions.
+Seven short answers (What is a hook? Describe it or stack blocks? What happens after I pay? What happens to a feature after launch? What does it cost? Which chains? Who audits it?), then **Read the sources**: links to the IMD docs, the Uniswap v4 overview, the hooks concept page, the PoolManager page, dynamic fees, "Your first hook", hook deployment and address mining, and the Hooks library reference (all at docs.uniswap.org/contracts/v4/…, checked live on 2026-10-21), then **What a hook can do: the 14 permissions**, a table that explains each callback in plain words (beforeInitialize/afterInitialize, beforeSwap, afterSwap, before/afterAddLiquidity, before/afterRemoveLiquidity, before/afterDonate, beforeSwapReturnDelta, afterSwapReturnDelta, afterAddLiquidityReturnDelta/afterRemoveLiquidityReturnDelta) and names the builder blocks that use each, ending with the note that a hook's address encodes its permissions.
 
 ## 4. Block catalog, version 1
 
@@ -276,7 +284,7 @@ The catalog entry carries the text in a `risk` field; a block with a `risk` fiel
 
 ### 4.14 Tested marks
 
-The site does not hold hook code: every launch is written, tested and audited by the swarm for that request (section 6). So the proof that a block works is a real launch that used it. `evidence/blocks-verified.json` in the spec repository records that proof: an array of `{block, launchId, chainId, hook, passed, checkedAt, notes}`, one entry per block per verification launch (15.4). The Builder fetches `https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json` at load (that host allows browser reads) and falls back to the bundled copy `public/blocks-verified.json`. A block with an entry whose `passed` is true shows a small tick and the words "tested on Sepolia" on its card; any other block shows "not yet tested on Sepolia" in its tooltip and nothing else changes. The file ships empty in job 2 and fills as launches pass. Before Robinhood Chain and Ethereum are enabled (15.6), every block in the catalog must have a passing entry, or it is removed.
+The site does not hold hook code: every launch is written, tested and audited by the swarm for that request (section 6). So the proof that a block works is a real launch that used it. `evidence/blocks-verified.json` in the spec repository records that proof: an array of `{block, launchId, chainId, hook, passed, checkedAt, notes}`, one entry per block per real launch that Claude checked (15.4). The Builder fetches `https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json` at load (that host allows browser reads) and falls back to the bundled copy `public/blocks-verified.json`. A block with an entry whose `passed` is true shows a small tick and the words "proven in a live launch" on its card; any other block shows "not yet proven in a live launch" in its tooltip and nothing else changes. The file ships empty and fills as real launches on Robinhood Chain or Ethereum are checked. Blocks are not pre-verified on a test network (decision 12): every launch is written, tested and audited by the swarm for that request, and a block that fails in a real launch has its sentence or its 4.11 functions rewritten, or leaves the catalog.
 
 ## 5. Composing the launch request
 
@@ -308,7 +316,7 @@ B, C: Take the PoolManager as a constructor argument and enable only the callbac
 Start from the creator's own source at {repo} commit {commit}: audit it as imported code, adapt it to this launch, and keep its behavior.   (only with Advanced: own code)
 Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.   ("block builder" only when blocks were used; the fixed last sentence marks cards Built here)
 ```
-Words are cleaned: `"`, `\`, `<`, `>` and line breaks become spaces; 3,000 characters maximum. PoolManager addresses: Sepolia `0xE03A1074c86CFeDd5C142C4F04F1a1536e203543`, Ethereum `0x000000000004444c5dc75cB358380D2e3dE08A90`, Robinhood `0x8366a39CC670B4001A1121B8F6A443A643e40951`.
+Words are cleaned: `"`, `\`, `<`, `>` and line breaks become spaces; 3,000 characters maximum. PoolManager addresses: Ethereum `0x000000000004444c5dc75cB358380D2e3dE08A90`, Robinhood `0x8366a39CC670B4001A1121B8F6A443A643e40951`.
 
 ### 5.2 The request body
 
@@ -316,18 +324,18 @@ Type A:
 ```json
 { "objective": "<text>", "shape": "chain", "references": ["uniswap-v4-hooks", "uniswap-v4-security"],
   "steps": [ { "skill": "build-contract-project" }, { "skill": "adversarial-review" } ],
-  "onchain": "univ4_hook", "chainId": 11155111, "pairWith": "eth", "owner": "0x…",
+  "onchain": "univ4_hook", "chainId": 4663, "pairWith": "eth", "owner": "0x…",
   "economics": { "poolBps": 5000, "remainderTo": "0x…" }, "customToken": true, "github": true }
 ```
 `customToken` only when Bring your own token is used; `owner` and `remainderTo` only when set. Types B and C:
 ```json
-{ "objective": "<text>", "onchain": "evm_contracts", "chainId": 11155111, "owner": "0x…", "github": true }
+{ "objective": "<text>", "onchain": "evm_contracts", "chainId": 4663, "owner": "0x…", "github": true }
 ```
 With Advanced: own code, both add `repoUrl` and `baseCommit` (resolved first with `POST /requests/import` when the relay exists). The compact JSON must stay under 16 KiB.
 
 ### 5.3 Evidence that IMD accepts these
 
-Run through `POST https://api.imd.fun/requests/check` on 2026-10-20 and 2026-10-21, all with zero blockers and the full plan (build, independent tests, four audit specialists, judge, deploy on Sepolia); the exact bodies and answers are saved under `evidence/`:
+Run through `POST https://api.imd.fun/requests/check` on 2026-10-20 and 2026-10-21, all with zero blockers and the full plan (build, independent tests, four audit specialists, judge, deploy on Sepolia); the exact bodies and answers are saved under `evidence/`. On 2026-10-21, after decision 12, the A1, B and C bodies were checked again with `chainId` 1 and 4663: zero blockers, and the plan's last step reads "Deploy on Ethereum mainnet" or "Deploy on Robinhood Chain" (`evidence/check-launch-mainnet-*.json`):
 
 - `check-A-default-blocks`: type A from the default stack (kind "hook"; token name, symbol, fee rule, fee destination and admin recognised).
 - `check-liquidity`: type A with Liquidity lock and JIT penalty. `check-prompt`: type A written in plain words inside `<description>`.
@@ -339,11 +347,11 @@ Run through `POST https://api.imd.fun/requests/check` on 2026-10-20 and 2026-10-
 
 ### 6.1 Where the hook deploys
 
-Phase 1: Sepolia. Phase 2: Robinhood Chain and Ethereum, released together. `site-config.json` lists the enabled deploy chains; the Builder shows the others disabled with "(phase 2)".
+Robinhood Chain and Ethereum, both from the first launch (decision 12). `site-config.json` enables deploy chains `[4663, 1]` and lists only those two chains; the Builder offers exactly those, with no default. Sepolia is not offered anywhere.
 
 ### 6.2 Where the payment happens
 
-IMD's Intake on Sepolia sells only oracle questions, so a launch is paid on **Ethereum or Robinhood Chain** in that chain's IMD, while the body's `chainId` says where the hook deploys. Intake v2 on every chain: `0xa43e6f75ee006411f79ac1c84120606c2330de82`. IMD on Ethereum `0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7`, on Robinhood `0x5f7bb59365ce557c26dbcaa4ee9d39a4b95b7127`. Action id `launch.open@launch-1` as bytes32 `0x6c61756e63682e6f70656e406c61756e63682d31000000000000000000000000`. Price from `priceOf(action, asset)`, today 0.5 IMD; refuse to send if 0 or above 0.5 IMD. Two transactions: `IMD.approve(intake, price)` then `Intake.request(actionId, bodyBytes, (0x0, 0x00000000), imd, price)`. The Intake ABI is in the foundation repo at `docs/checks/consolidated/sources/intake-abi.json`. Without the relay the Launch page warns that a refused body spends the fee and offers Copy request.
+A launch is paid on **Ethereum or Robinhood Chain** in that chain's IMD, while the body's `chainId` says where the hook deploys; the two need not match (IMD held on Ethereum pays for a hook on Robinhood Chain). Intake v2 on every chain: `0xa43e6f75ee006411f79ac1c84120606c2330de82`. IMD on Ethereum `0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7`, on Robinhood `0x5f7bb59365ce557c26dbcaa4ee9d39a4b95b7127`. Action id `launch.open@launch-1` as bytes32 `0x6c61756e63682e6f70656e406c61756e63682d31000000000000000000000000`. Price from `priceOf(action, asset)`, today 0.5 IMD; refuse to send if 0 or above 0.5 IMD. Two transactions: `IMD.approve(intake, price)` then `Intake.request(actionId, bodyBytes, (0x0, 0x00000000), imd, price)`. The Intake ABI is in the foundation repo at `docs/checks/consolidated/sources/intake-abi.json`. Without the relay the Launch page warns that a refused body spends the fee and offers Copy request.
 
 ### 6.3 Fee table
 
@@ -355,11 +363,11 @@ A featured #ad slot is 0.1 IMD for 24 hours, optional, phase 2; anyone can boost
 
 ### 6.4 Opening a pool for a type C hook (phase 2b)
 
-After a type C hook is live, the hook page shows OPEN THE POOL: the site builds `PoolManager.initialize(poolKey, sqrtPriceX96)` for currencies (ETH, token) sorted, the fee tier the Pool rules block chose (else 0.3%), the matching tick spacing, the hook address, and a starting price the user types as "1 token = x ETH". The wallet sends it. Then a link to add liquidity on a v4 interface for the chain. Phase 1 shows the same panel with the values and a copy button but tells the user to send it from a v4 interface.
+After a type C hook is live, the hook page shows OPEN THE POOL: the site builds `PoolManager.initialize(poolKey, sqrtPriceX96)` for currencies (ETH, token) sorted, the fee tier the Pool rules block chose (else 0.3%), the matching tick spacing, the hook address, and a starting price the user types as "1 token = x ETH". The wallet sends it. Then a link to add liquidity on a v4 interface for the chain. Until phase 2b the hook page shows the same panel with the values and a copy button but tells the user to send it from a v4 interface.
 
 ### 6.5 Hook-only address bits (to confirm in phase 1)
 
-A v4 hook's address must encode its permissions. The `univ4_hook` launch mines the address. For `evm_contracts` the docs do not say whether the factory mines a salt, and IMD's check accepted the request without a blocker. The first type B launch on Sepolia is the test: if the deployed address has the wrong bits, the site switches types B and C to a fallback where the swarm job delivers audited source and bytecode (`job.open`, no `onchain`) and the site deploys it through a minimal public CREATE2 deployer with a salt mined in the browser,.
+A v4 hook's address must encode its permissions. The `univ4_hook` launch mines the address. For `evm_contracts` the docs do not say whether the factory mines a salt, and IMD's check accepted the request without a blocker. The first type B launch is the test: if the deployed address has the wrong bits, the site switches types B and C to a fallback where the swarm job delivers audited source and bytecode (`job.open`, no `onchain`) and the site deploys it through a minimal public CREATE2 deployer with a salt mined in the browser,.
 
 ### 6.6 Featured placements, version 2 (phase 2)
 
@@ -367,7 +375,7 @@ The foundation repo's `FeaturedPlacements` (0.1 IMD for 7 days, ordered by purch
 
 - Duration 24 hours; base price 0.1 IMD per placement; one live placement per listing; `#ad` on every placement and event; the same deposit, withdraw, cancel with pro-rata refund of the base price, settle, proceeds recipient and two-step owner as before. No proxy, no upgrade, no self-destruct.
 - `boost(placementId, amount)`: anyone may add IMD from their deposited balance to an open placement. Boosts are never refunded: on cancel they go to the pinned proceeds recipient, on settle both base and boosts do. `rankOf(id)` returns base plus boosts; `featured(cursor, scanLimit)` returns each placement's total so the site sorts by total paid, ties by the earlier purchase.
-- Deployed through an IMD contracts launch (`jobs/job-6a-ads-contract.json`, `evm_contracts`, Sepolia first), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
+- Deployed through an IMD contracts launch (`jobs/job-6a-ads-contract.json`, `evm_contracts`, one launch per chain: Robinhood Chain, then Ethereum), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
 
 ## 7. Data: how a static site reads everything
 
@@ -377,7 +385,7 @@ The foundation repo's `FeaturedPlacements` (0.1 IMD for 7 days, ordered by purch
 
 ### 7.2 Catalog from chain
 
-The Intake emits `Requested(bytes32 requestId, address payer, bytes32 action, bytes body, address callbackTarget, bytes4 selector, address asset, uint256 amount)` and `Completed(bytes32 requestId, uint8 status, bytes32 resultHashOrReason, string uri, bool delivered)`. The site reads `Requested` logs for the `launch.open@launch-1` action on Robinhood and Ethereum in 10,000-block ranges walking backwards (cached in memory and `localStorage`), decodes the body JSON, keeps `onchain` `univ4_hook` and `evm_contracts` bodies whose objective mentions "Uniswap v4 hook", then reads `Completed` for those ids: status 0 with an `ipfs://CID/result.json` uri → fetch it from `https://ipfs.imd.fun/ipfs/CID/result.json` for the launch id and addresses; status 1 or 2 → Failed with the reason decoded as ASCII. A build-time snapshot `public/launches.json` (from `GET /launches` and `/launches/:id`, run before each publish) supplies launch numbers and addresses for older history; chain data wins. The fixed last line in 5.1 marks cards Built here. Block labels on cards come from the numbered rules: the site matches each rule against the catalog's sentence templates and falls back to "Custom".
+The Intake emits `Requested(bytes32 requestId, address payer, bytes32 action, bytes body, address callbackTarget, bytes4 selector, address asset, uint256 amount)` and `Completed(bytes32 requestId, uint8 status, bytes32 resultHashOrReason, string uri, bool delivered)`. The site reads `Requested` logs for the `launch.open@launch-1` action on Robinhood and Ethereum in 10,000-block ranges walking backwards (cached in memory and `localStorage`), decodes the body JSON, keeps only the `onchain` `univ4_hook` and `evm_contracts` bodies whose objective ends with the fixed last sentence of 5.1 (a launch made through this site) and ignores every other launch, then reads `Completed` for those ids: status 0 with an `ipfs://CID/result.json` uri → fetch it from `https://ipfs.imd.fun/ipfs/CID/result.json` for the launch id and addresses; status 1 or 2 → Failed with the reason decoded as ASCII. There is no build-time snapshot of other launches: a hook launched outside this site is never listed. Launch numbers and addresses come from `result.json`. Block labels on cards come from the numbered rules: the site matches each rule against the catalog's sentence templates and falls back to "Custom".
 
 ### 7.3 Status for the user's own launches
 
@@ -426,13 +434,13 @@ From `launch-2254-build-hooks-store-polished` at `11f246f`: `src/wallet/*`, `src
 
 Store: no horizontal scroll at 320, 390 and 1440 px; the scene renders behind the copy and the copy stays readable; the top bar never wraps above 820 px with a connected address; filters and search change the grid; an unknown address query resolves on chain or says nothing was found; `/swarm` numbers appear or are hidden.
 
-Builder: first visit shows the chooser; both modes work and switching keeps words and blocks; every catalog block is addable under the right types and renders its sentence with defaults; the three launch types change the request shape; the composed text for the fixture (standard token, Swap fee 1%, Anti-sniper 10 min 1%, Buyback jar 1% 0.1 ETH burn, Sepolia, pool 50%) equals `tests/fixtures/compose-A.txt` byte for byte, and likewise `compose-B.txt` (hook only, Anti-sniper, Cooldown) and `compose-C.txt` (existing token, Swap fee); the 5% rule and dependency rules are enforced; drafts survive a reload.
+Builder: first visit shows the chooser; both modes work and switching keeps words and blocks; every catalog block is addable under the right types and renders its sentence with defaults; the three launch types change the request shape; the composed text for the fixture (standard token, Swap fee 1%, Anti-sniper 10 min 1%, Buyback jar 1% 0.1 ETH burn, Robinhood Chain, pool 50%) equals `tests/fixtures/compose-A.txt` byte for byte, and likewise `compose-B.txt` (hook only, Anti-sniper, Cooldown) and `compose-C.txt` (existing token, Swap fee); the 5% rule and dependency rules are enforced; drafts survive a reload.
 
 Launch: on an Anvil fork of Robinhood with a mocked IMD balance, the three steps run in order for type A and type B bodies, the bytes sent equal the preview, the request id is parsed; wrong chain, rejected signature and zero price are covered; no live payment in tests.
 
 Hook page and My hooks: decode real `Requested` and `Completed` fixtures from both chains; Live with addresses for a real result.json fixture; Failed with the decoded reason.
 
-Blocks: every block in section 4 has a passing entry in `evidence/blocks-verified.json` from a real Sepolia launch before the mainnets are enabled; the Builder reads the file at load and shows the tested mark for passing blocks and the not-yet-tested tooltip for the rest, with the fetch failure falling back to the bundled copy.
+Blocks: `evidence/blocks-verified.json` records every block a checked real launch has exercised; the Builder reads the file at load and shows the proven mark for passing blocks and the not-yet-proven tooltip for the rest, with the fetch failure falling back to the bundled copy.
 
 Build: `npm run build` and `npm test` pass; `dist/` works from an IPFS gateway subpath; Lighthouse accessibility ≥ 95 on Store and Builder.
 
@@ -447,7 +455,7 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 | 3 | Chain reads, search by address, hook page, My hooks | Intake log decoding on both chains, result.json fetch, block-label matching, address resolution on chain, the Manage and Anyone-can panels built from section 4.11, pond triggers from chain, snapshot script |
 | 4 | Launch flow | Wallets on three chains, price read, approve, request, receipt parsing, Launch page per type, pool-opening panel (copy-only in phase 1) |
 | 5 | Relay and polish | Worker, live free check and facts panel, stage names, import of own code, scene polish (reeds, hat, birds), copy pass, hosting under the existing label |
-| 6a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Sepolia, later on the mainnets |
+| 6a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
 | 6 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
 
 ## 14. Decisions taken by the owner (2026-10-21)
@@ -455,28 +463,31 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 1. Fonts: Press Start 2P, Pixelify Sans and VT323, numbers in VT323. Kept.
 2. Pool share: no default. The user chooses it, and can change it freely within IMD's 10–90% range.
 3. Trade links: Uniswap's interface on every chain where it lists the pool. No code or asset from any other product is used anywhere in this project; other sites were only looked at for ideas.
-4. Going live: see section 15. The owner flips phase 2 after at least one successful Sepolia launch of each type; Claude prepares the edit.
-5. Hook-only test: one real type B launch on Sepolia early in phase 1, paid by the owner (0.5 IMD), before any fallback is built.
+4. Going live: see section 15. Partly superseded by decision 12: there is no test-network phase, and phase 2 now means only the ads (6.6).
+5. Hook-only test: one real type B launch on Robinhood Chain or Ethereum, early, paid by the owner (0.5 IMD), before any fallback is built.
 6. Prize pot stays in version 1, inside the Games and lotteries group; every block with a risk field carries the warning sign of 4.13.
 7. Ads: 0.1 IMD base per 24 hours with boosts. Kept.
 8. GitHub: not the owner's personal account. A new GitHub account is created for the project (IMD only imports from public GitHub repositories and delivers to GitHub, so a project account is the practical home); the push happens from it.
-9. Site name: the live site is `the-hooks-store.sites.imd.fun` (`the-hooks-store.site.identitymd.eth`). The label was free on 2026-10-21 and is claimed by job 1, so every delivery publishes there; while the site is unfinished the page says so in its banner.
+9. Catalog scope (2026-10-21, after job 1): the store lists only hooks launched through this site, recognized on chain by the fixed last sentence of the description (5.1). Other IMD launches are not shown anywhere, not in the grid, the search results, the featured strip or the pond ticker; the pond casts for this site's launches and the practice cast. The top bar stays exactly as the mockup draws it.
+10. Site name: the live site is `the-hooks-store.sites.imd.fun` (`the-hooks-store.site.identitymd.eth`). The label was free on 2026-10-21 and is claimed by job 1, so every delivery publishes there; while the site is unfinished the page says so in its banner.
+11. Brand mark (2026-10-21, after job 2): the drawn pixel fishing hook of 3.0 replaces the ʃ character, which VT323 cannot draw; the owner asked for the mockup's mark or anything but the fallback glyph the live site showed.
+12. No test network (2026-10-21, after job 2): Sepolia is dropped. Hooks deploy on Robinhood Chain or Ethereum from the first launch, the user chooses the chain in the Builder with no default, and testing is done with real launches on those chains; the tested marks record real launches instead of a verification round. IMD's free check accepts the sample launch bodies with chain ids 1 and 4663 with no blockers (5.3). The owner's IMD sits on Ethereum, which can pay for launches on either chain (6.2).
 
 ## 15. From mockup to live
 
 The mockup is a drawing of the product, not the product. The swarm builds the real site from this spec and the mockup. Here is the whole path, and who does what at each step.
 
 1. **Publish the brief.** Done on 2026-10-21: the `spec/` folder is the public repository https://github.com/the-hook-store/hooks-store-spec under a GitHub account created for the project (not the owner's personal one). Job 1 names it with `repoUrl` and `baseCommit`. IMD accepts only public GitHub repositories as a starting point and delivers every job to GitHub, which is why a project account is needed at all. Two consequences, both already in job 1's body: IMD hosts a site built from your own repository only after a `site-content-check` step, so job 1 is a two-step chain (content check, then `build-website`); and the repository needs an `index.html` at its root, which introduces the spec and opens the mockup. IMD's free check passes job 1 with no blockers (evidence/check-job-1.response.json).
-2. **Pay for job 1.** The explorer's Launch form cannot send this job: when it is given a repository it only hosts that repository as it is, and it has no way to paste a full body. So the owner pays on-chain instead, through IMD's Intake contract on Ethereum (where the owner's IMD is), from a local page Claude prepared (`tools/pay-onchain.html`, outside this repository): connect the wallet, approve 0.5 IMD, send the request. The page holds the exact checked body; its transaction encoding was verified against an independent encoder and a dry run on Ethereum. Claude cannot pay: every job and every test launch is paid by the owner's wallet, and Claude prepares the exact text each time. Within hours the swarm delivers source and a built site to a GitHub repository under IMD's launches organisation, and IMD pins the built site to IPFS and serves it at `the-hooks-store.sites.imd.fun`. That is the final name, claimed from day one; until the site is finished its banner says it is in progress.
+2. **Pay for job 1.** Done on 2026-10-21: paid 07:21 UTC, delivered 08:48 UTC, details in jobs/log.md. The explorer's Launch form cannot send this job: when it is given a repository it only hosts that repository as it is, and it has no way to paste a full body. So the owner pays on-chain instead, through IMD's Intake contract on Ethereum (where the owner's IMD is), from a local page Claude prepared (`tools/pay-onchain.html`, outside this repository): connect the wallet, approve 0.5 IMD, send the request. The page holds the exact checked body; its transaction encoding was verified against an independent encoder and a dry run on Ethereum. Claude cannot pay: every job and every test launch is paid by the owner's wallet, and Claude prepares the exact text each time. Within hours the swarm delivers source and a built site to a GitHub repository under IMD's launches organisation, and IMD pins the built site to IPFS and serves it at `the-hooks-store.sites.imd.fun`. That is the final name, claimed from day one; until the site is finished its banner says it is in progress.
 3. **Iterate.** Jobs 2 to 5 are `job.continue` requests on the same project: each one starts from the previous commit, and each delivery replaces what is served at the site name. Claude reads every delivery, screenshots it, and writes the next job or a fix-up continuation. Budget: six website jobs at 0.5 IMD plus a few continuations, so roughly 4 IMD for the site.
-4. **Test on Sepolia with real money, every block.** During jobs 4 and 5 the owner makes real launches from the site, in two rounds, each launch 0.5 IMD plus gas on Ethereum or Robinhood, deploying on Sepolia.
+4. **Test on chain with real money.** During jobs 4 and 5 the owner makes real launches from the site on Robinhood Chain or Ethereum, each 0.5 IMD plus gas, paid in IMD on Ethereum or Robinhood Chain (decision 12: no test network).
    - *The three journeys.* One hook with a new token (type A), one hook only (type B), one hook for an existing token (type C), each from a small default stack. This proves the launch flow end to end and settles the type B address question (6.5).
-   - *The block verification round.* The four all-blocks requests of 5.3 (A1, A2, B, C) sent as real launches, so every block in section 4 is built, audited and deployed at least once. For each block Claude checks the delivered hook: the 4.11 function names are in the deployed ABI and do what the sentence says, the owner-only ones refuse other callers, and where a rule can be exercised with a Sepolia swap (fees, limits, windows, cooldowns, jars) it is exercised and the effect is read back. Every block gets an entry in `evidence/blocks-verified.json` (4.14) with passed true or false and notes. A failing block has its sentence or its 4.11 functions rewritten and goes into one more launch, or leaves the catalog. The Custom rule block cannot be pre-verified; the user's own launch audit covers it, and the card says so.
-   Budget: seven launches, 3.5 IMD plus gas, before the mainnets open. Nothing on the site is sold on Robinhood Chain or Ethereum until this round is complete.
+   - *Block coverage.* There is no separate verification round. Claude checks every real launch the way 4.14 describes: the 4.11 function names are in the deployed ABI and do what the sentence says, the owner-only ones refuse other callers, and where a rule can be exercised with a swap (fees, limits, windows, cooldowns, jars) it is exercised and the effect is read back. Every block the launch used gets an entry in `evidence/blocks-verified.json` with passed true or false and notes, and the Builder shows the proven mark from then on. A failing block has its sentence or its 4.11 functions rewritten, or leaves the catalog. The Custom rule block cannot be pre-verified; the user's own launch audit covers it, and the card says so.
+   Budget: three launches, 1.5 IMD plus gas; the owner may add the four all-blocks launches of 5.3 (2 IMD) at any time to cover every block sooner.
 5. **Go live, phase 1.** The site is static files, so "live" is a hosting decision, and two options can run at once:
    - *IMD hosting.* Every delivery already publishes to `the-hooks-store.sites.imd.fun` and its ENS name `the-hooks-store.site.identitymd.eth`. Going live is removing the in-progress banner. The old `the-hooks-store-uniswap-v4-hooks` name stays on its offline page or is pointed at the new site later.
    - *The owner's own domain.* Cloudflare Pages (free) connected to a fork of the delivered repository under the owner's GitHub account, building `dist/` on every push, with a custom domain such as thehooksstore.xyz. Claude sets it up with the owner in about fifteen minutes. The relay worker (7.4) lives on the same Cloudflare account.
    Both serve the identical build. The IMD name is the canonical, audit-trailed copy; the custom domain is the one to advertise.
-6. **Phase 2.** The owner (or Claude, on the owner's go) changes `public/site-config.json` to enable Robinhood Chain and Ethereum as deploy chains, the ad contracts are deployed by the job 6a launch (Sepolia first, then the mainnets), job 6 wires the Promotions panel and the strip, and the same republish puts it live.
+6. **Phase 2.** The ad contracts are deployed by the job 6a launch (one launch per chain: Robinhood Chain, then Ethereum), job 6 wires the Promotions panel and the strip, and the same republish puts it live.
 7. **After that.** Changes are new `job.continue` jobs; the owner never edits code. Operating costs are zero: no server, no database, the relay is within Cloudflare's free tier, and users pay IMD directly for their own launches and placements.
 

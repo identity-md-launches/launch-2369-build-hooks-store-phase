@@ -1,0 +1,713 @@
+{
+  "date": "2026-10-21",
+  "target": "production dist/ at /preview/",
+  "browser": "Chromium headless shell",
+  "passed": 50,
+  "failed": 0,
+  "skipped": 0,
+  "flaky": 0,
+  "batches": [
+    {
+      "batch": "builder",
+      "stats": {
+        "startTime": "2026-10-21T12:40:30.045Z",
+        "duration": 53817.967000000004,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "tests": [
+        {
+          "file": "builder.spec.ts",
+          "title": "Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 5312,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 5953,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 5776,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "first visit to the stack starts from the default stack; preview, cost box and disabled check",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2682,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "pool share has no default; Continue stays disabled until 10 to 90 in steps of 5",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2212,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 5206,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "untested block names expose the status to assistive technology without a risk sign",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2518,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "dependent-removal status describes the removed block and clears after the next draft edit",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 10605,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "tested marks: a passing entry shows the tick, others say not yet tested",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1669,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "tested marks fall back to the bundled copy when the spec repository cannot be read",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1839,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "the shipped bundled copy is empty, so nothing shows a tick offline",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1482,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "type C and B settings, own code and the request shape",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2353,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "risk",
+      "stats": {
+        "startTime": "2026-10-21T12:41:26.585Z",
+        "duration": 39452.397,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "tests": [
+        {
+          "file": "builder.spec.ts",
+          "title": "risk tooltips at 320px: every sign stays readable on hover and keyboard focus",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 11400,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "risk tooltips at 390px: every sign stays readable on hover and keyboard focus",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 10493,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "builder.spec.ts",
+          "title": "risk tooltips at 1440px: every sign stays readable on hover and keyboard focus",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 11908,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "store-wallet-pond",
+      "stats": {
+        "startTime": "2026-10-21T12:42:08.977Z",
+        "duration": 63740.774,
+        "expected": 22,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "tests": [
+        {
+          "file": "pond.spec.ts",
+          "title": "water click draws every cast frame in order with specified timings, then returns through idle",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 7799,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "pond.spec.ts",
+          "title": "reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2382,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "pond.spec.ts",
+          "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2345,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "pond.spec.ts",
+          "title": "cast queue is capped at three and a keyboard press on the water also casts",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2102,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Store and Learn fit 320px; product and describe action visible",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 3105,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Store and Learn fit 390px; product and describe action visible",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 3243,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Store and Learn fit 1440px; product and describe action visible",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 3680,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Desktop bar remains one row at 821px, search >=120 and connected width unchanged",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2087,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Desktop bar remains one row at 1024px, search >=120 and connected width unchanged",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2086,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "Desktop bar remains one row at 1440px, search >=120 and connected width unchanged",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1972,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "search shows the no-match state over the empty pond; Enter scrolls to Results",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1429,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1540,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "describe saves required draft key, preserves other fields and opens the describe editor",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2198,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2078,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "swarm failure hides all metrics; successful response uses actual fields with honest labels",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2963,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "public config flag removes the in-progress banner",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1283,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2128,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "export works offline at a gateway subpath with local fonts and a single beige theme",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1815,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "empty or blocked storage never silently loses a description",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 5047,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "store.spec.ts",
+          "title": "catalog navigation does not restore a stale Learn scroll",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1588,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "wallet.spec.ts",
+          "title": "EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2970,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "wallet.spec.ts",
+          "title": "mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2049,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch": "hook",
+      "stats": {
+        "startTime": "2026-10-21T12:43:25.449Z",
+        "duration": 40767.715000000004,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "tests": [
+        {
+          "file": "hook.spec.ts",
+          "title": "Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2814,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2815,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2790,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "owner forms validate address arrays and booleans; query-param viewing never unlocks controls",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 3014,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2591,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "catalog searches exact known addresses, request ids and keywords; reads only 10k ranges",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1932,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "failed completion and unavailable result remain explicit, with addresses unknown",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1740,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "result failures are retryable without inventing a live deployment",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1776,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "header switches an unsupported wallet to Ethereum",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2290,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 3361,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "readings refresh after 20 seconds, and a connected non-owner stays locked",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 1990,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "unknown-address lookup shows a known fork hook and prefills type C for a known token",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 4217,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "file": "hook.spec.ts",
+          "title": "Connect keeps a wallet already on Robinhood Chain connected without a switch",
+          "status": "expected",
+          "expectedStatus": "passed",
+          "results": [
+            {
+              "status": "passed",
+              "durationMs": 2742,
+              "errors": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

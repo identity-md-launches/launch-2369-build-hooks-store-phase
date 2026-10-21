@@ -1,0 +1,40 @@
+> the-hooks-store@0.1.0 test
+> node --test ../tests/*.test.mjs
+
+✔ decodes at least two real Requested and two Completed logs from each chain (17.115869ms)
+✔ requires launch action, accepted kind and an exact terminal marker; handles both composer endings (23.311488ms)
+✔ every numbered rule template matches its own rendered sentence; label parameters and repeated values survive (19.540172ms)
+✔ request location is the payment chain; contract location comes from body.chainId (3.069628ms)
+✔ completion status 1 or 2 is Failed, with ASCII reason; real empty reason is explicit (8.376253ms)
+✔ real result JSON for a completed build without addresses never fabricates Live (3.537976ms)
+✔ Live result mapping and 40/64-hex searches use exact launch addresses and hashes (2.780167ms)
+✔ owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings (3.238614ms)
+✔ inclusive backwards ranges are gap-free, non-overlapping and never exceed 10,000 blocks (0.486238ms)
+✔ ENS reverse results cache by lowercase payer for a day, including negative lookups (0.957517ms)
+✔ cache construction re-filters unrelated launches; storage corruption stays usable (3.338248ms)
+✔ head polling casts only newly observed store launches and resumes from the saved cursor (95.305289ms)
+✔ result launch UUIDs are preserved for evidence without inventing a numeric launch number (3.134921ms)
+✔ catalog has every section 4 block with the required fields (3.750954ms)
+✔ every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions (9.228665ms)
+✔ blocks a launch type does not allow are dimmed in the palette and left out of the request (0.878853ms)
+✔ composed text equals the three fixtures byte for byte (3.843718ms)
+✔ words and rules together: numbered rules win; owner sentence names the functions; last line keeps names (0.492468ms)
+✔ request bodies follow 5.2 for every type and stay under 16 KiB (8.110362ms)
+✔ pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5 (1.852072ms)
+✔ the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot (1.348701ms)
+✔ swap-fee dependencies: fade, split and LP share need it and leave with it (1.352883ms)
+✔ buy/sell fees and the swap fee exclude each other; each block once (0.970458ms)
+✔ reorder keeps the token first; bring-your-own token replaces the standard one (0.889065ms)
+✔ field limits produce inline issues (0.935626ms)
+✔ job 1 landing drafts open in the describe editor (0.458578ms)
+✔ Pepe grids and all meta values match the reference character for character (14.613783ms)
+✔ Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction (11.725561ms)
+✔ exported cast integration delivers real messages and unsubscribes on route cleanup (99.885646ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2508.826728

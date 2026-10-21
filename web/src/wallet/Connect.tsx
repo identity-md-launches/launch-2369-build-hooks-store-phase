@@ -29,10 +29,10 @@ export function Connect({ config }: { config: SiteConfig }) {
   const close = () => { setOpen(false); trigger.current?.focus(); };
   return <>
     <button ref={trigger} id="connect" type="button" className={`btn connect ${isConnected && !needsSwitch ? 'address' : ''}`} title={isConnected ? `Disconnect ${address}` : 'Connect a wallet'} disabled={switching} onClick={() => {
-      if (needsSwitch) { resetSwitch(); switchChain({ chainId: config.enabledDeployChains[0] }); }
+      if (needsSwitch) { resetSwitch(); switchChain({ chainId: 1 }); }
       else if (isConnected) disconnect();
       else { reset(); setOpen(true); }
-    }}>{switching ? 'Switching…' : needsSwitch ? 'Switch to Sepolia' : shortened || 'Connect'}</button>
+    }}>{switching ? 'Switching…' : needsSwitch ? 'Switch to Ethereum' : shortened || 'Connect'}</button>
     {switchError && <div className="wallet-switch-error notice" role="alert">Could not switch networks. Try again in your wallet.<button className="link-button" onClick={() => resetSwitch()}>Dismiss</button></div>}
     <dialog ref={dialog} onKeyDown={event => {
       if (event.key !== 'Tab') return;
