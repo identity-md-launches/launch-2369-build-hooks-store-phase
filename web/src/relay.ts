@@ -22,9 +22,16 @@ export async function relayFetch(relay: string, path: string, input?: unknown, s
     ...(input === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }),
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(25000)]) : AbortSignal.timeout(25000),
   });
-  const data: unknown = await response.json();
-  if (!response.ok) throw new Error(`IMD could not finish this request (${response.status}). ${message(object(data).detail ?? object(data).error ?? 'Try again.')}`);
-  return data;
+  const text = await response.text();
+  const failure = `IMD could not finish this request (${response.status}). Try again.`;
+  // Proxies and Cloudflare can return HTML or an empty body at any status.
+  if (!response.ok) {
+    let detail: unknown;
+    try { const data = object(JSON.parse(text)); detail = data.detail ?? data.error; } catch { /* Use the status message. */ }
+    throw new Error(typeof detail === 'string' && detail.trim()
+      ? `IMD could not finish this request (${response.status}). ${detail}` : failure);
+  }
+  try { return JSON.parse(text) as unknown; } catch { throw new Error(failure); }
 }
 export async function checkRequest(relay: string, input: Body, signal?: AbortSignal) {
   return parseCheck(await relayFetch(relay, '/check', { action: 'launch.open', input }, signal));
@@ -63,15 +70,15 @@ export type JobStage = { title: 'Building' | 'Audit panel' | 'Deploying'; state:
 export function jobStages(value: unknown): JobStage[] {
   const job = object(value);
   if (!Array.isArray(job.nodes)) throw new Error('Job stages are unavailable.');
-  const done = (n: any) => ['accepted', 'completed', 'skipped'].includes(n.state);
-  const running = (n: any) => ['running', 'assigned', 'submitted', 'verifying', 'revising', 'dispatched'].includes(n.state);
-  const failed = (n: any) => ['failed', 'rejected', 'blocked'].includes(n.state);
+  const done = (n: any) => n.state === 'accepted';
+  const running = (n: any) => n.state === 'working';
+  const failed = (n: any) => n.state === 'failed';
   const nodes = job.nodes.map(object);
-  const audits = nodes.filter(n => /audit|judge|adversarial/.test(String(n.key)) || n.role === 'review');
+  const audits = nodes.filter(n => /audit|judge|adversarial/.test(String(n.key)) || ['review', 'audit'].includes(n.role));
   const builds = nodes.filter(n => !audits.includes(n) && !/deploy/.test(String(n.key)));
   const status = (group: any[]): JobStage['state'] => group.length && group.every(done) ? 'complete' : group.some(failed) ? 'failed' : group.some(running) ? 'active' : 'pending';
   const deploy = object(job.launch), deployNodes = nodes.filter(n => /deploy/.test(String(n.key)));
-  const deployState = deploy.status === 'live' ? 'complete' : ['failed', 'parked'].includes(deploy.status) ? 'failed' : deploy.status === 'deploying' ? 'active' : status(deployNodes);
+  const deployState = deploy.status === 'live' ? 'complete' : ['failed', 'parked'].includes(deploy.status) ? 'failed' : deploy.status === 'deploying' || job.state === 'completed' ? 'active' : status(deployNodes);
   return [
     { title: 'Building', state: status(builds), detail: builds.length ? `${builds.filter(done).length} of ${builds.length} build and test steps complete` : 'Waiting for build steps' },
     { title: 'Audit panel', state: status(audits), detail: audits.length ? `${audits.filter(done).length} of ${audits.length} review steps complete` : 'Waiting for audit steps' },

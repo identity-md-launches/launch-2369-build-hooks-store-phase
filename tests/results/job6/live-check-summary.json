@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-10-21T20:24:03.580Z",
+  "source": "https://hooks-store-relay.hooks-store.workers.dev/check",
+  "method": "POST",
+  "status": 200,
+  "elapsedMs": 583,
+  "requestSha256": "edd894a559471e175beebfc27ae09cd11eda26afc1dfd903a1e105d6ee783998",
+  "responseSha256": "79eae432bdb22941f009e8d03b85fb512daeeb87d87b852646083c33219c5698",
+  "browser": "Chromium",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "launchSubmitted": false,
+  "walletConnected": false,
+  "pageErrors": [],
+  "hashFormat": {
+    "request": "SHA-256 of compact JSON.stringify(request), not the pretty-printed file.",
+    "response": "SHA-256 of the exact HTTP response body, identical to live-check.response.json."
+  }
+}

@@ -1,0 +1,40 @@
+# Job 6 implementation and interface review
+
+Complete for the stated scope. This is worker evidence, not independent certification. Source and the production export retain the job 5 design and contracts; this delivery implements the seven reported defects, SPEC 1.19 and the owner's go-live configuration. No contract, token, Worker or site was published by this job. Publication uses the submitted `dist/`.
+
+## Confirmed findings and repairs
+
+| Finding | Final source | Correction and evidence |
+| --- | --- | --- |
+| Medium: real job nodes never activate stages | `web/src/relay.ts:70` | Uses waiting/working/accepted/failed and top-level job.state. Working implementation/review/audit nodes activate the appropriate panel; a completed job awaiting its live launch activates Deploying. Unit tests consume an unmodified live GET response plus phase replays in that schema; the job 5 browser timeline now uses working/waiting. Live still comes from chain data. |
+| Medium: wrong fee currency in an IMD objective | `src/lib/compose.ts:171` | Type A says IMD for pairWith=imd, ETH otherwise; B/C retain ETH. Updated compose-A fixture and unit/preview assertions for both pairings pass. |
+| Low: raw JSON parse errors from relay/proxy pages | `web/src/relay.ts:19` | Reads text, checks HTTP status, then parses success JSON. HTML, empty, malformed and proxy responses produce the status and Try again. Units cover six response variants; a browser 503 fixture checks failure, retry and stale/direct-Launch gates. |
+| Medium: cancelled approval stays pending | `web/src/LaunchReview.tsx:82` | Confirmed cancelled/replaced/reverted approvals and confirmed receipts lacking the approval event fail with retry. Browser wallet/RPC doubles exercise a successful fresh retry, saved receipt recovery, genuinely unknown receipts and repricing. No real signature or payment is used. |
+| Medium: orphaned events retain rows/Live | `web/src/chain/store.ts:159` | Successful windows reconcile deleted events, refresh checks retained block hashes, and dropped completions discard results. Removed requests also clear saved pending cards. Entry identity prevents late IPFS responses restoring orphaned data. The reorg fixture covers absent/removed requests/completions, deep hash changes, failed rereads and an in-flight result; browser checks verify refresh, storage and reload. |
+| Medium: a full storage import is lost on navigation | `web/src/useSwarmCheck.ts:46` | Validated imports are retained in module memory keyed by relay/repository/ref. The browser fills native session storage to quota, imports once, navigates to Launch with the same pinned source and confirms source edits relock continuation. Memory survives route changes; a full document reload still needs storage or a new import. |
+| Low: ticker age freezes | `web/src/Landing.tsx:22` | A 60-second timer recalculates age separately from cast deduplication. An accelerated clock verifies just now → 1 min → 2 min for identical relay data while the reduced-motion canvas stays unchanged. |
+
+The retained free-check gate additionally persists a failed attempt for the exact body/relay (`web/src/useSwarmCheck.ts:24`), so navigation/reload cannot bypass its Retry instruction. Blockers and changed requests remain locked; a never-run check remains optional, as in job 5. The refused-body warning remains visible beside Launch's free check. `public/site-config.json` and its export use the owner's relay origin and inProgress=false.
+
+## Better Interface coverage
+
+The pinned workflow, six core domains, critic thresholds and design-document method were read. The established beige pixel storefront, fonts, borders, copy and component arrangement were preserved. The visual idea remains a hook storefront carried by the monochrome fishing pond.
+
+| Domain | Coverage and outcome | Limits |
+| --- | --- | --- |
+| Accessibility | Checked native names/labels, status/alert feedback and disabled states; Chromium tests cover keyboard focus, skip/main action, wallet focus trapping/Escape/return and reduced motion. Lighthouse 13.5.0 scores 100 on Store, Builder and its checked-response panel. | No screen-reader session, physical phone, forced-colors visual session or native 200% zoom session. |
+| Layout | All seven routes at 320, 390 and 1440 pass route/control/reflow/resource checks. Existing tests cover the 821/1024 header and complete disclosures. Screenshots were inspected for Store, Builder, Launch, Hook and the actual free-check panel. At 390 the product and Describe it action are on screen. | Narrow viewports establish reflow, not browser-native zoom. No RTL/localized variant is claimed. |
+| Writing | Reviewed the corrected fee sentence, error/retry instructions, approval feedback, timestamp and stage labels against their behavior. The refused-body warning is retained; facts/states remain IMD's text. | Existing mockup copy and caps are intentional product choices. |
+| Typography | Local WOFF2 fonts load in the offline/gateway test. Source tokens and rendered widths preserve hierarchy and wrap full hashes, addresses and responses. The final probe passes its size/family/tracking checks. | No native-device text enlargement session. |
+| Colors | Reused existing tokens; the probe passes all measured solid-background text pairs and Lighthouse reports no contrast failure on the three audited states. Status includes text in addition to color. | The probe excludes text over the canvas/glow; no numeric contrast claim is made for that background. No dark theme exists by design. |
+| UI | Checked approval wallet/pending/failure/retry/success states, unknown receipt locks, import quota recovery, check loading/failure/blockers/stale/retry, reorg rollback and timer cleanup. Reduced motion keeps the pond still. | No live payment or paid-call fork run in job 6; prior fork evidence stays in job 4. No 10%-speed Animations-panel review. |
+
+## Critic probe and remaining limitations
+
+The final export was measured with `node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste --offline`. All 16 checks completed; **13 passed**. Render, layout, targets, contrast, tracking, size/family counts, glyphs, slogans, repetition, copy budget, reduced motion and sharing metadata pass. First-screen prose is 41 words at 390 and 58 at 1440. Offline mode blocks external services; their functionality is covered separately by the real free-check and real-RPC checks.
+
+Three flags are retained because SPEC 3.1/8 and the owner's established mockup require them: content caps (`Landing.tsx:96` and existing heading/control styles), eyebrow-like labels, and the hard border plus offset shadow (`styles.css` .btn/.prompt). These are established visual requirements, not newly introduced defects. The probe finds no cards nested inside cards, text overlap or document overflow. Nineteen compact controls are below the optional 44px comfort target but all satisfy the measured 24px-or-spacing rule. The existing pixel typography is documented in DESIGN.md.
+
+The supplied browser MCP could not initialize its Chrome distribution. Real browser validation and screenshot inspection used the installed Playwright Chromium instead. WebKit was attempted and failed before navigation because native GStreamer libraries were unavailable; no Safari result is claimed. Five optional fork tests are skipped in the full run; its two live-service tests are opted in and passed separately. The existing Vite >500 kB main-chunk advisory remains. No dependency/build configuration or ignore file was changed.
+
+Initial checks exposed a TypeScript nullable reference and fixture assumptions, all repaired. The type C pool fixture previously seeded a cached event while returning no canonical logs; it now serves coherent blocks/logs, as the new reconciliation correctly requires. Initial failed/interrupted runs are not counted as passes. The final full Chromium result is 121 passed, 7 skipped, zero failed/flaky; all 33 go-live-specific tests pass. Evidence includes the complete test-name/status list, actual command output, all 21 route/width JPEGs and live-service request/response.

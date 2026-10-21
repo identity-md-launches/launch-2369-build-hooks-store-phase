@@ -1,0 +1,15 @@
+{
+  "note": "Synthetic reorg sequence, using observed Ethereum block hashes and the existing ABI-encoded store request helper; never a claim of a real reorg.",
+  "requestBlock": "100",
+  "completionBlock": "101",
+  "initialHead": "101",
+  "nextHead": "102",
+  "deepHead": "200",
+  "originalHash": "0x109b637ace8baa8743ae804cf92507d4d0c6b5cb91440add87638998faaae9e3",
+  "replacementHash": "0xed41ad3163d13c34710c884c600f785de58fed0b2da55b1c579e24c1828f4acf",
+  "result": {
+    "launch": {
+      "hookAddress": "0x82f636a92364d13754d7b3e72d460f0be20a28cc"
+    }
+  }
+}

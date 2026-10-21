@@ -79,7 +79,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     flight.current = true;
     const operation: LaunchContext = { config, chainId: paymentChain, account: address, client, wallet, bytes: preview.bytes };
     const key = identity, savedKey = attemptKey, set = kind === 'approve' ? setApproval : setLaunch;
-    let hash: Hex | undefined, paid = approval.price, reverted = false;
+    let hash: Hex | undefined, paid = approval.price, terminalFailure = false;
     const update = (step: Step) => { saveStep(savedKey, kind, step); if (latestIdentity.current === key) set(step); };
     update({ phase: 'wallet' });
     try {
@@ -88,14 +88,22 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
       update({ phase: 'pending', hash, price: paid });
       const receipt = await client.waitForTransactionReceipt({ hash, timeout: 180000, onReplaced: replacement => {
         hash = replacement.transactionReceipt.transactionHash;
-        if (replacement.reason === 'cancelled' || replacement.reason === 'replaced') throw new Error('The transaction was cancelled or replaced. Check its hash before continuing.');
+        if (replacement.reason === 'cancelled' || replacement.reason === 'replaced') {
+          // This replacement has a confirmed receipt; the original is no longer pending.
+          terminalFailure = kind === 'approve';
+          throw new Error(kind === 'approve' ? 'The transaction was cancelled or replaced. You can retry this step.' : 'The transaction was cancelled or replaced. Check its hash before continuing.');
+        }
         update({ phase: 'pending', hash, price: paid });
       } });
-      if (receipt.status !== 'success') { reverted = true; throw new Error('The transaction reverted. You can retry this step.'); }
-      if (kind === 'approve') await verifyApprovalReceipt(receipt, operation, paid!);
+      if (receipt.status !== 'success') { terminalFailure = true; throw new Error('The transaction reverted. You can retry this step.'); }
+      if (kind === 'approve') {
+        // A confirmed transaction without this approval cannot authorize the launch.
+        terminalFailure = true;
+        await verifyApprovalReceipt(receipt, operation, paid!);
+      }
       update({ phase: 'success', hash: receipt.transactionHash, price: paid });
       if (kind === 'launch') { finish(receipt, operation, paid!); try { localStorage.removeItem(savedKey); } catch { /* The request id is already displayed. */ } }
-    } catch (e) { update({ phase: hash && !reverted ? 'pending' : 'failed', hash, price: paid, error: launchError(e) }); }
+    } catch (e) { update({ phase: hash && !terminalFailure ? 'pending' : 'failed', hash, price: paid, error: launchError(e) }); }
     finally { flight.current = false; }
   };
   const checkReceipt = async (kind: 'approve' | 'launch') => {
@@ -104,13 +112,14 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     flight.current = true;
     const key = identity, savedKey = attemptKey, operation = { config, chainId: paymentChain, account: address, client, wallet, bytes: preview.bytes };
     const update = (next: Step) => { saveStep(savedKey, kind, next); if (latestIdentity.current === key) set(next); };
+    let confirmedApproval = false;
     try {
       const receipt = await client.getTransactionReceipt({ hash: step.hash });
       if (receipt.status !== 'success') { update({ ...step, phase: 'failed', error: 'The transaction reverted. You can retry this step.' }); return; }
-      if (kind === 'approve') await verifyApprovalReceipt(receipt, operation, step.price!);
+      if (kind === 'approve') { confirmedApproval = true; await verifyApprovalReceipt(receipt, operation, step.price!); }
       update({ ...step, phase: 'success', error: undefined });
       if (kind === 'launch') { finish(receipt, operation, step.price!); try { localStorage.removeItem(savedKey); } catch { /* Already confirmed. */ } }
-    } catch (e) { update({ ...step, error: launchError(e) }); }
+    } catch (e) { update({ ...step, phase: confirmedApproval ? 'failed' : step.phase, error: launchError(e) }); }
     finally { flight.current = false; }
   };
   const feedback = (step: Step, kind: 'approve' | 'launch') => <>

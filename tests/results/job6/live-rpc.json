@@ -1,0 +1,17 @@
+{
+  "liveRpcElapsedMs": 2258,
+  "logCalls": {
+    "https://rpc.mainnet.chain.robinhood.com/": 48,
+    "https://rpc.mevblocker.io/": 2
+  },
+  "stats": {
+    "startTime": "2026-10-21T20:27:34.625Z",
+    "duration": 4023.9700000000003,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "passed": true,
+  "mode": "Read-only production export, fresh browser, contributor RPC transport; public source names shown. No transactions."
+}

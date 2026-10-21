@@ -141,3 +141,83 @@ test('Completed is fetched once per shared window and matched even when seen bef
  try{for(let i=0;i<100&&store.getSnapshot().chains[0].loading;i++)await new Promise(r=>setTimeout(r,5));const state=store.getSnapshot();assert.equal(state.chains[0].error,null);assert.equal(state.chains[0].backfilling,false);assert.equal(state.launches[0].status,'failed');assert.equal(calls.length,6);assert.ok(calls.filter(c=>c.topics[0]===COMPLETE_TOPIC).every(c=>c.topics.length===1));}
  finally{stop();delete globalThis.localStorage;}
 });
+
+const reorg = JSON.parse(fs.readFileSync(new URL('fixtures/chain/reorg.json', import.meta.url), 'utf8'));
+const eventually = async predicate => {
+ for (let i = 0; i < 200 && !predicate(); i++) await new Promise(resolve => setTimeout(resolve, 5));
+ assert.ok(predicate(), 'The chain store did not reach the expected state');
+};
+async function reorgStore(t, withCompletion = true, delayedResult = false) {
+ const storage = new Map();
+ globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
+ t.after(() => { delete globalThis.localStorage; });
+ const request = { ...requested(), blockNumber: reorg.requestBlock, blockHash: reorg.originalHash };
+ const completion = { ...completed(), blockNumber: reorg.completionBlock, blockHash: reorg.originalHash, logIndex: '0x1' };
+ const canonical = { head: BigInt(reorg.initialHead), requests: [request], completions: withCompletion ? [completion] : [], hashes: new Map([[reorg.requestBlock, reorg.originalHash], [reorg.completionBlock, reorg.originalHash]]), fail: false };
+ let release;
+ t.mock.method(globalThis, 'fetch', async () => {
+  if (delayedResult) await new Promise(resolve => { release = resolve; });
+  return Response.json(reorg.result);
+ });
+ const client = { getChainId: async () => 1, getBlockNumber: async () => canonical.head, getEnsName: async () => null,
+  getBlock: async ({ blockNumber }) => ({ timestamp: 1792563203n, hash: canonical.hashes.get(String(blockNumber)) }),
+  request: async ({ params: [q] }) => {
+   if (canonical.fail) throw new Error('RPC unavailable');
+   return (q.topics[0] === REQUEST_TOPIC ? canonical.requests : canonical.completions).filter(log => BigInt(log.blockNumber) >= BigInt(q.fromBlock) && BigInt(log.blockNumber) <= BigInt(q.toBlock));
+  } };
+ const site = { ...config, chains: [{ ...config.chains.find(c => c.id === 1), intakeFromBlock: 90 }], intake: { ...config.intake, pollIntervalMs: 60000 } };
+ const store = new LaunchStore(site, { 1: client }), stop = store.start(); t.after(stop);
+ await eventually(() => !store.getSnapshot().chains[0].loading);
+ if (withCompletion) await eventually(() => delayedResult ? !!release : store.getSnapshot().launches[0]?.status === 'live');
+ const saved = () => JSON.parse(storage.get(cacheKey(1)));
+ const refresh = async () => { const previous = saved().head; canonical.head++; store.retry(); await eventually(() => saved().head !== previous); };
+ return { store, canonical, storage, saved, refresh, request, completion, restore: () => new LaunchStore(site, { 1: client }), release: () => release?.() };
+}
+for (const removed of [false, true]) test(`reorg fixture retracts an orphaned request from rows and persistent records (${removed ? 'removed log' : 'absent on reread'})`, async t => {
+ const h = await reorgStore(t, false);
+ assert.equal(h.store.getSnapshot().launches.length, 1);
+ h.storage.set('hooks-store:pending', JSON.stringify([{ chainId: 1, requestId: realRequest.requestId, payer: realRequest.payer }]));
+ h.canonical.requests = removed ? [{ ...h.request, removed: true }] : [];
+ await h.refresh();
+ assert.deepEqual(h.store.getSnapshot().launches, []);
+ assert.deepEqual(h.saved().records, {});
+ assert.deepEqual(JSON.parse(h.storage.get('hooks-store:pending')), []);
+ assert.deepEqual(h.restore().getSnapshot().launches, []);
+});
+for (const removed of [false, true]) test(`reorg fixture retracts an orphaned completion and Live result (${removed ? 'removed log' : 'absent on reread'})`, async t => {
+ const h = await reorgStore(t);
+ h.canonical.completions = removed ? [{ ...h.completion, removed: true }] : [];
+ await h.refresh();
+ const row = h.store.getSnapshot().launches[0], entry = h.saved().records[row.requestId];
+ assert.equal(row.status, 'requested'); assert.equal(row.hookAddress, null); assert.equal(row.completion, undefined);
+ assert.equal(entry.completed, undefined); assert.equal(entry.result, undefined); assert.deepEqual(h.saved().completions, {});
+ assert.equal(h.restore().getSnapshot().launches[0].status, 'requested');
+});
+for (const event of ['request', 'completion']) test(`refresh checks the canonical block hash of a cached ${event}, even outside the overlap`, async t => {
+ const h = await reorgStore(t);
+ h.canonical.head = BigInt(reorg.deepHead);
+ await h.refresh(); // Move the overlap beyond both retained events first.
+ h.canonical.hashes.set(event === 'request' ? reorg.requestBlock : reorg.completionBlock, reorg.replacementHash);
+ if (event === 'request') h.canonical.requests = []; else h.canonical.completions = [];
+ await h.refresh();
+ if (event === 'request') {
+  assert.deepEqual(h.store.getSnapshot().launches, []); assert.deepEqual(h.saved().records, {});
+  assert.deepEqual(h.restore().getSnapshot().launches, []);
+ } else {
+  assert.equal(h.store.getSnapshot().launches[0].status, 'requested');
+  assert.equal(h.saved().records[realRequest.requestId].result, undefined);
+  assert.equal(h.restore().getSnapshot().launches[0].status, 'requested');
+ }
+});
+test('a failed canonical reread preserves cached events and reports the read error', async t => {
+ const h = await reorgStore(t); h.canonical.fail = true; h.canonical.requests = []; h.store.retry();
+ await eventually(() => !!h.store.getSnapshot().chains[0].error);
+ assert.equal(h.store.getSnapshot().launches[0].status, 'live'); assert.ok(h.saved().records[realRequest.requestId].requested);
+});
+test('late result enrichment cannot resurrect a completion removed by a reorg', async t => {
+ const h = await reorgStore(t, true, true); h.canonical.completions = []; await h.refresh(); h.release();
+ await new Promise(resolve => setTimeout(resolve, 15));
+ assert.equal(h.store.getSnapshot().launches[0].status, 'requested');
+ assert.equal(h.saved().records[realRequest.requestId].result, undefined);
+ assert.equal(h.restore().getSnapshot().launches[0].hookAddress, null);
+});

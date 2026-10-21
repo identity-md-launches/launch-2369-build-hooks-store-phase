@@ -1,0 +1,6 @@
+{
+  "url": "https://api.imd.fun/jobs/a6715145-76db-498f-9ca9-a11ed38d82a8",
+  "capturedAt": "2026-10-21T20:15:58.196943+00:00",
+  "sha256": "e7354d990f846781a2e24ee757ac525a2536cdd83bfad0ce3c026672a7f41c96",
+  "note": "Unmodified live GET response. The job has since blocked; tests also replay working and completed phases using this recorded schema."
+}

@@ -33,7 +33,7 @@ test('changed price, missing allowance, body over 16 KiB and the build banner fa
  await assert.rejects(requestLaunch(ctx(),1n),/price changed/);
  const c=ctx();c.client.readContract=async({functionName})=>functionName==='priceOf'?500000000000000000n:0n;await assert.rejects(requestLaunch(c,500000000000000000n),/approval is no longer/);
  await assert.rejects(approveLaunch(ctx({bytes:'0x'+'aa'.repeat(16385)})),/16 KiB/);
- await assert.rejects(approveLaunch(ctx({config})),/banner goes away/);
+ await assert.rejects(approveLaunch(ctx({config:{...config,inProgress:true}})),/banner goes away/);
 });
 
 test('approval receipts verify token events for EOAs and Smart Wallets, including replacement guards',async()=>{

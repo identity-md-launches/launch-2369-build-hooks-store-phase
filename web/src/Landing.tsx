@@ -16,8 +16,12 @@ export function Landing({ config, launches = [] }: { config: SiteConfig; launche
   const [prompt, setPrompt] = useState(''), [error, setError] = useState('');
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [relayRows, setRelayRows] = useState<RelayLaunch[]>([]);
+  const [now, setNow] = useState(Date.now);
   const knownLaunches = useRef(launches); knownLaunches.current = launches;
-  const named = useRef('');
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
   useEffect(() => {
     if (!config.relayUrl) return;
     const controller = new AbortController(), seen = new Set<string>(); let baseline = false, busy = false;
@@ -29,7 +33,7 @@ export function Landing({ config, launches = [] }: { config: SiteConfig; launche
         for (const row of rows.filter(r => r.status === 'live')) {
           if (baseline && !seen.has(row.id) && knownLaunches.current.some(l => matchesLaunch(row, l))) {
             const message = `${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt)}`;
-            named.current = `${row.id}:${row.updatedAt}`; cast(message);
+            cast(message);
           }
           seen.add(row.id);
         }
@@ -42,11 +46,10 @@ export function Landing({ config, launches = [] }: { config: SiteConfig; launche
   }, [config.relayUrl]);
   useEffect(() => {
     const row = relayRows.filter(r => r.status === 'live' && launches.some(l => matchesLaunch(r, l))).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
-    if (row && named.current !== `${row.id}:${row.updatedAt}`) {
-      named.current = `${row.id}:${row.updatedAt}`;
-      setTicker(`${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt)}`);
+    if (row) {
+      setTicker(`${row.name} was launched on ${CHAINS[row.chainId]} · ${relativeTime(row.updatedAt, now)}`);
     }
-  }, [relayRows, launches]);
+  }, [relayRows, launches, now]);
   useEffect(() => {
     const controller = new AbortController();
     fetch(config.swarmUrl, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10_000)]) })

@@ -1,0 +1,169 @@
+
+> the-hooks-store@0.1.0 test:e2e
+> playwright test tests/live-relay.spec.ts --reporter=line,json
+
+
+Running 1 test using 1 worker
+
+(node:36) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/1] tests/live-relay.spec.ts:6:1 › one real free check from the production export through the owner relay; no wallet or launch
+tests/live-relay.spec.ts:6:1 › one real free check from the production export through the owner relay; no wallet or launch
+{"capturedAt":"2026-10-21T20:24:03.580Z","source":"https://hooks-store-relay.hooks-store.workers.dev/check","method":"POST","status":200,"elapsedMs":583,"requestSha256":"edd894a559471e175beebfc27ae09cd11eda26afc1dfd903a1e105d6ee783998","responseSha256":"79eae432bdb22941f009e8d03b85fb512daeeb87d87b852646083c33219c5698","browser":"Chromium","viewport":{"width":390,"height":844},"launchSubmitted":false,"walletConnected":false,"pageErrors":[],"facts":14,"plan":9,"blockers":0}
+
+  1 passed (3.8s)
+{
+  "config": {
+    "argv": [
+      "/usr/bin/node",
+      "/tmp/hooks-job6/web/node_modules/.bin/playwright",
+      "test",
+      "tests/live-relay.spec.ts",
+      "--reporter=line,json"
+    ],
+    "configFile": "/tmp/hooks-job6/web/playwright.config.ts",
+    "rootDir": "/tmp/hooks-job6/web/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/hooks-job6/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/tmp/hooks-job6/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 35000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/tmp/hooks-job6/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/tmp/hooks-job6/web/tests",
+        "snapshotDir": "/tmp/hooks-job6/web/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 35000,
+        "use": {
+          "baseURL": "http://127.0.0.1:4173/preview/",
+          "headless": true,
+          "trace": "off",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node ../scripts/serve.mjs --port 4173",
+      "url": "http://127.0.0.1:4173/preview/",
+      "reuseExistingServer": true,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "live-relay.spec.ts",
+      "file": "live-relay.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "one real free check from the production export through the owner relay; no wallet or launch",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2001,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "{\"capturedAt\":\"2026-10-21T20:24:03.580Z\",\"source\":\"https://hooks-store-relay.hooks-store.workers.dev/check\",\"method\":\"POST\",\"status\":200,\"elapsedMs\":583,\"requestSha256\":\"edd894a559471e175beebfc27ae09cd11eda26afc1dfd903a1e105d6ee783998\",\"responseSha256\":\"79eae432bdb22941f009e8d03b85fb512daeeb87d87b852646083c33219c5698\",\"browser\":\"Chromium\",\"viewport\":{\"width\":390,\"height\":844},\"launchSubmitted\":false,\"walletConnected\":false,\"pageErrors\":[],\"facts\":14,\"plan\":9,\"blockers\":0}\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T20:24:01.442Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6608c3c370470a062c62-c9dbbc800e23746d424f",
+          "file": "live-relay.spec.ts",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-21T20:24:00.237Z",
+    "duration": 3787.965,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

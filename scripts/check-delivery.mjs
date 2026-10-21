@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
-const out = 'tests/results/job5'; mkdirSync(out, { recursive: true });
+const out = 'tests/results/job6'; mkdirSync(out, { recursive: true });
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const walk = directory => readdirSync(directory).flatMap(name => {
   const path = join(directory, name); return statSync(path).isDirectory() ? walk(path) : [path];
@@ -36,7 +36,7 @@ const integrity = {
   runtimeFiles: walk('dist').sort().map(path => ({ path, bytes: statSync(path).size, sha256: hash(path) })),
   specSha256: hash('SPEC.md'),
 };
-integrity.passed = Object.values(metadata).every(Boolean) && !absolute.length && !missing.length && !publicMismatches.length && config.relayUrl === null && config.inProgress === true && integrity.testRelayAbsentFromBundle;
+integrity.passed = Object.values(metadata).every(Boolean) && !absolute.length && !missing.length && !publicMismatches.length && config.relayUrl === 'https://hooks-store-relay.hooks-store.workers.dev' && config.inProgress === false && integrity.testRelayAbsentFromBundle;
 writeFileSync(`${out}/export-integrity.json`, JSON.stringify(integrity, null, 2) + '\n');
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim().split('\n').filter(Boolean);

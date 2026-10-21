@@ -31,7 +31,7 @@ async function prepare(page: Page, options: {type?:LaunchType;price?:bigint;fork
   }else await injectedOwner(page,owner,options.fork,options.initialChain??'0x1237');
   let head=94468175n;
   if(options.fork){const response=await fetch(options.fork,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_blockNumber',params:[]})});head=BigInt((await response.json()).result);}
-  const config={...site,inProgress:options.locked??false,chains:site.chains.map(c=>({...c,intakeFromBlock:c.id===4663?Number(head):c.intakeFromBlock}))};
+  const config={...site,relayUrl:null,inProgress:options.locked??false,chains:site.chains.map(c=>({...c,intakeFromBlock:c.id===4663?Number(head):c.intakeFromBlock}))};
   await page.route('**/site-config.json',r=>r.fulfill({json:config}));
   await page.route('https://api.imd.fun/**',r=>r.fulfill({status:503}));
   await page.route('https://raw.githubusercontent.com/**',r=>r.abort());
@@ -133,7 +133,12 @@ test('type C live hook prepares a copy-only pool call with on-chain decimals',as
   await page.addInitScript(({logs,requestId})=>localStorage.setItem('hooks-store:intake:v2:1',JSON.stringify({version:2,head:String(BigInt(logs.requested.blockNumber)),cursor:'-1',records:{[requestId]:{requested:logs.requested,completed:logs.completed}},completions:{}})),{logs,requestId:String(logs.requested.topics[1])});
   await page.route('https://rpc.mevblocker.io/**',async r=>{
     const req=r.request().postDataJSON();let result:unknown;
-    if(req.method==='eth_chainId')result='0x1';else if(req.method==='eth_blockNumber')result=logs.completed.blockNumber;else if(req.method==='eth_getLogs')result=[];
+    if(req.method==='eth_chainId')result='0x1';else if(req.method==='eth_blockNumber')result=logs.completed.blockNumber;
+    else if(req.method==='eth_getBlockByNumber')result={number:req.params[0],hash:logs.requested.blockHash,timestamp:'0x6a500000',transactions:[]};
+    else if(req.method==='eth_getLogs'){
+      const q=req.params[0],candidates=q.topics[0]===logs.requested.topics[0]?[logs.requested]:[logs.completed];
+      result=candidates.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock));
+    }
     else if(req.method==='eth_call'&&req.params[0].data.slice(0,10)===toFunctionSelector('decimals()'))result=encodeAbiParameters(parseAbiParameters('uint8'),[6]);
     else if(req.method==='eth_call'&&req.params[0].data.slice(0,10)===toFunctionSelector('poolManager()'))result=encodeAbiParameters(parseAbiParameters('address'),['0x000000000004444c5dc75cB358380D2e3dE08A90']);
     else return r.fulfill({json:{jsonrpc:'2.0',id:req.id,error:{code:3,message:'execution reverted'}}});

@@ -1,0 +1,16 @@
+{
+  "limitBytes": 8388608,
+  "candidateFiles": 324,
+  "rawFileBytes": 8085928,
+  "conservativeUncompressedTarBytes": 8351232,
+  "reservedMetadataBytes": 16384,
+  "headroomBytes": 37376,
+  "protectedPathsChanged": [],
+  "dependencyOrCachePaths": [],
+  "submodules": [],
+  "excludedInputs": [
+    ".imd/",
+    "test/scratch/"
+  ],
+  "passed": true
+}

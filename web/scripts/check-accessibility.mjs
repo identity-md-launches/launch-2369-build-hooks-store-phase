@@ -13,7 +13,7 @@ if (!toolRoot) throw new Error('Set HOOKS_A11Y_TOOLS to a directory with node_mo
 const toolRequire = createRequire(pathToFileURL(resolve(toolRoot, 'package.json')));
 const { default: lighthouse, snapshot } = await import(pathToFileURL(toolRequire.resolve('lighthouse')).href);
 const { default: puppeteer } = await import(pathToFileURL(toolRequire.resolve('puppeteer-core')).href);
-const output = resolve(new URL('../../tests/results/job5/', import.meta.url).pathname);
+const output = resolve(process.env.HOOKS_A11Y_OUT ?? new URL('../../tests/results/job6/', import.meta.url).pathname);
 const checked = JSON.parse(await readFile(new URL('../../evidence/check-A-default-blocks.response.json', import.meta.url), 'utf8'));
 const server = await serve();
 const url = `http://127.0.0.1:${server.address().port}/preview/`;

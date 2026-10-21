@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "inProgress": true,
+  "inProgress": false,
   "enabledDeployChains": [
     4663,
     1
@@ -9,7 +9,7 @@
     1,
     4663
   ],
-  "relayUrl": null,
+  "relayUrl": "https://hooks-store-relay.hooks-store.workers.dev",
   "featuredRequestId": null,
   "tradeUrlTemplates": {},
   "poolOpeningDefaults": null,

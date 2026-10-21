@@ -187,3 +187,14 @@ test('job 1 landing drafts open in the describe editor', () => {
   assert.deepEqual(old.blocks.map(b => b.id), ['token', 'pause']);
   assert.deepEqual(C.normalizeDraft('garbage'), C.newDraft());
 });
+test('the fee sentence names the actual pair currency; hook-only and existing-token requests use ETH', () => {
+  for (const pair of ['imd', 'eth']) {
+    const d = draftOf('A', ['swap-fee'], { pool: 50, pair });
+    assert.equal(C.body(d).pairWith, pair);
+    assert.ok(C.compose(d).includes(`Fees are always taken from the ${pair.toUpperCase()} (pair currency) side`));
+  }
+  for (const type of ['B', 'C']) {
+    const d = draftOf(type, [], { pair: 'imd' });
+    assert.match(C.compose(d), /Fees are always taken from the ETH \(pair currency\) side/);
+  }
+});

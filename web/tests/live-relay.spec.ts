@@ -1,0 +1,35 @@
+import { test, expect } from '@playwright/test';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import site from '../../public/site-config.json' with { type: 'json' };
+import { routeReadTransports } from './live-transport';
+
+test('one real free check from the production export through the owner relay; no wallet or launch', async ({ page }) => {
+  test.skip(process.env.HOOKS_LIVE_RELAY !== '1', 'Opt in once with HOOKS_LIVE_RELAY=1. This makes a real free check.');
+  test.setTimeout(60000);
+  const out = '../tests/results/job6'; fs.mkdirSync(out, { recursive: true });
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await routeReadTransports(page);
+  await page.setViewportSize({ width: 390, height: 844 }); await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./#store'); await expect(page.locator('.progress-banner')).toHaveCount(0);
+  await page.getByLabel('Describe your hook', { exact: true }).fill('Observe swaps without charging any hook fee or granting owner powers.');
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Builder', exact: true })).toBeVisible();
+  await page.locator('#s-chain').selectOption('1'); await page.locator('#s-pool').fill('50');
+  const button = page.getByRole('button', { name: 'Check with the swarm (free)', exact: true });
+  await expect(button).toBeEnabled();
+  const responsePromise = page.waitForResponse(r => r.url() === `${site.relayUrl}/check` && r.request().method() === 'POST');
+  const started = Date.now(); await button.click(); const response = await responsePromise;
+  const responseText = await response.text(), request = response.request().postDataJSON();
+  fs.writeFileSync(`${out}/live-check.request.json`, JSON.stringify(request, null, 2) + '\n');
+  fs.writeFileSync(`${out}/live-check.response.json`, responseText);
+  const summary = { capturedAt: new Date().toISOString(), source: response.url(), method: 'POST', status: response.status(), elapsedMs: Date.now() - started, requestSha256: crypto.createHash('sha256').update(JSON.stringify(request)).digest('hex'), responseSha256: crypto.createHash('sha256').update(responseText).digest('hex'), browser: 'Chromium', viewport: { width: 390, height: 844 }, launchSubmitted: false, walletConnected: false, pageErrors: errors };
+  fs.writeFileSync(`${out}/live-check-summary.json`, JSON.stringify(summary, null, 2) + '\n');
+  expect(response.status()).toBe(200); const result = JSON.parse(responseText);
+  expect(result.blockers).toEqual([]); expect(result.facts.length).toBeGreaterThan(0); expect(result.plan.length).toBeGreaterThan(0);
+  await expect(page.getByRole('heading', { name: 'What the swarm understood', exact: true })).toBeVisible();
+  await expect(page.locator('.swarm-panel')).toContainText('No blockers reported for this exact request.');
+  await page.locator('.swarm-panel').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${out}/live-check-390.jpg`, type: 'jpeg', quality: 75 });
+  await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled();
+  expect(errors).toEqual([]); console.log(JSON.stringify({ ...summary, facts: result.facts.length, plan: result.plan.length, blockers: result.blockers.length }));
+});

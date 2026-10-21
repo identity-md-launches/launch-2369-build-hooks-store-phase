@@ -70,7 +70,7 @@ export function verifyApprovalReceipt(receipt: TransactionReceipt, ctx: LaunchCo
       if (event.args.owner.toLowerCase() === ctx.account.toLowerCase() && event.args.spender.toLowerCase() === intake.toLowerCase() && event.args.value === price) return;
     } catch { /* Only the exact token approval can unlock the next step. */ }
   }
-  throw new Error('This receipt does not contain the expected IMD approval. Check the transaction before continuing.');
+  throw new Error('This receipt does not contain the expected IMD approval. Review its hash, then retry approval.');
 }
 export function requestedId(receipt: TransactionReceipt, ctx: Pick<LaunchContext, 'config' | 'chainId' | 'account' | 'bytes'>, price: bigint): Hex {
   if (receipt.status !== 'success') throw new Error('The launch transaction reverted. No request was created.');

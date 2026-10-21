@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseCheck, checkRequest, importSource, intakeJob, jobStages, parseLaunches, matchesLaunch, relativeTime } from '../web/src/relay.ts';
+import { parseCheck, checkRequest, importSource, intakeJob, jobStages, parseLaunches, matchesLaunch, relativeTime, relayFetch } from '../web/src/relay.ts';
 import { newDraft, body, normalizeDraft } from '../src/lib/compose.ts';
 
 const result = JSON.parse(readFileSync(new URL('../evidence/check-A-default-blocks.response.json', import.meta.url)));
@@ -33,19 +33,48 @@ test('IMD HTTP failures never become a clear check', async t => {
   t.mock.method(globalThis, 'fetch', async () => Response.json({ detail: 'Try later' }, { status: 503 }));
   await assert.rejects(checkRequest('https://relay.example', {}), /503.*Try later/);
 });
+test('HTML, proxy text, empty and malformed JSON responses use a retryable status message', async t => {
+  let response;
+  t.mock.method(globalThis, 'fetch', async () => response);
+  for (const [status, text] of [[503, '<html>Cloudflare unavailable</html>'], [502, 'Bad Gateway'], [500, ''], [200, '<html>Proxy page</html>'], [200, '{broken'], [204, null]]) {
+    response = new Response(text, { status });
+    await assert.rejects(relayFetch('https://relay.example', '/check', {}), e => {
+      assert.equal(e instanceof SyntaxError, false);
+      assert.equal(e.message, `IMD could not finish this request (${status}). Try again.`);
+      return true;
+    });
+  }
+  response = Response.json({ error: { unexpected: 'shape' } }, { status: 503 });
+  await assert.rejects(relayFetch('https://relay.example', '/launches'), /\(503\)\. Try again\./);
+});
 test('intake job discovery matches the request id and action before using admission.result.jobId', () => {
   const entry = { requestId: '0xABC', action: 'launch.open', admission: { result: { jobId: 'job-123' } } };
   assert.equal(intakeJob({ entries: [entry] }, '0xabc'), 'job-123');
   assert.equal(intakeJob({ entries: [entry] }, '0xdef'), null);
   assert.equal(intakeJob({ entries: [{ ...entry, action: 'job.open' }] }, '0xabc'), null);
 });
-test('job nodes map real build, audit and deployment states, including failures', () => {
-  const job = { nodes: [{ key: 'build_contract_project', state: 'accepted' }, { key: 'write_foundry_tests', state: 'accepted' }, { key: 'audit_math', role: 'review', state: 'running' }, { key: 'audit_judge', state: 'pending' }], launch: { status: 'pending' } };
-  assert.deepEqual(jobStages(job).map(s => [s.title, s.state]), [['Building', 'complete'], ['Audit panel', 'active'], ['Deploying', 'pending']]);
-  job.nodes[2].state = 'blocked'; assert.equal(jobStages(job)[1].state, 'failed');
-  job.nodes[2].state = 'accepted'; job.nodes[3].state = 'accepted'; job.launch.status = 'deploying';
+test('recorded live GET /jobs/:id response uses waiting, accepted and failed without inventing progress', () => {
+  const job = JSON.parse(readFileSync(new URL('fixtures/relay/job-live.response.json', import.meta.url)));
+  assert.equal(job.id, 'a6715145-76db-498f-9ca9-a11ed38d82a8');
+  assert.deepEqual(jobStages(job).map(s => s.state), ['failed', 'pending', 'pending']);
+  // Replay the active phases in the recorded response's actual schema.
+  const build = job.nodes.find(n => n.role === 'implement');
+  build.state = 'working'; assert.equal(jobStages(job)[0].state, 'active');
+  build.state = 'accepted';
+  job.nodes.find(n => n.role === 'review' && n.state === 'waiting').state = 'working';
+  assert.equal(jobStages(job)[1].state, 'active');
+  job.nodes.forEach(n => n.state = 'accepted'); job.state = 'completed';
   assert.deepEqual(jobStages(job).map(s => s.state), ['complete', 'complete', 'active']);
   job.launch.status = 'live'; assert.equal(jobStages(job)[2].state, 'complete');
+});
+test('job nodes map real build, audit and deployment states, including failures', () => {
+  const job = { state: 'executing', nodes: [{ key: 'build_contract_project', state: 'accepted' }, { key: 'write_foundry_tests', state: 'accepted' }, { key: 'audit_math', role: 'review', state: 'working' }, { key: 'audit_judge', state: 'waiting' }], launch: { status: null } };
+  assert.deepEqual(jobStages(job).map(s => [s.title, s.state]), [['Building', 'complete'], ['Audit panel', 'active'], ['Deploying', 'pending']]);
+  job.nodes[2].state = 'failed'; assert.equal(jobStages(job)[1].state, 'failed');
+  job.nodes[2].state = 'accepted'; job.nodes[3].state = 'accepted'; job.state = 'completed';
+  assert.deepEqual(jobStages(job).map(s => s.state), ['complete', 'complete', 'active']);
+  job.launch.status = 'live'; assert.equal(jobStages(job)[2].state, 'complete');
+  assert.equal(jobStages({ nodes: [{ key: 'security_check', role: 'audit', state: 'working' }] })[1].state, 'active');
   assert.throws(() => jobStages({}), /unavailable/);
 });
 test('ticker names come from API artifacts and match a chain-proven store launch; unrelated launches stay out', () => {

@@ -23,7 +23,7 @@ export function storeLogs(status = 0) {
 export async function interceptChains(page: Page, options: {status?:number; noLogs?:boolean; fork?:string; deployedHook?:string; result?:unknown; resultFailure?:boolean; paused?:boolean}={}) {
   const logs=storeLogs(options.status);
   const calls: {method:string;params:any[]}[]=[];
-  const config={...site,chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))};
+  const config={...site,relayUrl:null,chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))};
   await page.route('**/site-config.json',r=>r.fulfill({json:config}));
   await page.route('https://api.imd.fun/swarm',r=>r.fulfill({status:503}));
   await page.route('https://raw.githubusercontent.com/**',r=>r.abort());
@@ -36,6 +36,7 @@ export async function interceptChains(page: Page, options: {status?:number; noLo
       const chain=r.request().url().includes('robinhood')?4663:1;
       if(req.method==='eth_chainId')result=toHex(chain);
       else if(req.method==='eth_blockNumber')result=toHex(head);
+      else if(req.method==='eth_getBlockByNumber')result={number:req.params[0],hash:logs.requested.blockHash,timestamp:'0x6a500000',transactions:[]};
       else if(req.method==='eth_getLogs'){
         const q=req.params[0], candidates=q.topics[0]===REQUEST_TOPIC?[logs.requested]:q.topics[0]===COMPLETE_TOPIC?[logs.completed]:[];
         result=chain===1&&!options.noLogs?candidates.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock)&&(!q.topics[1]||q.topics[1].toLowerCase()===String(l.topics[1]).toLowerCase())):[];
@@ -83,6 +84,7 @@ export async function injectedOwner(page: Page, account=owner, rpc?:string, init
 
 // Existing-page regression tests have no network dependency or sample catalog cards.
 export async function emptyIntake(page: Page) {
+  await page.route('**/site-config.json', route => route.fulfill({ json: { ...site, relayUrl: null } }));
   const answer = async (route: any) => {
     const payload = route.request().postDataJSON();
     const reply = (req: any) => ({jsonrpc: '2.0', id: req.id, result: req.method === 'eth_chainId'

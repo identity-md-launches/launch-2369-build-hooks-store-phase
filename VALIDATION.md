@@ -1,3 +1,31 @@
+# Worker validation — phase 1, job 6
+
+Complete for the stated scope, validated on 2026-10-21. Current evidence is in [tests/results/job6](tests/results/job6/); the prior job 5 record below is historical. These are worker observations, not independent certification. The seven fixes and all six Better Interface domains are documented with source locations and limitations in [REVIEW.md](tests/results/job6/REVIEW.md).
+
+| Check | Actual job 6 result | Evidence under tests/results/job6 |
+| --- | --- | --- |
+| Locked install | npm ci passed in an isolated temporary copy; existing manifests/lockfiles/config untouched | Build/typecheck logs; README commands |
+| Typecheck and production build | Exit 0; complete relative-URL export in dist/ | typecheck.txt, build.txt, export-integrity.json |
+| Unit suite | 62 passed; no failures/skips | unit.txt |
+| Cloudflare Worker | 9 passed; no failures/skips | relay-unit.txt |
+| Full Chromium suite | 121 passed, 7 optional skipped, zero failures/flaky; all 33 go-live tests included | playwright.txt, playwright-results.json |
+| All routes | Store, Catalog, Builder, Launch, Hook, My hooks, Learn at 320/390/1440; primary interactions, local resources and reflow passed | 21 route/width JPEGs and full suite results |
+| Live free check | Owner relay HTTP 200 in a browser, 583 ms for the request; 14 facts, 9 plan steps, zero blockers; no wallet/launch | live-check.request.json, live-check.response.json, live-check-summary.json, live-relay.txt |
+| Live-RPC settle | Fresh browser: both histories settled in 2,258 ms; 2 Ethereum and 48 Robinhood log calls | live-rpc.txt, live-rpc.json |
+| Lighthouse | 100 Store, 100 Builder, 100 checked Builder response at 390 | lighthouse-summary.json, lighthouse.txt |
+| Final critic probe | 13/16 pass; 3 established visual-spec exceptions; no layout/resource/target/contrast/metadata failure | design-probe.json; REVIEW.md |
+| Export and submission budget | Complete assets/config; protected paths, cache/submodule absence and conservative 8 MiB envelope checked | export-integrity.json, submission-budget.json |
+
+Build/check commands were npm --prefix web ci, npm --prefix web run typecheck, npm --prefix web test, node --test relay/worker.test.mjs, npm --prefix web run build, npm --prefix web run test:e2e, and node scripts/check-delivery.mjs, executed from the isolated source copy where dependencies were installed. The two live tests were run individually with HOOKS_LIVE_RELAY=1 and HOOKS_LIVE_RPC=1. Contributor read transports were supplied only to verification; public RPC names remain in the site/evidence. Fonts/assets are local; all runtime file references were checked under /preview/.
+
+SPEC.md was refreshed from the task's upstream URL to 1.19. The recorded live GET /jobs answer and its URL/time/hash are under tests/fixtures/relay/. Its current failed/queued state is tested unchanged; working/completed phases replay the same actual schema. Reorg scenarios are explicitly synthetic fixtures using observed chain hashes, not claims of real reorganizations.
+
+The source and export set relayUrl to https://hooks-store-relay.hooks-store.workers.dev and inProgress to false. Approve/Launch work after the existing wallet/receipt gates. A failed, stale or blocker-bearing check stays locked; the refused-body warning remains. No real approval, payment, launch, contract/token deployment or site publication was made. WebKit/Safari, screen-reader, physical-device and native-zoom checks remain unperformed; details are in the review.
+
+---
+
+# Prior job 5 validation (historical)
+
 # Worker validation — phase 1, job 5
 
 Validated on 2026-10-21 against the production static export. These are this implementation seat’s observations, not independent certification. Current evidence is in `tests/results/job5/`; job 4 and earlier evidence remain in their original directories. The separate read-only adversarial review is pending and is not replaced by these checks.

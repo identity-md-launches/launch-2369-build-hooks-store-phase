@@ -43,7 +43,9 @@ for (const width of [320, 390, 1440]) for (const [name, hash, heading] of [
   } else if (name === 'Builder') {
     await expect(page.locator('#s-pair option')).toHaveText(['IMD', 'ETH']); await expect(page.locator('#s-pair')).toHaveValue('imd');
     await expect(page.locator('#composed')).toContainText('paired with IMD.');
+    await expect(page.locator('#composed')).toContainText('Fees are always taken from the IMD (pair currency) side');
     await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('paired with ETH.');
+    await expect(page.locator('#composed')).toContainText('Fees are always taken from the ETH (pair currency) side');
     await expect(page.locator('.preview .sum')).toContainText('paired with ETH');
     await page.getByRole('button', { name: 'Continue to launch' }).click(); await expect(page).toHaveURL(/#launch$/);
   } else if (name === 'Catalog') {
@@ -125,7 +127,7 @@ test('relay timeline discovers the current job through matching intake and rende
   const intake: any[] = [], jobs: any[] = []; let auditing = false, deploying = false;
   const jobId = 'ba9d232e-9213-459b-963d-811773f73376';
   await page.route(`${relay}/intake/**`, r => { intake.push(r.request().url()); return r.fulfill({ json: { entries: [{ requestId, action: 'launch.open', admission: { result: { jobId } } }] } }); });
-  await page.route(`${relay}/jobs/${jobId}`, r => { jobs.push(r.request().url()); return r.fulfill({ json: { id: jobId, nodes: [{ key: 'build_contract_project', state: auditing ? 'accepted' : 'running' }, { key: 'audit_math', role: 'review', state: deploying ? 'accepted' : auditing ? 'running' : 'pending' }], launch: { status: deploying ? 'deploying' : 'pending' } } }); });
+  await page.route(`${relay}/jobs/${jobId}`, r => { jobs.push(r.request().url()); return r.fulfill({ json: { id: jobId, nodes: [{ key: 'build_contract_project', state: auditing ? 'accepted' : 'working' }, { key: 'audit_math', role: 'review', state: deploying ? 'accepted' : auditing ? 'working' : 'waiting' }], launch: { status: deploying ? 'deploying' : 'pending' } } }); });
   await page.goto(route); await expect(page.locator('.timeline li').nth(1)).toContainText('In progress');
   expect(intake[0]).toContain('/intake/1/'); expect(jobs).toHaveLength(1);
   auditing = true; await page.clock.fastForward(20001); await expect(page.locator('.timeline li').nth(2)).toContainText('In progress');

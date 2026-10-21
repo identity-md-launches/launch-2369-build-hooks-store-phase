@@ -1,0 +1,28 @@
+
+> the-hooks-store@0.1.0 build
+> tsc --noEmit && vite build --config vite.config.ts
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 1651 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/index.html                           1.83 kB │ gzip:   0.76 kB
+../dist/assets/index-C20EWyXm.css           32.39 kB │ gzip:   7.41 kB
+../dist/assets/secp256k1-DD8PxkG2.js         0.05 kB │ gzip:   0.06 kB
+../dist/assets/utils-DFnHSamt.js             2.43 kB │ gzip:   1.07 kB
+../dist/assets/ccip-C66m14d6.js              2.88 kB │ gzip:   1.33 kB
+../dist/assets/eventemitter3-CASeZv19.js     3.40 kB │ gzip:   1.33 kB
+../dist/assets/sha2-BtPXGKXt.js              3.57 kB │ gzip:   1.88 kB
+../dist/assets/isAddressEqual-CZI2hc1A.js   11.45 kB │ gzip:   4.41 kB
+../dist/assets/secp256k1-DMk4gNp3.js        26.34 kB │ gzip:  10.22 kB
+../dist/assets/dist-BVDjdYEl.js             96.29 kB │ gzip:  31.12 kB
+../dist/assets/call-B0R1bJad.js             97.80 kB │ gzip:  27.43 kB
+../dist/assets/index-BVgxjl3I.js           627.77 kB │ gzip: 190.05 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 699ms

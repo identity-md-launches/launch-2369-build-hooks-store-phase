@@ -168,7 +168,7 @@ export function compose(d: Draft, wallet?: string): string {
   lines.push(powers.length
     ? `Owner ${walletOr(s.owner, wallet)} may only: ${powers.join(', ')}, through the functions named above. No other admin function, no backend signer, no upgrade path.`
     : 'No owner functions, no backend signer, no upgrade path.');
-  lines.push(`Fees are always taken from the ETH (pair currency) side, never from ${c.symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.`);
+  lines.push(`Fees are always taken from the ${d.type === 'A' && s.pair === 'imd' ? 'IMD' : 'ETH'} (pair currency) side, never from ${c.symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.`);
   if (d.type === 'A') {
     lines.push('Enable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.');
     if (s.pool !== null) lines.push(`Pool: ${s.pool}% of my 90% share seeds the pool; the remainder goes to ${walletOr(s.rem, wallet)}.`);

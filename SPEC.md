@@ -1,8 +1,14 @@
 # The Hooks Store — product and build specification
 
-Version 1.16 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
+Version 1.19 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
 
 This document is a specification, not a wish list. Every section says exactly what to build, what data it uses, and how to tell when it is done. The clickable mockup in `mockup/index.html` is the visual reference; where the mockup and this text disagree, this text wins.
+
+Changes in 1.19 (2026-10-21): job 5 is delivered and verified (jobs/log.md). Its adversarial review (three findings: timeline node states, the fee sentence for IMD pairs, relay error text) and its design critic (four reproducible bugs: a cancelled approval stuck pending, reorged Intake events kept, a full-storage import lost, a ticker timestamp that never ages) are recorded in evidence/job-5-reviews.md; none reopened the build, so all seven ride at the top of job 6, which also goes live: the relay URL set and the in-progress banner removed (13, 15, owner's decision 15). Phase 2 jobs are renumbered 7a and 7. 7.4 records the job states the API returns.
+
+Changes in 1.18 (2026-10-21): the owner scrapped the pairing and IMD-fee idea; the proposal and its switch are removed from the mockup and nothing of it is planned. The three mockup repairs and the fee-side wording of 5.1 from 1.17 stay.
+
+Changes in 1.17 (2026-10-21): the mockup carries a parked proposal behind the SHOW PROPOSAL switch in its top strip: a Pair with choice for existing-token launches (IMD, ETH or another token that already exists) and a store IMD fee of 0.1% of the paired side on every pool not paired with IMD, converted to IMD and burned or sent to a treasury address the creator picks. It is not part of any job until this document says so. One correction found while drawing it: the composer's fee-side sentence (5.1) names the pair currency, IMD when paired with IMD, instead of always ETH; the next job mirrors it.
 
 Changes in 1.16 (2026-10-21): job 4 is delivered and verified (jobs/log.md): the chain reads settle in about five seconds on a fresh browser, the top bar has no chain pill, and the launch flow is live behind the in-progress banner. The Builder's Pair with select lists IMD first and starts on IMD, ETH second (owner's decision 14 in section 14); job 5 carries it. IMD's launch policy pairs a new token's pool only with ETH, IMD or, on Ethereum, FWA (capabilities read 2026-10-21); the store offers ETH and IMD.
 
@@ -55,7 +61,7 @@ Goals, in priority order:
 Non-goals for version 1:
 
 - No store-operated review pipeline, requester or gated deployer. The `AutoHookJobRequester`, `HookRequestCodec` and `GatedHookDeployer` contracts from the foundation repo are **not used**.
-- No "buy this hook from its creator" marketplace. Free listings and paid #ad slots (`HookListingRegistry`, `FeaturedPlacements` from the foundation repo) are phase 2 (job 6); the carousel slot exists from day one.
+- No "buy this hook from its creator" marketplace. Free listings and paid #ad slots (`HookListingRegistry`, `FeaturedPlacements` from the foundation repo) are phase 2 (job 7); the carousel slot exists from day one.
 - No AI chat. "Describe it" is a text box whose contents become requirements in the launch request; IMD's free check reports what the swarm understood. The site does not interpret text itself.
 - No backend, database or accounts. A small optional relay (7.4) is the only server-side piece and the site works without it.
 
@@ -315,7 +321,7 @@ The hook does exactly the following, and nothing else:            (with words on
 In the creator's own words: <description>{words}</description>      (only when words were written)
 1. {rule}  2. {rule} …                                               (only when blocks were stacked)
 {owner powers sentence, ending "through the functions named above" when there are powers}
-Fees are always taken from the ETH (pair currency) side, never from {symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.
+Fees are always taken from the {ETH|IMD} (pair currency) side, never from {symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.
 A: Enable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.
 A: Pool: {poolShare}% of my 90% share seeds the pool; the remainder goes to {remainderTo}.   (only once the user has chosen; never a default)
 B, C: Take the PoolManager as a constructor argument and enable only the callbacks the behavior above needs. The deployed address must carry the correct hook permission bits (mine a CREATE2 salt). Owner, if any, is $owner.
@@ -381,7 +387,7 @@ The foundation repo's `FeaturedPlacements` (0.1 IMD for 7 days, ordered by purch
 
 - Duration 24 hours; base price 0.1 IMD per placement; one live placement per listing; `#ad` on every placement and event; the same deposit, withdraw, cancel with pro-rata refund of the base price, settle, proceeds recipient and two-step owner as before. No proxy, no upgrade, no self-destruct.
 - `boost(placementId, amount)`: anyone may add IMD from their deposited balance to an open placement. Boosts are never refunded: on cancel they go to the pinned proceeds recipient, on settle both base and boosts do. `rankOf(id)` returns base plus boosts; `featured(cursor, scanLimit)` returns each placement's total so the site sorts by total paid, ties by the earlier purchase.
-- Deployed through an IMD contracts launch (`jobs/job-6a-ads-contract.json`, `evm_contracts`, one launch per chain: Robinhood Chain, then Ethereum), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
+- Deployed through an IMD contracts launch (`jobs/job-7a-ads-contract.json`, `evm_contracts`, one launch per chain: Robinhood Chain, then Ethereum), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
 
 ## 7. Data: how a static site reads everything
 
@@ -402,6 +408,8 @@ Same logs filtered by payer, plus pending request ids saved in `localStorage` wh
 ### 7.4 Optional relay
 
 A single-file Cloudflare Worker forwarding `POST /check` and `POST /import` to `api.imd.fun/requests/…`, and `GET /launches*`, `/jobs/:id`, `/intake/:chain/:tx` to the same paths, adding `Access-Control-Allow-Origin: *`, caching GETs 30 seconds, allowing nothing else. `site-config.json` has `relayUrl` (null by default). With it: the free check button and the "What the swarm understood" panel work live, the pond ticker names launches, the timeline shows Building / Audit panel / Deploying, and own-code imports are resolved. The swarm writes and tests it; the operator deploys it. The operator will also ask IMD to enable CORS on those routes.
+
+Job states: `GET /jobs/:id` reports each node as `waiting` (queued), `working` (in progress) or `accepted` (done), with `failed` possible, and the job as `executing` or `completed`. The timeline marks Building active while an implement node is working, Audit panel active while a review or audit node is working, and Deploying active once the job is completed and the launch is not yet live; it never shows Live from the relay alone, only from the chain.
 
 ## 8. Design system
 
@@ -463,8 +471,9 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 | 3 | Chain reads, search by address, hook page, My hooks | Intake log decoding on both chains, result.json fetch, block-label matching, address resolution on chain, the Manage and Anyone-can panels built from section 4.11, pond triggers from chain, snapshot script |
 | 4 | Launch flow | The job 3 corrections of 7.2 (Ethereum RPC, start blocks and windows) and 3.0 (no chain pill), wallets on Ethereum and Robinhood Chain, price read, approve, request, receipt parsing, Launch page per type, pool-opening panel (copy-only in phase 1) |
 | 5 | Relay, polish and the review | A two-step chain: `build-website` (pairing order IMD first, worker, live free check and facts panel, stage names, import of own code, scene polish with reeds, hat and birds, copy pass) then `adversarial-review` by a different seat, read-only, of the money path from jobs 4 and 5; IMD's free check accepts the shape with no blockers and adds the design critic as well, all inside one 0.5 IMD job |
-| 6a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
-| 6 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
+| 6 | Go live | The seven findings of job 5's reviews (timeline node states, the pair-currency fee sentence, relay error text, cancelled-approval retry, reorged events dropped, import kept on full storage, ticker timestamp), then `relayUrl` set to the owner's deployed worker and `inProgress` false: the banner goes and Approve and Launch work |
+| 7a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
+| 7 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
 
 ## 14. Decisions taken by the owner (2026-10-21)
 
@@ -482,6 +491,7 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 12. No test network (2026-10-21, after job 2): Sepolia is dropped. Hooks deploy on Robinhood Chain or Ethereum from the first launch, the user chooses the chain in the Builder with no default, and testing is done with real launches on those chains; the tested marks record real launches instead of a verification round. IMD's free check accepts the sample launch bodies with chain ids 1 and 4663 with no blockers (5.3). The owner's IMD sits on Ethereum, which can pay for launches on either chain (6.2).
 13. No chain pill (2026-10-21, after job 3): the owner asked to remove the ETHEREUM · ROBINHOOD pill from the top bar. The bar is the logo, the nav, the search box and Connect; the chosen deploy chain shows in the Builder's settings and summary, on the launch page and on each card. Job 4 carries the removal.
 14. Pairing order (2026-10-21, after job 4): the Pair with select lists IMD first and starts on IMD, ETH second. IMD's launch policy offers ETH, IMD and, on Ethereum only, FWA as the pool pairing for a new token; the store does not offer FWA. Job 5 carries the order.
+15. Go live (2026-10-21, after job 5): the owner's agent read job 5's adversarial review and the critic's findings; all seven ride in job 6, which removes the banner. The owner deploys the relay worker on a free Cloudflare account before job 6 so the free check works live from the first real launch.
 
 ## 15. From mockup to live
 
@@ -489,15 +499,15 @@ The mockup is a drawing of the product, not the product. The swarm builds the re
 
 1. **Publish the brief.** Done on 2026-10-21: the `spec/` folder is the public repository https://github.com/the-hook-store/hooks-store-spec under a GitHub account created for the project (not the owner's personal one). Job 1 names it with `repoUrl` and `baseCommit`. IMD accepts only public GitHub repositories as a starting point and delivers every job to GitHub, which is why a project account is needed at all. Two consequences, both already in job 1's body: IMD hosts a site built from your own repository only after a `site-content-check` step, so job 1 is a two-step chain (content check, then `build-website`); and the repository needs an `index.html` at its root, which introduces the spec and opens the mockup. IMD's free check passes job 1 with no blockers (evidence/check-job-1.response.json).
 2. **Pay for job 1.** Done on 2026-10-21: paid 07:21 UTC, delivered 08:48 UTC, details in jobs/log.md. The explorer's Launch form cannot send this job: when it is given a repository it only hosts that repository as it is, and it has no way to paste a full body. So the owner pays on-chain instead, through IMD's Intake contract on Ethereum (where the owner's IMD is), from a local page Claude prepared (`tools/pay-onchain.html`, outside this repository): connect the wallet, approve 0.5 IMD, send the request. The page holds the exact checked body; its transaction encoding was verified against an independent encoder and a dry run on Ethereum. Claude cannot pay: every job and every test launch is paid by the owner's wallet, and Claude prepares the exact text each time. Within hours the swarm delivers source and a built site to a GitHub repository under IMD's launches organisation, and IMD pins the built site to IPFS and serves it at `the-hooks-store.sites.imd.fun`. That is the final name, claimed from day one; until the site is finished its banner says it is in progress.
-3. **Iterate.** Jobs 2 to 5 are `job.continue` requests on the same project: each one starts from the previous commit, and each delivery replaces what is served at the site name. Claude reads every delivery, screenshots it and drives it by script, and carries any miss to the top of the next job rather than paying for a separate fix-up. There is no audit after every job: website jobs already include IMD's design critic, every hook launch gets IMD's audit panel, and the money path (jobs 4 and 5) gets one adversarial review as the second step of job 5, before the first real launch. Budget: six website jobs at 0.5 IMD plus a few continuations, so roughly 4 IMD for the site.
-4. **Test on chain with real money.** During jobs 4 and 5 the owner makes real launches from the site on Robinhood Chain or Ethereum, each 0.5 IMD plus gas, paid in IMD on Ethereum or Robinhood Chain (decision 12: no test network).
+3. **Iterate.** Jobs 2 to 6 are `job.continue` requests on the same project: each one starts from the previous commit, and each delivery replaces what is served at the site name. Claude reads every delivery, screenshots it and drives it by script, and carries any miss to the top of the next job rather than paying for a separate fix-up. There is no audit after every job: website jobs already include IMD's design critic, every hook launch gets IMD's audit panel, and the money path (jobs 4 and 5) gets one adversarial review as the second step of job 5, before the first real launch. Budget: six website jobs at 0.5 IMD plus a few continuations, so roughly 4 IMD for the site.
+4. **Test on chain with real money.** After job 6 removes the banner, the owner makes real launches from the site on Robinhood Chain or Ethereum, each 0.5 IMD plus gas, paid in IMD on Ethereum or Robinhood Chain (decision 12: no test network).
    - *The three journeys.* One hook with a new token (type A), one hook only (type B), one hook for an existing token (type C), each from a small default stack. This proves the launch flow end to end and settles the type B address question (6.5).
    - *Block coverage.* There is no separate verification round. Claude checks every real launch the way 4.14 describes: the 4.11 function names are in the deployed ABI and do what the sentence says, the owner-only ones refuse other callers, and where a rule can be exercised with a swap (fees, limits, windows, cooldowns, jars) it is exercised and the effect is read back. Every block the launch used gets an entry in `evidence/blocks-verified.json` with passed true or false and notes, and the Builder shows the proven mark from then on. A failing block has its sentence or its 4.11 functions rewritten, or leaves the catalog. The Custom rule block cannot be pre-verified; the user's own launch audit covers it, and the card says so.
    Budget: three launches, 1.5 IMD plus gas; the owner may add the four all-blocks launches of 5.3 (2 IMD) at any time to cover every block sooner.
 5. **Go live, phase 1.** The site is static files, so "live" is a hosting decision, and two options can run at once:
-   - *IMD hosting.* Every delivery already publishes to `the-hooks-store.sites.imd.fun` and its ENS name `the-hooks-store.site.identitymd.eth`. Going live is removing the in-progress banner. The old `the-hooks-store-uniswap-v4-hooks` name stays on its offline page or is pointed at the new site later.
+   - *IMD hosting.* Every delivery already publishes to `the-hooks-store.sites.imd.fun` and its ENS name `the-hooks-store.site.identitymd.eth`. Job 6 removes the in-progress banner and sets `relayUrl` (7.4) once the owner has deployed the worker from the delivered `relay/` folder with one wrangler command on a free Cloudflare account; Claude runs that command with the owner. The old `the-hooks-store-uniswap-v4-hooks` name stays on its offline page or is pointed at the new site later.
    - *The owner's own domain.* Cloudflare Pages (free) connected to a fork of the delivered repository under the owner's GitHub account, building `dist/` on every push, with a custom domain such as thehooksstore.xyz. Claude sets it up with the owner in about fifteen minutes. The relay worker (7.4) lives on the same Cloudflare account.
    Both serve the identical build. The IMD name is the canonical, audit-trailed copy; the custom domain is the one to advertise.
-6. **Phase 2.** The ad contracts are deployed by the job 6a launch (one launch per chain: Robinhood Chain, then Ethereum), job 6 wires the Promotions panel and the strip, and the same republish puts it live.
+6. **Phase 2.** The ad contracts are deployed by the job 7a launch (one launch per chain: Robinhood Chain, then Ethereum), job 7 wires the Promotions panel and the strip, and the same republish puts it live.
 7. **After that.** Changes are new `job.continue` jobs; the owner never edits code. Operating costs are zero: no server, no database, the relay is within Cloudflare's free tier, and users pay IMD directly for their own launches and placements.
 
