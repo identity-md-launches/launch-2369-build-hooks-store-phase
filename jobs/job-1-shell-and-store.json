@@ -1,12 +1,20 @@
 {
   "objective": "Build The Hooks Store, phase 1 job 1 of 6: the site shell, the Store page with the character-tile pond landing, the #ad strip and the catalog. Implement SPEC.md sections 3.0, 3.1 (landing, the self-scrolling featured strip with only the open-slot card, catalog, keyword search; address resolution comes in job 3), 3.6 (the seven answers, the Read the sources links and the 14 permissions table exactly as in the mockup), 8, 9 (the monochrome tile scene exactly as mockup/index.html draws it: seeded canopy, shoreline, two alternating water fields, twelve drifting lily pads, two swaying branches, the grass bank with two friends, the fisher layer with the seven-frame cast, fish and leaves; the click-to-cast trigger) and 10 exactly; mockup/index.html is the visual reference and SPEC.md wins on any conflict. Stack: Vite + React + TypeScript, hash routing, base \"./\", one styles.css of the section 8 tokens (Press Start 2P, Pixelify Sans, VT323 from Google Fonts with fallbacks), a single beige theme by design, no footer, every number and amount in VT323. Top bar per 3.0: nothing wraps above 820 px, the search shrinks first, the Connect button keeps one width with or without an address. Landing per 3.1: full-bleed, the scene behind the centered copy on a beige glow, the describe box whose submit stores the text under localStorage hooks-store:draft:v2 as the prompt and opens #builder, three numbers from GET https://api.imd.fun/swarm hidden on failure, the ticker as outlined text at the bottom edge, no counter and no demo button. Catalog: filter rail (block type, chain, status, sort) and the card grid fed by public/launches.json produced by scripts/snapshot-launches.mjs (GET https://api.imd.fun/launches?limit=500 then /launches/:id for kinds univ4_hook and evm_contracts whose job objective mentions Uniswap v4 hook; commit the generated file); keyword search from the top bar as in 3.1 with the Results heading and the empty state. Export the cast function for later jobs. Builder, Launch, Hook and My hooks routes render a placeholder panel saying the page arrives in a later job. Never show invented numbers. Tests: Playwright at 320, 390 and 1440 for Store and Learn (no horizontal scroll, the top bar does not wrap at 1440 with a 12-character address in the connect button, filters and search change the grid, a click on the water runs the seven cast frames, reduced motion leaves the scene still), plus unit tests for the snapshot script on a saved fixture. Show a one-line in-progress banner under the top bar that reads This site is being built; launches open when the banner goes away, controlled by a flag in public/site-config.json. Deliver source, dist/, test results and a README that says how to regenerate launches.json.",
-  "skill": "build-website",
+  "shape": "chain",
+  "steps": [
+    {
+      "skill": "site-content-check"
+    },
+    {
+      "skill": "build-website"
+    }
+  ],
   "references": [
     "eth-frontend-ux",
     "better-interface"
   ],
   "repoUrl": "https://github.com/the-hook-store/hooks-store-spec",
-  "baseCommit": "0000000000000000000000000000000000000000",
+  "baseCommit": "cccc8d4735b21ec57d9e8ddd3aab0ca87fea10a9",
   "github": true,
   "ipfs": "the-hooks-store"
 }
