@@ -1,8 +1,10 @@
 # The Hooks Store — product and build specification
 
-Version 1.6 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
+Version 1.7 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
 
 This document is a specification, not a wish list. Every section says exactly what to build, what data it uses, and how to tell when it is done. The clickable mockup in `mockup/index.html` is the visual reference; where the mockup and this text disagree, this text wins.
+
+Changes in 1.7: the brief is published at github.com/the-hook-store/hooks-store-spec and job 1 imports it as a two-step chain (content check, then build); jobs are paid on-chain through the Intake because the explorer's form cannot send an imported-repository build; every block must pass a real Sepolia launch before the mainnets open (15.4, 12), with the results in `evidence/blocks-verified.json` read by the Builder (4.14).
 
 Changes in 1.6: gameable blocks show a small warning sign with a hover/focus explanation instead of a red label; the live site name is `the-hooks-store.sites.imd.fun`, claimed from job 1; the brief is hosted on a GitHub account created for the project, not the owner's personal one.
 
@@ -268,6 +270,10 @@ Some blocks can be worked around by determined users or need care. They stay in 
 
 The catalog entry carries the text in a `risk` field; a block with a `risk` field shows the sign everywhere in the site.
 
+### 4.14 Tested marks
+
+The site does not hold hook code: every launch is written, tested and audited by the swarm for that request (section 6). So the proof that a block works is a real launch that used it. `evidence/blocks-verified.json` in the spec repository records that proof: an array of `{block, launchId, chainId, hook, passed, checkedAt, notes}`, one entry per block per verification launch (15.4). The Builder fetches `https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/blocks-verified.json` at load (that host allows browser reads) and falls back to the bundled copy `public/blocks-verified.json`. A block with an entry whose `passed` is true shows a small tick and the words "tested on Sepolia" on its card; any other block shows "not yet tested on Sepolia" in its tooltip and nothing else changes. The file ships empty in job 2 and fills as launches pass. Before Robinhood Chain and Ethereum are enabled (15.6), every block in the catalog must have a passing entry, or it is removed.
+
 ## 5. Composing the launch request
 
 ### 5.1 The description text (at most 7,500 characters)
@@ -417,6 +423,8 @@ Launch: on an Anvil fork of Robinhood with a mocked IMD balance, the three steps
 
 Hook page and My hooks: decode real `Requested` and `Completed` fixtures from both chains; Live with addresses for a real result.json fixture; Failed with the decoded reason.
 
+Blocks: every block in section 4 has a passing entry in `evidence/blocks-verified.json` from a real Sepolia launch before the mainnets are enabled; the Builder reads the file at load and shows the tested mark for passing blocks and the not-yet-tested tooltip for the rest, with the fetch failure falling back to the bundled copy.
+
 Build: `npm run build` and `npm test` pass; `dist/` works from an IPFS gateway subpath; Lighthouse accessibility ≥ 95 on Store and Builder.
 
 ## 13. Delivery plan for the swarm
@@ -452,7 +460,10 @@ The mockup is a drawing of the product, not the product. The swarm builds the re
 1. **Publish the brief.** Done on 2026-10-21: the `spec/` folder is the public repository https://github.com/the-hook-store/hooks-store-spec under a GitHub account created for the project (not the owner's personal one). Job 1 names it with `repoUrl` and `baseCommit`. IMD accepts only public GitHub repositories as a starting point and delivers every job to GitHub, which is why a project account is needed at all. Two consequences, both already in job 1's body: IMD hosts a site built from your own repository only after a `site-content-check` step, so job 1 is a two-step chain (content check, then `build-website`); and the repository needs an `index.html` at its root, which introduces the spec and opens the mockup. IMD's free check passes job 1 with no blockers (evidence/check-job-1.response.json).
 2. **Pay for job 1.** The explorer's Launch form cannot send this job: when it is given a repository it only hosts that repository as it is, and it has no way to paste a full body. So the owner pays on-chain instead, through IMD's Intake contract on Ethereum (where the owner's IMD is), from a local page Claude prepared (`tools/pay-onchain.html`, outside this repository): connect the wallet, approve 0.5 IMD, send the request. The page holds the exact checked body; its transaction encoding was verified against an independent encoder and a dry run on Ethereum. Claude cannot pay: every job and every test launch is paid by the owner's wallet, and Claude prepares the exact text each time. Within hours the swarm delivers source and a built site to a GitHub repository under IMD's launches organisation, and IMD pins the built site to IPFS and serves it at `the-hooks-store.sites.imd.fun`. That is the final name, claimed from day one; until the site is finished its banner says it is in progress.
 3. **Iterate.** Jobs 2 to 5 are `job.continue` requests on the same project: each one starts from the previous commit, and each delivery replaces what is served at the site name. Claude reads every delivery, screenshots it, and writes the next job or a fix-up continuation. Budget: six website jobs at 0.5 IMD plus a few continuations, so roughly 4 IMD for the site.
-4. **Test on Sepolia with real money.** During jobs 4 and 5 the owner makes real launches from the site: one hook with a new token (type A), one hook only (type B), one hook for an existing token (type C). Each costs 0.5 IMD plus gas on Robinhood or Ethereum, and deploys on Sepolia. This is what proves the launch flow and settles the type B address question (6.5).
+4. **Test on Sepolia with real money, every block.** During jobs 4 and 5 the owner makes real launches from the site, in two rounds, each launch 0.5 IMD plus gas on Ethereum or Robinhood, deploying on Sepolia.
+   - *The three journeys.* One hook with a new token (type A), one hook only (type B), one hook for an existing token (type C), each from a small default stack. This proves the launch flow end to end and settles the type B address question (6.5).
+   - *The block verification round.* The four all-blocks requests of 5.3 (A1, A2, B, C) sent as real launches, so every block in section 4 is built, audited and deployed at least once. For each block Claude checks the delivered hook: the 4.11 function names are in the deployed ABI and do what the sentence says, the owner-only ones refuse other callers, and where a rule can be exercised with a Sepolia swap (fees, limits, windows, cooldowns, jars) it is exercised and the effect is read back. Every block gets an entry in `evidence/blocks-verified.json` (4.14) with passed true or false and notes. A failing block has its sentence or its 4.11 functions rewritten and goes into one more launch, or leaves the catalog. The Custom rule block cannot be pre-verified; the user's own launch audit covers it, and the card says so.
+   Budget: seven launches, 3.5 IMD plus gas, before the mainnets open. Nothing on the site is sold on Robinhood Chain or Ethereum until this round is complete.
 5. **Go live, phase 1.** The site is static files, so "live" is a hosting decision, and two options can run at once:
    - *IMD hosting.* Every delivery already publishes to `the-hooks-store.sites.imd.fun` and its ENS name `the-hooks-store.site.identitymd.eth`. Going live is removing the in-progress banner. The old `the-hooks-store-uniswap-v4-hooks` name stays on its offline page or is pointed at the new site later.
    - *The owner's own domain.* Cloudflare Pages (free) connected to a fork of the delivered repository under the owner's GitHub account, building `dist/` on every push, with a custom domain such as thehooksstore.xyz. Claude sets it up with the owner in about fifteen minutes. The relay worker (7.4) lives on the same Cloudflare account.
