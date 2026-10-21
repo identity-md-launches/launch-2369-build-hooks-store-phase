@@ -1,0 +1,69 @@
+{
+  "reference": "mockup/index.html unchanged",
+  "results": [
+    {
+      "id": "db6ce245",
+      "reproduced": true,
+      "evidence": "Original entry redirects to mockup; sampled counters 1,045/52/6 and paid placements present. Original required app files absent, recorded before implementation."
+    },
+    {
+      "id": "d4cc2a79-320",
+      "reproduced": true,
+      "evidence": {
+        "viewport": 320,
+        "document": 434,
+        "table": 401
+      }
+    },
+    {
+      "id": "d4cc2a79-390",
+      "reproduced": true,
+      "evidence": {
+        "viewport": 390,
+        "document": 434,
+        "table": 401
+      }
+    },
+    {
+      "id": "bb19b26d",
+      "reproduced": true,
+      "evidence": "remainder returns 0; hamster treasury returns 1 despite remainder in HamsterHook.req."
+    },
+    {
+      "id": "e43738dd",
+      "reproduced": true,
+      "evidence": {
+        "required": null,
+        "oldPrompt": "Send 1% of every buy to a prize pot"
+      }
+    },
+    {
+      "id": "3638d058",
+      "reproduced": true,
+      "evidence": {
+        "width": 821,
+        "document": 959,
+        "search": 0,
+        "connectRight": 959.015625
+      }
+    },
+    {
+      "id": "da6a3411",
+      "reproduced": true,
+      "evidence": "Reset keeps status prog and only one card."
+    },
+    {
+      "id": "581fdbf2",
+      "reproduced": true,
+      "evidence": {
+        "pointerEvents": "none",
+        "hit": "landing"
+      }
+    },
+    {
+      "id": "bd049d81",
+      "reproduced": true,
+      "evidence": "Cost answer says 0.1 IMD for 7 days."
+    }
+  ]
+}

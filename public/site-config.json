@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "inProgress": true,
+  "enabledDeployChains": [11155111],
+  "paymentChains": [1, 4663],
+  "relayUrl": null,
+  "featuredRequestId": null,
+  "tradeUrlTemplates": {},
+  "poolOpeningDefaults": null,
+  "swarmUrl": "https://api.imd.fun/swarm",
+  "chains": [
+    { "id": 11155111, "name": "Sepolia", "rpcUrl": "https://11155111.rpc.thirdweb.com", "explorerUrl": "https://sepolia.etherscan.io", "testnet": true },
+    { "id": 4663, "name": "Robinhood Chain", "rpcUrl": "https://rpc.mainnet.chain.robinhood.com", "explorerUrl": "https://robinhoodchain.blockscout.com", "testnet": false },
+    { "id": 1, "name": "Ethereum", "rpcUrl": "https://ethereum.reth.rs/rpc", "explorerUrl": "https://etherscan.io", "testnet": false }
+  ]
+}

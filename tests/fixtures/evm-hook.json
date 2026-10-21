@@ -1,0 +1,43 @@
+{
+  "id": "fa5586a5-ad0e-49ee-b695-bbbc7f67d352",
+  "kind": "evm_contracts",
+  "launchNumber": 2304,
+  "status": "live",
+  "chainId": 1,
+  "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2304-project-site-https-hamsterhour-fun-launc",
+  "sourceCommit": "69ca386ed1d5ea7529caf7b75c348159bf488885",
+  "requester": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+  "createdAt": "2026-10-20T18:37:20.196Z",
+  "updatedAt": "2026-10-20T18:39:01.735Z",
+  "jobs": [
+    {
+      "id": "2c9eb033-ae9f-4b2b-a887-f1cc368e1fcb",
+      "objective": "Project site: https://hamsterhour.fun\n\nLaunch 1 of 2 for $HAMSTER: deploy HamsterVault on Ethereum mainnet (evm_contracts, no token yet). Launch 2 is a Uniswap v4 hook token HAMSTER (1B, 18 decimals) with remainderTo = this vault (exactly 800M); its hook sends IMD here. It must survive future game versions (Squeekchain will migrate data to mainnet).\n\nGame v2: 0xe33ab493249a2df0d8c4a71ac54f46d1f7778367 (github.com/identity-md-launches/launch-2260-build-hamster-hour-v2). IMD 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7. TEAM = launch wallet. No owner, pause, upgrade or withdrawal path; TEAM powers are only those listed.\n\nBIND: bindToken(token), TEAM, once; requires totalSupply == 1e27 and balanceOf(vault) == 8e26. Buckets: mining 750M, boost 50M.\n\nGAMES: registry starting with v2. TEAM can scheduleGame(newGame) with a 48h timelock (public, no other effect); on execute it becomes currentGame. Each game must expose lossOf, totalEligibleLoss, cumulativeLossBefore/After, window times and finalization, the staking-recipient pull balance, depositJackpot and fundOracleReserve; check the interface on schedule. The previous game counts only windows starting before the switch; the new game's loss range starts after the previous game's last counted window is finalized, so ranges never overlap and halvings never reset. Old windows stay claimable forever. For 14 days after a switch, mining from the new game is capped at 2M HAMSTER per UTC day (deterministic scaling).\n\nMINING (pull, retroactive from the first v2 window): 20,000 HAMSTER per 1 IMD of eligible loss, halving every 18,750 IMD of global cumulative loss (converges to 750M). Window budget = F(after) - F(before) on the global curve; account share = budget * lossOf / totalEligibleLoss, rounded down, dust tracked. claimMined(game, windows[], beneficiary) is permissionless, pays only the beneficiary, once per (game, k, account), bounded. Committed emissions never exceed the bucket; claim order never changes amounts.\n\nVESTING: each claim creates a 7-day linear, non-transferable grant; unvested and vested-unwithdrawn balances count as stake weight.\n\nSTAKING (IMD rewards only):\n- stake/unstake HAMSTER. Weight earns after a 24h warm-up; requestUnstake stops weight now and releases after 24h; checkpoint on every change.\n- Sources: pull the 5% staker share from any registered game; depositRewards(amt) (hook 0.5%) streamed over 7 days; depositDrip(amt) (80% of anti-snipe tax) as a continuous 1%/day drip of the remainder; the game backlog streams over 30 days.\n- Strictly pro-rata over time. With zero weight, rewards wait: no first-staker windfall. Buckets never count as weight.\n\nFORWARDING: forwardJackpot(amt) and forwardOracle(amt) pull IMD from the caller (the hook) into separate balances that anyone can flush to currentGame's depositJackpot and fundOracleReserve. The hook never needs changing after a game switch.\n\nSQUEEK BOOST (50M, dormant): activateBoost(collection), TEAM once, 12h timelock, for the canonical Squeek NFT on Ethereum mainnet only. Holders register tokenId to their wallet without transfer; it counts for windows starting 24h+ after registering and is void if ownerOf changes. +50% of base mined, max 10k per NFT and 100k globally per UTC day (by window start), deterministic, same vesting. If not activated within 365 days, anyone can move the 50M into mining once.\n\nVIEWS for the site: claimable per game and window, grants, stake, warm-up, unstake queue, pending IMD, streams and drip, buckets left, rate and halving, games and pending switch.\n\nDeliver: Foundry, tests (retroactive claims, halving crossing, game switch with an overlapping backlog, the new-game cap, claim-order independence, bucket conservation, vesting as stake, warm-up, unstake, zero-weight periods, drip, forwarding after a switch, bind checks, boost voiding and caps, the 365-day sweep), ABI, README, real addresses only. After deploy TEAM calls scheduleStakingRecipient(vault) on the game.",
+      "state": "completed",
+      "attachedAt": "2026-10-20T18:37:20.196Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "other",
+      "name": "HamsterBoost",
+      "address": "0x8546b2190b5c38c253e8bea5be1b6427e91e0905",
+      "creationCodeHash": "e88e7d774ded179d2fdd1dc842e8f0c74b048d5e7e232af4ef214937dc5d4187",
+      "txHash": "0xefb89a14807d33b5e40fe97ef6cd198519aab8b864a2e1e40fcd0662dbf02138",
+      "blockNumber": 26235639,
+      "verifiedAt": "2026-10-20T18:39:22.094Z",
+      "verifyFailure": null
+    },
+    {
+      "role": "other",
+      "name": "HamsterVault",
+      "address": "0x1dceb78b36b5f18ac4a130f1ffc76eba0e73d183",
+      "creationCodeHash": "0b135dd96782846de12b2439d7223daf848678575480d9beb0ca856131582379",
+      "txHash": "0xefb89a14807d33b5e40fe97ef6cd198519aab8b864a2e1e40fcd0662dbf02138",
+      "blockNumber": 26235639,
+      "verifiedAt": "2026-10-20T18:39:37.714Z",
+      "verifyFailure": null
+    }
+  ],
+  "seeded": null
+}

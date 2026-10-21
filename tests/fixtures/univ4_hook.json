@@ -1,0 +1,80 @@
+{
+  "id": "702e6c9d-37ee-41ef-afcb-5d5e1af9f31b",
+  "kind": "univ4_hook",
+  "launchNumber": 2336,
+  "status": "live",
+  "chainId": 1,
+  "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2336-hamster-hour",
+  "sourceCommit": "bf12d716b9268cbe820ee776be2a990b4f2c09bd",
+  "requester": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+  "createdAt": "2026-10-20T19:55:33.319Z",
+  "updatedAt": "2026-10-20T19:56:49.866Z",
+  "jobs": [
+    {
+      "id": "863eba48-5cac-4fee-a772-9695de63efd2",
+      "objective": "Project site: https://hamsterhour.fun\nEthereum, paired with IMD 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7. Token is a plain ERC-20 (no tax, mint, burn or owner). Send the 80% remainder (800M) to HamsterVault 0x1dceb78b36b5f18ac4a130f1ffc76eba0e73d183 if the launch allows it.\n\nVault (github.com/identity-md-launches/launch-2304-project-site-https-hamsterhour-fun-launc): depositRewards, depositDrip, forwardJackpot, forwardOracle (uint256), each pulling IMD via transferFrom.\n\nHOOK FEE: 1.1% of the actual IMD leg of every swap (buy input or sell output), all swap modes, real deltas. 0.5% to depositRewards, 0.5% to forwardJackpot, 0.1% to forwardOracle.\n\nANTI-SNIPE: buy-only tax on the IMD leg from pool start: 95% in minute 0, minus 2 points per full minute, 0 from minute 48. Sells never taxed. Tax: 80% to depositDrip, 10% to forwardOracle, 10% to TEAM. Total fees with IMD's launch fee never exceed 100%.\n\nSAFETY: PoolManager-only, immutable pool key, no fee bypass, tax cannot re-arm. Fees accrue as credits and flush to the vault without ever reverting a swap (anyone can retry flush). No owner, pause, upgrade or fee change. Tests for every swap mode, each tax minute, sells untaxed, splits and a reverting vault.\n\nToken name: Hamster Hour\nToken symbol: HAMSTER",
+      "state": "completed",
+      "attachedAt": "2026-10-20T19:55:33.319Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "hook",
+      "name": "HamsterHook",
+      "address": "0x82f636a92364d13754d7b3e72d460f0be20a28cc",
+      "creationCodeHash": "65e44bc1dbede07b199a24a8ab176b9f4d62201692ac9854dbf09f6fcec97d85",
+      "txHash": "0x847c6b2faf49eea8f6e36c0327de0041d592eb400755799b57a05778d37fafc3",
+      "blockNumber": 26236027,
+      "verifiedAt": "2026-10-20T19:59:12.644Z",
+      "verifyFailure": null
+    },
+    {
+      "role": "token",
+      "name": "HamsterToken",
+      "address": "0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86",
+      "creationCodeHash": "f248dfa7f09b9095b4ef6afbcf1e4de25b172d2fb072dbfa290e08c1e50cecd9",
+      "txHash": "0x847c6b2faf49eea8f6e36c0327de0041d592eb400755799b57a05778d37fafc3",
+      "blockNumber": 26236027,
+      "verifiedAt": "2026-10-20T19:59:18.112Z",
+      "verifyFailure": null
+    },
+    {
+      "role": "distributor",
+      "name": "MerkleDistributor",
+      "address": "0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f",
+      "creationCodeHash": "f1c21108732a73286b1030e87fbba14c806905275dde6fce012f2c0ca19e30b9",
+      "txHash": "0x847c6b2faf49eea8f6e36c0327de0041d592eb400755799b57a05778d37fafc3",
+      "blockNumber": 26236027,
+      "verifiedAt": null,
+      "verifyFailure": null
+    }
+  ],
+  "seeded": {
+    "pools": [
+      {
+        "fee": 12500,
+        "hooks": "0x82f636a92364d13754d7b3e72d460f0be20a28cc",
+        "currency0": "0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86",
+        "currency1": "0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7",
+        "tickSpacing": 60
+      }
+    ],
+    "launched": [
+      {
+        "hook": "0x82f636a92364d13754d7b3e72d460f0be20a28cc",
+        "token": "0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86",
+        "factory": "0x12c63b581d07093f6126bc02263c58f7eadaa96f",
+        "distributor": "0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f",
+        "launchNumber": 2336
+      }
+    ],
+    "positions": [
+      {
+        "factory": "0x12c63b581d07093f6126bc02263c58f7eadaa96f",
+        "tickLower": -128940,
+        "tickUpper": 887220,
+        "launchNumber": 2336
+      }
+    ]
+  }
+}

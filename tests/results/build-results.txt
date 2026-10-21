@@ -1,0 +1,16 @@
+
+> the-hooks-store@0.1.0 build
+> tsc --noEmit && vite build --config vite.config.ts
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 796 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/index.html                          1.40 kB │ gzip:   0.66 kB
+../dist/assets/index-cjFyzarf.css          17.43 kB │ gzip:   4.58 kB
+../dist/assets/eventemitter3-D_I5B3_b.js   14.85 kB │ gzip:   5.62 kB
+../dist/assets/dist-BcwI7Q5J.js            99.95 kB │ gzip:  32.89 kB
+../dist/assets/index-Diy7GITY.js          341.55 kB │ gzip: 107.22 kB
+
+✓ built in 463ms

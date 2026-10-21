@@ -1,0 +1,79 @@
+{
+  "faqs": [
+    {
+      "question": "WHAT IS A HOOK?",
+      "answer": "A Uniswap v4 hook is a small contract attached to a trading pool. It runs before or after swaps and liquidity changes and can add a fee, block a trade, lock liquidity, or move money to a treasury. The pool's rules, written by you."
+    },
+    {
+      "question": "DESCRIBE IT OR STACK BLOCKS?",
+      "answer": "Both produce the same kind of request. Blocks are reviewed patterns with numbers to fill in, so the swarm gets an exact rule. Your own words give you freedom; the swarm reads them as requirements and the free check tells you what it understood before you pay. You can mix them."
+    },
+    {
+      "question": "WHAT HAPPENS AFTER I PAY?",
+      "answer": "Your request goes to the IMD swarm. One agent writes the contracts, another tests them, a panel of four auditors and a judge review them, and IMD's deployer launches them. You can watch every step on the IMD explorer."
+    },
+    {
+      "question": "WHAT HAPPENS TO A FEATURE AFTER LAUNCH?",
+      "answer": "Most blocks run by themselves inside the pool. A few give the owner a switch (pause, allowlists, donation rules): those appear under Owner controls on your hook page, for your wallet only. A few give traders or anyone a button (place a limit order, trigger a buyback, run a prize draw) and a few only publish a reading (an average price, a jar balance): those appear under Traders, anyone, and readings. Every block card in the builder says which of these it is."
+    },
+    {
+      "question": "WHAT DOES IT COST?",
+      "answer": "0.5 IMD plus gas for two transactions. The audit panel is included in that fee. Deployment gas is paid by IMD. A request the swarm refuses still costs the fee, which is why the builder checks it for free first. A featured #ad slot is 0.1 IMD for 24 hours and is optional."
+    },
+    {
+      "question": "WHY SEPOLIA FIRST?",
+      "answer": "Sepolia is a test network. Hooks launched there cost the same swarm fee but trade play money, so we can prove the whole path before opening Robinhood Chain and Ethereum."
+    },
+    {
+      "question": "WHO AUDITS IT?",
+      "answer": "IMD's audit panel: four specialist agents (math, permissions, economics, control flow) and a judge who reproduces their findings. Nothing deploys with an unresolved finding. This is an automated review, not a guarantee."
+    }
+  ],
+  "permissions": [
+    {
+      "callback": "beforeInitialize / afterInitialize",
+      "description": "Runs when a pool is created with this hook. Can refuse pools that do not fit (pair, fee tier) and set things up. IMD launches require one of them.",
+      "blocks": "Pool rules, every launch."
+    },
+    {
+      "callback": "beforeSwap",
+      "description": "Runs before every trade. Can block it, limit it, or change the fee for this trade.",
+      "blocks": "anti-sniper, max buy, max swap, cooldown, circuit breaker, scheduled open, trading hours, allowlists, pause, sunset, dynamic LP fee."
+    },
+    {
+      "callback": "afterSwap",
+      "description": "Runs after every trade, seeing the final amounts. Used for counting, oracles and collecting fees.",
+      "blocks": "swap fee, buyback jar, prize pot, price oracle, limit orders."
+    },
+    {
+      "callback": "beforeAddLiquidity / afterAddLiquidity",
+      "description": "Runs when someone adds liquidity. Can gate who may add and record when they did.",
+      "blocks": "LP allowlist, minimum position, liquidity lock, JIT penalty."
+    },
+    {
+      "callback": "beforeRemoveLiquidity / afterRemoveLiquidity",
+      "description": "Runs when liquidity is removed. Can enforce lock-ups and penalties.",
+      "blocks": "liquidity lock, JIT penalty."
+    },
+    {
+      "callback": "beforeDonate / afterDonate",
+      "description": "Runs when someone donates tokens to the pool's liquidity providers.",
+      "blocks": "donation rules, share fees with LPs."
+    },
+    {
+      "callback": "beforeSwapReturnDelta",
+      "description": "Lets the hook take over part or all of a trade's accounting. Powerful and risky; it is how custom curves and batch auctions work.",
+      "blocks": "stable curve, batch auctions."
+    },
+    {
+      "callback": "afterSwapReturnDelta",
+      "description": "Lets the hook take a cut of a trade's output. This is how hook fees are collected.",
+      "blocks": "every fee block, buyback jar, prize pot."
+    },
+    {
+      "callback": "afterAddLiquidityReturnDelta / afterRemoveLiquidityReturnDelta",
+      "description": "Lets the hook adjust what a liquidity provider puts in or takes out.",
+      "blocks": "JIT penalty, yield on idle liquidity."
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "method": "WCAG relative luminance from final CSS token values; solid pairs only, no canvas/gradient claim",
+  "usedPairs": [
+    {
+      "foreground": "ink",
+      "background": "paper",
+      "ratio": 13.97,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink",
+      "background": "paper-2",
+      "ratio": 12.44,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink",
+      "background": "paper-3",
+      "ratio": 15.73,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink-2",
+      "background": "paper",
+      "ratio": 5.73,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink-2",
+      "background": "paper-2",
+      "ratio": 5.1,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink-2",
+      "background": "paper-3",
+      "ratio": 6.45,
+      "passes4_5": true
+    },
+    {
+      "foreground": "pine",
+      "background": "paper",
+      "ratio": 6.13,
+      "passes4_5": true
+    },
+    {
+      "foreground": "pine",
+      "background": "paper-2",
+      "ratio": 5.46,
+      "passes4_5": true
+    },
+    {
+      "foreground": "pine",
+      "background": "paper-3",
+      "ratio": 6.9,
+      "passes4_5": true
+    },
+    {
+      "foreground": "paper-3",
+      "background": "pine",
+      "ratio": 6.9,
+      "passes4_5": true
+    },
+    {
+      "foreground": "paper-3",
+      "background": "bad",
+      "ratio": 5.64,
+      "passes4_5": true
+    },
+    {
+      "foreground": "ink",
+      "background": "ad",
+      "ratio": 7.67,
+      "passes4_5": true
+    }
+  ],
+  "correctedFinding": {
+    "unusedPair": "paper-3 on pine-2",
+    "ratio": 4.44,
+    "fix": "Primary hover retains pine background; pine-2 is a border/underline accent."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "id": "f3f405cd-9de4-496c-af14-f208d6600e76",
+  "kind": "evm_contracts",
+  "launchNumber": 2368,
+  "status": "live",
+  "chainId": 1,
+  "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2368-the-imd-daily",
+  "sourceCommit": "d5063fa05882a292f2dccf9defeb57c09bcb9387",
+  "requester": "0x48e4e74fe1d0c14404ceb57b9fec5b21329c6ec9",
+  "createdAt": "2026-10-21T07:07:44.093Z",
+  "updatedAt": "2026-10-21T07:08:27.020Z",
+  "jobs": [
+    {
+      "id": "ae8a24f3-a95d-4905-aff8-222404e085e6",
+      "objective": "Build, test, review and DEPLOY THE IMD DAILY collectible newspaper contracts on Ethereum mainnet. Publish the source on GitHub and verify deployed source on Etherscan. This is a NEW independent project. Never modify UNLOCK or its websites/contracts. No new ERC20, trading pool or liquidity. This job is CONTRACTS ONLY. A separate website job will later provide public PDF reading and the publisher dashboard.\n\nToken name: The IMD Daily\nToken symbol: IMDDAILY\nTotal supply: 0 at deployment; uncapped ERC1155 open editions, mintable only during each issue's 24-hour window. These fields describe the NFT collection, NOT an ERC20.\n\nPublisher and sole revenue withdrawal authority: 0x48E4E74fE1d0c14404cEB57B9fec5b21329C6ec9. Hardcode this authority or pass it explicitly; never leave authority with a factory or service wallet. Payment token is existing Ethereum IMD at 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7. Verify its decimals onchain. Price is exactly 0.1 IMD per copy, immutable. ETH is for transaction gas only.\n\nCOLLECTION: Use non-upgradeable ERC1155. One sequential token ID per newspaper issue; identical collectible copies share that issue's metadata. Only the publisher can create an issue, recording its title, editorial date, PDF URL, cover URL, metadata URI and immutable content hashes. Metadata must identify the issue, link its PDF and use its cover as the image. Edition date does not control mint eligibility. The window starts at the successful publication transaction's block.timestamp and closes exactly 86400 seconds later. Mint requires start <= block.timestamp < close. No reopening, extending, backdating eligibility, changing published files/URIs/hashes or price, and no free/owner minting. No upgrade, hidden bypass or mutable base URI.\n\nUnlimited issues over time. No per-issue supply cap or wallet cap during the window. Users may repeatedly mint any positive quantity they can afford and fit within transaction gas limits. After expiry that issue's supply can never increase, while transfers and public metadata remain available. Include per-issue totalSupply, timestamps, price and availability views plus publication/mint events suitable for paginated indexing. No secondary royalties. NFT ownership is a collectible, not copyright or a financial-return entitlement.\n\nPAYMENT/VAULT: A distinct vault receives IMD mint proceeds atomically with safe minting. Use SafeERC20 and reentrancy protection, including malicious ERC1155 receiver callbacks; failed payment or mint rolls back everything. Check amount multiplication, zero quantity, nonexistent IDs, insufficient balance/approval and deadline. Reject native ETH payments. Only the publisher wallet may withdraw vault funds to that same wallet; no other payout destination or administrator. Provide reliable collected/withdrawn counters and actual IMD balance; direct donations must not be counted as mint revenue. Emit withdrawal events and permit partial withdrawal.\n\nNO STORAGE BLOCKER: PDFs, covers and metadata will be uploaded by the publisher AFTER deployment using a later VPS-backed website. Do not require sample PDFs, IPFS pins, a domain, storage credentials or the first issue before delivering these contracts. Do not publish dummy or real issues on mainnet. The later publisher UI must verify public URLs/hashes before submitting createIssue; contracts record commitments, they cannot fetch files. Provide an exact integration guide: ABI, hash algorithms, metadata JSON schema, issue discovery, publish/mint/approve/withdraw examples and chain/address configuration. Durable hosting remains the publisher's responsibility; keep URL origins replaceable by server/DNS migration without changing published paths or bytes.\n\nRELEASE: Use the supported IMD deployment manifest and dependency ordering; respect EIP-170/initcode limits. No unsupported post-deployment setup dependency. Test with local mocks AND an Ethereum fork using real IMD: payment arithmetic, repeated/multi-copy mints, exact closing boundary, multiple independent issues, unauthorized publication/withdrawal, reentrancy, atomic rollback, immutable fields, donations and transfers after expiry. No real-fund test purchases. Deliver deployed contract addresses, transaction receipts, verified source links, ABIs, pinned source commit, reproducible results and integration documentation. Clearly separate fork results from real deployment. Do not call code publication alone deployment; report any remaining release blocker explicitly.",
+      "state": "completed",
+      "attachedAt": "2026-10-21T07:07:44.093Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "other",
+      "name": "IMDDaily",
+      "address": "0xb8fd2b7fb37cbf03a26b4c4688ed5cce86c0a9c5",
+      "creationCodeHash": "610d846e62051593a847f482011f7a90b023c7f3b739a99f93ae5591954d75d3",
+      "txHash": "0x972fe515154dbc48a4373e625201034a59ff379223dbaa34a95fcfe5bf8fa17d",
+      "blockNumber": 26239377,
+      "verifiedAt": "2026-10-21T07:10:57.819Z",
+      "verifyFailure": null
+    },
+    {
+      "role": "other",
+      "name": "IMDDailyVault",
+      "address": "0x3343692c3667852a1d4a7d8052c24862e6c523c0",
+      "creationCodeHash": "4f4915063f5e1d8fc57b4691f26023c05de2d0e6209228fedee5e31894e7af8e",
+      "txHash": "0x972fe515154dbc48a4373e625201034a59ff379223dbaa34a95fcfe5bf8fa17d",
+      "blockNumber": 26239377,
+      "verifiedAt": "2026-10-21T07:10:52.129Z",
+      "verifyFailure": null
+    }
+  ],
+  "seeded": null
+}

@@ -1,0 +1,207 @@
+{
+  "runner": "Playwright Chromium",
+  "against": "production dist served at /preview/",
+  "stats": {
+    "startTime": "2026-10-21T08:28:52.570Z",
+    "duration": 19344.845999999998,
+    "expected": 24,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 22,
+      "title": "water click draws every cast frame in order with specified timings, then returns through idle",
+      "status": "passed",
+      "durationMs": 2410,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 45,
+      "title": "reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it",
+      "status": "passed",
+      "durationMs": 785,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 56,
+      "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+      "status": "passed",
+      "durationMs": 1092,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 74,
+      "title": "cast queue is capped at three and a keyboard press on the water also casts",
+      "status": "passed",
+      "durationMs": 673,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 320px; product and describe action visible",
+      "status": "passed",
+      "durationMs": 928,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 390px; product and describe action visible",
+      "status": "passed",
+      "durationMs": 1085,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 1440px; product and describe action visible",
+      "status": "passed",
+      "durationMs": 1274,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 46,
+      "title": "Desktop bar remains one row at 821px, search >=120 and connected width unchanged",
+      "status": "passed",
+      "durationMs": 665,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 46,
+      "title": "Desktop bar remains one row at 1024px, search >=120 and connected width unchanged",
+      "status": "passed",
+      "durationMs": 563,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 46,
+      "title": "Desktop bar remains one row at 1440px, search >=120 and connected width unchanged",
+      "status": "passed",
+      "durationMs": 558,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 60,
+      "title": "keyword search indexes every word including request-only remainder; Enter scrolls to Results",
+      "status": "passed",
+      "durationMs": 520,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 72,
+      "title": "all filters and sorts change results immediately, and reset restores status, search and all groups/chains",
+      "status": "passed",
+      "durationMs": 806,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 94,
+      "title": "describe saves required draft key, preserves other fields and opens a placeholder",
+      "status": "passed",
+      "durationMs": 465,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 104,
+      "title": "all deferred routes remain honest placeholders",
+      "status": "passed",
+      "durationMs": 285,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 110,
+      "title": "only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn",
+      "status": "passed",
+      "durationMs": 597,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 121,
+      "title": "swarm failure hides all metrics; successful response uses actual fields with honest labels",
+      "status": "passed",
+      "durationMs": 795,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 128,
+      "title": "public config flag removes the in-progress banner",
+      "status": "passed",
+      "durationMs": 549,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 132,
+      "title": "catalog load failure offers a working retry without invented cards",
+      "status": "passed",
+      "durationMs": 487,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 138,
+      "title": "keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger",
+      "status": "passed",
+      "durationMs": 589,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 146,
+      "title": "export works offline at a gateway subpath with local fonts and a single beige theme",
+      "status": "passed",
+      "durationMs": 542,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 158,
+      "title": "empty or blocked storage never silently loses a description",
+      "status": "passed",
+      "durationMs": 607,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 169,
+      "title": "catalog navigation does not restore a stale Learn scroll when snapshot cards arrive",
+      "status": "passed",
+      "durationMs": 428,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/wallet.spec.ts",
+      "line": 33,
+      "title": "EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects",
+      "status": "passed",
+      "durationMs": 764,
+      "retries": 0
+    },
+    {
+      "file": "web/tests/wallet.spec.ts",
+      "line": 49,
+      "title": "mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay",
+      "status": "passed",
+      "durationMs": 520,
+      "retries": 0
+    }
+  ],
+  "errors": []
+}

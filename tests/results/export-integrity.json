@@ -1,0 +1,125 @@
+{
+  "checkedAt": "2026-10-21",
+  "budgetBytes": 8388608,
+  "productionExportBytes": 1067311,
+  "productionExportFiles": 18,
+  "repositoryCandidateFileCount": 124,
+  "repositoryCandidateRawBytesBeforeThisReport": 3062564,
+  "separateArtifactsRawBytes": 663653,
+  "reservedReportAndPackagingOverheadBytes": 1048576,
+  "combinedRawBytesPlusReserve": 4774793,
+  "candidateSnapshotGzipBytes": 1813342,
+  "withinFileBudget": true,
+  "gitHistoryBundleCheck": {
+    "status": "blocked by read-only original Git object storage",
+    "message": "The partial repository tried to fetch a missing historic object; index-pack could not create .git/objects/pack/tmp_pack_XXXXXX. No repository permission or configuration was changed.",
+    "scope": "The gzip snapshot and raw file budget above cover every deliverable file; they do not claim to measure the publisher-generated Git history bundle."
+  },
+  "checks": {
+    "allHtmlAssetUrlsRelative": true,
+    "allCssFontUrlsRelativeAndPresent": true,
+    "publicFilesMatchDist": true,
+    "oneSourceStylesheet": true,
+    "noSourceMaps": true,
+    "noDependencyCacheDirectoriesInAppTree": true,
+    "noSubmodules": true,
+    "noIgnoredRuntimeAssets": true,
+    "existingModifiedFiles": [
+      "README.md",
+      "index.html"
+    ],
+    "ignoreFilesChanged": false
+  },
+  "export": [
+    {
+      "path": "dist/assets/dist-BcwI7Q5J.js",
+      "bytes": 99957,
+      "sha256": "ac32671d8fe5b4ece2ca8cd1f2c2a27694527363e7290af37e3eb64afdf73c32"
+    },
+    {
+      "path": "dist/assets/eventemitter3-D_I5B3_b.js",
+      "bytes": 14850,
+      "sha256": "1ec6b2b7895e547280af0e2bc1bb07eed3e80d9fe3997a7bca90a4d53e68d599"
+    },
+    {
+      "path": "dist/assets/index-Diy7GITY.js",
+      "bytes": 341557,
+      "sha256": "f0b4ad2cb6d28a34b0340cdfccd84cf3cd5e66b14a2b1febc72a7c0d362119d4"
+    },
+    {
+      "path": "dist/assets/index-cjFyzarf.css",
+      "bytes": 17434,
+      "sha256": "406415278b62120a95d1e0c16e47f2a0bb76a1ca30be5e6b20406b9bd11c0313"
+    },
+    {
+      "path": "dist/favicon.svg",
+      "bytes": 225,
+      "sha256": "d52933cdc0a68ed43e49926b76510279b0550373c330f33f7ba11d9c233d42e6"
+    },
+    {
+      "path": "dist/fonts/LICENSES.txt",
+      "bytes": 13309,
+      "sha256": "1956912e994d17a2640f0a83f595f0c63ca32b99aa14d1fc9cb015695afdb20d"
+    },
+    {
+      "path": "dist/fonts/pixelify-sans-latin.woff2",
+      "bytes": 12016,
+      "sha256": "4a5633a0c9c1b73abd133a56d3716c2d8df2ed03cb987346f72194aeb224f382"
+    },
+    {
+      "path": "dist/fonts/press-start-2p-latin.woff2",
+      "bytes": 12512,
+      "sha256": "afec86997fdaf54af1f59358fa2c1e2a0f1d04146edad18e5cd141d0384a7548"
+    },
+    {
+      "path": "dist/fonts/vt323-latin.woff2",
+      "bytes": 17936,
+      "sha256": "8ddbebcc1048154132e1d78eb9b1f7850bca1b7d857035ccf1cb4318ebc615b6"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 1409,
+      "sha256": "4e8e802a5d3a4b0ce2fb678525b695e76bb38633ee3b914be8628e3ea9ce5403"
+    },
+    {
+      "path": "dist/launches.json",
+      "bytes": 327882,
+      "sha256": "032a73a677ec039ba0596141e5ffb48bc9d9f295a476818e474ef9655189a8fb"
+    },
+    {
+      "path": "dist/og.png",
+      "bytes": 201060,
+      "sha256": "7afb250de54b3be3321b6d8adf00aefd4954fe3afe142b862988ee86a3278a59"
+    },
+    {
+      "path": "dist/site-config.json",
+      "bytes": 746,
+      "sha256": "1aca2e988261d52755f9956508c6ce646f729aa5f5fb47689c4e5073a490d009"
+    },
+    {
+      "path": "dist/wallets/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "5095037afa1ba03be36e04305c01ec9ee600e14377738a026482b1a888c4e365"
+    },
+    {
+      "path": "dist/wallets/coinbaseWallet.svg",
+      "bytes": 538,
+      "sha256": "74b55347075cbbb2a0292cca0f94459d531afd23586ecfd2fcc670236c590439"
+    },
+    {
+      "path": "dist/wallets/metaMaskWallet.svg",
+      "bytes": 1665,
+      "sha256": "892c7dfab8c4ca5682878dda3f42f55a75195d7d365e4adb0832845f3a0a2135"
+    },
+    {
+      "path": "dist/wallets/phantomWallet.svg",
+      "bytes": 861,
+      "sha256": "f841f8112e131259a2e5123177950099c79487e61e77971f4e193e6c374419eb"
+    },
+    {
+      "path": "dist/wallets/rabbyWallet.svg",
+      "bytes": 2290,
+      "sha256": "dcae4de88ebfa10cffa1fe28df13d7c8c0b40736ef2b704f1f2fc348e777e443"
+    }
+  ]
+}

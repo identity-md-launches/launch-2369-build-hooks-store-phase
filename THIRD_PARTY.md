@@ -1,0 +1,10 @@
+# Attribution
+
+- **Better Interface** design guidance by Jakub Krehel, copyright 2026, MIT. The pinned worker guide was used during implementation and the six-domain review. Its combined license is retained in [LICENSES/design-guidance.txt](LICENSES/design-guidance.txt).
+- **Impeccable** documentation guidance by Paul Bakaus, commit `9d715cc4f5564a990ca8345abfdd5df6dc9b41c8`, Apache-2.0. Source: [document reference](https://github.com/pbakaus/impeccable/blob/9d715cc4f5564a990ca8345abfdd5df6dc9b41c8/skill/reference/document.md). The pinned IMD adaptation supplies implementation-only extraction and evidence reporting; `DESIGN.md` follows that method. The full license is retained in the same combined file.
+- **ETH frontend UX** guidance by Austin Griffith, pinned commit `06ea4efa0807`, MIT. License retained in [LICENSES/eth-frontend-ux.txt](LICENSES/eth-frontend-ux.txt). No upstream code or contract address table was copied into the app.
+- **Google Fonts**: Press Start 2P, Pixelify Sans and VT323. Local Latin WOFF2 assets are distributed under the SIL Open Font License; author notices and full licenses are in [public/fonts/LICENSES.txt](public/fonts/LICENSES.txt), also copied to `dist/fonts/`.
+- **Wallet marks**: MetaMask, Rabby, Phantom and Coinbase SVGs from the official [RainbowKit wallet collection](https://github.com/rainbow-me/rainbowkit/tree/main/packages/rainbowkit/src/wallets/walletConnectors), MIT, copyright 2024 Rainbow. The notice is in [public/wallets/LICENSE.txt](public/wallets/LICENSE.txt), also copied to `dist/wallets/`. Marks identify their respective providers and imply no endorsement.
+- **Pond and Pepe**: ported from this assignment's `mockup/index.html` as requested. The sprite grids and meta are retained verbatim in `src/scene/pepe.json`. The Open Graph image is rendered from that canvas. No code or artwork was taken from the ASCII Sharks demo.
+
+Runtime and development dependencies are pinned by `web/package-lock.json`. Dependency packages and caches are not included in the submission; only their necessary production bundle is included in `dist/assets/`.
