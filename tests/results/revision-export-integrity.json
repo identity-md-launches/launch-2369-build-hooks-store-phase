@@ -1,0 +1,115 @@
+{
+  "revision": "Builder tooltip, accessible status and removal-note fixes",
+  "budgetBytes": 8388608,
+  "productionExportBytes": 801772,
+  "productionExportFiles": 18,
+  "candidateFilesBeforeThisReport": 156,
+  "candidateRawBytesBeforeThisReport": 3380693,
+  "reservedReportAndPackagingBytes": 1048576,
+  "compressedCandidateSnapshotBytes": 2242811,
+  "accounting": "Complete deliverable files excluding original Git metadata, supplied inputs and temporary scratch/cache directories. Original Git history was not accessed. The raw file total plus a 1 MiB reserve is the conservative delivery budget check.",
+  "checks": {
+    "htmlAndCssRuntimeAssetUrlsRelativeAndPresent": true,
+    "allPublicFilesMatchDist": true,
+    "bundledVerificationCopyEmpty": true,
+    "noSourceMapsOrDependencyArchives": true,
+    "noSymlinksOrSubmodules": true,
+    "noGeneratedDependencyOrCacheDirectories": true,
+    "protectedConfigurationAndDependenciesEdited": false,
+    "ignoreFilesChanged": false
+  },
+  "export": [
+    {
+      "path": "dist/assets/dist-BcwI7Q5J.js",
+      "bytes": 99957,
+      "sha256": "ac32671d8fe5b4ece2ca8cd1f2c2a27694527363e7290af37e3eb64afdf73c32"
+    },
+    {
+      "path": "dist/assets/eventemitter3-D_I5B3_b.js",
+      "bytes": 14850,
+      "sha256": "1ec6b2b7895e547280af0e2bc1bb07eed3e80d9fe3997a7bca90a4d53e68d599"
+    },
+    {
+      "path": "dist/assets/index-CaHQvRYu.js",
+      "bytes": 395391,
+      "sha256": "0010b3caba22ae7968854638d72dc0b3ad539b856fd20a66abf5f62405d90c71"
+    },
+    {
+      "path": "dist/assets/index-CbJWFinA.css",
+      "bytes": 25813,
+      "sha256": "60bffe5ea8af4369426279bc5c530c48096e9c377cc4a2522b3d0eddd67312bb"
+    },
+    {
+      "path": "dist/blocks-verified.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "dist/favicon.svg",
+      "bytes": 225,
+      "sha256": "d52933cdc0a68ed43e49926b76510279b0550373c330f33f7ba11d9c233d42e6"
+    },
+    {
+      "path": "dist/fonts/LICENSES.txt",
+      "bytes": 13309,
+      "sha256": "1956912e994d17a2640f0a83f595f0c63ca32b99aa14d1fc9cb015695afdb20d"
+    },
+    {
+      "path": "dist/fonts/pixelify-sans-latin.woff2",
+      "bytes": 12016,
+      "sha256": "4a5633a0c9c1b73abd133a56d3716c2d8df2ed03cb987346f72194aeb224f382"
+    },
+    {
+      "path": "dist/fonts/press-start-2p-latin.woff2",
+      "bytes": 12512,
+      "sha256": "afec86997fdaf54af1f59358fa2c1e2a0f1d04146edad18e5cd141d0384a7548"
+    },
+    {
+      "path": "dist/fonts/vt323-latin.woff2",
+      "bytes": 17936,
+      "sha256": "8ddbebcc1048154132e1d78eb9b1f7850bca1b7d857035ccf1cb4318ebc615b6"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 1409,
+      "sha256": "db12312b350b9e5e1f4c1a33883f78ede7941380293e406ef1b0fb61b410cad9"
+    },
+    {
+      "path": "dist/og.png",
+      "bytes": 201060,
+      "sha256": "7afb250de54b3be3321b6d8adf00aefd4954fe3afe142b862988ee86a3278a59"
+    },
+    {
+      "path": "dist/site-config.json",
+      "bytes": 873,
+      "sha256": "57479d87f5b635be4f962722b2d3cd000990228472d60b28f2f82aef0d9cc21d"
+    },
+    {
+      "path": "dist/wallets/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "5095037afa1ba03be36e04305c01ec9ee600e14377738a026482b1a888c4e365"
+    },
+    {
+      "path": "dist/wallets/coinbaseWallet.svg",
+      "bytes": 538,
+      "sha256": "74b55347075cbbb2a0292cca0f94459d531afd23586ecfd2fcc670236c590439"
+    },
+    {
+      "path": "dist/wallets/metaMaskWallet.svg",
+      "bytes": 1665,
+      "sha256": "892c7dfab8c4ca5682878dda3f42f55a75195d7d365e4adb0832845f3a0a2135"
+    },
+    {
+      "path": "dist/wallets/phantomWallet.svg",
+      "bytes": 861,
+      "sha256": "f841f8112e131259a2e5123177950099c79487e61e77971f4e193e6c374419eb"
+    },
+    {
+      "path": "dist/wallets/rabbyWallet.svg",
+      "bytes": 2290,
+      "sha256": "dcae4de88ebfa10cffa1fe28df13d7c8c0b40736ef2b704f1f2fc348e777e443"
+    }
+  ],
+  "candidateRawBytesPlusReserve": 4429269,
+  "withinBudget": true
+}

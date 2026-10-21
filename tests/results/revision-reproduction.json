@@ -1,0 +1,40 @@
+{
+  "tooltip": [
+    {
+      "before": 320,
+      "viewport": 320,
+      "document": 495,
+      "signLeft": 245,
+      "signRight": 265,
+      "tooltipWidth": "224px",
+      "tooltipLeft": "0px",
+      "tooltipRight": "-232px",
+      "content": "\"Heads up: this block is easy to work around or needs care. Per-wallet limits can be sidestepped by splitting across several wallets. Not yet tested on Sepolia.\"",
+      "visible": true
+    },
+    {
+      "before": 390,
+      "viewport": 390,
+      "document": 531,
+      "signLeft": 245,
+      "signRight": 265,
+      "tooltipWidth": "260px",
+      "tooltipLeft": "0px",
+      "tooltipRight": "-268px",
+      "content": "\"Heads up: this block is easy to work around or needs care. Per-wallet limits can be sidestepped by splitting across several wallets. Not yet tested on Sepolia.\"",
+      "visible": true
+    }
+  ],
+  "untested": {
+    "html": "<span class=\"block-name\" title=\"Not yet tested on Sepolia.\">Swap fee</span>",
+    "tabIndex": -1,
+    "description": null,
+    "hasScreenReaderText": false,
+    "text": "Swap fee"
+  },
+  "removal": {
+    "afterRemove": "Also removed, because they need Swap fee: Fee that fades.",
+    "afterAdd": "Also removed, because they need Swap fee: Fee that fades.",
+    "afterMode": "Also removed, because they need Swap fee: Fee that fades."
+  }
+}

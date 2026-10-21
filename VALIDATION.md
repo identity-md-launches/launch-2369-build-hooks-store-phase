@@ -1,5 +1,44 @@
 # Worker validation
 
+## Job 2 revision — 2026-10-21
+
+Scope: reproduce the three reopened findings against the accepted production export, then correct only the shared warning tooltip, block-name accessibility and dependency-removal status. The existing catalog, composer, fixtures, landing, header, wallet configuration and draft format were preserved. This section is the current revision record; the earlier job 1 record below is historical.
+
+| Finding | Reproduction and fix | Recheck |
+| --- | --- | --- |
+| `22df7d2199184612d30d27e01b126f897deb4599b442eb85dd8630775876660a` | Reproduced: focusing Anti-sniper widened the document from 390 to 531px, and from 320 to 495px. `web/src/styles.css:276` now positions each tooltip within its palette row, card header or summary rule and caps its border-box width to that row. This also protects signs near the left edge. | All six risky blocks, all three locations, hover and actual Shift+Tab/Tab focus at 320/390/1440px: tooltip edges remain inside the viewport and document width never exceeds it. Manual screenshots confirm complete text and visible keyboard focus. Anti-sniper now spans x=33–293 at 390px and x=33–257 at 320px. |
+| `f22e23455785cafb3fb0169a7c8cced56f5e22d35631331ad2cf396210bc63ee` | Reproduced: Swap fee's untested status existed only in the native title on a non-focusable span. `web/src/Builder.tsx:44` adds the same status to the name using the existing `.sr` utility, while retaining the title. | Accessible-text snapshots include “Not yet tested on Sepolia.” in untested palette/card names without risk signs; a passing block has no stale untested text. No screen-reader session is claimed. |
+| `0454f5576e44be76f81e910bbd1b9f6109d2c38490ff8d9b7b1de5f33512e825` | Reproduced: after removing Swap fee and Fee that fades, the dependency note survived re-adding Swap fee and switching modes. `web/src/Builder.tsx:95` clears the notice on each draft update; `:104` then creates a new notice for a dependency removal, using the removed block's catalog title. | Note lists both removed dependants and clears on add, mode/type change, setting change, block-field change, reorder and another removal. |
+
+### Commands and results
+
+- `npm --prefix web ci --cache /tmp/hooks-store-revision-npm-cache --no-audit --no-fund`: installed the locked frontend dependencies without changing manifests or configuration.
+- `npm --prefix web run typecheck`: passed (`tests/results/revision-typecheck.txt`).
+- `npm --prefix web run build`: passed; rebuilt the complete relative-URL `dist/` (`tests/results/revision-build-results.txt`).
+- `npm --prefix web test`: 16 passed, 0 failed (`tests/results/revision-unit-results.txt`), including the unchanged A/B/C fixtures.
+- `npm --prefix web run test:e2e -- --reporter=list,json`: 38 passed, 0 failed in Chromium, one worker (`tests/results/revision-playwright-results.json`, `revision-playwright-list.txt`). Tests used the production export under `/preview/`. Browser binaries were installed in a temporary directory outside the submission.
+- Pinned probe: `node .imd/reads/skills/design-critic/scripts/taste.mjs --out test/scratch/taste` with explicit local Playwright resolution: **11/16** passed. Render, layout, targets, contrast, tracking, type faces, glyphs, slogans, copy budget, motion and metadata passed. The five remaining flags are the specified capitals, heading/label heuristics, mockup's extra header/eyebrow sizes, required marquee, and hard border/shadow treatment. These established choices were preserved. Raw results are `tests/results/revision-design-probe.json`.
+- Browser-tool review of the final export: Store's product and primary action at 390×900 (button bottom y=627); focused Anti-sniper tooltips at 320/390; hovered Cooldown palette tooltip at 320/390; full Prize pot summary tooltip at 320; Builder at 1440×1000. Images are `tests/results/revision-*.png`. No console messages or missing local resources were observed during this manual review.
+
+The first focused run passed the tooltip and accessible-name tests but exposed a wrong label in the new status test (“Rate” instead of the existing “Jar rate”). Only that test selector was corrected; the final suite above is the completed result. Before-change measurements are retained in `tests/results/revision-reproduction.json`.
+
+One intermediate full run passed all Builder regressions but the unchanged pond resize test read 160 columns immediately after requesting a 390px resize (expected 44). The same test then passed three isolated repetitions without source or test changes (`tests/results/revision-pond-recheck.*`). The intermediate failure is retained in `revision-intermediate-playwright.json`; the final full-suite result above is a separate run. The pond implementation and its test were preserved.
+
+### Better Interface review of changed surfaces
+
+| Domain | Coverage and outcome |
+| --- | --- |
+| Accessibility | Checked focusable risk signs, visible keyboard rings and full accessible warning names; verified hidden untested text in the accessibility tree. Existing mouse titles and tested ticks remain. Physical touch, screen-reader speech and forced-colors rendering were not verified. |
+| Layout | Checked tooltip bounds and document width across all risk blocks and locations at 320, 390 and 1440px. Viewed the final mobile first screen and desktop Builder; retained the accepted header and responsive grids. Native browser zoom and RTL were not verified. |
+| Writing | Preserved exact SPEC 4.13 warning and risk sentences. Removal feedback now describes the current removal, names its source and disappears after a later edit. |
+| Typography | Reused the existing body face, 16px tooltip size and wrapping; complete risk text is visible in mobile screenshots. No type tokens changed. |
+| Colors | Reused ink/paper tooltip colors and yellow `--ad` sign; no new color or red risk label. The probe's measured solid text pairs pass; canvas/gradient pairs remain outside its measurements. |
+| UI | Checked inactive, hovered and keyboard-focused warnings, tested/untested/fallback states, and transient removal feedback. Existing type/mode/add/reorder/remove/reload flows still pass. No new motion or transaction behavior. |
+
+Complete for the revision's stated scope. WebKit could not launch with the available browser runtime, so no Safari/WebKit rendering result is claimed. Real wallets, signing, transactions, physical devices, native zoom and screen-reader speech remain untested. No deployment was performed. Final export/file accounting is in `tests/results/revision-export-integrity.json`; no ignore file or protected configuration was changed.
+
+## Earlier job 1 evidence (historical, retained)
+
 Validation date: **2026-10-21**. These are checks performed by the implementing worker, not an independent audit or deployment certification. The production export was tested at a subpath with the local preview server. Runtime assets, fonts and launch data are bundled; only the optional live metrics call requires the public API for normal browsing.
 
 ## Commands and actual results

@@ -1,0 +1,54 @@
+
+> the-hooks-store@0.1.0 test:e2e
+> playwright test --reporter=list,json
+
+
+Running 38 tests using 1 worker
+
+(node:28) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/builder.spec.ts:24:3 › Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload (1.1s)
+  ✓   2 tests/builder.spec.ts:24:3 › Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload (1.0s)
+  ✓   3 tests/builder.spec.ts:24:3 › Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload (1.0s)
+  ✓   4 tests/builder.spec.ts:87:1 › first visit to the stack starts from the default stack; preview, cost box and disabled check (494ms)
+  ✓   5 tests/builder.spec.ts:106:1 › pool share has no default; Continue stays disabled until 10 to 90 in steps of 5 (444ms)
+  ✓   6 tests/builder.spec.ts:123:1 › 4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks (705ms)
+  ✓   7 tests/builder.spec.ts:160:1 › risk tooltips at 320px: every sign stays readable on hover and keyboard focus (2.2s)
+  ✓   8 tests/builder.spec.ts:160:1 › risk tooltips at 390px: every sign stays readable on hover and keyboard focus (2.2s)
+  ✓   9 tests/builder.spec.ts:160:1 › risk tooltips at 1440px: every sign stays readable on hover and keyboard focus (2.2s)
+  ✓  10 tests/builder.spec.ts:214:1 › untested block names expose the status to assistive technology without a risk sign (267ms)
+  ✓  11 tests/builder.spec.ts:227:1 › dependent-removal status describes the removed block and clears after the next draft edit (2.0s)
+  ✓  12 tests/builder.spec.ts:248:1 › tested marks: a passing entry shows the tick, others say not yet tested (289ms)
+  ✓  13 tests/builder.spec.ts:257:1 › tested marks fall back to the bundled copy when the spec repository cannot be read (276ms)
+  ✓  14 tests/builder.spec.ts:264:1 › the shipped bundled copy is empty, so nothing shows a tick offline (277ms)
+  ✓  15 tests/builder.spec.ts:270:1 › type C and B settings, own code and the request shape (372ms)
+  ✓  16 tests/pond.spec.ts:22:1 › water click draws every cast frame in order with specified timings, then returns through idle (1.2s)
+  ✓  17 tests/pond.spec.ts:45:1 › reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it (478ms)
+  ✓  18 tests/pond.spec.ts:56:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (809ms)
+  ✓  19 tests/pond.spec.ts:75:1 › cast queue is capped at three and a keyboard press on the water also casts (332ms)
+  ✓  20 tests/store.spec.ts:18:3 › Store and Learn fit 320px; product and describe action visible (679ms)
+  ✓  21 tests/store.spec.ts:18:3 › Store and Learn fit 390px; product and describe action visible (612ms)
+  ✓  22 tests/store.spec.ts:18:3 › Store and Learn fit 1440px; product and describe action visible (713ms)
+  ✓  23 tests/store.spec.ts:50:3 › Desktop bar remains one row at 821px, search >=120 and connected width unchanged (333ms)
+  ✓  24 tests/store.spec.ts:50:3 › Desktop bar remains one row at 1024px, search >=120 and connected width unchanged (304ms)
+  ✓  25 tests/store.spec.ts:50:3 › Desktop bar remains one row at 1440px, search >=120 and connected width unchanged (331ms)
+  ✓  26 tests/store.spec.ts:70:1 › search shows the no-match state over the empty pond; Enter scrolls to Results (287ms)
+  ✓  27 tests/store.spec.ts:81:1 › a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains (377ms)
+  ✓  28 tests/store.spec.ts:96:1 › describe saves required draft key, preserves other fields and opens the describe editor (331ms)
+  ✓  29 tests/store.spec.ts:110:1 › all deferred routes remain honest placeholders (200ms)
+  ✓  30 tests/store.spec.ts:116:1 › only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn (463ms)
+  ✓  31 tests/store.spec.ts:127:1 › swarm failure hides all metrics; successful response uses actual fields with honest labels (482ms)
+  ✓  32 tests/store.spec.ts:134:1 › public config flag removes the in-progress banner (296ms)
+  ✓  33 tests/store.spec.ts:138:1 › keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger (372ms)
+  ✓  34 tests/store.spec.ts:146:1 › export works offline at a gateway subpath with local fonts and a single beige theme (362ms)
+  ✓  35 tests/store.spec.ts:158:1 › empty or blocked storage never silently loses a description (419ms)
+  ✓  36 tests/store.spec.ts:169:1 › catalog navigation does not restore a stale Learn scroll (273ms)
+  ✓  37 tests/wallet.spec.ts:32:1 › EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects (459ms)
+  ✓  38 tests/wallet.spec.ts:48:1 › mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay (328ms)
+
+  38 passed (26.3s)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

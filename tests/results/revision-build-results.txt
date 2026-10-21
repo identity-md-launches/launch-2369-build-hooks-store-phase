@@ -1,0 +1,21 @@
+
+> the-hooks-store@0.1.0 build
+> tsc --noEmit && vite build --config vite.config.ts
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 799 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/index.html                          1.40 kB │ gzip:   0.65 kB
+../dist/assets/index-CbJWFinA.css          25.81 kB │ gzip:   6.15 kB
+../dist/assets/eventemitter3-D_I5B3_b.js   14.85 kB │ gzip:   5.62 kB
+../dist/assets/dist-BcwI7Q5J.js            99.95 kB │ gzip:  32.89 kB
+../dist/assets/index-CaHQvRYu.js          395.39 kB │ gzip: 123.24 kB
+
+✓ built in 406ms
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

@@ -156,7 +156,9 @@ test('4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclu
   expect(text!.width).toBeGreaterThan(100);
 });
 
-test('every block with a risk field shows the yellow sign with its tooltip in the palette, on the card and in the summary', async ({ page }) => {
+for (const width of [320, 390, 1440]) {
+test(`risk tooltips at ${width}px: every sign stays readable on hover and keyboard focus`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
   const risky = catalog.blocks.filter(b => 'risk' in b && b.risk);
   expect(risky.map(b => b.id).sort()).toEqual(['anti-sniper', 'breaker', 'cooldown', 'max-buy', 'max-swap', 'pot']);
   await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, ...risky.map(b => ({ id: b.id }))], settings: { pool: 50 } });
@@ -169,6 +171,32 @@ test('every block with a risk field shows the yellow sign with its tooltip in th
       await expect(sign).toHaveAttribute('data-tip', tip);
       await expect(sign).toHaveAttribute('aria-label', tip);
       await expect(sign).toHaveCSS('background-color', 'rgb(201, 162, 39)');
+      await sign.evaluate(el => el.scrollIntoView({ block: 'center' }));
+      for (const trigger of ['hover', 'focus'] as const) {
+        await page.mouse.move(0, 0);
+        await page.locator('.warn:focus').evaluateAll(els => els.forEach(el => (el as HTMLElement).blur()));
+        if (trigger === 'hover') await sign.hover();
+        else {
+          await sign.focus();
+          await page.keyboard.press('Shift+Tab');
+          await page.keyboard.press('Tab');
+          await expect(sign).toBeFocused();
+          await expect(sign).toHaveCSS('outline-style', 'solid');
+        }
+        const box = await sign.evaluate(el => {
+          const tip = getComputedStyle(el, '::after');
+          // The tooltip's containing block is the palette row, card header or summary rule.
+          const row = el.closest('.pal-item, .blk-head, .sum ol li')!;
+          const rect = row.getBoundingClientRect(), rowStyle = getComputedStyle(row);
+          const left = rect.left + parseFloat(rowStyle.borderLeftWidth) + parseFloat(tip.left);
+          return { display: tip.display, left, right: left + parseFloat(tip.width), viewport: innerWidth, document: document.documentElement.scrollWidth, content: tip.content };
+        });
+        expect(box.display, `${b.id}, ${where}, ${trigger}`).toBe('block');
+        expect(box.content).toContain(tip);
+        expect(box.left).toBeGreaterThanOrEqual(0);
+        expect(box.right).toBeLessThanOrEqual(box.viewport);
+        expect(box.document).toBeLessThanOrEqual(box.viewport);
+      }
     }
   }
   const sign = page.locator('.blk[data-block="breaker"] .warn');
@@ -180,6 +208,41 @@ test('every block with a risk field shows the yellow sign with its tooltip in th
   expect(await page.locator('.warn').count()).toBe(risky.length * 3);
   // No red labels: the signs are yellow and nothing on the cards is coloured "bad".
   expect(await page.locator('.blk .pill').evaluateAll(els => els.filter(el => getComputedStyle(el).backgroundColor === 'rgb(163, 56, 43)').length)).toBe(0);
+});
+}
+
+test('untested block names expose the status to assistive technology without a risk sign', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await open(page, [{ block: 'jar', passed: true }], { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'jar' }, { id: 'swap-fee' }] });
+  for (const where of ['.pal-item', '.blk']) {
+    const untested = page.locator(`${where}[data-block="swap-fee"] .block-name`);
+    await expect(untested).toHaveAttribute('title', 'Not yet tested on Sepolia.');
+    await expect(untested.locator('.sr')).toHaveText(', Not yet tested on Sepolia.');
+    // ariaSnapshot checks the accessible text rather than only the native hover title.
+    expect(await untested.ariaSnapshot()).toContain('Not yet tested on Sepolia.');
+    await expect(page.locator(`${where}[data-block="jar"] .block-name .sr`)).toHaveCount(0);
+  }
+});
+
+test('dependent-removal status describes the removed block and clears after the next draft edit', async ({ page }) => {
+  const edits: [string, () => Promise<unknown>][] = [
+    ['add', () => page.getByRole('button', { name: 'Add Swap fee', exact: true }).click()],
+    ['mode', () => page.getByRole('button', { name: 'Describe it', exact: true }).click()],
+    ['type', () => page.getByRole('button', { name: /^B: Hook only/ }).click()],
+    ['setting', () => page.locator('#s-pool').fill('45')],
+    ['block field', () => page.locator('.blk[data-block="jar"]').getByLabel('Jar rate (% of ETH side)').fill('1.5')],
+    ['reorder', () => page.getByRole('button', { name: 'Move Buyback jar up' }).click()],
+    ['remove', () => page.getByRole('button', { name: 'Remove Buyback jar' }).click()],
+  ];
+  for (const [name, edit] of edits) await test.step(name, async () => {
+    await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }, { id: 'jar' }, { id: 'fee-fade' }, { id: 'fee-split' }] });
+    await page.getByRole('button', { name: 'Remove Swap fee', exact: true }).click();
+    expect(await stackIds(page)).toEqual(['jar']);
+    const note = page.getByRole('status').filter({ hasText: 'Also removed' });
+    await expect(note).toHaveText('Also removed, because they need Swap fee: Fee that fades, Split the fee.');
+    await edit();
+    await expect(note).toHaveCount(0);
+  });
 });
 
 test('tested marks: a passing entry shows the tick, others say not yet tested', async ({ page }) => {

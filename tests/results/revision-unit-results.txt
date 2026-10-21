@@ -1,0 +1,33 @@
+
+> the-hooks-store@0.1.0 test
+> node --test ../tests/*.test.mjs
+
+✔ catalog has every section 4 block with the required fields (1.966146ms)
+✔ every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions (3.406629ms)
+✔ blocks a launch type does not allow are dimmed in the palette and left out of the request (0.214856ms)
+✔ composed text equals the three fixtures byte for byte (4.062912ms)
+✔ words and rules together: numbered rules win; owner sentence names the functions; last line keeps names (0.220553ms)
+✔ request bodies follow 5.2 for every type and stay under 16 KiB (4.128932ms)
+✔ pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5 (0.429652ms)
+✔ the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot (1.062272ms)
+✔ swap-fee dependencies: fade, split and LP share need it and leave with it (1.681614ms)
+✔ buy/sell fees and the swap fee exclude each other; each block once (0.318048ms)
+✔ reorder keeps the token first; bring-your-own token replaces the standard one (0.748811ms)
+✔ field limits produce inline issues (0.320151ms)
+✔ job 1 landing drafts open in the describe editor (2.039848ms)
+✔ Pepe grids and all meta values match the reference character for character (17.13932ms)
+✔ Learn retains all seven answers and all fourteen permissions, with only the specified ad-term correction (9.896601ms)
+✔ exported cast integration delivers real messages and unsubscribes on route cleanup (81.444072ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 408.122138
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

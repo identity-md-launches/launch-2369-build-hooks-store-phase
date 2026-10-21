@@ -42,7 +42,7 @@ function WarnSign({ def, tested }: { def: BlockDef; tested: boolean }) {
   return <span className="warn" tabIndex={0} role="img" aria-label={tip} data-tip={tip}>!</span>;
 }
 function BlockName({ def, tested, children }: { def: BlockDef; tested: boolean; children?: ReactNode }) {
-  return <><span className="block-name" title={tested ? 'Tested on Sepolia' : UNTESTED}>{children ?? def.title}</span><WarnSign def={def} tested={tested} /></>;
+  return <><span className="block-name" title={tested ? 'Tested on Sepolia' : UNTESTED}>{children ?? def.title}{!tested && <span className="sr">, {UNTESTED}</span>}</span><WarnSign def={def} tested={tested} /></>;
 }
 function manageNote(def: BlockDef) {
   const lower = (list?: { label: string }[]) => (list ?? []).map(f => f.label.toLowerCase()).join(', ');
@@ -77,7 +77,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const [draft, setDraft] = useState<Draft>(loadDraft);
   const [storageError, setStorageError] = useState(false);
   const [verified, setVerified] = useState<Set<string>>(new Set());
-  const [blocked, setBlocked] = useState<string[]>([]);
+  const [blocked, setBlocked] = useState<{ source: string; titles: string[] } | null>(null);
   const { address } = useAccount();
   useEffect(() => { setStorageError(!storeDraft(draft)); }, [draft]);
   useEffect(() => {
@@ -92,7 +92,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const bytes = useMemo(() => bodyBytes(body(draft, address)), [draft, address]);
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);
   const tested = (id: string) => verified.has(id);
-  const update = (next: Draft) => setDraft(next);
+  const update = (next: Draft) => { setBlocked(null); setDraft(next); };
   const settings = (patch: Partial<Settings>) => update({ ...draft, settings: { ...draft.settings, ...patch } });
   const chooseMode = (mode: Mode) => {
     let next: Draft = { ...draft, mode };
@@ -103,8 +103,8 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const add = (id: string) => update(addBlock(draft, id));
   const remove = (index: number) => {
     const gone = draft.blocks[index], dependants = draft.blocks.filter(b => BY_ID[b.id]?.requires === gone.id).map(b => BY_ID[b.id].title);
-    setBlocked(dependants);
     update(removeBlock(draft, index));
+    setBlocked(dependants.length ? { source: BY_ID[gone.id].title, titles: dependants } : null);
   };
   const enabledChains: number[] = config.enabledDeployChains;
   const ruleIssues = issues.filter(i => i.field === 'rates' || i.field === 'rules' || /^block:\d+$/.test(i.field));
@@ -279,7 +279,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
           </div>}
           {draft.mode === 'prompt' && <>{tokenCard}{describe}</>}
           {draft.mode === 'blocks' && stack}
-          {blocked.length > 0 && <p className="small muted" role="status">Also removed, because they need Swap fee: {blocked.join(', ')}.</p>}
+          {blocked && <p className="small muted" role="status">Also removed, because they need {blocked.source}: {blocked.titles.join(', ')}.</p>}
           {ruleIssues.length > 0 && draft.mode !== null && <div className="notice bad" role="alert" id="rule-notice">{[...new Set(ruleIssues.map(i => i.message))].map(m => <p key={m}>{m}</p>)}</div>}
         </section>
         {draft.mode !== null && settingsPanel}

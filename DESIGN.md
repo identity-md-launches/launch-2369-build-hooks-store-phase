@@ -21,7 +21,7 @@ These are the exact section 8 tokens; no extra palette or dark theme is generate
 | `--pine` | `#1e5a3a` | Top bar, primary action, links, live status, focus |
 | `--pine-2` | `#2c7a50` | Hover border/underline accent |
 | `--on-pine` | `#f3ecd8` | Text and focus outline on pine |
-| `--ad` | `#c9a227` | #AD pill only |
+| `--ad` | `#c9a227` | #AD pill and block warning signs |
 | `--bad` | `#a3382b` | Failed status and errors |
 | `--warn` | `#a1731c` | Notice stripe |
 
@@ -80,8 +80,9 @@ Hard rectangular corners throughout. Pills are rectangular labels. Secondary sep
 | `.palette` details, `.pal-item`, `.pill.state` | Collapsible groups with VT323 added/total count; first three open, plus any group with an added block. ADD buttons are named “Add {block}”. Grey state pills: ADDED, ALWAYS, NEEDS SWAP FEE, REMOVE … FIRST, OWN POOLS ONLY, TOKEN LAUNCH ONLY. Unavailable rows dim their text. |
 | `.blk`, `.blk.token`, `.params` | Block card: number, title, warning sign, tested mark, ▲ ▼ REMOVE (named per block), the short label in VT323, labelled fields with inline `.field-error` and `aria-invalid`, and the Who uses it / On the hook page note. The token card has a 12px pine left stripe and the BRING MY OWN / USE STANDARD TOKEN switch. Dimmed (`.off`) with a “Not for this launch type” pill when the type does not allow it. |
 | `.editor`, `.chips`, `.added .chip` | Describe editor: textarea with VT323 counter, example chips, added-block chips with a 32px × remove button. |
-| `.warn` | 20px yellow (`--ad`) square with `!`, focusable, `role="img"` with the full tooltip as its name; the tooltip is an ink box shown on hover and focus, hidden (`display: none`) otherwise so it never widens the page. No red labels. |
-| `.tested` | Pine-outlined “✓ tested on Sepolia” on cards of blocks with a passing entry. |
+| `.warn` | 20px yellow (`--ad`) square with `!`, focusable, `role="img"` with the full tooltip as its name. The ink tooltip appears on hover and focus, positioned above its containing palette row, card header or summary rule. Its border-box width is `min(260px, 70vw)`, capped at the containing row's width; inactive tooltips use `display: none`. Focused and hovered risk signs were checked at 320, 390 and 1440px without horizontal overflow. No red labels. |
+| `.tested`, `.block-name .sr` | Pine-outlined “✓ tested on Sepolia” on cards of blocks with a passing entry. Untested block names include visually hidden status text for assistive technology; the native title remains available on mouse hover. |
+| `Builder` removal status | Names the removed parent block and its removed dependants; the next draft edit clears the note. |
 | `.notice.bad` | Rule notice under the stack (left stripe `--bad`): the 5% rule, dependencies, exclusions. |
 | `.preview`, `.sum`, `.exact`, `.cost` | Summary rows (8px label column 76px), the exact text in a closed disclosure (VT323 `pre`), cost box with VT323 26px amounts, disabled check button with its relay note, Continue disabled with a “Before you continue” list. |
 | `.pill.status-*`, `.pill.ad` | Text identifies status alongside color. Ad always says #AD. |

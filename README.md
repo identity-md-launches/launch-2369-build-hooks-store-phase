@@ -94,6 +94,8 @@ Actual worker validation (job 2, 2026-10-21): `npm --prefix web run typecheck` a
 
 The pinned design probe passed 11 of 16 checks; the five flags (capitals, kicker labels, type sizes, the marquee, border plus shadow) come from the mockup and the brief and are documented in [VALIDATION.md](VALIDATION.md). See [DESIGN.md](DESIGN.md) and [tests/results/](tests/results/) for evidence, fixes and limitations.
 
+Job 2 revision: all three reviewer findings were reproduced and fixed. Risk tooltips stay within their rows on phones; untested block names expose their status to assistive technology; dependency-removal notes clear on the next draft edit. The production build, typecheck, 16 unit tests and 38 Chromium interaction tests passed. Regression coverage exercises all six risk blocks in the palette, cards and summary at 320, 390 and 1440px with hover and keyboard focus. Current reports and screenshots use the `tests/results/revision-` prefix; reviewer answers are in [.imd-responses.json](.imd-responses.json). WebKit and screen-reader output remain unverified; see [VALIDATION.md](VALIDATION.md).
+
 Real wallet installations, signing, on-chain transactions, Safari/Firefox and a screen-reader session were not tested. Lighthouse was not run; no score is claimed. Connection behavior uses an EIP-6963 fixture with a real public address, without a private key. No production contract action was sent.
 
 ## Source map and attribution

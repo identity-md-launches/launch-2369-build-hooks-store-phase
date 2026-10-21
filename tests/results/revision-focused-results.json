@@ -1,0 +1,345 @@
+{
+  "config": {
+    "argv": [
+      "/opt/imd-worker/node-v24.21.0-linux-x64/bin/node",
+      "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/node_modules/.bin/playwright",
+      "test",
+      "--grep",
+      "risk tooltips|untested block names|dependent-removal status",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/playwright.config.ts",
+    "rootDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 35000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "snapshotDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 35000,
+        "use": {
+          "baseURL": "http://127.0.0.1:4173/preview/",
+          "headless": true,
+          "trace": "off",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node ../scripts/serve.mjs --port 4173",
+      "url": "http://127.0.0.1:4173/preview/",
+      "reuseExistingServer": true,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "builder.spec.ts",
+      "file": "builder.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "risk tooltips at 320px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2302,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:39:44.852Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-5be64903cf96d972f5ae",
+          "file": "builder.spec.ts",
+          "line": 160,
+          "column": 1
+        },
+        {
+          "title": "risk tooltips at 390px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2202,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:39:47.327Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-9812f8073e0376036c65",
+          "file": "builder.spec.ts",
+          "line": 160,
+          "column": 1
+        },
+        {
+          "title": "risk tooltips at 1440px: every sign stays readable on hover and keyboard focus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2186,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:39:49.539Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-c698f234525e1032b28f",
+          "file": "builder.spec.ts",
+          "line": 160,
+          "column": 1
+        },
+        {
+          "title": "untested block names expose the status to assistive technology without a risk sign",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 336,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:39:51.739Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-a254e4c0ea25104a2c44",
+          "file": "builder.spec.ts",
+          "line": 208,
+          "column": 1
+        },
+        {
+          "title": "dependent-removal status describes the removed block and clears after the next draft edit",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 35068,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 35000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 35000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 35000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts",
+                        "column": 89,
+                        "line": 227
+                      },
+                      "message": "Error: locator.fill: Test timeout of 35000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.blk[data-block=\"jar\"]').getByLabel('Rate (%)')\u001b[22m\n\n\n  225 |     ['type', () => page.getByRole('button', { name: /^B: Hook only/ }).click()],\n  226 |     ['setting', () => page.locator('#s-pool').fill('45')],\n> 227 |     ['block field', () => page.locator('.blk[data-block=\"jar\"]').getByLabel('Rate (%)').fill('1.5')],\n      |                                                                                         ^\n  228 |     ['reorder', () => page.getByRole('button', { name: 'Move Buyback jar up' }).click()],\n  229 |     ['remove', () => page.getByRole('button', { name: 'Remove Buyback jar' }).click()],\n  230 |   ];\n    at edit (/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:227:89)\n    at /home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:237:11\n    at /home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:231:37"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "add",
+                      "duration": 305
+                    },
+                    {
+                      "title": "mode",
+                      "duration": 250
+                    },
+                    {
+                      "title": "type",
+                      "duration": 296
+                    },
+                    {
+                      "title": "setting",
+                      "duration": 236
+                    },
+                    {
+                      "title": "block field",
+                      "duration": 33944,
+                      "error": {
+                        "message": "Error: locator.fill: Test timeout of 35000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.blk[data-block=\"jar\"]').getByLabel('Rate (%)')\u001b[22m\n",
+                        "stack": "Error: locator.fill: Test timeout of 35000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.blk[data-block=\"jar\"]').getByLabel('Rate (%)')\u001b[22m\n\n    at edit (/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:227:89)\n    at /home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:237:11\n    at /home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts:231:37",
+                        "location": {
+                          "file": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests/builder.spec.ts",
+                          "column": 89,
+                          "line": 227
+                        },
+                        "snippet": "  225 |     ['type', () => page.getByRole('button', { name: /^B: Hook only/ }).click()],\n  226 |     ['setting', () => page.locator('#s-pool').fill('45')],\n> 227 |     ['block field', () => page.locator('.blk[data-block=\"jar\"]').getByLabel('Rate (%)').fill('1.5')],\n      |                                                                                         ^\n  228 |     ['reorder', () => page.getByRole('button', { name: 'Move Buyback jar up' }).click()],\n  229 |     ['remove', () => page.getByRole('button', { name: 'Remove Buyback jar' }).click()],\n  230 |   ];"
+                      }
+                    }
+                  ],
+                  "startTime": "2026-10-21T09:39:52.087Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright/builder-dependent-removal--28721-s-after-the-next-draft-edit/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright/builder-dependent-removal--28721-s-after-the-next-draft-edit/error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "eb8c965bfed0363de8d0-d41a76e59fe1b71a1719",
+          "file": "builder.spec.ts",
+          "line": 221,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-21T09:39:44.234Z",
+    "duration": 43003.814,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

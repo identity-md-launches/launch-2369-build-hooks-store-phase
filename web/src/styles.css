@@ -273,11 +273,11 @@ details p { margin: 0; max-width: 75ch; }
 .pal-item.off .pal-text { opacity: .6; }
 .pill.state { max-width: 96px; white-space: normal; text-align: center; justify-content: center; color: var(--ink-2); border-color: var(--ink-3); background: var(--paper-2); overflow-wrap: anywhere; }
 .btn.tiny { min-height: 36px; padding: 6px 10px; font-size: var(--text-xs); box-shadow: 3px 3px 0 var(--ink); }
-.warn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-inline-start: 6px; border: 2px solid var(--ink); background: var(--ad); color: var(--ink); font: 400 var(--text-xs)/1 var(--display); vertical-align: middle; cursor: help; position: relative; }
-.warn::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: min(260px, 70vw); background: var(--ink); color: var(--paper-3); font: 500 var(--text-body)/1.35 var(--body); padding: 8px 10px; border: 2px solid var(--paper-3); white-space: normal; text-align: left; text-transform: none; display: none; opacity: 0; pointer-events: none; z-index: 30; }
+/* Keep each tooltip inside its row, including signs close to either viewport edge. */
+.pal-item, .blk-head, .sum ol li { position: relative; }
+.warn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-inline-start: 6px; border: 2px solid var(--ink); background: var(--ad); color: var(--ink); font: 400 var(--text-xs)/1 var(--display); vertical-align: middle; cursor: help; }
+.warn::after { content: attr(data-tip); position: absolute; left: 0; bottom: calc(100% + 8px); width: min(260px, 70vw); max-width: 100%; box-sizing: border-box; background: var(--ink); color: var(--paper-3); font: 500 var(--text-body)/1.35 var(--body); padding: 8px 10px; border: 2px solid var(--paper-3); white-space: normal; text-align: left; text-transform: none; display: none; opacity: 0; pointer-events: none; z-index: 30; }
 .warn:hover::after, .warn:focus-visible::after, .warn:focus::after { display: block; opacity: 1; }
-.pal-item .warn::after, .blk .warn::after { left: 0; transform: none; }
-.preview .warn::after { left: auto; right: 0; transform: none; }
 .tested { display: inline-block; margin-inline-start: 8px; padding: 2px 6px; border: 2px solid var(--pine); color: var(--pine); font: 500 var(--text-body)/1.2 var(--body); text-transform: none; vertical-align: middle; }
 .canvas { min-width: 0; }
 .canvas > section + section { margin-top: 24px; }

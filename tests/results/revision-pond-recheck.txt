@@ -1,0 +1,23 @@
+
+> the-hooks-store@0.1.0 test:e2e
+> playwright test pond.spec.ts --grep scene pauses outside --repeat-each=3 --reporter=list,json
+
+
+Running 3 tests using 1 worker
+
+(node:28) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/pond.spec.ts:56:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (938ms)
+(node:108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 tests/pond.spec.ts:56:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (825ms)
+(node:190) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 tests/pond.spec.ts:56:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer (986ms)
+
+  3 passed (4.4s)
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

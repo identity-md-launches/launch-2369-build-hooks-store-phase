@@ -1,0 +1,220 @@
+{
+  "config": {
+    "argv": [
+      "/opt/imd-worker/node-v24.21.0-linux-x64/bin/node",
+      "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/node_modules/.bin/playwright",
+      "test",
+      "pond.spec.ts",
+      "--grep",
+      "scene pauses outside",
+      "--repeat-each=3",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/playwright.config.ts",
+    "rootDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright",
+        "repeatEach": 3,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 35000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/test/scratch/playwright",
+        "repeatEach": 3,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "snapshotDir": "/home/imd-worker/.identitymd/work/a9268c47-5864-45b4-ae6e-022d726eed3c/edd43315-3759-4da8-a3cc-3179ffd86375/web/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 35000,
+        "use": {
+          "baseURL": "http://127.0.0.1:4173/preview/",
+          "headless": true,
+          "trace": "off",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node ../scripts/serve.mjs --port 4173",
+      "url": "http://127.0.0.1:4173/preview/",
+      "reuseExistingServer": true,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "pond.spec.ts",
+      "file": "pond.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 938,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:47:27.473Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f26e940d41be42608caa-018ae186cca667e7d37e",
+          "file": "pond.spec.ts",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 825,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:47:28.961Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f26e940d41be42608caa-1d4475a4fab05df01cf3",
+          "file": "pond.spec.ts",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 35000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 986,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-21T09:47:30.288Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f26e940d41be42608caa-35e0f17714964b81864d",
+          "file": "pond.spec.ts",
+          "line": 56,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-21T09:47:27.109Z",
+    "duration": 4385.955,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
