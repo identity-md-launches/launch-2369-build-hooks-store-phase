@@ -118,7 +118,7 @@ details > div { padding: 0 14px 14px; }
 .water { left: 0; } .water.a { animation: fadeA 3.2s steps(1) infinite; } .water.b { animation: fadeB 3.2s steps(1) infinite; }
 .pad { animation: drift 10s ease-in-out infinite alternate; } .pad.b { animation-duration: 13s; animation-delay: -6s; }
 .bank { right: 0; bottom: 0; }
-.fisher { left: 56%; top: 58%; }
+.fisher { left: 60%; top: 52%; }
 .fish { top: 72%; animation: swimL 38s linear infinite; }
 .fish.two { top: 84%; animation: swimR 52s linear infinite; animation-delay: -22s; }
 .leaf { top: 0; animation: fall 15s linear infinite; opacity: 0; color: var(--ink-2); }
@@ -974,11 +974,15 @@ section.view { padding-block: 8px 24px; }
   $('canopy').innerHTML = tiles(field(220, 8, function (r, c, x) { var d = [0.88, 0.86, 0.8, 0.7, 0.5, 0.3, 0.14, 0.05][r] * (0.85 + 0.3 * Math.sin(c / 9)); if (x > d) return ' '; var w = Math.min(7, Math.floor(x / d * 8)); return CANOPY_CHARS[Math.max(0, w - (r > 4 ? 0 : 1))]; }));
   $('shore').style.top = '118px'; $('shore').innerHTML = tiles(field(220, 2, function (r, c, x) { return x < (r === 0 ? 0.35 : 0.12) ? (x < 0.08 ? ',' : '-') : ' '; }));
   $('water-a').style.top = '150px'; $('water-b').style.top = '150px';
-  $('water-a').innerHTML = tiles(field(220, 36, function (r, c, x) { return x < 0.045 ? '~' : x < 0.06 ? '-' : ' '; }));
-  $('water-b').innerHTML = tiles(field(220, 36, function (r, c, x) { return x < 0.045 ? '~' : x < 0.06 ? '-' : ' '; }));
-  var PAD_BIG = ['   .:SSSSS:.', '  (:S88888S:)', "   ':SSSSS:'"], PAD_SMALL = [' .:SSS:.', '(:S888S:)', " ':SSS:'"], PAD_FLOWER = ['   .:SSSS*:.', '  (:S88888S:)', "   ':SSSSS:'"];
+  function water() { var rows = field(220, 36, function (r, c, x) { return x < 0.022 ? '-' : x < 0.04 ? '.' : ' '; });
+    for (var i = 0; i < 7; i++) { var r = 2 + Math.floor(rnd() * 32), c = Math.floor(rnd() * 200), f = rnd() < 0.5 ? '><>' : '<><'; rows[r] = rows[r].slice(0, c) + f + rows[r].slice(c + 3); }
+    return tiles(rows); }
+  $('water-a').innerHTML = water(); $('water-b').innerHTML = water();
+  var PAD_BIG = ['  .:SSSSSS:.', ' (:SSS  \\SSS:)', "  ':SSSSSS:'"], PAD_SMALL = [' .:SSS:.', '(:S  \\S:)', " ':SSS:'"], PAD_FLOWER = ['         *', '  .:SSSSSS:.', ' (:SSS  \\SSS:)', "  ':SSSSSS:'"];
   var PADS = [[3, 25, PAD_BIG], [12, 33, PAD_SMALL], [20, 48, PAD_FLOWER], [5, 44, PAD_SMALL], [30, 24, PAD_BIG], [38, 31, PAD_SMALL], [9, 60, PAD_SMALL], [26, 68, PAD_BIG], [46, 40, PAD_FLOWER], [14, 76, PAD_SMALL], [40, 55, PAD_SMALL], [52, 62, PAD_BIG]];
-  $('pads').innerHTML = PADS.map(function (p, i) { return '<pre class="layer pad' + (i % 2 ? ' b' : '') + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + tiles(p[2]) + '</pre>'; }).join('');
+  var REEDS = ['  8   8', ' 8|  8|   8', '  |   |  8|', '  |  |    |', '  |  |    |'];
+  $('pads').innerHTML = PADS.map(function (p, i) { return '<pre class="layer pad' + (i % 2 ? ' b' : '') + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + tiles(p[2]) + '</pre>'; }).join('')
+    + '<pre class="layer" style="left:1%;top:22%">' + tiles(REEDS) + '</pre>' + '<pre class="layer" style="left:7%;top:85%">' + tiles(REEDS) + '</pre>';
   $('branch').innerHTML = tiles([
     "                                                  _____",
     "                                        ___..--''  ,,, `--.",
@@ -1005,19 +1009,34 @@ section.view { padding-block: 8px 24px; }
   ]);
   var BANK = field(96, 14, function (r, c, x) { var edge = 11 - Math.floor(c / 9); if (r < edge) return ' '; return x < 0.42 ? (x < 0.14 ? '"' : x < 0.28 ? ',' : "'") : ' '; });
   function stamp(rows, r0, c0, sprite) { sprite.forEach(function (line, i) { var r = r0 + i; if (!rows[r]) return; rows[r] = (rows[r].slice(0, c0) + line + rows[r].slice(c0 + line.length)).slice(0, 96); }); }
-  stamp(BANK, 3, 40, ['   .tSt.', '  :S888S:', '  t88888t', ' :S88888S:', '  tSSSSSt']);
-  stamp(BANK, 5, 62, ['   .:tt:.', '  :S8888S:', '   t8888t', '  .S8888S.', '  :SSSSSS:']);
+  var PEPE_SMALL = ['   .:S8888888S:.', '  :S8S(_o)(_o)8S:', '  :S8SSSSSSSSSS8S:', '  :S8S.======.S8S:', "   ':S88888888S:'", '    tSSSSSSSSSSt', '    :S88888888S:'];
+  stamp(BANK, 2, 74, PEPE_SMALL);
+  stamp(BANK, 6, 58, PEPE_SMALL);
   $('bank').innerHTML = tiles(BANK);
-  var BODY = ['                               :tt:', '                              :8888:', '                             .S8888S.', '                               S88S', '                             .:S88S:.', '                            :S888888S:', '                            t88888888t', '                           .S88888888S.', '                        ,,,:tSSSSSSSSt:,,,', '                      ,,,,,,,,,,,,,,,,,,,,,,'];
+  var BODY = [
+    '                         .:S88888888S:.',
+    '                      .:S8SSSSSSSSSSSSS8S:.',
+    '                     :S8SS.____..____.SSS8S:',
+    '                     :S8SS(_oo_)(_oo_)SSS8S:',
+    '                     :S8SSSSSSSSSSSSSSSSS8S:',
+    '                     :S8SS.============.S8S:',
+    "                      ':S8S'----------'S8S:'",
+    "                        ':S8888888888888S:'",
+    '                         .:tSSSSSSSSSSSt:.',
+    '                         tS8888888888888St',
+    '                         :SSSSSSSSSSSSSSS:',
+    '                      ,,,:tSSSSSSSSSSSSSt:,,,',
+    '                    ,,,,,,,,,,,,,,,,,,,,,,,,,,',
+    '', ''];
   function frame(kind) {
     var rows = BODY.map(function (r) { return r.padEnd(46); });
     var put = function (ri, ci, str) { var r = rows[ri] || ''.padEnd(46); rows[ri] = (r.slice(0, ci) + str + r.slice(ci + str.length)).slice(0, 46); };
-    if (kind === 'idle' || kind === 'land' || kind === 'ripple') { put(4, 8, '_____________________'); put(5, 6, '/'); put(6, 4, '/'); put(7, 2, '/'); }
-    if (kind === 'idle') { put(8, 0, '( o )'); }
-    if (kind === 'land') { put(8, 0, '(*)'); }
-    if (kind === 'ripple') { put(8, 0, '( o )'); put(9, 0, '(     )'); }
-    if (kind === 'reel') { put(3, 28, '/'); put(2, 27, '/'); put(1, 26, '/'); put(0, 25, '/'); }
-    if (kind === 'cast') { put(4, 14, '_______________'); put(2, 1, '.----------.'); put(3, 0, 'o'); }
+    if (kind === 'idle' || kind === 'land' || kind === 'ripple') { put(9, 8, '_________________'); put(10, 6, '/'); put(11, 4, '/'); put(12, 2, '/'); }
+    if (kind === 'idle') { put(13, 0, '( o )'); }
+    if (kind === 'land') { put(13, 0, '(*)'); }
+    if (kind === 'ripple') { put(13, 0, '( o )'); put(14, 0, '(     )'); }
+    if (kind === 'reel') { put(8, 19, '/'); put(7, 17, '/'); put(6, 15, '/'); put(5, 13, '/'); }
+    if (kind === 'cast') { put(9, 8, '_________________'); put(7, 1, '.----------.'); put(8, 0, 'o'); }
     return tiles(rows);
   }
   var fisher = $('fisher'), casting = false, queue = 0, castCount = 0;
