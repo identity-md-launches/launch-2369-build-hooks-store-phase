@@ -1,0 +1,50 @@
+{
+  "status": "complete for the revision scope",
+  "findingsReproduced": 3,
+  "findingsFixed": 3,
+  "typecheckExit": 0,
+  "buildExit": 0,
+  "unit": {
+    "passed": 1192,
+    "failed": 0,
+    "skipped": 0
+  },
+  "chromium": {
+    "job13AndBalanceCopy": 10,
+    "priorJob12": 22,
+    "storeKeyboardAndOffline": 5,
+    "uniquePassed": 37,
+    "failed": 0,
+    "skipped": 0
+  },
+  "easylist": {
+    "rules": 13077,
+    "classes": [],
+    "ids": [],
+    "scanned": {
+      "classes": 254,
+      "ids": 120
+    }
+  },
+  "designProbe": {
+    "passed": 13,
+    "total": 16,
+    "retainedExceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "productionIndexSha256": "4634058ee98a25c1cc5f26dc56e6b55e12b31bdd6f74d7e1a403c782736218a4",
+  "sourceSha256": {
+    "proven": "6314ab74019619d55139d15588bcd223e457f86b9e00fb445dacf48136b8c738",
+    "promotions": "3c19f70b7825bdda3f7dbcc0baf24c1953728517ec674aa65dde85c9cf82706d",
+    "styles": "019abab94f67ca14c76785a06321e860b2e738c0139a9cad4f2a03437b40b19c"
+  },
+  "limitations": [
+    "WebKit, assistive technology, physical devices and native zoom not retested",
+    "Historical full browser suite and Anvil fork not rerun",
+    "Public endpoints exercised through controlled responses; live availability not certified",
+    "Existing non-fatal build chunk-size warning"
+  ]
+}

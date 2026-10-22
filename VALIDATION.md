@@ -1,19 +1,20 @@
-# Job 12 validation
+# Job 13 revision validation
 
-Complete for the stated scope. The final source and static export implement the proven lane and all carry-overs (h)–(m), with the existing wallet, swarm payment and launch safety flows retained.
+Complete for the stated revision scope. All three reviewer findings reproduced and were fixed. Responses are in [.imd-responses.json](.imd-responses.json); actual results and the six-domain review are in [tests/results/job13/validation.md](tests/results/job13/validation.md).
 
 | Check | Actual final result |
 | --- | --- |
-| Production build and separate TypeScript check | Passed |
-| Unit tests | 1,177 passed, 0 failed |
-| Relay tests | 9 passed, 0 failed |
-| Chromium production-export suite | 277 passed, 7 existing opt-in cases skipped, 0 failed |
-| Job 12 browser cases | All 23 passed within the full suite |
-| Local Anvil fork | Listing, approve/deposit, purchase, metadata revision pinning, second-wallet boost, cancel/refund and withdrawal passed; browser payments passed at 320, 390 and 1440px |
-| Real public request links, no wallet | Launches 2456 and 2454 reached Live and their real IMD build links in 3.9s and 5.8s |
-| Better Interface/design probe | All six domains reviewed; 13/16 probe checks passed; three required pixel-style exceptions retained |
-| Export integrity and submission budget | Passed; complete snapshot about 7.83 MiB, under 8 MiB. See final [export-integrity.json](tests/results/job12/export-integrity.json) and [submission-budget.json](tests/results/job12/submission-budget.json) |
+| Production build and separate TypeScript check | Passed; final `dist/` included |
+| `npm --prefix web test` | 1,192 passed, 0 failed, 0 skipped |
+| Focused job 13 Chromium cases and balance-copy check | 10 passed |
+| Existing job 12 Chromium regressions | 22 passed |
+| Store/Learn reflow, keyboard wallet sheet and offline subpath | 5 passed |
+| Better Interface/design probe | All six domains reviewed; 13/16 probe checks passed; three established pixel-style exceptions retained |
+| Generic EasyList names in final export | No matches; 254 classes and 120 ids scanned against 13,077 pinned rules |
+| Export integrity and complete Git snapshot size | Passed; see [export-integrity.json](tests/results/job13/export-integrity.json) and [submission-budget.json](tests/results/job13/submission-budget.json) |
 
-Detailed coverage, source locations, findings/fixes, actual commands, screenshots and limitations are in [tests/results/job12/validation.md](tests/results/job12/validation.md). Machine-readable results are in [tests/results/job12/summary.json](tests/results/job12/summary.json). [README.md](README.md) explains installation, preview and rebuild; [DESIGN.md](DESIGN.md) documents the final system.
+The browser cases use the production export under `/preview/`, controlled RPC answers and a local injected wallet. They cover deposit 0.25, promote, boost 0.05, cancel and withdraw at 320, 390 and 1440px; allowance sufficiency; zero-deposit guidance; proceeds; injected EasyList; first-endpoint HTTP 429; and an exact proven stack before and after choosing each chain. The final first screen was inspected at 390×844: the product and Describe it action are visible.
 
-These are worker observations, not independent certification. No public-chain transaction, token deployment, factory deployment or publication was performed. Screen readers, physical devices and native zoom were not tested. The supplied browser connector could not locate Chrome; all rendered checks used the working Playwright Chromium runner. Older validation files remain historical.
+[README.md](README.md) explains installation and rebuilding; [DESIGN.md](DESIGN.md) documents the implemented system. The requested EasyList image and all final textual results are retained. The optional cancellation inspection image stays in scratch to preserve bundle space.
+
+These are worker observations. WebKit, screen readers, physical devices, native zoom, the full historical browser suite, live public endpoint verification and the Anvil fork were not rerun in this focused revision. The build emits an existing non-fatal chunk-size warning. Earlier reports remain historical. No public-chain transaction or deployment was sent.

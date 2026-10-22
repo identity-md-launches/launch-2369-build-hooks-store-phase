@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "title": true,
+    "favicon": true,
+    "description": true,
+    "ogTitle": true,
+    "ogImage": true
+  },
+  "publicMismatchCount": 0,
+  "missingReferenceCount": 0,
+  "absoluteRuntimeReferenceCount": 0,
+  "indexSha256": "4634058ee98a25c1cc5f26dc56e6b55e12b31bdd6f74d7e1a403c782736218a4",
+  "passed": true
+}

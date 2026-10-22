@@ -31,6 +31,18 @@ test('exact stack on the same chain keeps the job 12 sentence and the Built from
   assert.match(text, /commit [\da-f]{40}: keep its behavior, apply the parameters and rules of this request, adapt the deployer/);
   assert.doesNotMatch(text, /deploy on .* with that chain's PoolManager/);
 });
+for (const chainId of [1, 4663]) test(`exact stack before choosing a chain names the proven launch on chain ${chainId} without an empty change list`, () => {
+  const entry = { ...p, chainId }, d = draft(p.blocks, null);
+  assert.equal(d.settings.chain, null);
+  assert.equal(matchProvenLaunch(d, [entry]), entry);
+  assert.equal(provenLine(entry, d), 'Built from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22)');
+  assert.doesNotMatch(provenLine(entry, d), /none|redeployed/);
+});
+test('a nearest stack before choosing a chain still describes its block changes', () => {
+  const d = draft(['swap-fee', 'cooldown', 'pause'], null);
+  assert.equal(matchProvenLaunch(d, [p]), p);
+  assert.equal(provenLine(p, d), 'Adapted from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22): the swarm removes Anti-sniper window, Buyback jar and adds Cooldown');
+});
 test('nearest match on the other chain: remove X; add Y; deploy on <chain>', () => {
   const d = draft(['swap-fee', 'cooldown', 'pause'], 1);
   assert.equal(matchProvenLaunch(d, [p]), p);

@@ -117,9 +117,9 @@ export function Promotions({ launches, store }: { launches: Launch[]; store: Lau
       {setup === 'pending' && <p className="notice" role="status">Promotion payments await contract setup on {chainName}. IMD and the proceeds recipient must be configured by the contract owner.</p>}
       <div className="promotion-balance" aria-live="polite">
         <p className="wallet-imd">In your wallet on {chainName}: <strong className="num">{imd(walletBalance)}</strong></p>
-        {walletBalance !== null && walletBalance < AD_PRICE && <p className="small low-imd">Not enough IMD on {chainName} for a placement; the pay page and bridges are outside the store</p>}
+        {walletBalance !== null && walletBalance < AD_PRICE && <p className="small low-imd">Not enough IMD on {chainName} for a placement. Get IMD on {chainName} outside the store, then deposit it here.</p>}
         <p className="deposited-imd">Deposited for promotions: <strong className="num">{imd(available)}</strong></p>
-        <p className="small muted">Deposits are pulled from your wallet when you promote or boost and stay yours until spent; withdraw any unspent deposit here.</p>
+        <p className="small muted">DEPOSIT moves IMD from your wallet into the placements contract. PROMOTE and BOOST spend from it; WITHDRAW returns what is unspent.</p>
         {showEarned && <p className="earned-imd">Earned as recipient: <strong className="num">{formatEther(earned!.proceeds)} IMD</strong></p>}
         <div className="row-actions">
           <button className="btn tiny" disabled={busy || wrongChain || !available} onClick={() => void run('Withdraw your unspent deposit: check your wallet…', 'Deposit withdrawn to your wallet.', async ctx => {

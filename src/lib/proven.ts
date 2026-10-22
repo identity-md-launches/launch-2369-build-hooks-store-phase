@@ -21,7 +21,7 @@ export const exactProvenMatch = (draft: Draft, p: ProvenLaunch) => p.chainId ===
 const otherChain = (draft: Draft, p: ProvenLaunch) => draft.settings.chain !== null && draft.settings.chain !== p.chainId && CHAIN_NAMES[draft.settings.chain] ? draft.settings.chain : null;
 export const provenLine = (p: ProvenLaunch, draft?: Draft) => {
   const title = `${p.name} (launch ${p.launchNumber}, audited ${p.verifiedAt})`;
-  if (!draft || exactProvenMatch(draft, p)) return `Built from a proven launch: ${title}`;
+  if (!draft || exactProvenMatch(draft, p) || (draft.settings.chain === null && sameBlocks(draft, p))) return `Built from a proven launch: ${title}`;
   const chain = otherChain(draft, p);
   if (chain && sameBlocks(draft, p)) return `Adapted from a proven launch: ${title}: the same blocks, redeployed on ${CHAIN_NAMES[chain]}`;
   const changes = provenChanges(draft, p);

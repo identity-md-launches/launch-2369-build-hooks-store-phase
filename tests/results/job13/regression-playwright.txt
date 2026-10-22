@@ -1,0 +1,38 @@
+npm notice run the-hooks-store@0.1.0 npx
+npm notice run 'playwright' test job12.spec.ts --grep-invert job 13 promotions panel|two labelled balances --reporter=list
+[WebServer] (node:30) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 22 tests using 1 worker
+
+(node:42) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/job12.spec.ts:30:65 › nearest match, exact sheet and paid swarm review at 390 (2.2s)
+  ✓   2 tests/job12.spec.ts:30:65 › nearest match, exact sheet and paid swarm review at 1100 (1.8s)
+  ✓   3 tests/job12.spec.ts:30:65 › nearest match, exact sheet and paid swarm review at 1920 (1.6s)
+  ✓   4 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 320x900 (891ms)
+  ✓   5 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 390x844 (911ms)
+  ✓   6 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 768x900 (943ms)
+  ✓   7 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 1100x800 (1.1s)
+  ✓   8 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 1366x768 (964ms)
+  ✓   9 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 1440x900 (982ms)
+  ✓  10 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 1920x1080 (1.1s)
+  ✓  11 tests/job12.spec.ts:45:119 › fluid Builder edges, fixed type and card fit at 2560x1440 (1.1s)
+  ✓  12 tests/job12.spec.ts:54:55 › seven findings do not leave a phantom scroll gap at 1920x1080 (921ms)
+  ✓  13 tests/job12.spec.ts:54:55 › seven findings do not leave a phantom scroll gap at 1366x768 (776ms)
+  ✓  14 tests/job12.spec.ts:69:64 › proven catalog card and hook preload their audited blocks at 390 (1.2s)
+  ✓  15 tests/job12.spec.ts:69:64 › proven catalog card and hook preload their audited blocks at 1100 (1.3s)
+  ✓  16 tests/job12.spec.ts:69:64 › proven catalog card and hook preload their audited blocks at 1920 (1.5s)
+  ✓  17 tests/job12.spec.ts:75:31 › loaded reading, rule, address, request and cost fonts at 390 (1.4s)
+  ✓  18 tests/job12.spec.ts:75:31 › loaded reading, rule, address, request and cost fonts at 1440 (1.4s)
+  ✓  19 tests/job12.spec.ts:85:225 › public ads request 2454 resolves its Requested event without a wallet (570ms)
+  ✓  20 tests/job12.spec.ts:85:225 › public ads request 2456 resolves its Requested event without a wallet (674ms)
+  ✓  21 tests/job12.spec.ts:151:1 › Robinhood hook promoted with IMD on Ethereum from the deposit, then both balances refresh (1.7s)
+  ✓  22 tests/job12.spec.ts:233:1 › one featured card ranks the summed hook total and own placements show both payment chains (1.0s)
+
+  22 passed (30.7s)
+npm notice
+npm notice New patch version of npm available! 12.2.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

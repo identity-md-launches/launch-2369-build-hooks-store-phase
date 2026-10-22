@@ -1,5 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {encodeAbiParameters,parseAbiParameters,stringToHex,toHex,encodeFunctionResult,decodeFunctionData,erc20Abi,zeroAddress,type Abi} from 'viem';
 import site from '../../public/site-config.json' with {type:'json'};
 import index from '../../tests/fixtures/job12/proven-index.json' with {type:'json'};
@@ -11,7 +12,9 @@ import {REQUEST_TOPIC,COMPLETE_TOPIC} from '../src/chain/store';
 import {genericRules,hidingStylesheet} from '../../scripts/easylist-check.mjs';
 import {interceptChains,injectedOwner,storeLogs,head,owner,hook,token,requestId,rpcRoute} from './chain-fixture';
 const proven=parseProvenLaunches(index),reed=proven.find(p=>p.launchNumber===2449)!;
-const out='../artifacts/job12';
+const out=fileURLToPath(new URL('../../tests/results/job12/',import.meta.url));
+const job13Out=fileURLToPath(new URL('../../tests/results/job13/',import.meta.url));
+const job13Scratch=fileURLToPath(new URL('../../test/scratch/job13/',import.meta.url));
 function draft(ids=['swap-fee','pause','max-swap']):Draft {let d={...newDraft(),type:'B' as const,mode:'blocks' as const,seeded:true};d.settings={...d.settings,chain:4663,hname:'ReedHook',owner};for(const id of ids)d=addBlock(d,id) as typeof d;return d;}
 async function builder(page:Page,d=draft()) {
  await interceptChains(page,{noLogs:true});await injectedOwner(page);
@@ -141,9 +144,10 @@ async function promotionFixture(page:Page,options:{balance?:bigint;both?:boolean
 }
 test('two labelled balances and the low-wallet note use controlled RPC readings',async({page})=>{
  await page.setViewportSize({width:390,height:844});const {reads}=await promotionFixture(page,{balance:50000000000000000n});const p=page.locator('#promotions');
- await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 0.05 IMD');await expect(p.locator('.deposited-imd')).toHaveText('Deposited for promotions: 0 IMD');await expect(p.locator('.low-imd')).toHaveText('Not enough IMD on Ethereum for a placement; the pay page and bridges are outside the store');await expect(p).toContainText('Deposits are pulled from your wallet when you promote or boost and stay yours until spent; withdraw any unspent deposit here.');
+ await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 0.05 IMD');await expect(p.locator('.deposited-imd')).toHaveText('Deposited for promotions: 0 IMD');await expect(p.locator('.low-imd')).toHaveText('Not enough IMD on Ethereum for a placement. Get IMD on Ethereum outside the store, then deposit it here.');await expect(p).toContainText('DEPOSIT moves IMD from your wallet into the placements contract. PROMOTE and BOOST spend from it; WITHDRAW returns what is unspent.');
  expect(reads.some(r=>r.chain===1&&r.name==='balanceOf')).toBe(true);expect(reads.some(r=>r.chain===1&&r.name==='available')).toBe(true);
- await page.locator('#promotion-chain').selectOption('4663');await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Robinhood Chain: 0 IMD');expect(reads.some(r=>r.chain===4663&&r.name==='balanceOf')).toBe(true);
+ fs.mkdirSync(job13Out,{recursive:true});await p.locator('.promotion-balance').scrollIntoViewIfNeeded();await page.screenshot({path:`${job13Out}/promotions-balances-390.jpg`,type:'jpeg',quality:60});
+ await page.locator('#promotion-chain').selectOption('4663');await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Robinhood Chain: 0 IMD');await expect(p.locator('.low-imd')).toHaveText('Not enough IMD on Robinhood Chain for a placement. Get IMD on Robinhood Chain outside the store, then deposit it here.');expect(reads.some(r=>r.chain===4663&&r.name==='balanceOf')).toBe(true);
 });
 test('Robinhood hook promoted with IMD on Ethereum from the deposit, then both balances refresh',async({page})=>{
  await page.setViewportSize({width:390,height:844});const {writes,reads}=await promotionFixture(page);const p=page.locator('#promotions');await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 2 IMD');
@@ -156,6 +160,16 @@ test('Robinhood hook promoted with IMD on Ethereum from the deposit, then both b
  await page.goto(`#hook/1/${requestId}`);await expect(page.locator('.detail-pills .paid-tag')).toContainText('active placement');
 });
 test.describe('job 13 promotions panel',()=>{
+ test('exact proven blocks before choosing a chain, then both deploy chains',async({page})=>{
+  await page.setViewportSize({width:390,height:844});const d=draft(reed.blocks);d.settings.chain=null;
+  await builder(page,d);const line=page.locator('.hookcard .proven-line');
+  const title=`${reed.name} (launch ${reed.launchNumber}, audited ${reed.verifiedAt})`;
+  await expect(page.locator('#s-chain')).toHaveValue('');await expect(line).toHaveText(`Built from a proven launch: ${title}`);
+  await expect(line).not.toContainText('none');
+  await page.locator('#s-chain').selectOption('1');await expect(line).toHaveText(`Adapted from a proven launch: ${title}: the same blocks, redeployed on Ethereum`);
+  await page.locator('#s-chain').selectOption('4663');await expect(line).toHaveText(`Built from a proven launch: ${title}`);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+ });
  for(const width of [320,390,1440])test(`deposit 0.25, promote, boost 0.05, cancel and withdraw at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   const {writes}=await promotionFixture(page);const p=page.locator('#promotions');
@@ -173,7 +187,8 @@ test.describe('job 13 promotions panel',()=>{
   await row.getByLabel('I confirm this boost is non-refundable.').check();await row.getByRole('button',{name:'Confirm boost',exact:true}).click();
   await expect(row).toContainText('0.15 IMD total paid');await expect(p.locator('.deposited-imd')).toHaveText('Deposited for promotions: 0.1 IMD');
   await row.getByRole('button',{name:'Cancel',exact:true}).click();await expect(row).toContainText('All boosts are forfeited');
-  if(width===390){fs.mkdirSync(out.replace('job12','job13'),{recursive:true});await row.scrollIntoViewIfNeeded();await page.screenshot({path:`${out.replace('job12','job13')}/promotions-cancel-390.jpg`,type:'jpeg',quality:60});}
+  // The required EasyList screenshot is retained below; this inspection-only frame stays in scratch.
+  if(width===390){fs.mkdirSync(job13Scratch,{recursive:true});await row.scrollIntoViewIfNeeded();await page.screenshot({path:`${job13Scratch}/promotions-cancel-390.jpg`,type:'jpeg',quality:60});}
   await row.getByRole('button',{name:'Confirm cancellation',exact:true}).click();
   await expect(row.locator('.placement-running')).toHaveCount(0);await expect(p.locator('.deposited-imd')).toHaveText('Deposited for promotions: 0.2 IMD');
   await p.getByRole('button',{name:'Withdraw',exact:true}).click();await expect(p.locator('.deposited-imd')).toHaveText('Deposited for promotions: 0 IMD');await expect(p.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 1.95 IMD');
@@ -208,7 +223,7 @@ test.describe('job 13 promotions panel',()=>{
   const names=await page.evaluate(()=>{const c=new Set<string>(),i=new Set<string>();for(const el of document.querySelectorAll('*')){el.classList.forEach(x=>c.add(x));if(el.id)i.add(el.id);}return {classes:[...c],ids:[...i]};});
   expect(names.classes.filter(c=>rules.classes.has(c))).toEqual([]);expect(names.ids.filter(i=>rules.ids.has(i))).toEqual([]);
   await page.goto('#mine');await page.addStyleTag({content:hidingStylesheet(rules)});await expect(page.locator('#promotions')).toBeVisible();await expect(page.locator('.promotion-row').first()).toBeVisible();
-  fs.mkdirSync(out.replace('job12','job13'),{recursive:true});await page.goto('#store');await page.addStyleTag({content:hidingStylesheet(rules)});await page.locator('#featured').scrollIntoViewIfNeeded();await page.screenshot({path:`${out.replace('job12','job13')}/featured-easylist-390.jpg`,type:'jpeg',quality:60});
+  fs.mkdirSync(job13Out,{recursive:true});await page.goto('#store');await page.addStyleTag({content:hidingStylesheet(rules)});await page.locator('#featured').scrollIntoViewIfNeeded();await page.screenshot({path:`${job13Out}/featured-easylist-390.jpg`,type:'jpeg',quality:60});
  });
  test('the first RPC answering 429 is invisible: strip and panel still render',async({page})=>{
   const {rejected}=await promotionFixture(page,{both:true,first429:true});

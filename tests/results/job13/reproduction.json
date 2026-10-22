@@ -1,0 +1,17 @@
+{
+  "a7e97b3ee71c5ffde62f6554e13f6be876bc844272ddba0de560c7f0c367c1e2": {
+    "reproduced": true,
+    "observation": "tests/results/job13/ was absent; job 13 screenshots used out.replace from ../artifacts/job12. Existing browser tests passed without producing a repository job 13 report."
+  },
+  "ff46ab97b720c3f15d7ccb56213a2fd70c834c6ca64a041598fe091d8d34e420": {
+    "reproduced": true,
+    "baselineCommand": "playwright test job12.spec.ts --grep \"two labelled balances|deposit 0.25.*390px\" --reporter=list",
+    "baselineResult": "2 passed (9.6s), against the prior export. The first case asserted the misleading sentence; the second confirmed wallet IMD fell from 2 to 1.75 on DEPOSIT, before PROMOTE."
+  },
+  "73c66bb2023a0695ad8ec3d8288b63151add2753443b187a8846dbdbc19e0104": {
+    "reproduced": true,
+    "draft": "Type B, blocks swap-fee / anti-sniper / jar / pause, chain null",
+    "matched": "PondsideGuard",
+    "priorLine": "Adapted from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22): the swarm removes none and adds none"
+  }
+}

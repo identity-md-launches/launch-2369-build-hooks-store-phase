@@ -1,0 +1,11 @@
+{
+  "limitBytes": 8388608,
+  "completeSnapshotGitBundleBytes": 8370962,
+  "reservedMetadataBytes": 16384,
+  "headroomBytes": 1262,
+  "candidateFileCount": 668,
+  "dependencyOrCachePathCount": 0,
+  "protectedPathsChanged": [],
+  "submoduleCount": 0,
+  "passed": true
+}

@@ -4,7 +4,7 @@
 
 A pixel storefront for browsing, composing and managing Uniswap v4 hooks. Preserve the supplied pond scene, paper palette, hard borders, terminal numbers and compact Steam-style navigation. The primary actions are describing a hook on Store, completing its Builder request, and managing owned hooks and advertisements in My hooks.
 
-Canonical tokens and components are in `web/src/styles.css`. React composition is in `web/src/`. The canvas and character grids live in `src/scene/`. This document describes the final source, including the fluid Builder, proven launch marks and cross-chain promotions in job 12.
+Canonical tokens and components are in `web/src/styles.css`. React composition is in `web/src/`. The canvas and character grids live in `src/scene/`. This document describes the final source, including job 13's balance-first Promotions panel and proven-launch wording. This revision preserves the existing tokens, typography and layout.
 
 ## Colors
 
@@ -47,7 +47,7 @@ Below 1,100px the card comes first. Below 720px the details show at least 40vh, 
 
 The nested scroll containers `.hc-scroll`, `.findings .list`, `.understood` and `.marquee` are positioned relatively. This contains their absolutely positioned screen-reader labels without adding empty scroll space to `.hookcol`; their overflow rules and panel dimensions are retained.
 
-Catalog uses a 224px filter rail and flexible card grid; mobile filters sit above it. Featured cards form a compact one-line marquee; a stationary open slot is the empty state. Promotions use four step columns, changing to two below 720px, full-width selects and wrapping actions. Confirmation insets are 16px, 12px on phones. Every promotion action has a minimum 44px height.
+Catalog uses a 224px filter rail and flexible card grid; mobile filters sit above it. Featured cards form a compact one-line marquee; a stationary open slot is the empty state. Promotions read vertically: terms, payment chain, wallet/deposit/proceeds balances, deposit form, then one row per live hook. `.deposit-row` and `.row-actions` wrap at narrow widths; the input flexes from a 160px basis. Confirmation and deposit insets are 16px, becoming 12px below 720px. Every promotion action has a minimum 44px height. Final browser checks covered the promotion cycle at 320, 390 and 1440px.
 
 ## Elevation & Depth
 
@@ -65,17 +65,17 @@ Rectangular panels, fields, pills and buttons. The open slot has a dashed border
 | `Landing`, `.prompt` | Describe field saves a local draft and opens Builder. Metrics come from live reads; reduced motion pauses the pond. |
 | `Catalog`, `Featured` | Immediate native filters, clearable empty state, chain-backed hook cards. Indexed cards add a textual PROVEN pill and a Build one like this action. Ads show purchased metadata, #AD, symbol, creator and hours left. Ranking sums live totals per hook across both payment chains and ties use the earliest purchase; open slot is last. |
 | `Builder`, `.step`, `.shelf`, `.rule` | Four steps, category tabs, one rule per row with Edit/reorder/remove, explicit own-code selection, token choice and readiness links. The old chooser and palette disclosures are absent. |
-| `.hookcard`, `.findings`, `dialog.sheet` | Tile summary, audited-source adaptation line, fees, wait and readiness; concise findings with Jump to it; exact request in a native modal with highlighted words, Copy, Close and Escape. |
+| `.hookcard`, `.findings`, `dialog.sheet` | Tile summary, audited-source adaptation line, fees, wait and readiness; concise findings with Jump to it; exact request in a native modal with highlighted words, Copy, Close and Escape. An identical proven stack says Built from before a chain is chosen; choosing the other chain names its redeployment, without an empty change list. |
 | `Connect` | Native wallet sheet, EIP-6963 named wallets, mobile wallet-browser links and Coinbase Smart Wallet. Escape returns focus to Connect. |
 | `Hook`, `RelayTimeline`, `AddressValue` | Status and evidence, full copyable addresses, deduplicated Build page links, pool opening and exact request. Notifications are restricted to own launches. |
 | `Management`, `.function-row` | Catalog labels matched by name to the source ABI. Owner reads gate writes. Pool-scoped rows wait for a selected/typed pool id and do no read without one. Every Send simulates first; failures use plain action reasons. |
-| `AdsProvider`, `Promotions` | Reads every 60 seconds. Payment-chain selector, separately labelled wallet and deposited IMD balances, low-balance guidance, placements on both chains, combined hook rank, BOOST and cancellation confirmations, withdrawal and a four-step listing/deposit/purchase/done flow. Busy, rejected, unavailable, empty and setup-pending states have adjacent guidance. Step changes focus the next action. |
+| `AdsProvider`, `Promotions` | Reads every 60 seconds and after transactions. Payment-chain selector, separately labelled wallet/deposit/proceeds balances, typed DEPOSIT form, live hook rows with PROMOTE, combined hook rank, typed BOOST with confirmation, cancellation terms and separate deposit/proceeds withdrawals. The persistent note explains that DEPOSIT moves wallet IMD into the contract and PROMOTE/BOOST spend it. Busy, rejected, unavailable, empty and setup-pending states have adjacent guidance. |
 | `OpenPool` | Type C initialization parameters and copyable calldata; sending from this site remains phase 2b. |
 | `.btn`, `.pill`, `.notice`, `.field-error` | Existing primary/secondary/disabled states, textual statuses, inline recovery and live-region feedback. |
 
 The 42-second featured loop pauses for hover and keyboard focus. Reduced motion produces a scrollable row and hides its duplicate. Missing ads addresses hide both ads surfaces. Expired/cancelled placements are removed even if an RPC page still lists them.
 
-Closing and reopening an unfinished promotion preserves its current step. Starting again after Done opens step 1 with an empty, enabled hook selector and clears the previous listing, revision, recipient, reviewed metadata and transaction hash.
+`.featured-band`, `.featured-track`, `.featured-group`, `.placement-card`, `.placement-slot` and `.promotion-row` avoid generic blocker selectors; #AD stays visible text. Do not reintroduce ad/ads/adcard/adslot/ad-card/sponsored/promo class or id names. The pinned EasyList check scans the built export, and the browser suite injects its generic hiding stylesheet. Changing the wallet or payment chain clears entered amounts, confirmations and transaction feedback, then reads the new balances.
 
 ## Do's and Don'ts
 

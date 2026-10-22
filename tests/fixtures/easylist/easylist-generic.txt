@@ -1,10 +1,10 @@
 [Adblock Plus 2.0]
-! Version: 202610222008
+! Version: 202610222028
 ! Title: EasyList
-! Last modified: 22 Oct 2026 20:08 UTC
-! Commit: 2aed0745054246d2a9a59b188a0f499d467f19c0
+! Last modified: 22 Oct 2026 20:28 UTC
+! Commit: 1d776e34a682199f5b117bd01197fb12ef11990e
 ! Source: https://easylist.to/easylist/easylist.txt
-! Pinned: generic ##.class and ###id rules only (13077 of 85238 lines)
+! Pinned: generic ##.class and ###id rules only (13077 of 85241 lines)
 ###AC_ad
 ###AD_160
 ###AD_300
