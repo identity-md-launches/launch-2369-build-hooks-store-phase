@@ -48,7 +48,7 @@ test('reduced motion leaves one still frame and no cast; the pointer-accessible 
   await start(page, true);
   const original = await pixels(page); await page.clock.runFor(20_000); await waterClick(page); await page.clock.runFor(6000);
   expect(await pixels(page)).toBe(original); expect((await snapshot(page)).frames).toBe(0); expect((await snapshot(page)).state).toBe('idle');
-  await expect(page.locator('.marquee-track')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.featured-track')).toHaveCSS('animation-name', 'none');
   const animate = page.getByRole('button', { name: '▶ animate the pond', exact: true });
   await expect(animate).toHaveCSS('pointer-events', 'auto');
   const box = (await animate.boundingBox())!; await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);

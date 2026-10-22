@@ -1,4 +1,4 @@
-import type { Draft } from './compose.ts';
+import { CHAIN_NAMES, POOL_MANAGERS, type Draft } from './compose.ts';
 import catalog from '../blocks/catalog.json' with { type: 'json' };
 
 export const PROVEN_LAUNCHES_URL = 'https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/proven-launches.json';
@@ -15,22 +15,32 @@ export function provenChanges(draft: Draft, p: ProvenLaunch) {
   return { remove: [...source].filter(id => !ids.has(id)), add: [...ids].filter(id => !source.has(id)) };
 }
 export const blockNames = (ids: string[]) => ids.map(id => catalog.blocks.find(b => b.id === id)?.title ?? id).join(', ') || 'none';
-export const exactProvenMatch = (draft: Draft, p: ProvenLaunch) => p.type === draft.type && p.chainId === draft.settings.chain && !provenChanges(draft, p).remove.length && !provenChanges(draft, p).add.length;
+const sameBlocks = (draft: Draft, p: ProvenLaunch) => { const changes = provenChanges(draft, p); return p.type === draft.type && !changes.remove.length && !changes.add.length; };
+export const exactProvenMatch = (draft: Draft, p: ProvenLaunch) => p.chainId === draft.settings.chain && sameBlocks(draft, p);
+/** The draft deploys on a chain other than the proven launch's own: name it and its PoolManager. */
+const otherChain = (draft: Draft, p: ProvenLaunch) => draft.settings.chain !== null && draft.settings.chain !== p.chainId && CHAIN_NAMES[draft.settings.chain] ? draft.settings.chain : null;
 export const provenLine = (p: ProvenLaunch, draft?: Draft) => {
   const title = `${p.name} (launch ${p.launchNumber}, audited ${p.verifiedAt})`;
   if (!draft || exactProvenMatch(draft, p)) return `Built from a proven launch: ${title}`;
+  const chain = otherChain(draft, p);
+  if (chain && sameBlocks(draft, p)) return `Adapted from a proven launch: ${title}: the same blocks, redeployed on ${CHAIN_NAMES[chain]}`;
   const changes = provenChanges(draft, p);
-  return `Adapted from a proven launch: ${title}: the swarm removes ${blockNames(changes.remove)} and adds ${blockNames(changes.add)}`;
+  return `Adapted from a proven launch: ${title}: the swarm removes ${blockNames(changes.remove)} and adds ${blockNames(changes.add)}${chain ? `, redeployed on ${CHAIN_NAMES[chain]}` : ''}`;
 };
 export function provenRequestLine(p: ProvenLaunch, request: string) {
-  const changes = /Start from the audited source at https:\/\/github\.com\/\S+ commit [\da-f]{40}: remove ([^;]+); add ([^;]+);/.exec(request);
-  return changes ? `Adapted from a proven launch: ${p.name} (launch ${p.launchNumber}, audited ${p.verifiedAt}): the swarm removes ${changes[1]} and adds ${changes[2]}` : provenLine(p);
+  const title = `${p.name} (launch ${p.launchNumber}, audited ${p.verifiedAt})`;
+  const redeploy = /Start from the audited source at https:\/\/github\.com\/\S+ commit [\da-f]{40}: keep its behavior, deploy on (Ethereum|Robinhood Chain) with/.exec(request);
+  if (redeploy) return `Adapted from a proven launch: ${title}: the same blocks, redeployed on ${redeploy[1]}`;
+  const changes = /Start from the audited source at https:\/\/github\.com\/\S+ commit [\da-f]{40}: remove ([^;]+); add ([^;]+);( deploy on (Ethereum|Robinhood Chain) with)?/.exec(request);
+  return changes ? `Adapted from a proven launch: ${title}: the swarm removes ${changes[1]} and adds ${changes[2]}${changes[4] ? `, redeployed on ${changes[4]}` : ''}` : provenLine(p);
 }
 export function provenInstruction(draft: Draft, p: ProvenLaunch) {
-  const start = `Start from the audited source at ${p.repoUrl} commit ${p.commit}: `;
-  if (exactProvenMatch(draft, p)) return start + 'keep its behavior, apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as imported code.';
+  const start = `Start from the audited source at ${p.repoUrl} commit ${p.commit}: `, chain = otherChain(draft, p);
+  const deploy = chain ? `deploy on ${CHAIN_NAMES[chain]} with that chain's PoolManager ${POOL_MANAGERS[chain]}` : '';
+  const tail = 'apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as';
+  if (sameBlocks(draft, p)) return start + `keep its behavior, ${deploy ? `${deploy}, ` : ''}${tail} imported code.`;
   const changes = provenChanges(draft, p);
-  return start + `remove ${blockNames(changes.remove)}; add ${blockNames(changes.add)}; apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as a new hook.`;
+  return start + `remove ${blockNames(changes.remove)}; add ${blockNames(changes.add)}; ${deploy ? `${deploy}; ` : ''}${tail} a new hook.`;
 }
 /** This launch itself is in the runtime index, rather than merely based on one. */
 export function provenForLaunch(launch: { launchId?: string | null; launchNumber: number | null; chainId: number; hookAddress?: string | null }, entries: ProvenLaunch[]) {

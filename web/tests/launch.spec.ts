@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { encodeAbiParameters, parseAbiParameters, toHex, toFunctionSelector, decodeFunctionData, hexToString, zeroAddress } from 'viem';
 import site from '../../public/site-config.json' with {type:'json'};
 import { newDraft, addBlock, type LaunchType } from '../../src/lib/compose';
-import { injectedOwner, owner, hook, interceptChains, jsonResult, route } from './chain-fixture';
+import { injectedOwner, owner, hook, interceptChains, jsonResult, route ,rpcRoute} from './chain-fixture';
 import { intakeAbi } from '../src/chain/decode';
 
 function validDraft(type: LaunchType='A') {
@@ -35,7 +35,7 @@ async function prepare(page: Page, options: {type?:LaunchType;price?:bigint;fork
   await page.route('**/site-config.json',r=>r.fulfill({json:config}));
   await page.route('https://api.imd.fun/**',r=>r.fulfill({status:503}));
   await page.route('https://raw.githubusercontent.com/**',r=>r.abort());
-  for(const chain of config.chains)await page.route(`${chain.rpcUrl}/**`,async r=>{
+  for(const chain of config.chains)await page.route(rpcRoute(chain),async r=>{
     const request=r.request().postDataJSON();calls.push({...request,chain:chain.id});
     if(options.fork && chain.id===4663){
       if(options.delayReceipt&&request.method==='eth_getTransactionReceipt')await new Promise(resolve=>setTimeout(resolve,1200));

@@ -6,7 +6,7 @@ import controls2424 from '../../src/abi/PondsideGuard-2424-controls.json' with {
 import site from '../../public/site-config.json' with {type:'json'};
 import {body,newDraft,addBlock} from '../../src/lib/compose';
 import {REQUEST_TOPIC} from '../src/chain/store';
-import {head,hook,token,owner,requestId,route,storeLogs,interceptChains,injectedOwner} from './chain-fixture';
+import {head,hook,token,owner,requestId,route,storeLogs,interceptChains,injectedOwner,rpcRoute} from './chain-fixture';
 const poolId='0xccab6575b5cdd5798731f62f9299c442f954366e91b9513386d83e249cb99843';
 
 test('type A reaches Live from 2448 record and preselects the seeded pool',async({page})=>{
@@ -15,8 +15,8 @@ test('type A reaches Live from 2448 record and preselects the seeded pool',async
  await interceptChains(page,{result:{jobId:record2448.jobs[0].id,launch:{id:record2448.id,chainId:4663}}});
  await page.route('**/site-config.json',r=>r.fulfill({json:{...site,ads:{},chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))}}));
  await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));await page.route(`${site.relayUrl}/launches/${record2448.id}`,r=>r.fulfill({json:record2448}));
- await page.route(site.chains[1].rpcUrl,async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
- await page.route(site.chains[0].rpcUrl,async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getCode')return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:'0x6000'}});return r.fallback();});
+ await page.route(rpcRoute(site.chains[1]),async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
+ await page.route(rpcRoute(site.chains[0]),async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getCode')return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:'0x6000'}});return r.fallback();});
  await page.goto(route);await expect(page.locator('.detail-pills')).toContainText('Live');await expect(page.locator('.timeline li').last()).toContainText('Launch record live; addresses from the record');
  await expect(page.locator('.addresses')).toContainText(getAddress('0x5a9e7a61c45d2c615162fa57931bcbc06d9b20cc'));
  await expect(page.getByLabel('Pool id for these controls',{exact:true})).toHaveValue(poolId);
@@ -39,7 +39,7 @@ test('type C owner rereads after deployer resolves, omits distributor and offers
  await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));
  await page.route(`${site.relayUrl}/launches/2450`,r=>r.fulfill({json:{id:'2450',chainId:1,status:'live',artifacts:[{role:'deployer',name:'LilyGuardDeployer',address:owner}]}}));
  let resolved=false,ownerReads=0;
- await page.route(site.chains[1].rpcUrl,async r=>{const q=r.request().postDataJSON();let result;
+ await page.route(rpcRoute(site.chains[1]),async r=>{const q=r.request().postDataJSON();let result;
   if(q.method==='eth_getLogs'&&q.params[0].topics[0]===REQUEST_TOPIC)result=[requested];
   else if(q.method==='eth_call'&&q.params[0].data.slice(0,10)===toFunctionSelector('hook()'))result=encodeAbiParameters(parseAbiParameters('address'),[resolved?hook:zeroAddress]);
   else if(q.method==='eth_call'&&q.params[0].data.slice(0,10)===toFunctionSelector('owner()')){ownerReads++;expect(q.params[0].to.toLowerCase()).toBe(hook);result=encodeAbiParameters(parseAbiParameters('address'),[owner]);}
@@ -60,7 +60,7 @@ test('2424 ABI keeps global pause and claimFees usable while pool-dependent acti
  const repo='https://github.com/identity-md-launches/launch-2424-deploy-one-contract-pondsideguard',commit='5a9f6a36d659084e084a8abc08a55213c9516f07';
  await page.route(`${site.relayUrl}/launches/2424`,r=>r.fulfill({json:{id:'2424',chainId:1,status:'live',sourceRepoUrl:repo,sourceCommit:commit,artifacts:[{role:'hook',name:'PondsideGuard',address:hook}]}}));
  await page.route(`https://raw.githubusercontent.com/identity-md-launches/launch-2424-deploy-one-contract-pondsideguard/${commit}/out/PondsideGuard.sol/PondsideGuard.json`,r=>r.fulfill({json:{abi:controls2424}}));
- await page.route(site.chains[1].rpcUrl,async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
+ await page.route(rpcRoute(site.chains[1]),async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
  await page.goto(route);await page.locator('#connect').click();await page.getByRole('button',{name:'Fork Wallet',exact:true}).click();
  const pause=page.locator('[data-function="pause"]'),claim=page.locator('[data-function="claimFees"]'),buyback=page.locator('[data-function="buyback"]');
  await expect(pause.locator('code')).toHaveText('pause()');await expect(pause.getByRole('button',{name:'Send',exact:true})).toBeEnabled();await expect(claim.locator('code')).toHaveText('claimFees()');
@@ -75,10 +75,10 @@ test('contract launches are plain My hooks rows and stay out of the hook catalog
  const request={onchain:'evm_contracts',chainId:1,objective:'Build two immutable contracts: HookListingRegistry and FeaturedPlacementsV2.'};const requested={...logs.requested,data:encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'),[stringToHex(JSON.stringify(request)),owner,'0x00000000',token,500000000000000000n])};
  await page.route('**/site-config.json',r=>r.fulfill({json:{...site,ads:{},chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))}}));await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));
  await page.route(`${site.relayUrl}/launches/2456`,r=>r.fulfill({json:{id:'2456',chainId:1,status:'live',launchNumber:2456,artifacts:[{role:'other',name:'HookListingRegistry',address:site.ads['1'].registry},{role:'other',name:'FeaturedPlacementsV2',address:site.ads['1'].placements}]}}));
- await page.route(site.chains[1].rpcUrl,async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
+ await page.route(rpcRoute(site.chains[1]),async r=>{const req=r.request().postDataJSON();if(req.method==='eth_getLogs'&&req.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:req.id,result:[requested]}});return r.fallback();});
  await page.goto(`#mine?address=${owner}`);await expect(page.locator('.contracts-row')).toHaveText('Contracts launch 2456, live');await expect(page.locator('.contracts-row a')).toHaveAttribute('href','https://explorer.imd.fun/jobs/ad-contract-build');
  await page.goto(route);await expect(page.getByRole('heading')).toHaveText('Contracts launch 2456, live');await page.goto('#catalog');await expect(page.locator('.grid .card')).toHaveCount(0);
- await expect(page.locator('.ads, #promotions')).toHaveCount(0);
+ await expect(page.locator('.featured-band, #promotions')).toHaveCount(0);
 });
 
 
@@ -88,11 +88,11 @@ test('placements expire locally between refreshes and a missing chain never beco
  const listing={chainId:1n,hook,owner,proposedOwner:zeroAddress,revision:1n,active:true};
  const metadata={name:'Pinned ad',sourceRef:'',testRef:'',reviewRef:'',auditRef:'',callbackMask:0n,callbackDisclosure:'No callbacks',feeDisclosure:'No fees',adminDisclosure:'No owner powers',labels:[]};
  await page.route('**/site-config.json',r=>r.fulfill({json:{...site,relayUrl:null,ads:{'1':site.ads['1']},chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))}}));
- await page.route(site.chains[1].rpcUrl,async r=>{const req=r.request().postDataJSON();if(req.method!=='eth_call')return r.fallback();const to=req.params[0].to.toLowerCase();const abi=to===site.ads['1'].placements?placementsAbi:to===site.ads['1'].registry?registryAbi:null;if(!abi)return r.fallback();
+ await page.route(rpcRoute(site.chains[1]),async r=>{const req=r.request().postDataJSON();if(req.method!=='eth_call')return r.fallback();const to=req.params[0].to.toLowerCase();const abi=to===site.ads['1'].placements?placementsAbi:to===site.ads['1'].registry?registryAbi:null;if(!abi)return r.fallback();
   const decoded=decodeFunctionData({abi,data:req.params[0].data});const values:any={placementCount:1n,featured:[[ad],[100000000000000000n],2n],getPlacement:ad,rankOf:100000000000000000n,getListing:listing,getMetadata:metadata,available:0n,imd:site.chains[1].imdAddress,proceedsRecipient:owner};
   if(!(decoded.functionName in values))return r.fallback();const result=encodeFunctionResult({abi,functionName:decoded.functionName,result:values[decoded.functionName]});await r.fulfill({json:{jsonrpc:'2.0',id:req.id,result}});
  });
- await page.goto('#store');await expect(page.locator('.adcard:not(.slot)').first()).toContainText('Pinned ad');
- await page.clock.fastForward(4000);await expect(page.locator('.adcard:not(.slot)')).toHaveCount(0);
+ await page.goto('#store');await expect(page.locator('.placement-card:not(.placement-slot)').first()).toContainText('Pinned ad');
+ await page.clock.fastForward(4000);await expect(page.locator('.placement-card:not(.placement-slot)')).toHaveCount(0);
  await page.goto('#mine');await page.locator('#connect').click();await page.getByRole('button',{name:'Fork Wallet',exact:true}).click();await expect(page.getByLabel('Promotion chain',{exact:true})).toHaveValue('1');await expect(page.getByRole('button',{name:'Switch to Ethereum',exact:true})).toBeVisible();
 });

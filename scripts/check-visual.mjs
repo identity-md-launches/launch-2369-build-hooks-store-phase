@@ -9,7 +9,7 @@ try{
  const page=await browser.newPage();page.on('pageerror',e=>result.pageErrors.push(e.message));
  await page.route('**/site-config.json',r=>r.fulfill({json:{...site,relayUrl:null,ads:{}}}));
  await page.route('https://api.imd.fun/**',r=>r.fulfill({status:503}));await page.route('https://raw.githubusercontent.com/**',r=>r.abort());
- for(const c of site.chains)await page.route(c.rpcUrl,async r=>{const q=r.request().postDataJSON();const answer=x=>({jsonrpc:'2.0',id:x.id,result:x.method==='eth_chainId'?`0x${c.id.toString(16)}`:x.method==='eth_getLogs'?[]:'0x0'});await r.fulfill({json:Array.isArray(q)?q.map(answer):answer(q)});});
+ for(const c of site.chains)for(const url of c.rpcUrls)await page.route(url,async r=>{const q=r.request().postDataJSON();const answer=x=>({jsonrpc:'2.0',id:x.id,result:x.method==='eth_chainId'?`0x${c.id.toString(16)}`:x.method==='eth_getLogs'?[]:'0x0'});await r.fulfill({json:Array.isArray(q)?q.map(answer):answer(q)});});
  await mkdir(new URL('../artifacts/screenshots/',import.meta.url),{recursive:true});
  await page.setViewportSize({width:390,height:844});await page.goto(base+'#store');await page.locator('.prompt .btn').waitFor();await page.evaluate(async()=>{await document.fonts.load('400 18px \"Atkinson Hyperlegible\"');await document.fonts.load('400 13px \"Press Start 2P\"');await document.fonts.ready;});
  result.firstScreen=await page.evaluate(()=>({viewport:{width:innerWidth,height:innerHeight},documentWidth:document.documentElement.scrollWidth,primary:document.querySelector('.prompt .btn').getBoundingClientRect().toJSON(),fonts:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family)}));

@@ -148,7 +148,7 @@ test('result launch UUIDs are preserved for evidence without inventing a numeric
 
 test('configured windows start at Intake deployment and use 100,000 / 400,000 inclusive blocks',()=>{
  const ethereum=config.chains.find(c=>c.id===1), robinhood=config.chains.find(c=>c.id===4663);
- assert.equal(ethereum.rpcUrl,'https://rpc.mevblocker.io');assert.equal(ethereum.intakeFromBlock,26164897);assert.equal(ethereum.logRange,100000);
+ assert.deepEqual(ethereum.rpcUrls,['https://ethereum-rpc.publicnode.com','https://rpc.mevblocker.io','https://eth.llamarpc.com']);assert.equal(ethereum.intakeFromBlock,26164897);assert.equal(ethereum.logRange,100000);
  assert.equal(robinhood.intakeFromBlock,85300000);assert.equal(robinhood.logRange,400000);
  for(const c of config.chains){const floor=BigInt(c.intakeFromBlock),size=BigInt(c.logRange),head=floor+size*3n+123n,ranges=[...backwardsRanges(floor,head,size)];
  assert.equal(ranges[0][1]-ranges[0][0]+1n,size);assert.equal(ranges.at(-1)[0],floor);for(let i=1;i<ranges.length;i++)assert.equal(ranges[i][1]+1n,ranges[i-1][0]);}

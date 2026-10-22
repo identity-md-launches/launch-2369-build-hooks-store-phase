@@ -7,7 +7,7 @@ import registryAbi from '../../src/abi/HookListingRegistry.json' with {type:'jso
 import site from '../../public/site-config.json' with { type:'json' };
 import { addBlock, body, newDraft } from '../../src/lib/compose';
 import { REQUEST_TOPIC, COMPLETE_TOPIC } from '../src/chain/store';
-import { injectedOwner, storeLogs, requestId, token } from './chain-fixture';
+import { injectedOwner, storeLogs, requestId, token ,rpcRoute} from './chain-fixture';
 // This suite is run by check-ads-fork.mjs while its isolated Anvil fork is alive.
 const statePath = new URL('../../test/scratch/ads-fork.json', import.meta.url);
 let fork: any, runner: ChildProcess;
@@ -46,7 +46,7 @@ async function setup(page: Page) {
     };
     const res=Array.isArray(data)?await Promise.all(data.map(answer)):await answer(data);await r.fulfill({json:res});
   };
-  await page.route(site.chains[0].rpcUrl,handler);await page.route(site.chains[1].rpcUrl,handler);
+  await page.route(rpcRoute(site.chains[0]),handler);await page.route(rpcRoute(site.chains[1]),handler);
   await page.goto('#mine');await page.locator('#connect').click();await page.getByRole('button',{name:'Fork Wallet',exact:true}).click();
   await expect(page.locator('.mine-list')).toContainText('Pondside');
 }
@@ -95,7 +95,7 @@ for(const width of [320,390,1440])test(`real promotion wallet flow at ${width}px
   const edit=await rpc('eth_sendTransaction',[{from:fork.owner,to:fork.registry,data:encodeFunctionData({abi:registryAbi as Abi,functionName:'updateListing',args:[1n,{...purchasedMetadata,name:'Edited after purchase'}]})}]);
   await client.waitForTransactionReceipt({hash:edit});
   await panel.getByRole('button',{name:'Refresh balance',exact:true}).click();
-  await panel.getByRole('link',{name:'View the featured carousel',exact:true}).click();await expect(page.locator('#featured')).toBeInViewport();await expect(page.locator('.adcard:not(.slot)').first()).toContainText('Pondside');await expect(page.locator('.adcard:not(.slot)').first()).toContainText('#AD'); await expect(page.locator('.adcard:not(.slot)').first()).not.toContainText('Edited after purchase'); if(width===390) { await page.locator('.ads').scrollIntoViewIfNeeded(); await page.screenshot({path:'../artifacts/screenshots/featured-390.jpg',type:'jpeg',quality:72}); }
+  await panel.getByRole('link',{name:'View the featured carousel',exact:true}).click();await expect(page.locator('#featured')).toBeInViewport();await expect(page.locator('.placement-card:not(.placement-slot)').first()).toContainText('Pondside');await expect(page.locator('.placement-card:not(.placement-slot)').first()).toContainText('#AD'); await expect(page.locator('.placement-card:not(.placement-slot)').first()).not.toContainText('Edited after purchase'); if(width===390) { await page.locator('.ads').scrollIntoViewIfNeeded(); await page.screenshot({path:'../artifacts/screenshots/featured-390.jpg',type:'jpeg',quality:72}); }
   await page.goto(`#hook/1/${requestId}`);await expect(page.locator('.detail-pills')).toContainText('#AD');
   await page.goto('#mine');await panel.getByRole('button',{name:'Boost',exact:true}).click();await panel.getByLabel('Boost amount (IMD)').fill('0.02');
   await expect(panel.getByRole('button',{name:'Confirm boost',exact:true})).toBeDisabled();await panel.getByLabel('I confirm this boost is non-refundable.').check();

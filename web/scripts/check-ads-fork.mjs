@@ -15,7 +15,7 @@ if(process.argv.includes('--with-browser')) {
  execFileSync(path.join(root,'web/node_modules/.bin/playwright'),['test','job10-promotions.spec.ts','--config',path.join(root,'web/playwright.config.ts'),'--reporter=list'],{cwd:path.join(root,'web'),stdio:'inherit',timeout:300000});process.exit(0);
 }
 const rpc='http://127.0.0.1:8557';
-const anvil=spawn('anvil',['--port','8557','--fork-url',config.chains.find(c=>c.id===4663).rpcUrl,'--chain-id','4663','--no-storage-caching','--silent'],{stdio:'ignore'});
+const anvil=spawn('anvil',['--port','8557','--fork-url',config.chains.find(c=>c.id===4663).rpcUrls[0],'--chain-id','4663','--no-storage-caching','--silent'],{stdio:'ignore'});
 const chain=defineChain({id:4663,name:'Robinhood local fork',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:{default:{http:[rpc]}}});
 const client=createPublicClient({chain,transport:http(rpc,{retryCount:0,timeout:12000})});
 const owner='0x6cba4751742f6989fa224b2dc5d5d52fcef98a34', second='0x9a50fd22bcefd3774d796e775a467a7f743e0ab0', imd=config.chains.find(c=>c.id===4663).imdAddress;

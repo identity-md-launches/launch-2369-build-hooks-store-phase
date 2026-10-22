@@ -80,13 +80,13 @@ export function Featured() {
   if (!enabled) return null;
   const active = mergeAds(ads);
   const scrolling = active.length > 0;
-  return <section className="ads" id="featured" aria-labelledby="featured-h">
-    <div className="ads-head"><h2 id="featured-h">Featured <span className="pill ad">#AD</span></h2><p className="muted">Paid placements, <span className="num">0.1 IMD</span> for <span className="num">24</span> hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</p></div>
+  return <section className="featured-band" id="featured" aria-labelledby="featured-h">
+    <div className="featured-head"><h2 id="featured-h">Featured <span className="pill paid-tag">#AD</span></h2><p className="muted">Paid placements, <span className="num">0.1 IMD</span> for <span className="num">24</span> hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</p></div>
     {!!errors.length && <p className="small muted" role="status">{errors.join(' ')} <button className="link-button" onClick={refresh}>Retry placements</button></p>}
-    <div className={`marquee ${scrolling ? 'has-placements' : 'slot-only'}`} aria-label="Featured placement slots"><div className="marquee-track">
-      {(scrolling ? [false, true] : [false]).map(duplicate => <div key={String(duplicate)} className="marquee-group" aria-hidden={duplicate || undefined}>
-        {active.map(p => <a className="adcard" href={hookHref(p.launch!)} key={`${p.chainId}:${p.placement.id}`} tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><Text>{p.metadata.name}</Text>{p.launch!.symbol && <span className="num">${p.launch!.symbol}</span>}<span>by {p.launch!.creatorName || shortAddress(p.launch!.payer)}</span><span className="num">{Math.ceil((Number(p.placement.endsAt) * 1000 - Date.now()) / 3600000)}h left</span></a>)}
-        <a className="adcard slot" href="#mine" tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><span className="slot-title">Open slot</span><span className="num">0.1 IMD / 24h</span><span>· promote from My hooks</span></a>
+    <div className={`featured-strip ${scrolling ? 'has-placements' : 'slot-only'}`} aria-label="Featured placement slots"><div className="featured-track">
+      {(scrolling ? [false, true] : [false]).map(duplicate => <div key={String(duplicate)} className="featured-group" aria-hidden={duplicate || undefined}>
+        {active.map(p => <a className="placement-card" href={hookHref(p.launch!)} key={`${p.chainId}:${p.placement.id}`} tabIndex={duplicate ? -1 : 0}><span className="pill paid-tag">#AD</span><Text>{p.metadata.name}</Text>{p.launch!.symbol && <span className="num">${p.launch!.symbol}</span>}<span>by {p.launch!.creatorName || shortAddress(p.launch!.payer)}</span><span className="num">{Math.ceil((Number(p.placement.endsAt) * 1000 - Date.now()) / 3600000)}h left</span></a>)}
+        <a className="placement-card placement-slot" href="#mine" tabIndex={duplicate ? -1 : 0}><span className="pill paid-tag">#AD</span><span className="slot-title">Open slot</span><span className="num">0.1 IMD / 24h</span><span>· promote from My hooks</span></a>
       </div>)}
     </div></div>
   </section>;

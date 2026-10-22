@@ -41,6 +41,9 @@ export function storeLogs(status = 0) {
   const completed = { ...base, blockNumber:toHex(head - 5), logIndex:'0x1', topics:encodeEventTopics({abi,eventName:'Completed',args:{requestId}}), data:encodeAbiParameters(parseAbiParameters('uint8,bytes32,string,bool'),[status,stringToHex(status ? 'BUILD_REFUSED' : '',{size:32}),'ipfs://bafybeiehm6g5f64gnapfl2elqikvaxb2paxsljvhrow43dxoidn6macbpm/result.json',false]) };
   return {requested,completed};
 }
+const trim=(u:string)=>u.replace(/\/+$/,'');
+/** Every configured public endpoint of a chain, so the fallback transport never reaches a real RPC. */
+export const rpcRoute=(chain:{rpcUrls:string[]})=>(url:URL)=>chain.rpcUrls.some(u=>trim(url.href).startsWith(trim(u)));
 export async function interceptChains(page: Page, options: {status?:number; noLogs?:boolean; fork?:string; deployedHook?:string; result?:unknown; resultFailure?:boolean; paused?:boolean}={}) {
   const logs=storeLogs(options.status);
   const calls: {method:string;params:any[]}[]=[];
@@ -81,8 +84,7 @@ export async function interceptChains(page: Page, options: {status?:number; noLo
     }));
     await r.fulfill({json:Array.isArray(payload)?results:results[0]});
   };
-  await page.route('https://rpc.mevblocker.io',intercept);
-  await page.route('https://rpc.mainnet.chain.robinhood.com',intercept);
+  for(const c of site.chains)await page.route(rpcRoute(c),intercept);
   return calls;
 }
 export async function injectedOwner(page: Page, account=owner, rpc?:string, initialChain='0x1') {
@@ -113,6 +115,5 @@ export async function emptyIntake(page: Page) {
       : req.method === 'eth_getLogs' ? [] : '0x0'});
     await route.fulfill({json: Array.isArray(payload) ? payload.map(reply) : reply(payload)});
   };
-  await page.route('https://rpc.mevblocker.io', answer);
-  await page.route('https://rpc.mainnet.chain.robinhood.com', answer);
+  for (const c of site.chains) await page.route(rpcRoute(c), answer);
 }

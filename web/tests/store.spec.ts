@@ -113,12 +113,12 @@ test('describe saves required draft key, preserves other fields and opens the de
   expect(saved.blocks.map((b: { id: string }) => b.id)).toEqual(['token', 'pause']);
 });
 test('only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn', async ({ page }) => {
-  await ready(page); await expect(page.locator('.adcard:not([aria-hidden])').first()).toContainText('Open slot');
-  expect(await page.locator('.adcard').count()).toBe(1);
-  await expect(page.locator('.marquee-track')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.ads')).toContainText('24 hours');
-  await page.locator('.marquee').hover(); await expect(page.locator('.marquee-track')).toHaveCSS('animation-play-state', 'paused');
-  await page.mouse.move(0, 0); await page.locator('.adcard').first().focus(); await expect(page.locator('.marquee-track')).toHaveCSS('animation-play-state', 'paused');
+  await ready(page); await expect(page.locator('.placement-card:not([aria-hidden])').first()).toContainText('Open slot');
+  expect(await page.locator('.placement-card').count()).toBe(1);
+  await expect(page.locator('.featured-track')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.featured-band')).toContainText('24 hours');
+  await page.locator('.featured-strip').hover(); await expect(page.locator('.featured-track')).toHaveCSS('animation-play-state', 'paused');
+  await page.mouse.move(0, 0); await page.locator('.placement-card').first().focus(); await expect(page.locator('.featured-track')).toHaveCSS('animation-play-state', 'paused');
   await page.getByRole('link', { name: 'Learn', exact: true }).click(); await page.getByText('WHAT DOES IT COST?', { exact: true }).click();
   await expect(page.locator('details').filter({ hasText: 'WHAT DOES IT COST?' })).toContainText('0.1 IMD for 24 hours');
   const links = await page.locator('.sources a').evaluateAll(els => els.map(el => (el as HTMLAnchorElement).href));

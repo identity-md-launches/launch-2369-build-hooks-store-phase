@@ -1,4 +1,4 @@
-import { encodeAbiParameters, keccak256, erc20Abi, type Abi, type Address, type WalletClient, type TransactionReceipt } from 'viem';
+import { encodeAbiParameters, keccak256, erc20Abi, parseEther, type Abi, type Address, type WalletClient, type TransactionReceipt } from 'viem';
 import registryJson from '../../../src/abi/HookListingRegistry.json' with { type: 'json' };
 import placementsJson from '../../../src/abi/FeaturedPlacementsV2.json' with { type: 'json' };
 import type { SiteConfig } from '../config';
@@ -54,6 +54,50 @@ export async function readPromotionBalances(client: ReadClient, config: AdsConfi
     client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'available', args: [account] }) as Promise<bigint>,
   ]);
   return { wallet, deposited };
+}
+/** Proceeds held for the wallet when it is the placements contract's proceeds recipient. */
+export async function readEarnedProceeds(client: ReadClient, config: AdsConfig, account: Address) {
+  const [recipient, proceeds] = await Promise.all([
+    client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'proceedsRecipient' }) as Promise<Address>,
+    client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'proceeds', args: [account] }) as Promise<bigint>,
+  ]);
+  return { isRecipient: recipient.toLowerCase() === account.toLowerCase(), proceeds };
+}
+export const PROMOTE_NOTE = 'Deposit at least 0.1 IMD first';
+/** A typed IMD amount: positive, at most 18 decimals. */
+export function parseImd(text: string): bigint | null {
+  const value = text.trim();
+  if (!/^(?:\d+(?:\.\d{1,18})?|\.\d{1,18})$/.test(value)) return null;
+  const amount = parseEther(value.startsWith('.') ? `0${value}` : value);
+  return amount > 0n ? amount : null;
+}
+/** One deposit, preceded by an approval only when the current allowance is short of the amount. */
+export const depositSteps = (allowance: bigint, amount: bigint): ('approve' | 'deposit')[] => amount <= 0n ? [] : allowance < amount ? ['approve', 'deposit'] : ['deposit'];
+export function amountState(text: string, limit: bigint | null, over: string) {
+  if (!text.trim()) return { amount: null, error: '' };
+  const amount = parseImd(text);
+  if (amount === null) return { amount, error: 'Enter a positive IMD amount, with up to 18 decimals.' };
+  return limit !== null && amount > limit ? { amount: null, error: over } : { amount, error: '' };
+}
+export const depositState = (text: string, wallet: bigint | null) => amountState(text, wallet, 'More than your wallet holds on this chain.');
+export const boostState = (text: string, deposited: bigint | null) => amountState(text, deposited, 'More than your deposit. Deposit more IMD first.');
+/** PROMOTE is paid from the deposit, so it waits for 0.1 IMD there; the note says why it is disabled. */
+export function promoteState(deposited: bigint | null, o: { ready: boolean; wrongChain: boolean; busy: boolean }) {
+  if (deposited === null) return { disabled: true, note: 'Reading your deposit…' };
+  if (deposited < AD_PRICE) return { disabled: true, note: PROMOTE_NOTE };
+  if (!o.ready) return { disabled: true, note: 'Promotion payments await contract setup on this chain.' };
+  if (o.wrongChain) return { disabled: true, note: 'Switch your wallet to the promotion chain first.' };
+  return { disabled: o.busy, note: '' };
+}
+/** Approve only when short, then deposit exactly the typed amount. */
+export async function depositAmount(ctx: AdsWallet, amount: bigint) {
+  const token = await ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'imd' });
+  if (String(token).toLowerCase() !== ctx.imd.toLowerCase()) throw new Error('The placement contract is not configured with this chain’s IMD. No deposit was sent.');
+  const allowance = await ctx.client.readContract({ address: ctx.imd, abi: erc20Abi, functionName: 'allowance', args: [ctx.account, ctx.config.placements] });
+  for (const step of depositSteps(allowance, amount)) {
+    if (step === 'approve') await sendAdTransaction(ctx, ctx.imd, erc20Abi, 'approve', [ctx.config.placements, amount]);
+    else await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'deposit', [amount]);
+  }
 }
 export const listingIdentity = (chainId: number, hook: Address, account: Address) => keccak256(encodeAbiParameters([{ type: 'uint256' }, { type: 'address' }, { type: 'address' }], [BigInt(chainId), hook, account]));
 export function listingMetadata(launch: Launch): Metadata {

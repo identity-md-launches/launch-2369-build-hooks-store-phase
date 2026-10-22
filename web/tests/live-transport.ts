@@ -6,8 +6,8 @@ export async function routeReadTransports(page: Page) {
   const observations: Record<string, { calls: number; statuses: Record<string, number>; transportErrors: number }> = {};
   for (const chain of site.chains) {
     const endpoint = process.env[`HOOKS_READ_RPC_${chain.id}`];
-    if (endpoint) await page.route(chain.rpcUrl, async route => {
-      const observation = observations[chain.rpcUrl] ??= { calls: 0, statuses: {}, transportErrors: 0 }; observation.calls++;
+    if (endpoint) await page.route(chain.rpcUrls[0], async route => {
+      const observation = observations[chain.rpcUrls[0]] ??= { calls: 0, statuses: {}, transportErrors: 0 }; observation.calls++;
       try {
         const response = await fetch(endpoint, { method: 'POST', headers: { 'content-type': 'application/json' }, body: route.request().postData(), signal: AbortSignal.timeout(12000) });
         observation.statuses[response.status] = (observation.statuses[response.status] ?? 0) + 1;

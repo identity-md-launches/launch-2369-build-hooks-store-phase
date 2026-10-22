@@ -1,131 +1,160 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
-import { formatEther, parseEther, zeroAddress, type Address, type Hex } from 'viem';
+import { formatEther, zeroAddress, type Address, type Hex } from 'viem';
 import type { LaunchStore } from './chain/store';
 import { CHAINS, hookHref, type Launch } from './types';
 import { AddressValue } from './AddressValue';
 import { useAds } from './Ads';
-import { AD_PRICE, BOOST_TERMS, adError, adsConfig, depositFor, listingIdentity, listingMetadata, placementPosition, readPromotionBalances, placementsAbi, registryAbi, sendAdTransaction, type Ad, type AdsWallet, type Listing, type Metadata } from './chain/ads';
+import { AD_PRICE, BOOST_TERMS, adError, adsConfig, boostState, depositAmount, depositState, listingIdentity, listingMetadata, placementPosition, promoteState, readEarnedProceeds, readPromotionBalances, placementsAbi, registryAbi, sendAdTransaction, type Ad, type AdsWallet, type Listing } from './chain/ads';
+
+const imd = (value: bigint | null) => value === null ? 'Reading…' : `${formatEther(value)} IMD`;
+const sameHook = (ad: Ad, launch: Launch) => Number(ad.listing.chainId) === launch.chainId && ad.listing.hook.toLowerCase() === launch.hookAddress?.toLowerCase();
+
+/** Promotions (SPEC 3.5, decision 44): the balance first, then one row per live hook. */
 export function Promotions({ launches, store }: { launches: Launch[]; store: LaunchStore }) {
   const { address, chainId } = useAccount(), { data: wallet } = useWalletClient(), { mutateAsync: switchChain } = useSwitchChain();
   const { ads, errors, enabled, refresh } = useAds();
   const hooks = launches.filter(l => l.isHook !== false && l.status === 'live' && l.hookAddress && l.payer.toLowerCase() === address?.toLowerCase());
   const [selectedChain, setSelectedChain] = useState(() => chainId && adsConfig(store.config, chainId) ? chainId : store.config.chains.find(c => adsConfig(store.config, c.id))?.id ?? 4663);
-  const [selected, setSelected] = useState(''), [flow, setFlow] = useState(false), [step, setStep] = useState(1);
-  const [listingId, setListingId] = useState<bigint | null>(null), [revision, setRevision] = useState<bigint | null>(null), [recipient, setRecipient] = useState<Address | null>(null), [metadata, setMetadata] = useState<Metadata | null>(null);
   const [setup, setSetup] = useState<'reading' | 'ready' | 'pending'>('reading');
-  const [walletBalance, setWalletBalance] = useState<bigint | null>(null), [hashChain, setHashChain] = useState(selectedChain);
-  const [available, setAvailable] = useState<bigint | null>(null), [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState(''), [hash, setHash] = useState<Hex | null>(null);
-  const [boostId, setBoostId] = useState(''), [boostAmount, setBoostAmount] = useState(''), [boostConfirmed, setBoostConfirmed] = useState(false), [cancelId, setCancelId] = useState('');
+  const [walletBalance, setWalletBalance] = useState<bigint | null>(null), [available, setAvailable] = useState<bigint | null>(null);
+  const [earned, setEarned] = useState<{ isRecipient: boolean; proceeds: bigint } | null>(null);
+  const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState(''), [hash, setHash] = useState<Hex | null>(null), [hashChain, setHashChain] = useState(selectedChain);
+  const [depositText, setDepositText] = useState(''), [boostId, setBoostId] = useState(''), [boostText, setBoostText] = useState(''), [boostConfirmed, setBoostConfirmed] = useState(false), [cancelId, setCancelId] = useState('');
   const [balanceRevision, setBalanceRevision] = useState(0), lock = useRef(false);
-  const launch = hooks.find(l => l.id === selected), config = adsConfig(store.config, selectedChain), client = store.clients[selectedChain];
+  const config = adsConfig(store.config, selectedChain), client = store.clients[selectedChain], chainName = CHAINS[selectedChain];
+  const imdAddress = store.config.chains.find(c => c.id === selectedChain)!.imdAddress as Address;
   const wrongChain = !!address && chainId !== selectedChain;
   const ownAds = ads.filter(a => a.placement.payer.toLowerCase() === address?.toLowerCase());
-  const identity = `${address}:${selectedChain}:${selected}`;
+  const identity = `${address}:${selectedChain}`;
   const identityRef = useRef(identity); identityRef.current = identity;
   useEffect(() => {
-    if (step <= 1 || !flow) return;
-    const frame = requestAnimationFrame(() => document.getElementById(`promo-step-${step}`)?.focus());
-    return () => cancelAnimationFrame(frame);
-  }, [step, flow]);
-  useEffect(() => {
-    setAvailable(null); setWalletBalance(null); setSetup('reading'); setError(''); setHash(null); setMessage(''); setListingId(null); setRevision(null); setRecipient(null); setMetadata(null); setStep(1);
-    setBoostId(''); setCancelId(''); setBoostConfirmed(false);
+    setAvailable(null); setWalletBalance(null); setEarned(null); setSetup('reading'); setError(''); setHash(null); setMessage('');
+    setBoostId(''); setCancelId(''); setBoostConfirmed(false); setDepositText('');
   }, [identity]);
   useEffect(() => {
     if (!address || !config) return;
     let active = true;
     const read = async () => { try {
       const [configuredToken, configuredRecipient] = await Promise.all([client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'imd' }), client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'proceedsRecipient' })]);
-      if (active) setSetup(String(configuredToken).toLowerCase() === store.config.chains.find(c => c.id === selectedChain)!.imdAddress.toLowerCase() && String(configuredRecipient).toLowerCase() !== zeroAddress ? 'ready' : 'pending');
-      const balances = await readPromotionBalances(client, config, store.config.chains.find(c => c.id === selectedChain)!.imdAddress as Address, address);
-      if (active) { setAvailable(balances.deposited); setWalletBalance(balances.wallet); }
-    } catch { if (active) { setAvailable(null); setWalletBalance(null); setSetup('reading'); setError('Could not read your available IMD. Retry the balance reading.'); } } };
+      if (active) setSetup(String(configuredToken).toLowerCase() === imdAddress.toLowerCase() && String(configuredRecipient).toLowerCase() !== zeroAddress ? 'ready' : 'pending');
+      const [balances, proceeds] = await Promise.all([readPromotionBalances(client, config, imdAddress, address), readEarnedProceeds(client, config, address)]);
+      if (active) { setAvailable(balances.deposited); setWalletBalance(balances.wallet); setEarned(proceeds); }
+    } catch { if (active) { setAvailable(null); setWalletBalance(null); setEarned(null); setSetup('reading'); setError(`Could not read your IMD on ${chainName}. Refresh balances to retry.`); } } };
     void read(); const timer = setInterval(read, 60000); return () => { active = false; clearInterval(timer); };
   }, [address, client, config?.placements, balanceRevision]);
-  const context = (paymentChain = selectedChain): AdsWallet => {
-    const config = adsConfig(store.config, paymentChain), client = store.clients[paymentChain];
-    if (!wallet || !address || !config || chainId !== paymentChain) throw new Error('Connect your wallet on the selected promotion chain.');
-    return { client, wallet, account: address, chainId: paymentChain, config, imd: store.config.chains.find(c => c.id === paymentChain)!.imdAddress as Address,
+  const context = (): AdsWallet => {
+    if (!wallet || !address || !config || chainId !== selectedChain) throw new Error('Connect your wallet on the selected promotion chain.');
+    const paymentChain = selectedChain;
+    return { client, wallet, account: address, chainId: paymentChain, config, imd: imdAddress,
       onHash: tx => { setHash(tx); setHashChain(paymentChain); setMessage('Waiting for confirmation…'); }, onConfirmed: () => { refresh(); setBalanceRevision(v => v + 1); } };
   };
-  const run = async (label: string, action: (ctx: AdsWallet) => Promise<void>, paymentChain = selectedChain) => {
+  /** Every transaction is simulated in sendAdTransaction; every confirmation re-reads all balances. */
+  const run = async (label: string, done: string, action: (ctx: AdsWallet) => Promise<void>) => {
     if (lock.current) return;
     lock.current = true; setBusy(true); setError(''); setHash(null); setMessage(label);
     const started = identity;
-    try { await action(context(paymentChain)); if (identityRef.current === started) setMessage('Confirmed on chain.'); }
+    try { await action(context()); if (identityRef.current === started) setMessage(done); }
     catch (e) { if (identityRef.current === started) { setError(adError(e)); setMessage(''); } }
     finally { lock.current = false; setBusy(false); refresh(); setBalanceRevision(v => v + 1); }
   };
-  const preparePurchase = async (ctx: AdsWallet, id: bigint) => {
-    const [listing, to] = await Promise.all([
+  const promote = (launch: Launch) => run(`Promote ${launch.name}: check your wallet…`, `${launch.name} is promoted for 24 hours.`, async ctx => {
+    const key = listingIdentity(launch.chainId, launch.hookAddress as Address, ctx.account);
+    let id = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'listingFor', args: [key] }) as bigint;
+    // The free listing is created first and silently when the hook has none on this chain.
+    if (!id) { await sendAdTransaction(ctx, ctx.config.registry, registryAbi, 'createListing', [BigInt(launch.chainId), launch.hookAddress, listingMetadata(launch)]); id = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'listingFor', args: [key] }) as bigint; }
+    if (!id) throw new Error('The confirmed listing could not be read. Retry PROMOTE.');
+    const [listing, recipient, deposited] = await Promise.all([
       ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'getListing', args: [id] }) as Promise<Listing>,
       ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'proceedsRecipient' }) as Promise<Address>,
+      ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'available', args: [ctx.account] }) as Promise<bigint>,
     ]);
-    if (to === zeroAddress) throw new Error('The proceeds recipient has not been configured. No purchase can be sent.');
+    if (recipient === zeroAddress) throw new Error('The proceeds recipient has not been configured. No purchase can be sent.');
     if (!listing.active || listing.owner.toLowerCase() !== ctx.account.toLowerCase()) throw new Error('This listing is inactive or belongs to another wallet.');
-    const snapshot = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'getMetadata', args: [id, listing.revision] }) as Metadata;
-    setRevision(listing.revision); setRecipient(to); setMetadata(snapshot);
-  };
-  const toggleFlow = () => {
-    if (!flow && step === 4) {
-      setStep(1); setSelected(''); setListingId(null); setRevision(null);
-      setRecipient(null); setMetadata(null); setHash(null);
-    }
-    setFlow(!flow); setError(''); setMessage('');
-  };
+    if (deposited < AD_PRICE) throw new Error('Deposit at least 0.1 IMD first.');
+    await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'purchase', [id, listing.revision, recipient, BigInt(Math.floor(Date.now() / 1000) + 600)]);
+  });
   if (!enabled) return null;
-  return <section className="box promotions" id="promotions" aria-labelledby="promotions-h"><h2 id="promotions-h">Promotions <span className="pill ad">#AD</span></h2>
+  const deposit = depositState(depositText, walletBalance), boost = boostState(boostText, available);
+  const promotion = promoteState(available, { ready: setup === 'ready', wrongChain, busy });
+  const showEarned = !!earned && (earned.isRecipient || earned.proceeds > 0n);
+  const rows: { key: string; launch?: Launch; placements: Ad[] }[] = [
+    ...hooks.map(l => ({ key: l.id, launch: l, placements: ownAds.filter(a => sameHook(a, l)) })),
+    ...ownAds.filter(a => !hooks.some(l => sameHook(a, l))).map(a => ({ key: `${a.chainId}:${a.placement.id}`, placements: [a] })),
+  ];
+  const placementRow = (ad: Ad) => {
+    const key = `${ad.chainId}:${ad.placement.id}`, here = ad.chainId === selectedChain, { rank, total: stripCount } = placementPosition(ads, ad);
+    const elapsed = BigInt(Math.max(0, Math.floor(Date.now() / 1000) - Number(ad.placement.startsAt))), duration = ad.placement.endsAt - ad.placement.startsAt;
+    const refund = AD_PRICE - AD_PRICE * (elapsed < duration ? elapsed : duration) / duration;
+    const hoursLeft = Math.max(0, Math.ceil((Number(ad.placement.endsAt) - Date.now() / 1000) / 3600));
+    return <div className="placement-running" key={key} data-placement={key}>
+      <p className="num">{hoursLeft}h left · {formatEther(ad.total)} IMD total paid · {rank ? `Rank ${rank} of ${stripCount}` : 'Not in store strip'}</p>
+      <p className="small muted">Paid on {CHAINS[ad.chainId]} · Listing {String(ad.placement.listingId)} · pinned revision {String(ad.placement.revision)}</p>
+      {here ? <div className="row-actions">
+        <button className="btn tiny" disabled={busy || wrongChain} aria-expanded={boostId === key} onClick={() => { setBoostId(boostId === key ? '' : key); setBoostConfirmed(false); setBoostText(''); setCancelId(''); }}>Boost</button>
+        <button className="btn tiny" disabled={busy || wrongChain} aria-expanded={cancelId === key} onClick={() => { setCancelId(cancelId === key ? '' : key); setBoostId(''); }}>Cancel</button>
+      </div> : <button className="btn tiny" disabled={busy} onClick={() => setSelectedChain(ad.chainId)}>Manage on {CHAINS[ad.chainId]}</button>}
+      {boostId === key && here && <form className="promotion-confirm" onSubmit={e => { e.preventDefault(); if (!boost.amount || !boostConfirmed) return; const amount = boost.amount; void run('Boost this placement: check your wallet…', `Boosted by ${formatEther(amount)} IMD.`, async ctx => { await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'boost', [ad.placement.id, amount]); setBoostId(''); }); }}>
+        <label htmlFor={`boost-${key}`}>Boost amount (IMD), from your deposit</label>
+        <input id={`boost-${key}`} className="num" inputMode="decimal" autoComplete="off" value={boostText} onChange={e => setBoostText(e.target.value)} placeholder="0.05" disabled={busy} aria-describedby={`boost-${key}-note`} aria-invalid={!!boost.error || undefined} />
+        <p id={`boost-${key}-note`} className={boost.error ? 'field-error' : 'small muted'}>{boost.error || `Deposited: ${imd(available)}`}</p>
+        <p>{BOOST_TERMS}.</p>
+        <label className="check-label"><input type="checkbox" checked={boostConfirmed} onChange={e => setBoostConfirmed(e.target.checked)} disabled={busy} />I confirm this boost is non-refundable.</label>
+        <button className="btn" disabled={busy || wrongChain || !boostConfirmed || !boost.amount}>Confirm boost</button>
+      </form>}
+      {cancelId === key && here && <div className="promotion-confirm"><p>Cancelling refunds the unused part of the 0.1 IMD base to your deposit, about <span className="num">{formatEther(refund)} IMD</span> now. All boosts are forfeited to the pinned proceeds recipient. Withdraw the deposit afterwards if you want it back in your wallet.</p>
+        <button className="btn" disabled={busy || wrongChain} onClick={() => void run('Cancel this placement: check your wallet…', 'Placement cancelled; the refund is in your deposit.', async ctx => { await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'cancel', [ad.placement.id]); setCancelId(''); })}>Confirm cancellation</button>
+        <button className="btn" disabled={busy} onClick={() => setCancelId('')}>Keep placement</button></div>}
+    </div>;
+  };
+  return <section className="box promotion-panel" id="promotions" aria-labelledby="promotions-h"><h2 id="promotions-h">Promotions <span className="pill paid-tag">#AD</span></h2>
     <p>0.1 IMD for 24 hours, ranked by total paid. Top-ups are never refunded; cancelling refunds the unused base.</p>
     <p className="small muted">A paid placement is not a review or endorsement. Prices are in IMD; USD context is unavailable.</p>
     {!address ? <button className="btn primary" onClick={() => document.getElementById('connect')?.click()}>Connect to promote a hook</button> : <>
-      <label htmlFor="promotion-chain">Promotion chain</label><p className="small muted" id="promotion-chain-note">Where you pay. You can promote your live hooks on either chain.</p><select id="promotion-chain" aria-describedby="promotion-chain-note" disabled={busy} value={selectedChain} onChange={e => { setSelectedChain(Number(e.target.value)); setSelected(''); setFlow(false); }}>{store.config.chains.filter(c => adsConfig(store.config, c.id)).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-      {wrongChain && <p className="notice">Connect on {CHAINS[selectedChain]} to manage placements. <button className="btn tiny" disabled={busy} onClick={async () => { try { await switchChain({ chainId: selectedChain }); } catch (e) { setError(adError(e)); } }}>Switch to {CHAINS[selectedChain]}</button></p>}
-      {setup === 'pending' && <p className="notice" role="status">Promotion payments await contract setup on {CHAINS[selectedChain]}. IMD and the proceeds recipient must be configured by the contract owner. Free listings are available.</p>}
+      <label htmlFor="promotion-chain">Promotion chain</label><p className="small muted" id="promotion-chain-note">Where your wallet pays. You can promote your live hooks from either chain.</p>
+      <select id="promotion-chain" aria-describedby="promotion-chain-note" disabled={busy} value={selectedChain} onChange={e => setSelectedChain(Number(e.target.value))}>{store.config.chains.filter(c => adsConfig(store.config, c.id)).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+      {wrongChain && <p className="notice">Your wallet is not on {chainName}. <button className="btn tiny" disabled={busy} onClick={async () => { try { await switchChain({ chainId: selectedChain }); } catch (e) { setError(adError(e)); } }}>Switch to {chainName}</button></p>}
+      {setup === 'pending' && <p className="notice" role="status">Promotion payments await contract setup on {chainName}. IMD and the proceeds recipient must be configured by the contract owner.</p>}
       <div className="promotion-balance" aria-live="polite">
-        <p className="wallet-imd">In your wallet on {CHAINS[selectedChain]}: <strong className="num">{walletBalance === null ? 'Reading…' : `${formatEther(walletBalance)} IMD`}</strong></p>
-        {walletBalance !== null && walletBalance < AD_PRICE && <p className="small low-imd">Not enough IMD on {CHAINS[selectedChain]} for a placement; the pay page and bridges are outside the store</p>}
-        <p className="deposited-imd">Deposited for promotions: <strong className="num">{available === null ? 'Reading…' : `${formatEther(available)} IMD`}</strong></p>
+        <p className="wallet-imd">In your wallet on {chainName}: <strong className="num">{imd(walletBalance)}</strong></p>
+        {walletBalance !== null && walletBalance < AD_PRICE && <p className="small low-imd">Not enough IMD on {chainName} for a placement; the pay page and bridges are outside the store</p>}
+        <p className="deposited-imd">Deposited for promotions: <strong className="num">{imd(available)}</strong></p>
         <p className="small muted">Deposits are pulled from your wallet when you promote or boost and stay yours until spent; withdraw any unspent deposit here.</p>
-        <button className="link-button" disabled={busy} onClick={() => { refresh(); setBalanceRevision(v => v + 1); }}>Refresh balance</button><button className="btn tiny" disabled={busy || wrongChain || !available} onClick={() => void run('Withdraw deposited IMD: check your wallet…', async ctx => {
-          const value = await ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'available', args: [ctx.account] }) as bigint;
-          if (value <= 0n) throw new Error('No deposited balance to withdraw.');
-          await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'withdraw', [value, ctx.account]);
-        })}>Withdraw available balance</button>
+        {showEarned && <p className="earned-imd">Earned as recipient: <strong className="num">{formatEther(earned!.proceeds)} IMD</strong></p>}
+        <div className="row-actions">
+          <button className="btn tiny" disabled={busy || wrongChain || !available} onClick={() => void run('Withdraw your unspent deposit: check your wallet…', 'Deposit withdrawn to your wallet.', async ctx => {
+            const value = await ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'available', args: [ctx.account] }) as bigint;
+            if (value <= 0n) throw new Error('No deposit to withdraw.');
+            await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'withdraw', [value, ctx.account]);
+          })}>Withdraw</button>
+          {showEarned && <button className="btn tiny" disabled={busy || wrongChain || !earned!.proceeds} onClick={() => void run('Withdraw proceeds: check your wallet…', 'Proceeds withdrawn to your wallet.', async ctx => {
+            const value = await ctx.client.readContract({ address: ctx.config.placements, abi: placementsAbi, functionName: 'proceeds', args: [ctx.account] }) as bigint;
+            if (value <= 0n) throw new Error('No proceeds to withdraw.');
+            await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'withdrawProceeds', [value, ctx.account]);
+          })}>Withdraw proceeds</button>}
+          <button className="link-button" disabled={busy} onClick={() => { refresh(); setBalanceRevision(v => v + 1); }}>Refresh balances</button>
+        </div>
       </div>
+      <form className="deposit-box" onSubmit={e => { e.preventDefault(); if (!deposit.amount) return; const amount = deposit.amount; void run('Deposit IMD: check your wallet…', `Deposited ${formatEther(amount)} IMD.`, async ctx => { await depositAmount(ctx, amount); setDepositText(''); }); }}>
+        <label htmlFor="deposit-amount">Deposit IMD</label>
+        <div className="deposit-row"><input id="deposit-amount" className="num" inputMode="decimal" autoComplete="off" placeholder="0.25" value={depositText} disabled={busy} onChange={e => setDepositText(e.target.value)} aria-describedby="deposit-note" aria-invalid={!!deposit.error || undefined} />
+          <button className="btn" disabled={busy || wrongChain || setup !== 'ready' || !deposit.amount}>Deposit</button></div>
+        <p id="deposit-note" className={deposit.error ? 'field-error' : 'small muted'}>{deposit.error || 'Your wallet asks for an approval only when the allowance is short, then one deposit.'}</p>
+      </form>
       {!!errors.length && <p className="notice" role="status">{errors.join(' ')} <button className="link-button" onClick={refresh}>Retry placements</button></p>}
-      <div className="promotion-list">{ownAds.length ? ownAds.map(ad => {
-        const key = `${ad.chainId}:${ad.placement.id}`, adWrongChain = chainId !== ad.chainId, { rank, total: stripCount } = placementPosition(ads, ad);
-        const elapsed = BigInt(Math.max(0, Math.floor(Date.now() / 1000) - Number(ad.placement.startsAt))), duration = ad.placement.endsAt - ad.placement.startsAt;
-        const refund = AD_PRICE - AD_PRICE * (elapsed < duration ? elapsed : duration) / duration;
-        return <article className="promotion-row" key={key} data-placement={key}><div><h3>{ad.launch ? <a href={hookHref(ad.launch)}>{ad.metadata.name}</a> : ad.metadata.name} <span className="pill ad">#AD</span></h3><p className="num">{Math.ceil((Number(ad.placement.endsAt) - Date.now() / 1000) / 3600)}h left · {formatEther(ad.total)} IMD total · {rank ? `Rank ${rank} of ${stripCount}` : 'Not in store strip'}</p><p className="small muted">Paid on {CHAINS[ad.chainId]} · Listing {String(ad.placement.listingId)} · pinned revision {String(ad.placement.revision)}</p></div>
-          <div className="row-actions">{adWrongChain && <button className="btn tiny" disabled={busy} onClick={async () => { setSelectedChain(ad.chainId); try { await switchChain({ chainId: ad.chainId }); } catch (e) { setError(adError(e)); } }}>Switch to {CHAINS[ad.chainId]}</button>}<button className="btn tiny" disabled={busy || adWrongChain} onClick={() => { setBoostId(boostId === key ? '' : key); setBoostConfirmed(false); setBoostAmount(''); setCancelId(''); }}>Boost</button><button className="btn tiny" disabled={busy || adWrongChain} onClick={() => { setCancelId(cancelId === key ? '' : key); setBoostId(''); }}>Cancel placement</button></div>
-          {boostId === key && <form className="promotion-confirm" onSubmit={e => { e.preventDefault(); if (!boostConfirmed) { setError('Confirm the boost terms before continuing.'); return; } void run('Approve and deposit the boost if needed: check your wallet…', async ctx => {
-            if (!/^\d+(?:\.\d{1,18})?$/.test(boostAmount) || parseEther(boostAmount) <= 0n) throw new Error('Enter a positive IMD amount, with up to 18 decimals.');
-            const amount = parseEther(boostAmount); await depositFor(ctx, amount); await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'boost', [ad.placement.id, amount]); setBoostId('');
-          }, ad.chainId); }}><label htmlFor={`boost-${key}`}>Boost amount (IMD)</label><input id={`boost-${key}`} inputMode="decimal" value={boostAmount} onChange={e => setBoostAmount(e.target.value)} placeholder="e.g. 0.02" disabled={busy} /><p>{BOOST_TERMS}</p><label className="check-label"><input type="checkbox" checked={boostConfirmed} onChange={e => setBoostConfirmed(e.target.checked)} disabled={busy} />I confirm this boost is non-refundable.</label><button className="btn" disabled={busy || adWrongChain || !boostConfirmed}>Confirm boost</button></form>}
-          {cancelId === key && <div className="promotion-confirm"><p>Cancelling refunds the unused part of the 0.1 IMD base to your available balance, approximately <span className="num">{formatEther(refund)} IMD</span> now. All boosts are forfeited to the pinned proceeds recipient. Withdraw the available balance afterwards.</p><button className="btn" disabled={busy || adWrongChain} onClick={() => void run('Cancel this placement: check your wallet…', async ctx => { await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'cancel', [ad.placement.id]); setCancelId(''); }, ad.chainId)}>Confirm cancellation</button><button className="btn" disabled={busy} onClick={() => setCancelId('')}>Keep placement</button></div>}
+      <h3 className="promotion-hooks-h">Your live hooks</h3>
+      <div className="promotion-list">{rows.length ? rows.map(row => {
+        const running = row.placements.find(a => a.chainId === selectedChain), name = row.launch?.name ?? row.placements[0].metadata.name;
+        const hookChain = row.launch?.chainId ?? Number(row.placements[0].listing.chainId);
+        return <article className="promotion-row" key={row.key} data-hook={row.key}>
+          <p className="promotion-hook">{row.launch ? <a href={hookHref(row.launch)}>{name}</a> : name}{row.launch?.symbol && <span className="num"> (${row.launch.symbol})</span>} <span className="pill chain">{CHAINS[hookChain]}</span></p>
+          {row.placements.map(placementRow)}
+          {!running && row.launch && <div className="promote-action">
+            <button className="btn primary" disabled={promotion.disabled} aria-describedby={promotion.note ? `promote-note-${row.key}` : undefined} onClick={() => void promote(row.launch!)}>Promote · 0.1 IMD / 24h</button>
+            {promotion.note && <p className="small muted promote-note" id={`promote-note-${row.key}`}>{promotion.note}</p>}
+          </div>}
         </article>;
-      }) : <p className="muted">No active placements from this wallet on either chain. Promote a live hook below.</p>}</div>
-      <button className="btn primary" disabled={busy} onClick={toggleFlow}>Promote a hook</button>
-      {flow && <div className="promotion-flow"><h3>Promote a hook · 0.1 IMD / 24h</h3><ol className="promotion-steps" aria-label="Promotion steps">{['Free listing', 'Approve & deposit', 'Purchase 24 hours', 'Done'].map((title, i) => <li key={title} aria-current={step === i + 1 ? 'step' : undefined} className={step > i + 1 ? 'confirmed' : ''}><span className="num">{i + 1}</span> {title}</li>)}</ol>
-        <label htmlFor="promote-hook">Your live hook (either chain)</label><select id="promote-hook" value={selected} disabled={busy || step === 4} onChange={e => setSelected(e.target.value)}><option value="">Choose a hook you launched</option>{hooks.map(l => <option key={l.id} value={l.id}>{l.name}{l.symbol ? ` (${l.symbol})` : ''} · {CHAINS[l.chainId]}</option>)}</select>
-        {!hooks.length && <p>No live hooks launched by this wallet on either chain. <a href="#builder">Build a hook</a>.</p>}
-        {launch && <>
-          <p className="small">Listing creation is free; each wallet transaction costs gas. Approval lets the placement contract take only the missing IMD deposit. A deposit remains yours until purchase or boost.</p>
-          {step === 1 && <button className="btn" disabled={busy || wrongChain} onClick={() => void run('Create the free listing: check your wallet…', async ctx => {
-            const key = listingIdentity(launch.chainId, launch.hookAddress as Address, ctx.account);
-            let id = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'listingFor', args: [key] }) as bigint;
-            if (!id) { await sendAdTransaction(ctx, ctx.config.registry, registryAbi, 'createListing', [BigInt(launch.chainId), launch.hookAddress, listingMetadata(launch)]); id = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'listingFor', args: [key] }) as bigint; }
-            if (!id) throw new Error('The confirmed listing could not be read. Retry the reading.');
-            setListingId(id); await preparePurchase(ctx, id); setStep(2);
-          })}>1. Create or use free listing</button>}
-          {step >= 2 && metadata && <details className="listing-review"><summary>Listing {String(listingId)} · revision {String(revision)} · review metadata</summary><dl className="kv"><div><dt>Name</dt><dd>{metadata.name}</dd></div><div><dt>Callbacks</dt><dd>{metadata.callbackDisclosure} (mask 0x{metadata.callbackMask.toString(16)})</dd></div><div><dt>Fees</dt><dd>{metadata.feeDisclosure}</dd></div><div><dt>Admin</dt><dd>{metadata.adminDisclosure}</dd></div>{(['sourceRef', 'testRef', 'reviewRef', 'auditRef'] as const).map(key => <div key={key}><dt>{key.replace('Ref', '')}</dt><dd>{metadata[key] || 'Not supplied'}</dd></div>)}</dl></details>}
-          {step === 2 && <button id="promo-step-2" className="btn" disabled={busy || wrongChain || setup !== 'ready'} onClick={() => void run('Approve and deposit up to 0.1 IMD: check your wallet…', async ctx => { await depositFor(ctx, AD_PRICE); await preparePurchase(ctx, listingId!); setStep(3); })}>2. Approve & deposit 0.1 IMD</button>}
-          {step === 3 && <><p>Purchase <span className="num">24 hours for 0.1 IMD</span> at revision {String(revision)}. The purchase expires after 10 minutes if unconfirmed. Cancellation returns the unused base; boosts are never refunded.</p><p className="small">Pinned proceeds recipient:</p><AddressValue value={recipient} label="promotion proceeds recipient" explorer={store.config.chains.find(c => c.id === selectedChain)!.explorerUrl} /><div className="row-actions"><button id="promo-step-3" className="btn primary" disabled={busy || wrongChain || !recipient} onClick={() => void run('Purchase 24 hours: check your wallet…', async ctx => { await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'purchase', [listingId, revision, recipient, BigInt(Math.floor(Date.now() / 1000) + 600)]); setStep(4); })}>3. Purchase 24 hours · 0.1 IMD</button><button className="link-button" disabled={busy} onClick={() => void run('Refreshing purchase terms…', ctx => preparePurchase(ctx, listingId!))}>Refresh purchase terms</button></div></>}
-          {step === 4 && <p className="notice" role="status">Your #ad placement is active. <a id="promo-step-4" href="#store?featured=1" onClick={refresh}>View the featured carousel</a>. It uses the listing revision you purchased.</p>}
-        </>}
-      </div>}
+      }) : <p>No live hooks launched by this wallet on either chain. <a href="#builder">Build a hook</a>.</p>}</div>
     </>}
     <p className="function-feedback" role="status">{busy ? message || 'Check your wallet…' : message}</p>{error && <p className="field-error" role="alert">{error}</p>}{hash && <AddressValue value={hash} label="promotion transaction" kind="tx" explorer={store.config.chains.find(c => c.id === hashChain)!.explorerUrl} />}
   </section>;
