@@ -1,12 +1,18 @@
 # The Hooks Store
 
-Phase 1, jobs 1–9: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
+Phase 1, jobs 1–11: a static React storefront, the block Builder, a chain-backed catalog, the wallet launch flow, an optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`. It uses relative assets and hash routes, so it works on static hosting and at IPFS gateway subpaths.
 
-Job 9 implements **SPEC 1.34 §4.17** and the open launch/fee corrections. Matching block sets automatically resolve audited source through the relay before reuse. The runtime index is fetched at site load and is never bundled; failed imports compose a complete fresh request. Advanced own-code sources override automatic matching. Both review pages state the typical wait; hook pages retain provenance, offer Copy link and ask once about browser notifications.
+**Job 11 (Builder v2, SPEC 1.41 §3.2, decision 34)** rebuilds the Builder to `mockup/builder-v2.html`:
 
-Request addresses are lowercase, including checksummed connected wallets and embedded addresses. Structural written-fee analysis resolves named recipients, parses whole amounts and checks the combined 5% cap per direction; ambiguous amounts lock payment. Contracts-only Live requires Completed status 0 plus a live relay launch record. Deployer and hook addresses come from that record and `hook()` independently; zero keeps hook controls locked while Live can be confirmed.
+- **Two zones.** The steps sit on the left (type, how, blocks, settings). A sticky hook card sits on the right, and comes first on screens below 1,100px.
+- **Step 2.** The starting point (From scratch, or From my own code) sits above Describe it | Stack blocks. The repository and commit fields exist only while own code is chosen.
+- **Step 3.** A category shelf sits above a one-line-per-rule stack.
+- **Findings.** They sit in a box that scrolls inside itself, one row each.
+- **Exact text.** It opens in a modal sheet with the faulty words highlighted.
 
-Current evidence is in [tests/results/job9/REVIEW.md](tests/results/job9/REVIEW.md), with the separate read-only [adversarial review](tests/results/job9/ADVERSARIAL-REVIEW.md). Production build/typecheck, **1,155 unit tests and 234 browser tests passed** (revision results in `tests/results/job9/revision/`), with seven optional service/fork cases skipped. Earlier job results remain historical evidence. No paid launch or deployment was made.
+`compose()`, `body()`, `validate()`, `checkConsistency()`, `writtenFees`, the relay calls, the free check, the proven-launch line and import, the draft key `hooks-store:draft:v2` and the launch review page are unchanged. The Store, hook page, My hooks, Learn and launch pages are unchanged. Job 11's results are in [VALIDATION.md](VALIDATION.md) and `tests/results/job11/`. The Builder screenshots at six widths are in `artifacts/`.
+
+Earlier evidence: [tests/results/job9/REVIEW.md](tests/results/job9/REVIEW.md). No paid launch or deployment was made.
 
 ## Install, preview and rebuild
 
@@ -23,7 +29,7 @@ node scripts/serve.mjs --port 4173
 
 `npm --prefix web run preview` also serves the export. Vite uses root `index.html`, `base: './'` and root `dist/`. No route rewrites are needed. Fonts, wallet icons, favicon, share image, configuration and JS/CSS chunks are local. The supplied canonical Open Graph URL remains `https://the-hooks-store.sites.imd.fun/og.png`. This assignment did not publish the site or send a public-chain transaction.
 
-The worker installed dependencies and built in an isolated `/tmp` copy, then copied the complete export back. No dependency installation, cache, package archive or ignore-file change is included. The existing `snapshot` package script is obsolete; it is not part of this build.
+Job 11 installed dependencies with `npm --prefix web ci` (not committed) and built in place. No dependency, cache, package archive or ignore-file change is included. The existing `snapshot` package script is obsolete; it is not part of this build.
 
 ## Launch flow
 
@@ -113,6 +119,28 @@ Only `univ4_hook` / `evm_contracts` bodies ending in this store's fixed composer
 Hook management and My hooks retain the delivered ownership gates: owner reads gate privileged functions, public functions and views derive from matched catalog rules, unknown addresses stay unknown, and query-param wallet viewing never authorizes writes. Current pool-dependent controls pass a selected PoolId. Earlier requests use the retained legacy catalog signatures; they are not silently changed. Featured placements remain phase 2.
 
 ## Validation
+
+Job 11 checks, all run from `web/` on the final source:
+
+```sh
+npm run typecheck                                  # passed
+npm run build                                      # passed (tsc --noEmit + vite build into ../dist)
+npm test                                           # 1,155 unit tests passed, 0 failed (unchanged)
+npx playwright test tests/builder.spec.ts tests/hook.spec.ts tests/job5.spec.ts tests/job6.spec.ts \
+  tests/store.spec.ts tests/launch.spec.ts tests/wallet.spec.ts tests/pond.spec.ts   # 119 passed, 5 skipped
+```
+
+`tests/builder.spec.ts` is new for the v2 screen. It covers:
+
+- every step;
+- the card, its readiness list and "fill it in" links;
+- the findings box, JUMP TO IT and the sheet's COPY and CLOSE;
+- the own-code toggle and the shelf on phones;
+- screenshots at 320, 390, 768, 1100, 1440 and 2560px, with no horizontal overflow and the card inside the viewport.
+
+The job 7, 8 and 9 browser specs drove the v1 three-column Builder: the palette, `.blk` cards, the `.sum` preview and the chooser. `web/playwright.config.ts` now lists them under `testIgnore`. The request text those specs checked is still covered by the unchanged unit tests. Their v1 DOM steps were not ported, which is a stated limitation.
+
+Older job records follow.
 
 Job 9 used an isolated `/tmp` dependency installation with the unchanged lockfile. Current results are in `tests/results/job9/`; the final production export is in `dist/`.
 

@@ -20,7 +20,7 @@ async function fits(page: Page, width: number) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   const clipped = await page.locator('button, input, select, textarea').evaluateAll(els => els.filter(el => {
     const rect = el.getBoundingClientRect(), style = getComputedStyle(el);
-    return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && (rect.left < -1 || rect.right > innerWidth + 1);
+    return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && !el.closest('#shelf') && (rect.left < -1 || rect.right > innerWidth + 1);
   }).map(el => el.outerHTML.slice(0, 160)));
   expect(clipped).toEqual([]);
 }
@@ -48,7 +48,7 @@ for (const width of [320, 390, 1440]) for (const [name, hash, heading] of [
     await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('paired with ETH.');
     await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
     await expect(page.locator('#composed')).not.toContainText('Fees are always taken from');
-    await expect(page.locator('.preview .sum')).toContainText('paired with ETH');
+    await expect(page.locator('.hookcard')).toContainText('Paired with ETH');
     await page.getByRole('button', { name: 'Continue to launch' }).click(); await expect(page).toHaveURL(/#launch$/);
   } else if (name === 'Catalog') {
     await page.getByRole('searchbox').fill('no matching hook'); await expect(page.getByText(/No hooks match/)).toBeVisible();

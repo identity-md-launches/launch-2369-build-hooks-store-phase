@@ -17,7 +17,7 @@ for(const width of [320,390,1440])test(`Hook page fits ${width}px, exposes readi
   await page.locator('.hook-blocks .warn').blur();await page.locator('#manage').evaluate(el=>el.scrollIntoView({block:'start'}));await page.screenshot({path:`../artifacts/hook-manage-${width}.png`});
   await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`../artifacts/hook-${width}.png`});
   await page.getByRole('button',{name:'Copy hook',exact:true}).click();await expect(page.locator('.addresses')).toContainText('Copied');
-  await page.getByRole('button',{name:'Build one like this'}).click();await expect(page).toHaveURL(/#builder$/);await expect(page.locator('#s-chain')).toHaveValue('1');await expect(page.locator('.blk[data-block="pause"]')).toBeVisible();expect(errors).toEqual([]);
+  await page.getByRole('button',{name:'Build one like this'}).click();await expect(page).toHaveURL(/#builder$/);await expect(page.locator('#s-chain')).toHaveValue('1');await expect(page.locator('#stack .rule[data-block="pause"]')).toBeVisible();expect(errors).toEqual([]);
 });
 test('owner forms validate address arrays and booleans; query-param viewing never unlocks controls',async({page})=>{
   await interceptChains(page);await page.goto(`${route}?address=${owner}`);await expect(page.locator('[data-function="setAllowed"] button')).toBeDisabled();

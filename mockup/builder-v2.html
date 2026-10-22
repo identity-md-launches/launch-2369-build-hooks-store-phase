@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Builder v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Proposed Builder layout for The Hooks Store: the hook you are building sits on the right as a stack you can read, the steps breathe, and findings are one line each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Press+Start+2P&family=VT323&display=swap">
+<style>
+/* Same skin as the store (beige paper, black ink, one pine accent, hard shadows). Single light look by design. */
+:root {
+  --paper: #e9dfc3; --paper-2: #dfd3b0; --paper-3: #f3ecd8;
+  --ink: #15130f; --ink-2: #5b5342; --ink-3: #8a816a;
+  --pine: #1e5a3a; --pine-2: #2c7a50; --on-pine: #f3ecd8;
+  --bad: #a3382b; --warn: #a1731c; --ok: #1e5a3a; --ad: #c9a227;
+  --fees: #c9a227; --protection: #a3382b; --treasury: #1e5a3a; --liquidity: #3b6ea5; --timing: #7a4e9e; --advanced: #5b5342; --games: #c2612e; --custom: #8a816a; --token: #1e5a3a;
+  --display: 'Press Start 2P', 'Courier New', monospace;
+  --body: 'Pixelify Sans', 'Trebuchet MS', system-ui, sans-serif;
+  --mono: 'VT323', 'Courier New', ui-monospace, monospace;
+  --shadow: 4px 4px 0 var(--ink);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--paper); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 500 17px/1.55 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--pine); }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; line-height: 1.6; margin: 0; text-wrap: balance; }
+h1 { font-size: 22px; } h2 { font-size: 13px; } h3 { font-size: 11px; } h4 { font-size: 9px; color: var(--ink-2); letter-spacing: .04em; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--pine); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--pine); outline-offset: 2px; }
+.mono, code { font-family: var(--mono); font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }
+.num { font-family: var(--mono); font-size: 1.3em; line-height: 1; font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.muted { color: var(--ink-2); } .small { font-size: 14px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 3px solid var(--ink); background: var(--paper-3); color: var(--ink); font: 400 10px/1.4 var(--display); text-decoration: none; cursor: pointer; box-shadow: var(--shadow); white-space: nowrap; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn.primary { background: var(--pine); color: var(--on-pine); }
+.btn.tiny { min-height: 34px; padding: 0 12px; font-size: 8px; box-shadow: 3px 3px 0 var(--ink); }
+.btn.ghost { box-shadow: none; background: transparent; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.pill { display: inline-block; font: 400 8px/1.4 var(--display); padding: 5px 8px; border: 2px solid var(--ink); background: var(--paper-3); white-space: nowrap; }
+.pill.chain { background: var(--paper-2); }
+.pill.pine { background: var(--pine); color: var(--on-pine); border-color: var(--pine); }
+input, select, textarea { width: 100%; min-height: 46px; background: var(--paper-3); color: var(--ink); border: 3px solid var(--ink); padding: 8px 12px; font: 500 16px/1.3 var(--body); }
+label { display: block; font: 400 9px/1.6 var(--display); margin: 0 0 6px; }
+.hint { font-size: 14px; color: var(--ink-2); margin-top: 6px; }
+
+/* mock bar */
+.mock { background: var(--ink); color: var(--paper); padding: 8px 0; }
+.mock .wrap { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+.mock b { font: 400 9px/1.6 var(--display); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--pine); color: var(--on-pine); border-bottom: 3px solid var(--ink); }
+.top-in { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--on-pine); text-decoration: none; font: 400 12px/1 var(--display); }
+.brand .hook { display: block; width: 24px; height: 32px; }
+.nav { display: flex; gap: 2px; }
+.nav a { color: var(--on-pine); text-decoration: none; font: 400 9px/1 var(--display); padding: 12px 10px; border: 2px solid transparent; }
+.nav a.on { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+.connect { margin-left: auto; background: var(--paper); }
+
+/* page head */
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 28px 0 20px; border-bottom: 3px dashed var(--ink-3); margin-bottom: 28px; }
+.head p { font-size: 15px; color: var(--ink-2); }
+.progress { display: flex; gap: 6px; flex-wrap: wrap; }
+.progress span { font: 400 8px/1.6 var(--display); padding: 6px 10px; border: 2px solid var(--ink-3); color: var(--ink-2); background: var(--paper-3); }
+.progress span.done { border-color: var(--pine); color: var(--pine); } .progress span.now { background: var(--pine); color: var(--on-pine); border-color: var(--pine); }
+
+/* two zones: the build steps, and the hook you are making */
+.b2 { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 36px; align-items: start; margin-bottom: 60px; }
+.steps { display: grid; gap: 32px; min-width: 0; }
+.step { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 22px 24px 24px; min-width: 0; }
+.step-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.step-head .n { font: 400 14px/40px var(--display); width: 40px; height: 40px; text-align: center; border: 3px solid var(--ink); background: var(--pine); color: var(--on-pine); flex: 0 0 auto; }
+.step-head h2 { flex: 1 1 auto; }
+.step-head .state { font-size: 14px; color: var(--pine); }
+
+/* 1 type */
+.types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.type { text-align: left; padding: 16px; cursor: pointer; background: var(--paper-3); border: 3px solid var(--ink); font: inherit; color: inherit; display: grid; gap: 8px; }
+.type.on { background: var(--pine); color: var(--on-pine); } .type strong { font: 400 9px/1.6 var(--display); } .type span { font-size: 15px; line-height: 1.4; }
+
+/* 2 mode */
+.seg { display: inline-flex; border: 3px solid var(--ink); background: var(--paper-3); box-shadow: var(--shadow); }
+.seg button { min-height: 44px; padding: 0 18px; border: 0; background: transparent; color: var(--ink); font: 400 9px/1.4 var(--display); cursor: pointer; }
+.seg button.on { background: var(--pine); color: var(--on-pine); } .seg button + button { border-left: 3px solid var(--ink); }
+.mode-note { font-size: 15px; color: var(--ink-2); margin-top: 12px; }
+
+/* 3 blocks: a shelf of categories, then the stack */
+.shelf-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.shelf-tabs button { font: 400 8px/1.6 var(--display); padding: 9px 12px; border: 2px solid var(--ink); background: var(--paper-3); cursor: pointer; color: var(--ink); display: inline-flex; gap: 8px; align-items: center; }
+.shelf-tabs button .c { font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--ink-2); }
+.shelf-tabs button.on { background: var(--ink); color: var(--paper); } .shelf-tabs button.on .c { color: var(--paper); }
+.shelf-tabs button i { display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor; background: var(--swatch, transparent); }
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; padding: 14px; background: var(--paper-2); border: 3px solid var(--ink); margin-bottom: 22px; min-width: 0; max-width: 100%; }
+.bcard { background: var(--paper-3); border: 2px solid var(--ink); padding: 12px 12px 10px; display: grid; gap: 6px; border-top: 6px solid var(--swatch, var(--ink)); min-width: 0; }
+.bcard strong { font-size: 15px; line-height: 1.3; } .bcard p { font-size: 13px; color: var(--ink-2); line-height: 1.35; }
+.bcard .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; }
+.bcard .state { font: 400 7px/1.5 var(--display); color: var(--ink-2); }
+.bcard.added { opacity: .55; }
+.stack-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.stack-head h3 { font-size: 10px; } .stack-head .small { color: var(--ink-2); }
+.rule { background: var(--paper-3); border: 3px solid var(--ink); border-left: 12px solid var(--swatch, var(--ink)); margin-bottom: 8px; min-width: 0; }
+.rule .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 8px 12px 8px 14px; }
+.rule .row .n { font: 400 11px/1 var(--display); color: var(--ink-2); }
+.rule .txt { display: flex; gap: 10px 14px; align-items: baseline; flex-wrap: wrap; min-width: 0; }
+.rule .txt strong { font: 400 9px/1.6 var(--display); } .rule .txt span { font-family: var(--mono); font-size: 19px; line-height: 1.1; color: var(--ink-2); overflow-wrap: anywhere; }
+.rule .chip { font: 400 7px/1.5 var(--display); color: var(--ink-2); border: 2px solid var(--ink-3); padding: 4px 6px; white-space: nowrap; }
+.rule .chip.owner { color: var(--pine); border-color: var(--pine); }
+.rule .tools { display: flex; gap: 6px; }
+.rule .tools button { font: 400 8px/1 var(--display); min-width: 32px; min-height: 32px; border: 2px solid var(--ink); background: var(--paper-3); cursor: pointer; color: var(--ink); padding: 0 8px; }
+.rule .tools .edit { background: var(--paper-2); }
+.rule .body { display: none; padding: 4px 14px 14px; border-top: 2px dashed var(--ink-3); }
+.rule.open .body { display: grid; gap: 10px; }
+.rule.open .row { background: var(--paper-2); }
+.link { font: inherit; background: none; border: 0; padding: 0; color: var(--pine); text-decoration: underline; cursor: pointer; }
+.start { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.own { margin-top: 12px; padding: 12px 14px; border: 2px dashed var(--ink-3); }
+.rule .params { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.rule .who { font-size: 14px; color: var(--ink-2); }
+.rule .who b { color: var(--ink); font-weight: 600; }
+
+/* 4 settings */
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fields .wide { grid-column: 1 / -1; }
+details.adv { border: 2px dashed var(--ink-3); background: transparent; margin-top: 16px; }
+details.adv summary { cursor: pointer; padding: 12px 14px; font: 400 9px/1.6 var(--display); list-style: none; display: flex; justify-content: space-between; }
+details.adv summary::-webkit-details-marker { display: none; } details.adv summary::after { content: "+"; } details.adv[open] summary::after { content: "\2212"; }
+details.adv > div { padding: 0 14px 14px; }
+
+/* the hook you are making */
+.hookcol { position: sticky; top: 84px; display: grid; gap: 18px; min-width: 0; max-height: calc(100vh - 100px); overflow: auto; align-content: start; padding: 0 6px 6px 0; }
+.hookcard { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 0; overflow: hidden; }
+.hookcard .hc-top { background: var(--pine); color: var(--on-pine); padding: 16px 18px; display: grid; gap: 8px; }
+.hookcard .hc-top .eyebrow { font: 400 8px/1.6 var(--display); opacity: .85; }
+.hookcard .hc-top h2 { font-size: 15px; color: var(--on-pine); }
+.hookcard .hc-top .sym { font-family: var(--mono); font-size: 22px; line-height: 1; opacity: .9; }
+.hookcard .hc-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.hookcard .hc-pills .pill { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+.tiles { padding: 16px 18px 8px; display: grid; gap: 0; max-height: 40vh; overflow: auto; min-width: 0; }
+.tile .t strong, .tile .t span { overflow-wrap: anywhere; }
+.tile { display: grid; grid-template-columns: 14px 1fr; gap: 12px; align-items: stretch; }
+.tile i { display: block; background: var(--swatch, var(--ink)); border: 2px solid var(--ink); }
+.tile .t { padding: 10px 0 12px; border-bottom: 2px dashed var(--ink-3); display: grid; gap: 2px; }
+.tile:last-child .t { border-bottom: 0; }
+.tile .t strong { font-size: 15px; } .tile .t span { font-family: var(--mono); font-size: 19px; line-height: 1.1; color: var(--ink-2); }
+.tile.base .t strong { font: 400 9px/1.6 var(--display); }
+.tile.empty .t { color: var(--ink-2); font-size: 14px; border: 2px dashed var(--ink-3); padding: 12px; }
+.flow { margin: 8px 18px 16px; padding: 12px 14px; background: var(--paper-2); border: 2px solid var(--ink); font-size: 14px; display: grid; gap: 4px; }
+.flow b { font: 400 8px/1.8 var(--display); color: var(--ink-2); }
+.ready { list-style: none; margin: 0; padding: 0 18px 14px; display: grid; gap: 6px; font-size: 14px; }
+.ready li { display: flex; gap: 6px 10px; align-items: baseline; flex-wrap: wrap; }
+.ready li::before { content: "\2713"; font: 400 11px/1 var(--display); color: var(--pine); flex: 0 0 18px; }
+.ready li.todo { color: var(--bad); } .ready li.todo::before { content: "\2192"; color: var(--bad); }
+.ready li button { font: inherit; background: none; border: 0; padding: 0; color: var(--bad); text-decoration: underline; cursor: pointer; }
+.cost { display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-top: 3px solid var(--ink); font-size: 14px; align-items: baseline; flex-wrap: wrap; }
+.cost strong { font-family: var(--mono); font-size: 22px; line-height: 1; }
+.hc-actions { display: grid; gap: 10px; padding: 0 18px 18px; }
+.hc-actions .btn { width: 100%; }
+.exact { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 10px 18px 16px; font-size: 14px; color: var(--ink-2); }
+
+/* findings: one line each, never the request text */
+.findings { background: var(--paper-3); border: 3px solid var(--ink); border-left: 10px solid var(--bad); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.findings .list { max-height: 36vh; overflow: auto; min-width: 0; padding-right: 4px; }
+.findings h3 { font-size: 9px; color: var(--bad); }
+.findings p.small { color: var(--ink-2); }
+.finding { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 10px 0; border-top: 2px dashed var(--ink-3); }
+.finding strong { font-size: 15px; min-width: 0; overflow-wrap: anywhere; } .finding em { grid-column: 1 / -1; font-style: normal; font-size: 13px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.finding em q { font-family: var(--mono); font-size: 17px; color: var(--ink); quotes: "\201C" "\201D"; }
+.finding .btn { min-height: 32px; }
+.findings.ok { border-left-color: var(--ok); } .findings.ok h3 { color: var(--ok); }
+
+/* the exact request, in a sheet you open on purpose */
+dialog { width: min(760px, calc(100% - 32px)); border: 3px solid var(--ink); background: var(--paper-3); color: var(--ink); box-shadow: var(--shadow); padding: 0; }
+dialog::backdrop { background: rgba(21,19,15,.55); }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 3px solid var(--ink); background: var(--paper-2); }
+.sheet-head h2 { font-size: 11px; }
+dialog pre { margin: 0; padding: 18px; font: 400 19px/1.25 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 70vh; overflow: auto; }
+dialog pre mark { background: #f6e3a1; color: inherit; outline: 2px solid var(--warn); }
+
+.note { border: 3px solid var(--ink); background: var(--paper-2); padding: 14px 16px; font-size: 15px; margin-top: 28px; }
+.note b { font: 400 9px/1.8 var(--display); display: block; }
+
+@media (max-width: 1100px) {
+  .b2 { grid-template-columns: 1fr; gap: 28px; }
+  .hookcol { position: static; order: -1; max-height: none; overflow: visible; padding: 0; }
+  .hookcol .hookcard { box-shadow: var(--shadow); }
+}
+@media (max-width: 720px) {
+  .types, .fields, .start { grid-template-columns: 1fr; }
+  .rule .row { grid-template-columns: auto minmax(0, 1fr); } .rule .chip { grid-column: 2; justify-self: start; } .rule .tools { grid-column: 1 / -1; }
+  .step { padding: 16px; }
+  .shelf { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px; gap: 10px; }
+  .shelf .bcard { flex: 0 0 210px; scroll-snap-align: start; }
+  .top-in { flex-wrap: wrap; gap: 8px 12px; } .nav { order: 3; flex-basis: 100%; justify-content: space-between; } .nav a { padding: 10px 6px; font-size: 8px; } .connect { margin-left: 0; }
+  .head { padding-top: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="mock"><div class="wrap"><b>MOCKUP · BUILDER V2</b><span>Proposed layout only. Same colors, fonts and words as the live site; the shape changes.</span></div></div>
+
+<header class="top"><div class="wrap top-in">
+  <a class="brand" href="#"><svg class="hook" viewBox="0 0 12 16" shape-rendering="crispEdges" aria-hidden="true"><rect x="7" y="0" width="2" height="2" fill="#f3ecd8"/><rect x="7" y="2" width="2" height="7" fill="#f3ecd8"/><rect x="5" y="9" width="2" height="2" fill="#f3ecd8"/><rect x="3" y="11" width="2" height="2" fill="#f3ecd8"/><rect x="1" y="11" width="2" height="2" fill="#f3ecd8"/><rect x="1" y="9" width="2" height="2" fill="#f3ecd8"/></svg>THE HOOKS STORE</a>
+  <nav class="nav" aria-label="Main"><a href="#">STORE</a><a href="#" class="on">BUILDER</a><a href="#">MY HOOKS</a><a href="#">LEARN</a></nav>
+  <button class="btn connect" type="button">CONNECT</button>
+</div></header>
+
+<main class="wrap">
+<div class="head">
+  <div><h1>BUILDER</h1><p>Drafts save in this browser. Nothing is sent until you launch.</p></div>
+  <div class="progress" aria-label="Progress"><span class="done">1 TYPE</span><span class="done">2 HOW</span><span class="now">3 BLOCKS</span><span>4 SETTINGS</span><span>5 CHECK &amp; LAUNCH</span></div>
+</div>
+
+<div class="b2">
+<div class="steps">
+
+  <section class="step" aria-labelledby="s1">
+    <div class="step-head"><span class="n">1</span><h2 id="s1">WHAT ARE YOU LAUNCHING?</h2><span class="state">Hook + new token + pool</span></div>
+    <div class="types">
+      <button class="type on" type="button"><strong>HOOK + NEW TOKEN + POOL</strong><span>IMD launches your hook, a token and the trading pool together. The simplest path.</span></button>
+      <button class="type" type="button"><strong>HOOK ONLY</strong><span>Just the hook contract, no token, no pool. Anyone can open a pool with it later.</span></button>
+      <button class="type" type="button"><strong>HOOK FOR MY EXISTING TOKEN</strong><span>Deploy the hook, then open a pool for a token that is already live.</span></button>
+    </div>
+  </section>
+
+
+
+
+
+  <section class="step" aria-labelledby="s2">
+    <div class="step-head"><span class="n">2</span><h2 id="s2">HOW DO YOU WANT TO BUILD IT?</h2></div>
+    <h4 style="margin-bottom:8px">STARTING POINT</h4>
+    <div class="start" id="start">
+      <button class="type on" type="button" data-start="scratch"><strong>FROM SCRATCH</strong><span>The swarm writes the hook from your blocks or your words. Best for a first hook.</span></button>
+      <button class="type" type="button" data-start="own"><strong>FROM MY OWN CODE</strong><span>A public GitHub repository with your hook. It is audited as imported code, then adapted to the rules you add below, and reviewed before deploying.</span></button>
+    </div>
+    <div class="own" aria-label="Own code fields" id="own" hidden>
+      <p class="small muted" style="margin-bottom:10px">The request pins this exact commit. Your blocks and words become the changes the swarm makes to it.</p>
+      <div class="fields"><div><label for="s-repo">REPOSITORY URL</label><input id="s-repo" placeholder="https://github.com/you/your-hook"></div><div><label for="s-commit">COMMIT</label><input id="s-commit" placeholder="40-character commit id"></div></div>
+    </div>
+    <h4 style="margin:18px 0 8px">HOW YOU DESCRIBE THE RULES</h4>
+    <div class="seg" role="group" aria-label="Builder mode"><button type="button">DESCRIBE IT</button><button type="button" class="on">STACK BLOCKS</button></div>
+    <p class="mode-note">Blocks are checked sentences the swarm already knows. Words are yours and riskier. Switching never loses anything: blocks stay as numbered rules under your words.</p>
+  </section>
+
+  <section class="step" aria-labelledby="s3">
+    <div class="step-head"><span class="n">3</span><h2 id="s3">STACK YOUR BLOCKS</h2><span class="state">6 added · 6 is plenty</span></div>
+    <div class="shelf-tabs" role="tablist" aria-label="Block categories">
+      <button role="tab" class="on" style="--swatch:var(--fees)"><i></i>FEES <span class="c">1/7</span></button>
+      <button role="tab" style="--swatch:var(--protection)"><i></i>PROTECTION <span class="c">1/6</span></button>
+      <button role="tab" style="--swatch:var(--treasury)"><i></i>TREASURY <span class="c">1/2</span></button>
+      <button role="tab" style="--swatch:var(--liquidity)"><i></i>LIQUIDITY <span class="c">0/4</span></button>
+      <button role="tab" style="--swatch:var(--timing)"><i></i>TIMING <span class="c">1/5</span></button>
+      <button role="tab" style="--swatch:var(--advanced)"><i></i>ADVANCED <span class="c">0/7</span></button>
+      <button role="tab" style="--swatch:var(--games)"><i></i>GAMES <span class="c">0/1</span></button>
+      <button role="tab" style="--swatch:var(--custom)"><i></i>CUSTOM <span class="c">0/1</span></button>
+    </div>
+    <div class="shelf" id="shelf" style="--swatch:var(--fees)">
+      <div class="bcard added"><strong>Swap fee</strong><p>A fixed cut of every swap, sent somewhere.</p><div class="foot"><span class="state">ADDED</span></div></div>
+      <div class="bcard"><strong>Fee that fades</strong><p>Starts high at launch, settles to a floor.</p><div class="foot"><span class="state"></span><button class="btn tiny" type="button" data-add="Fee that fades|3% → 1% over 30 min">ADD</button></div></div>
+      <div class="bcard"><strong>Different buy and sell fees</strong><p>One rate for buys, another for sells.</p><div class="foot"><span class="state"></span><button class="btn tiny" type="button" data-add="Different buy and sell fees|buy 1%, sell 2% → my wallet">ADD</button></div></div>
+      <div class="bcard"><strong>Whale fee</strong><p>Big swaps pay an extra fee.</p><div class="foot"><span class="state"></span><button class="btn tiny" type="button" data-add="Whale fee|+1% above 5 IMD">ADD</button></div></div>
+      <div class="bcard"><strong>Volatility fee</strong><p>Fee rises when the price moves fast.</p><div class="foot"><span class="state"></span><button class="btn tiny" type="button" data-add="Volatility fee|2% when price moves 5% in 60s">ADD</button></div></div>
+      <div class="bcard"><strong>Split the fee</strong><p>Send the hook fee to two places.</p><div class="foot"><span class="state"></span><button class="btn tiny" type="button" data-add="Split the fee|70% me / 30% treasury">ADD</button></div></div>
+      <div class="bcard"><strong>Dynamic LP fee</strong><p>The pool’s own fee tier moves with volatility. Own pools only.</p><div class="foot"><span class="state">OWN POOLS ONLY</span></div></div>
+    </div>
+
+    <div class="stack-head"><h3>YOUR STACK</h3><span class="small">One line per rule. Open a rule to change its numbers. <button class="link" type="button" id="expand-all">Open all</button></span></div>
+    <div id="stack">
+      <article class="rule" style="--swatch:var(--token)">
+        <div class="row"><span class="n">0</span><div class="txt"><strong>LAUNCH TOKEN</strong><span>Pond Token ($POND) · standard · 1B</span></div><span class="chip">STANDARD</span><div class="tools"><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><div class="params"><div><label for="t-name">NAME</label><input id="t-name" value="Pond Token"></div><div><label for="t-sym">SYMBOL</label><input id="t-sym" value="POND"></div></div><p class="who">1B supply, 18 decimals, no owner. <b>10% to the swarm</b>, your pool share from the rest.</p></div>
+      </article>
+      <article class="rule open" style="--swatch:var(--fees)">
+        <div class="row"><span class="n">1</span><div class="txt"><strong>SWAP FEE</strong><span>1.0% on every buy and sell → my wallet</span></div><span class="chip">RUNS ITSELF</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="true">CLOSE</button></div></div>
+        <div class="body"><div class="params"><div><label for="f-rate">RATE (%)</label><input id="f-rate" type="number" value="1.0" step="0.1" class="num"></div><div><label for="f-on">ON</label><select id="f-on"><option>every buy and sell</option><option>buys only</option><option>sells only</option></select></div><div><label for="f-to">SEND TO</label><select id="f-to"><option>my wallet</option><option>treasury</option><option>an address…</option></select></div></div><p class="who"><b>Runs itself.</b> Anyone can press the button that sends collected fees to the recipient. · On the hook page: <b>claimFees()</b></p></div>
+      </article>
+      <article class="rule" style="--swatch:var(--protection)">
+        <div class="row"><span class="n">2</span><div class="txt"><strong>ANTI-SNIPER WINDOW</strong><span>first 10 min: max 1.0% per wallet</span></div><span class="chip">RUNS ITSELF</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><div class="params"><div><label for="a-min">FOR THE FIRST (MIN)</label><input id="a-min" type="number" value="10" class="num"></div><div><label for="a-pct">MAX PER WALLET (% OF SUPPLY)</label><input id="a-pct" type="number" value="1.0" step="0.1" class="num"></div></div><p class="who"><b>Runs itself</b> for the window, then switches off. · On the hook page: <b>windowEndsAt()</b></p></div>
+      </article>
+      <article class="rule" style="--swatch:var(--treasury)">
+        <div class="row"><span class="n">3</span><div class="txt"><strong>BUYBACK JAR</strong><span>1.0% into a jar, buy back at 100 IMD</span></div><span class="chip">ANYONE PRESSES</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><div class="params"><div><label for="j-rate">INTO THE JAR (%)</label><input id="j-rate" type="number" value="1.0" step="0.1" class="num"></div><div><label for="j-trig">BUY BACK AT (IMD)</label><input id="j-trig" type="number" value="100" class="num"></div></div><p class="who"><b>Runs itself;</b> anyone presses the button when the jar is full. · On the hook page: <b>buyback()</b>, <b>jar()</b></p></div>
+      </article>
+      <article class="rule" style="--swatch:var(--timing)">
+        <div class="row"><span class="n">4</span><div class="txt"><strong>PAUSE SWITCH</strong><span>owner can pause</span></div><span class="chip owner">OWNER</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><p class="who"><b>The owner</b> can pause and resume swaps. Liquidity can always be removed while paused. Buyers may dislike it. · On the hook page: owner buttons <b>pause</b>, <b>unpause</b></p></div>
+      </article>
+      <article class="rule" style="--swatch:var(--protection)">
+        <div class="row"><span class="n">5</span><div class="txt"><strong>COOLDOWN</strong><span>30s between swaps per wallet</span></div><span class="chip">RUNS ITSELF</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><div class="params"><div><label for="c-secs">WAIT (SECONDS)</label><input id="c-secs" type="number" value="30" class="num"></div></div><p class="who"><b>Runs itself.</b> Makes a wallet wait between swaps.</p></div>
+      </article>
+      <article class="rule" style="--swatch:var(--timing)">
+        <div class="row"><span class="n">6</span><div class="txt"><strong>ALLOWLIST OPENING</strong><span>allowlist only for 15 min</span></div><span class="chip owner">OWNER</span><div class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button><button type="button" class="edit" aria-expanded="false">EDIT</button></div></div>
+        <div class="body"><div class="params"><div><label for="w-min">FOR THE FIRST (MIN)</label><input id="w-min" type="number" value="15" class="num"></div></div><p class="who"><b>The owner</b> adds and removes buyer addresses. While it is active, only the owner may add liquidity.</p></div>
+      </article>
+    </div>
+    <p class="hint" style="margin-top:10px">Six rules stacked. Above six, every extra rule is more for the audit panel to refuse, and the contract has a 24 KB size limit.</p>
+  </section>
+
+  <section class="step" aria-labelledby="s4">
+    <div class="step-head"><span class="n">4</span><h2 id="s4">SETTINGS</h2><span class="state" style="color:var(--bad)">2 to fill in</span></div>
+    <div class="fields">
+      <div><label for="s-chain">DEPLOY ON</label><select id="s-chain"><option value="">Choose a chain</option><option selected>Robinhood Chain</option><option>Ethereum</option></select></div>
+      <div><label for="s-pair">PAIR WITH</label><select id="s-pair"><option selected>IMD</option><option>ETH</option></select></div>
+      <div><label for="s-pool">POOL SHARE OF YOUR 90% (%)</label><input id="s-pool" type="number" placeholder="10 to 90, your choice" class="num"><p class="hint">How much of your share seeds the pool. The rest goes to your remainder address.</p></div>
+      <div><label for="s-rem">REMAINDER GOES TO</label><input id="s-rem" placeholder="your connected wallet" spellcheck="false"></div>
+      <div class="wide"><label for="s-owner">OWNER ADDRESS (USED BY THE PAUSE SWITCH)</label><input id="s-owner" placeholder="your connected wallet" spellcheck="false"><p class="hint">Leave empty to use the wallet that pays. Typed addresses are sent in lowercase.</p></div>
+    </div>
+  </section>
+</div>
+
+<aside class="hookcol" aria-label="The hook you are building">
+  <div class="hookcard">
+    <div class="hc-top">
+      <span class="eyebrow">YOUR HOOK, AS IT STANDS</span>
+      <h2>POND TOKEN <span class="sym">$POND</span></h2>
+      <div class="hc-pills"><span class="pill">HOOK + TOKEN + POOL</span><span class="pill">ROBINHOOD CHAIN</span><span class="pill">PAIRED WITH IMD</span></div>
+    </div>
+    <div class="tiles" id="tiles">
+      <div class="tile base" style="--swatch:var(--token)"><i></i><div class="t"><strong>TOKEN</strong><span>Pond Token · 1B POND · standard</span></div></div>
+      <div class="tile" style="--swatch:var(--fees)"><i></i><div class="t"><strong>Swap fee</strong><span>1.0% on every buy and sell → my wallet</span></div></div>
+      <div class="tile" style="--swatch:var(--protection)"><i></i><div class="t"><strong>Anti-sniper window</strong><span>first 10 min: max 1.0% per wallet</span></div></div>
+      <div class="tile" style="--swatch:var(--treasury)"><i></i><div class="t"><strong>Buyback jar</strong><span>1.0% into a jar, buy back at 100 IMD</span></div></div>
+      <div class="tile" style="--swatch:var(--timing)"><i></i><div class="t"><strong>Pause switch</strong><span>owner can pause</span></div></div>
+      <div class="tile" style="--swatch:var(--protection)"><i></i><div class="t"><strong>Cooldown</strong><span>30s between swaps per wallet</span></div></div>
+      <div class="tile" style="--swatch:var(--timing)"><i></i><div class="t"><strong>Allowlist opening</strong><span>allowlist only for 15 min</span></div></div>
+    </div>
+    <div class="flow"><b>WHERE THE MONEY GOES</b><span>1.0% of every swap → your wallet · 1.0% → the jar, spent on POND · pool fee 1.25% → liquidity providers</span><span class="muted">Fees are taken on the IMD side and settled in IMD.</span></div>
+    <ul class="ready" aria-label="Before you can launch">
+      <li>Type, chain and pair chosen</li>
+      <li>6 blocks, all allowed for this type</li>
+      <li class="todo">Pool share not chosen · <button type="button">fill it in</button></li>
+      <li class="todo">Owner address missing for the Pause switch and the Allowlist · <button type="button">fill it in</button></li>
+    </ul>
+    <div class="cost"><span>Swarm fee <strong>0.5 IMD</strong></span><span>Gas <strong>2 tx</strong></span><span>Usually <strong>30–90 min</strong></span></div>
+    <div class="hc-actions"><button class="btn" type="button">CHECK WITH THE SWARM (FREE)</button><button class="btn primary" type="button" disabled>CONTINUE TO LAUNCH</button></div>
+    <div class="exact"><span>The request the swarm receives, 3,120 characters.</span><button class="btn tiny" type="button" id="open-exact">SHOW EXACT TEXT</button></div>
+  </div>
+
+  <div class="findings" aria-labelledby="fx">
+    <h3 id="fx">FIX BEFORE PAYING · 3</h3>
+    <p class="small">Launch is locked until these are fixed. One line each; the list scrolls inside this box and never stretches the page.</p>
+    <div class="list">
+      <div class="finding"><strong>Choose a pool share</strong><button class="btn tiny" type="button">JUMP TO IT</button><em>The request says <q>pool share (choose a share)</q>. Pick 10 to 90% in Settings.</em></div>
+      <div class="finding"><strong>Name the owner for the Pause switch</strong><button class="btn tiny" type="button">JUMP TO IT</button><em>The request says <q>Owner (connect a wallet)</q>. Connect a wallet or type an address.</em></div>
+      <div class="finding"><strong>Deployer sentence needs a chain</strong><button class="btn tiny" type="button">JUMP TO IT</button><em>The request says <q>on (choose a chain): its constructor takes the (choose a chain) PoolManager</q>. Only the few wrong words are shown here, never the paragraph; the exact text sheet highlights them in place.</em></div>
+    </div>
+  </div>
+</aside>
+</div>
+
+<div class="note"><b>WHAT CHANGED, FOR THE OWNER</b>The order is type, how, blocks, settings. "Start from my own code" moved into step 2 as the starting point, and its repository and commit fields appear only when it is chosen: your repository is audited as imported code, then adapted to the blocks and words you add, so blocks on top of your own code is a real path. The stack is one line per rule, with the numbers filled in, a chip saying who uses it, and the fields only when you open a rule, so ten rules take the space four used to. The hook card on the right reads the same stack at a glance, with where the money goes and a readiness list. Findings are one line each in a box that scrolls; the exact text opens in a sheet with the wrong words highlighted. Same colours, fonts, words and prices. No change to what is sent to IMD or to the relay.</div>
+</main>
+
+<dialog id="exact">
+  <div class="sheet-head"><h2>EXACT TEXT THE SWARM RECEIVES</h2><div style="display:flex;gap:8px"><button class="btn tiny" type="button">COPY</button><button class="btn tiny" type="button" id="close-exact">CLOSE</button></div></div>
+<pre>Launch Pond Token (POND), a standard IMD token, paired with IMD on Robinhood Chain, with a pool share of <mark>(choose a share)</mark>.
+The hook does exactly the following, and nothing else:
+1. Take 1.0% of the IMD side of every buy and sell as a hook fee, settled in IMD inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to my wallet. Expose claimFees(PoolId) that anyone may call.
+2. For the first 10 minutes of block timestamp after the pool's first swap, each wallet may buy at most 1.0% of the total supply in total; larger buys revert. Expose windowEndsAt(PoolId) as a view.
+3. Collect 1.0% of the IMD side of every swap into a jar held by the hook. Whenever the jar holds at least 100 IMD, anyone may call buyback(PoolId) to buy POND from this pool with the whole jar; the bought tokens stay in the jar.
+4. The owner may pause and unpause swaps for a pool. Liquidity can always be removed while paused.
+Owner <mark>(connect a wallet)</mark> may only: pause and unpause swaps. No other admin function, no backend signer, no upgrade path.
+…</pre>
+</dialog>
+
+<script>
+(function () {
+  var d = document.getElementById('exact');
+  document.getElementById('open-exact').addEventListener('click', function () { d.showModal(); });
+  document.getElementById('close-exact').addEventListener('click', function () { d.close(); });
+  var sw = { 'Fee that fades': 'fees', 'Different buy and sell fees': 'fees', 'Whale fee': 'fees', 'Volatility fee': 'fees', 'Split the fee': 'fees' };
+  document.getElementById('shelf').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-add]'); if (!b) return;
+    var parts = b.getAttribute('data-add').split('|'), name = parts[0], label = parts[1];
+    var tile = document.createElement('div'); tile.className = 'tile'; tile.style.setProperty('--swatch', 'var(--' + (sw[name] || 'fees') + ')');
+    tile.innerHTML = '<i></i><div class="t"><strong></strong><span></span></div>';
+    tile.querySelector('strong').textContent = name; tile.querySelector('span').textContent = label;
+    document.getElementById('tiles').appendChild(tile);
+    var card = b.closest('.bcard'); card.classList.add('added'); card.querySelector('.state').textContent = 'ADDED'; b.remove();
+  });
+  document.getElementById('stack').addEventListener('click', function (e) { var b = e.target.closest('.edit'); if (!b) return; var r = b.closest('.rule'); r.classList.toggle('open'); var on = r.classList.contains('open'); b.textContent = on ? 'CLOSE' : 'EDIT'; b.setAttribute('aria-expanded', on); });
+  document.getElementById('expand-all').addEventListener('click', function () { var all = [...document.querySelectorAll('.rule')]; var open = all.some(function (r) { return !r.classList.contains('open'); }); all.forEach(function (r) { r.classList.toggle('open', open); var b = r.querySelector('.edit'); b.textContent = open ? 'CLOSE' : 'EDIT'; b.setAttribute('aria-expanded', open); }); this.textContent = open ? 'Close all' : 'Open all'; });
+  document.getElementById('start').addEventListener('click', function (e) { var b = e.target.closest('[data-start]'); if (!b) return; document.querySelectorAll('#start .type').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); document.getElementById('own').hidden = b.getAttribute('data-start') !== 'own'; });
+  document.querySelectorAll('.shelf-tabs button').forEach(function (t) { t.addEventListener('click', function () { document.querySelectorAll('.shelf-tabs button').forEach(function (x) { x.classList.remove('on'); }); t.classList.add('on'); }); });
+})();
+</script>
+</body>
+</html>

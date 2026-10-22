@@ -1,0 +1,127 @@
+  ✓   43 tests/hook.spec.ts:41:1 › failed completion and unavailable result remain explicit, with addresses unknown (923ms)
+  5 skipped
+  119 passed (40.5s)
+  ✓    3 tests/job5.spec.ts:31:4 › Store regression at 320px: route, controls, resources and reflow 
+  ✓    1 tests/hook.spec.ts:4:35 › Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning 
+  ✓    5 tests/job6.spec.ts:35:4 › go-live store at 320px: route, primary interaction, export resources and reflow 
+  ✓    6 tests/launch.spec.ts:65:1 › wrong payment chain keeps approval and launch locked until switching 
+  ✓    2 tests/builder.spec.ts:29:1 › steps come in order: type, how, blocks, settings; first visit has no chooser and starts on Stack blocks 
+  ✓    7 tests/job5.spec.ts:31:4 › Catalog regression at 320px: route, controls, resources and reflow 
+  ✓    9 tests/job6.spec.ts:35:4 › go-live catalog at 320px: route, primary interaction, export resources and reflow 
+  ✓   10 tests/launch.spec.ts:74:1 › zero price refuses approval and offers a read retry 
+  ✓    8 tests/hook.spec.ts:4:35 › Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning 
+  ✓   11 tests/builder.spec.ts:51:1 › step 2: own code fields exist only while chosen, and the composed text for own code is unchanged 
+  ✓   12 tests/job5.spec.ts:31:4 › Builder regression at 320px: route, controls, resources and reflow 
+  ✓   13 tests/job6.spec.ts:35:4 › go-live builder at 320px: route, primary interaction, export resources and reflow 
+  ✓   14 tests/launch.spec.ts:83:1 › rejected approval signature recovers without unlocking launch 
+  ✓   17 tests/job5.spec.ts:31:4 › Launch regression at 320px: route, controls, resources and reflow 
+  ✓   15 tests/hook.spec.ts:4:35 › Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning 
+  ✓    4 tests/pond.spec.ts:24:1 › water click draws every cast frame in order with specified timings, then returns through idle 
+  ✓   18 tests/job6.spec.ts:35:4 › go-live launch at 320px: route, primary interaction, export resources and reflow 
+  ✓   16 tests/builder.spec.ts:69:1 › step 2: describe mode keeps the words, the saved stack and the warning inside the step 
+  ✓   20 tests/job5.spec.ts:31:4 › Hook regression at 320px: route, controls, resources and reflow 
+  ✓   19 tests/launch.spec.ts:91:1 › in-progress flag keeps live payments locked while review and copy work 
+  -   26 tests/launch.spec.ts:99:38 › Robinhood Anvil fork pays for type A, gates receipts, parses id and preserves preview bytes
+  -   27 tests/launch.spec.ts:99:38 › Robinhood Anvil fork pays for type B, gates receipts, parses id and preserves preview bytes
+  ✓   23 tests/job6.spec.ts:35:4 › go-live hook at 320px: route, primary interaction, export resources and reflow 
+  ✓   22 tests/pond.spec.ts:47:1 › reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it 
+  ✓   25 tests/job5.spec.ts:31:4 › My hooks regression at 320px: route, controls, resources and reflow 
+  ✓   21 tests/hook.spec.ts:22:1 › owner forms validate address arrays and booleans; query-param viewing never unlocks controls 
+  ✓   29 tests/job6.spec.ts:35:4 › go-live mine at 320px: route, primary interaction, export resources and reflow 
+  ✓   31 tests/job5.spec.ts:31:4 › Learn regression at 320px: route, controls, resources and reflow 
+  ✓   28 tests/launch.spec.ts:127:1 › type C resolves hook(), shows zero as pending, passes PoolId and prepares a dynamic-fee pool call 
+  ✓   30 tests/pond.spec.ts:58:1 › scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer 
+  -   35 tests/launch.spec.ts:193:1 › a refresh recovers the approval receipt without another payment or approval
+  ✓   33 tests/job6.spec.ts:35:4 › go-live learn at 320px: route, primary interaction, export resources and reflow 
+  ✓   32 tests/hook.spec.ts:30:1 › My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo 
+  ✓   34 tests/job5.spec.ts:31:4 › Store regression at 390px: route, controls, resources and reflow 
+  ✓   24 tests/builder.spec.ts:87:1 › step 3: shelf tabs with counts, add opens the rule, reorder, remove, edit, open all / close all 
+  ✓   36 tests/pond.spec.ts:77:1 › cast queue is capped at three and a keyboard press on the water also casts 
+  ✓   39 tests/hook.spec.ts:35:1 › catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges 
+  ✓   38 tests/job6.spec.ts:35:4 › go-live store at 390px: route, primary interaction, export resources and reflow 
+  ✓   37 tests/launch.spec.ts:207:39 › launch review fits 320px and keeps the complete summary, fees and wallet steps 
+  ✓   40 tests/job5.spec.ts:31:4 › Catalog regression at 390px: route, controls, resources and reflow 
+  ✓   43 tests/hook.spec.ts:41:1 › failed completion and unavailable result remain explicit, with addresses unknown 
+  ✓   44 tests/job6.spec.ts:35:4 › go-live catalog at 390px: route, primary interaction, export resources and reflow 
+  ✓   46 tests/job5.spec.ts:31:4 › Builder regression at 390px: route, controls, resources and reflow 
+  ✓   45 tests/launch.spec.ts:207:39 › launch review fits 390px and keeps the complete summary, fees and wallet steps 
+  ✓   42 tests/store.spec.ts:20:3 › Store and Learn fit 320px; product and describe action visible 
+  ✓   41 tests/builder.spec.ts:134:1 › the card: name, pills, tiles, where the money goes, readiness with fill it in, cost, buttons 
+  ✓   47 tests/hook.spec.ts:44:1 › result failures are retryable without inventing a live deployment 
+  ✓   48 tests/job6.spec.ts:35:4 › go-live builder at 390px: route, primary interaction, export resources and reflow 
+  ✓   49 tests/job5.spec.ts:31:4 › Launch regression at 390px: route, controls, resources and reflow 
+  ✓   50 tests/launch.spec.ts:207:39 › launch review fits 821px and keeps the complete summary, fees and wallet steps 
+  ✓   51 tests/store.spec.ts:20:3 › Store and Learn fit 390px; product and describe action visible 
+  ✓   53 tests/hook.spec.ts:47:1 › header switches an unsupported wallet to Ethereum 
+  ✓   55 tests/job5.spec.ts:31:4 › Hook regression at 390px: route, controls, resources and reflow 
+  ✓   54 tests/job6.spec.ts:35:4 › go-live launch at 390px: route, primary interaction, export resources and reflow 
+  -   58 tests/hook.spec.ts:50:1 › Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()
+  ✓   52 tests/builder.spec.ts:173:1 › findings box: one line each, short quote, jump; the sheet opens with COPY and CLOSE and highlights the words 
+  ✓   56 tests/launch.spec.ts:207:39 › launch review fits 1440px and keeps the complete summary, fees and wallet steps 
+  ✓   59 tests/job5.spec.ts:31:4 › My hooks regression at 390px: route, controls, resources and reflow 
+  ✓   60 tests/job6.spec.ts:35:4 › go-live hook at 390px: route, primary interaction, export resources and reflow 
+  ✓   57 tests/store.spec.ts:20:3 › Store and Learn fit 1440px; product and describe action visible 
+  ✓   61 tests/hook.spec.ts:59:1 › readings refresh after 20 seconds, and a connected non-owner stays locked 
+  ✓   64 tests/job5.spec.ts:31:4 › Learn regression at 390px: route, controls, resources and reflow 
+  ✓   63 tests/launch.spec.ts:221:1 › Copy request copies the exact compact preview JSON 
+  ✓   62 tests/builder.spec.ts:203:1 › phones: card first, shelf scrolls sideways, rule tools wrap under the text 
+  -   67 tests/hook.spec.ts:65:1 › unknown-address lookup shows a known fork hook and prefills type C for a known token
+  ✓   65 tests/job6.spec.ts:35:4 › go-live mine at 390px: route, primary interaction, export resources and reflow 
+  ✓   66 tests/store.spec.ts:52:3 › Desktop bar remains one row at 821px, search >=120 and connected width unchanged 
+  ✓   71 tests/hook.spec.ts:74:1 › Connect keeps a wallet already on Robinhood Chain connected without a switch 
+  ✓   68 tests/job5.spec.ts:31:4 › Store regression at 1440px: route, controls, resources and reflow 
+  ✓   69 tests/wallet.spec.ts:34:1 › EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects 
+  ✓   72 tests/job6.spec.ts:35:4 › go-live learn at 390px: route, primary interaction, export resources and reflow 
+  ✓   70 tests/builder.spec.ts:220:3 › Builder at 320px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓   73 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1024px, search >=120 and connected width unchanged 
+  ✓   74 tests/job5.spec.ts:31:4 › Catalog regression at 1440px: route, controls, resources and reflow 
+  ✓   75 tests/wallet.spec.ts:50:1 › mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay 
+  ✓   76 tests/job6.spec.ts:35:4 › go-live store at 1440px: route, primary interaction, export resources and reflow 
+  ✓   78 tests/store.spec.ts:52:3 › Desktop bar remains one row at 1440px, search >=120 and connected width unchanged 
+  ✓   79 tests/job5.spec.ts:31:4 › Builder regression at 1440px: route, controls, resources and reflow 
+  ✓   77 tests/builder.spec.ts:220:3 › Builder at 390px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓   81 tests/store.spec.ts:75:1 › search shows the no-match state over the empty pond; Enter scrolls to Results 
+  ✓   80 tests/job6.spec.ts:35:4 › go-live catalog at 1440px: route, primary interaction, export resources and reflow 
+  ✓   82 tests/job5.spec.ts:31:4 › Launch regression at 1440px: route, controls, resources and reflow 
+  ✓   84 tests/store.spec.ts:86:1 › a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains 
+  ✓   85 tests/job6.spec.ts:35:4 › go-live builder at 1440px: route, primary interaction, export resources and reflow 
+  ✓   83 tests/builder.spec.ts:220:3 › Builder at 768px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓   86 tests/job5.spec.ts:31:4 › Hook regression at 1440px: route, controls, resources and reflow 
+  ✓   87 tests/store.spec.ts:101:1 › describe saves required draft key, preserves other fields and opens the describe editor 
+  ✓   90 tests/job5.spec.ts:31:4 › My hooks regression at 1440px: route, controls, resources and reflow 
+  ✓   88 tests/job6.spec.ts:35:4 › go-live launch at 1440px: route, primary interaction, export resources and reflow 
+  ✓   91 tests/store.spec.ts:115:1 › only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn 
+  ✓   89 tests/builder.spec.ts:220:3 › Builder at 1100px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓   92 tests/job5.spec.ts:31:4 › Learn regression at 1440px: route, controls, resources and reflow 
+  ✓   93 tests/job6.spec.ts:35:4 › go-live hook at 1440px: route, primary interaction, export resources and reflow 
+  ✓   97 tests/job6.spec.ts:35:4 › go-live mine at 1440px: route, primary interaction, export resources and reflow 
+  ✓   94 tests/store.spec.ts:127:1 › swarm failure hides all metrics; successful response uses actual fields with honest labels 
+  ✓   95 tests/builder.spec.ts:220:3 › Builder at 1440px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓   96 tests/job5.spec.ts:69:1 › live free check renders IMD facts and plan, blocks continuation and direct Launch, persists on reload, then clears after a recheck 
+  ✓   99 tests/store.spec.ts:134:1 › public config flag removes the in-progress banner 
+  ✓   98 tests/job6.spec.ts:35:4 › go-live learn at 1440px: route, primary interaction, export resources and reflow 
+  ✓  102 tests/store.spec.ts:138:1 › keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger 
+  ✓  101 tests/job5.spec.ts:91:1 › free check exposes pending, failure and retry without accepting stale or malformed replies 
+  ✓  100 tests/builder.spec.ts:220:3 › Builder at 2560px: layout, no horizontal overflow, card within the viewport, screenshot 
+  ✓  103 tests/job6.spec.ts:80:1 › non-JSON relay failure locks continuation and direct Launch until a successful retry 
+  ✓  104 tests/store.spec.ts:146:1 › export works offline at a gateway subpath with local fonts and a single beige theme 
+  ✓  105 tests/job5.spec.ts:105:1 › own code resolves through /import before composing, checking or reviewing payment; a changed source relocks the flow 
+  ✓  107 tests/store.spec.ts:158:1 › empty or blocked storage never silently loses a description 
+  ✓  106 tests/job6.spec.ts:101:1 › a pinned own-code import survives Builder to Launch with genuinely full native session storage 
+  ✓  108 tests/job5.spec.ts:126:1 › relay timeline discovers the current job through matching intake and renders build, audit and deployment progress 
+  ✓  109 tests/store.spec.ts:169:1 › catalog navigation does not restore a stale Learn scroll 
+  ✓  110 tests/job6.spec.ts:127:1 › the ticker ages identical relay timestamps at least once a minute without moving a reduced-motion pond 
+  ✓  111 tests/job5.spec.ts:141:1 › pond ticker names only store-matched API launches, casts only a newly live launch, and updates while reduced motion stays still 
+  ✓  112 tests/job6.spec.ts:138:48 › a reorg removes the request from catalog state and storage after refresh and reload 
+  ✓  113 tests/job5.spec.ts:157:1 › rendered job 5 evidence: Store and checked Builder first screens at 390px 
+  ✓  115 tests/job5.spec.ts:169:39 › configured relay panels, long names and errors wrap at 320px 
+  ✓  114 tests/job6.spec.ts:138:48 › a reorg removes the completion from catalog state and storage after refresh and reload 
+  ✓  116 tests/job5.spec.ts:169:39 › configured relay panels, long names and errors wrap at 390px 
+  ✓  117 tests/job6.spec.ts:208:68 › a cancelled approval exits pending and a fresh approval retry succeeds 
+  ✓  118 tests/job5.spec.ts:169:39 › configured relay panels, long names and errors wrap at 1440px 
+  ✓  119 tests/job6.spec.ts:208:68 › a replaced approval exits pending and a fresh approval retry succeeds 
+  ✓  120 tests/job6.spec.ts:208:68 › a reverted approval exits pending and a fresh approval retry succeeds 
+  ✓  121 tests/job6.spec.ts:220:1 › a repriced approval verifies the replacement receipt and unlocks Launch without a second approval 
+  ✓  122 tests/job6.spec.ts:226:65 › saved approval recovery handles a missing receipt without trapping a confirmed failure 
+  ✓  123 tests/job6.spec.ts:226:65 › saved approval recovery handles a reverted receipt without trapping a confirmed failure 
+  ✓  124 tests/job6.spec.ts:226:65 › saved approval recovery handles a unknown receipt without trapping a confirmed failure 

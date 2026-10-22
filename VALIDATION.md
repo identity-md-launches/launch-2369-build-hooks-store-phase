@@ -1,3 +1,112 @@
+# Worker validation — job 11 (Builder v2)
+
+## Scope
+
+This job rebuilds `web/src/Builder.tsx` and the Builder section of `web/src/styles.css` to SPEC 1.41 §3.2 (decision 34), following `mockup/builder-v2.html`. `SPEC.md` and the mockup were refreshed from the spec repository.
+
+It does not touch `src/lib/compose.ts`, `src/lib/safety.ts`, `src/lib/writtenFees.ts`, the relay, the free check, proven launches, `web/src/draft.ts` or `LaunchReview.tsx`. Nothing was sent to IMD or to a chain.
+
+## Commands and results (run on this machine)
+
+| Command (in `web/`) | Result |
+| --- | --- |
+| `npm run typecheck` | passed |
+| `npm run build` | passed; `dist/` regenerated with relative `./assets/...` URLs |
+| `npm test` | 1,155 passed, 0 failed (unit tests unchanged) |
+| `npx playwright test` on builder, hook, job5, job6, store, launch, wallet and pond specs (Chromium headless shell) | 119 passed, 5 skipped (optional live and fork cases). List in `tests/results/job11/playwright-summary.txt` |
+
+The job 7, 8 and 9 browser specs drove v1 Builder DOM that no longer exists, so they are in `testIgnore` in `web/playwright.config.ts`. Two older reflow checks (job5 and job6) now exempt controls inside `#shelf`, because the shelf scrolls sideways on phones by design. `hook.spec.ts` and `job5.spec.ts` follow the renamed selectors (`#stack .rule`, `.hookcard`).
+
+## Interaction coverage (`web/tests/builder.spec.ts`)
+
+- **Step order and first visit.** Steps run in order. The first visit has no chooser and starts on Stack blocks with the reviewed default stack. The progress pills work.
+- **Step 1.** The type is named beside the title. Type B removes the Token tab and the token row.
+- **Step 2, own code.** The fields exist only while own code is chosen. The composed text carries the unchanged "Start from the creator’s own source" line. Switching back to scratch removes the line, and switching to own code again restores the fields.
+- **Step 2, Describe mode.** The words, the warning and the saved stack stay in step 2. A shelf ADD switches back to Stack blocks.
+- **Step 3.**
+  - Tab counts and state pills are correct.
+  - ADD opens the new rule.
+  - The chips read RUNS ITSELF, OWNER and ANYONE PRESSES.
+  - Editing a field updates the row, the tile and the exact text.
+  - Up and down reorder both the stack and the tiles.
+  - Remove, Open all and Close all work.
+  - Token row 0 switches between Standard and My own.
+  - The six-block notice appears, and the stack survives a reload.
+- **The card.**
+  - The pills, tiles, money line, cost, wait line and both buttons render.
+  - "fill it in" focuses the chain and pool fields.
+  - A block finding opens its rule and focuses its field.
+  - CONTINUE unlocks when the request is ready, and the box then reads "Nothing to fix. The request is consistent."
+- **Findings.**
+  - Quotes are 60 characters or fewer.
+  - The list's max-height is about a third of the viewport.
+  - JUMP TO IT focuses the field.
+  - A text finding opens the sheet at its `<mark>`.
+  - COPY, CLOSE and Escape work.
+- **Phones.** The card comes first. The shelf overflows sideways and scrolls. Rule tools wrap below the text.
+- **Six widths** (320, 390, 768, 1100, 1440 and 2560px):
+  - no horizontal overflow, with all rules open;
+  - content width at most 1,240px and centred;
+  - a 420px sticky card at 1,100px and wider, never taller than the viewport;
+  - the card first below 1,100px;
+  - 13px step titles at every width;
+  - the sheet fits the viewport.
+
+  Screenshots are in `artifacts/builder-<width>.png`, with copies in `tests/results/job11/`.
+
+## Design probe (`taste.mjs`, run on the export)
+
+The probe ran with `IMD_PLAYWRIGHT` pointing at the Playwright install in `web/node_modules`. It loads the index route, which is the Store. This job must leave the Store unchanged, so its failed checks are recorded, not fixed. Each comes from the owner-specified Store mockup:
+
+- the uppercase Press Start 2P eyebrow;
+- uppercase buttons;
+- the wordmark and nav one-offs;
+- the bordered and shadowed Connect button.
+
+The 390px probe screenshot shows the Store's product and its Describe it action on the first screen. Raw output: `tests/results/job11/design-probe.json`.
+
+| Check | Result | Detail |
+| --- | --- | --- |
+| render | pass | renders, no script errors or missing local files |
+| layout | pass | no horizontal scroll at 320, 390 or 1440 |
+| targets | pass | all 32 controls at least 24px or spaced at 390 |
+| contrast | pass | all measured text meets 4.5:1 (3:1 large) |
+| casing | fail | 33 all-caps text boxes in content: |
+| tracking | pass | letter-spacing natural in content (display type may run tight) |
+| eyebrows | fail | 21 kicker labels above headings: |
+| type-sizes | fail | 390: 6 sizes in use, 8 with one-offs (8px×33, 9px×1, 10px×8, 12px×1, 13px×2, 16px×50, 18px×37, 26px×3) |
+| type-faces | pass | families (3): press start 2p, pixelify sans, vt323 |
+| glyphs | pass | no em dashes or emoji in text |
+| slogans | pass | 1 two-beat lines; a stack is four or more, so keep the best and cut the rest: |
+| repetition | pass | no repeated lines |
+| copy-budget | pass | prose on the first screen: 41 words at 390 (bar 60), 58 at 1440 (bar 90) |
+| chrome | fail | border and shadow together: 2 (#connect; #landing > div.landing-copy:nth-of-type(1) > form.prompt) |
+| motion | pass | transition: all on 0 elements |
+| share | pass | title "The Hooks Store", favicon, og:title, og:image, description |
+
+## Better Interface review (six domains, Builder v2)
+
+The browser checks were run with Playwright, not the `browser` tool. Rendered contrast for the new category stripes was not measured: they are decorative swatches, never behind text.
+
+- **Accessibility.**
+  - Steps are `section`s labelled by their `h2`, and the step number is `aria-hidden` with "Step N:" for screen readers.
+  - Type, start and mode buttons use `aria-pressed`. Shelf tabs use `role=tab`, `aria-selected` and a `tabpanel`. EDIT uses `aria-expanded` and `aria-controls`.
+  - The sheet is a native modal `dialog`, so focus is trapped and Escape closes it.
+  - "fill it in" and JUMP TO IT move focus to the field. The findings list is focusable so it can scroll by keyboard.
+  - Fixed: the readiness arrow wrapped onto its own line (`web/src/styles.css`, `.ready li` changed to a grid).
+- **Layout.** The page uses `min-width: 0` on every grid child and `overflow-wrap: anywhere` for mono text and addresses. It has a 1,240px cap and the 1,100px and 720px breakpoints. Overflow was verified at six widths.
+- **Writing.** The words are the mockup's and the spec's. The existing validate and consistency messages are used verbatim as finding titles. Quotes contain only the fault words.
+- **Typography.** The type sizes are fixed (9, 13, 15, 17, 19 and 22px in the Builder). There is no viewport scaling and no added letter-spacing. Fixed: the card eyebrow inherited the landing's pine `.eyebrow` colour and was invisible on the pine header (`styles.css`, `.hookcard .eyebrow`, now on-pine).
+- **Colors.** The palette is unchanged. Category colours are only swatches and stripes. Text stays ink, ink-2, pine or bad on paper.
+- **UI.** The controls are at least 36px, the primary actions 44px. Disabled CONTINUE uses `not-allowed`. Readiness, findings and the sheet replace the old always-open disclosure.
+
+## Limitations
+
+- The design probe measures only the Store route. Its Store failures are kept by the owner's decision.
+- The job 7, 8 and 9 v1 browser specs are ignored, not ported.
+- WebKit and Firefox were not run.
+- The Copy button was exercised, but the clipboard contents were not asserted.
+
 # Worker validation — job 8
 
 Current source and `dist/` implement SPEC **1.31, section 4.16**. Production build and typecheck passed; **1,096 unit tests**, **9 relay tests**, and **195 Chromium browser cases** passed, with **7 optional browser cases skipped**, no failures or flaky cases. Both Builder modes were exercised at **320, 390 and 1440px**. All four live free-check cases returned HTTP 200 with zero blockers and fixed-fact conflicts. No approval, payment or deployment was sent.

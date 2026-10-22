@@ -25,7 +25,7 @@ async function setup(page: Page, draft = validDraft()) {
 async function fits(page: Page, width: number) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   expect(await page.locator('button, input, select, textarea').evaluateAll(els => els.filter(el => {
-    const r = el.getBoundingClientRect(); return r.width && r.height && (r.left < -1 || r.right > innerWidth + 1);
+    const r = el.getBoundingClientRect(); return r.width && r.height && !el.closest('#shelf') && (r.left < -1 || r.right > innerWidth + 1);
   }).map(el => el.outerHTML.slice(0, 120)))).toEqual([]);
 }
 
