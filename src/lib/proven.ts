@@ -30,6 +30,8 @@ export async function fetchProvenLaunches(signal?: AbortSignal): Promise<ProvenL
 export function matchProvenLaunch(draft: Draft, entries: ProvenLaunch[]): ProvenLaunch | undefined {
   if (draft.settings.repo.trim() || draft.settings.commit.trim()) return;
   const ids = new Set(draft.blocks.filter(b => b.id !== 'custom' && (['token', 'own-token'].includes(b.id) ? draft.type === 'A' : draft.mode !== 'prompt')).map(b => b.id));
+  // The audited behavior lives in the blocks. With none, a words-only draft would inherit an unrelated hook.
+  if (![...ids].some(id => !['token', 'own-token'].includes(id))) return;
   return entries.find(p => p.type === draft.type && p.chainId === draft.settings.chain
     && new Set(p.blocks.filter(id => id !== 'custom')).size === ids.size
     && p.blocks.filter(id => id !== 'custom').every(id => ids.has(id)));

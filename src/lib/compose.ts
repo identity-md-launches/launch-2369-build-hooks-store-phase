@@ -198,13 +198,17 @@ export function compose(d: Draft, wallet?: string): string {
   const custom = blocks.filter(b => b.id === 'custom').map(b => cleanText(b.p.text)).filter(Boolean);
   const words = cleanText(d.prompt).slice(0, MAX_WORDS), written = [words, ...custom].filter(Boolean), lines: string[] = [];
   const owner = walletOr(s.owner, wallet), recipient = feeRecipient(d, wallet);
+  let firstSentence = 0;
   if (d.type === 'A') {
     lines.push(`Launch ${c.name} (${c.symbol}) with a Uniswap v4 hook on ${chain}, paired with ${s.pair.toUpperCase()}.`);
+    firstSentence = lines[0].length;
     const t = tokenEntry(d) ?? entry('token');
     lines.push(sentenceOf(t, c));
     lines.push(`beforeInitialize accepts only the IMD launch factory, passed as the constructor argument $factory; any other initialization reverts; the hook serves only the pool the factory initializes. Constructor arguments: the ${chain} PoolManager ${pm}, $owner and $factory.`);
   } else {
-    lines.push(`Deploy one contract, ${c.name}Deployer, on ${chain}: its constructor takes the ${chain} PoolManager ${pm}, $owner and the fee recipient ${recipient}, takes no salt argument, starts at salt 0 and increments until the CREATE2 address carries the hook's permission flags, then creates ${c.name} in the launch transaction, passing the PoolManager, $owner and fee recipient unchanged to the hook constructor; neither constructor calls any other contract (apart from the deployer creating the hook). There is no deploy function to call afterwards; hook() returns the hook's address. Enable only the callbacks the behavior below needs.`);
+    const first = `Deploy one contract, ${c.name}Deployer, on ${chain}: its constructor takes the ${chain} PoolManager ${pm}, $owner and the fee recipient ${recipient}, takes no salt argument, starts at salt 0 and increments until the CREATE2 address carries the hook's permission flags, then creates ${c.name} in the launch transaction, passing the PoolManager, $owner and fee recipient unchanged to the hook constructor; neither constructor calls any other contract (apart from the deployer creating the hook).`;
+    firstSentence = first.length;
+    lines.push(`${first} There is no deploy function to call afterwards; hook() returns the hook's address. Enable only the callbacks the behavior below needs.`);
     if (d.type === 'B') lines.push(`${c.name} is a standalone Uniswap v4 hook with no new token and no pool of its own; anyone may initialize an eligible pool with it.`);
     else lines.push(`${c.name} is a Uniswap v4 hook for the existing token ${s.token.trim() || '(enter the token address)'}${s.tsym.trim() ? ` (${s.tsym.trim()})` : ''}; only pools of native ETH and ${s.token.trim() || '(enter the token address)'} may use it. No new token and no pool created by the launch; the creator initializes the pool afterwards.`);
     lines.push('Only pools whose currency0 is native ETH may be initialized with this hook; any other initialization reverts.');
@@ -241,12 +245,13 @@ export function compose(d: Draft, wallet?: string): string {
   if (s.repo.trim()) lines.push(`Start from the creator’s own source at ${s.repo.trim()}${s.commit.trim() ? ` commit ${s.commit.trim()}` : ''}: audit it as imported code, adapt it to this launch, and keep its behavior.`);
   lines.push(`Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store${blocks.length ? ' block builder' : ''}.`);
   const proven = d.proven && matchProvenLaunch(d, [d.proven]);
-  // The first line can contain several sentences in contracts-only launches.
+  // The first line can contain several sentences in contracts-only launches. Its first sentence
+  // ends where it was built, never at a '. ' inside a free-text token name such as 'Dr. Pond'.
   if (proven) {
     const instruction = `Start from the audited source at ${proven.repoUrl} commit ${proven.commit}: keep its behavior, apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as imported code.`;
-    const end = lines[0].indexOf('. ');
-    if (end < 0) lines.splice(1, 0, instruction);
-    else { const rest = lines[0].slice(end + 2); lines[0] = lines[0].slice(0, end + 1); lines.splice(1, 0, instruction, rest); }
+    const rest = lines[0].slice(firstSentence).trim();
+    lines[0] = lines[0].slice(0, firstSentence);
+    lines.splice(1, 0, instruction, ...(rest ? [rest] : []));
   }
   return lowercaseAddresses(lines.join('\n').replace(/\bmy wallet\b/gi, wallet && isAddress(wallet) ? wallet.trim() : 'my wallet'));
 }
@@ -258,7 +263,7 @@ export const feeRecipient = (d: Draft, wallet?: string): string => {
     const targets = [...new Map(writtenFeeTargets(writtenRules(d).join('\n')).map(target => {
       const resolved =
       /^(?:the )?owner$/i.test(target) ? walletOr(d.settings.owner, wallet)
-        : /^(?:IMD['’]s )?treasury$/i.test(target) ? IMD_TREASURY
+        : /^(?:(?:the|IMD['’]s) )?treasury$/i.test(target) ? IMD_TREASURY
         : /^my wallet$/i.test(target) ? walletOr('', wallet) : target;
       return [resolved.toLowerCase(), resolved];
     })).values()];

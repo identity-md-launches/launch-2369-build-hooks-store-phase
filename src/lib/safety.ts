@@ -109,6 +109,8 @@ export function checkConsistency(input: Body): SafetyFinding[] {
     if (/\b(?:my wallet|treasury address|the second address|connect to resolve|0x…|0x\.\.\.)\b/i.test(sentence)) add('recipient', sentence, 'Replace the recipient with its full address. Connect the paying wallet for “my wallet”.');
     for (const match of sentence.matchAll(/(?:send (?:it|them|the (?:bought |remaining )?tokens|the pot) to|send (?:[\w-]+\s+){0,4}fees?(?: (?:revenue|proceeds|payouts?))? to|\bfees? (?:revenue |proceeds )?(?:(?:must|shall|will) )?go(?:es)? to|remainder goes to|\d+(?:\.\d+)?% to)\s+([^;,.]+(?:\.[^\s]+)?)/gi)) {
       if (/^the (?:fee )?recipient\b/i.test(match[1]) && (new RegExp(`Fee recipient: ${addressPattern}\\.`).test(text) || !!catalogRules.get('fee-split'))) continue;
+      // A named destination ('1% to the owner') is resolved and compared below with the written targets.
+      if (/^(?:(?:the )?owner|(?:(?:the|IMD['’]s) )?treasury)\b/i.test(match[1].trim()) && writtenFeeTargets(sentence).length) continue;
       const target = /^0x[\da-fA-F]{40}\b/.exec(match[1].trim())?.[0] ?? match[1].trim().split(/\s/)[0];
       if (!fullAddress(target)) add('recipient', sentence, 'Every fee or remainder recipient must be a full, nonzero address.');
     }
@@ -195,7 +197,7 @@ export function checkConsistency(input: Body): SafetyFinding[] {
     if (!catalogRules.get('fee-split') && (!footer || !fullAddress(footer))) add('recipient', writtenCharges[0], 'Name one full fee recipient address, or use a fee block.');
     for (const target of writtenFeeTargets(written.join('\n'))) {
       const source = written.find(rule => rule.toLowerCase().includes(target.toLowerCase())) ?? written.join('\n');
-      const resolved = /^(?:the )?owner$/i.test(target) ? String(input.owner ?? '') : /^(?:IMD['’]s )?treasury$/i.test(target) ? IMD_TREASURY : target;
+      const resolved = /^(?:the )?owner$/i.test(target) ? String(input.owner ?? '') : /^(?:(?:the|IMD['’]s) )?treasury$/i.test(target) ? IMD_TREASURY : target;
       if (!fullAddress(resolved)) add('recipient', source, 'Name every written fee destination with a full address. Multiple or unresolved destinations must be clarified before paying.');
       else if (footer && resolved.toLowerCase() !== footer.toLowerCase()) add('fee-recipient', source, `The written fee destination ${resolved} disagrees with Fee recipient: ${footer}. Use one destination or a Split the fee block.`);
     }

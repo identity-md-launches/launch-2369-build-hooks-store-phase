@@ -1,0 +1,13 @@
+
+
+Running 241 tests using 1 worker
+
+(node:41) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+  7 skipped
+  234 passed (3.7m)
+
+Focused: tests/job9.spec.ts tests/builder.spec.ts tests/job8.spec.ts
+  41 passed (59.6s)
