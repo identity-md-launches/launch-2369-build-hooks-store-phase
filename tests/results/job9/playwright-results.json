@@ -1,0 +1,2981 @@
+{
+  "stats": {
+    "startTime": "2026-10-22T03:01:24.182Z",
+    "duration": 210314.69199999998,
+    "expected": 234,
+    "skipped": 7,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "file": "builder.spec.ts",
+      "line": 30,
+      "title": "Builder at 320px: type, mode, switching without loss, add, reorder, remove, reload",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1759
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 30,
+      "title": "Builder at 390px: type, mode, switching without loss, add, reorder, remove, reload",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1728
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 30,
+      "title": "Builder at 1440px: type, mode, switching without loss, add, reorder, remove, reload",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1773
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 100,
+      "title": "first visit to the stack starts from the default stack; preview, cost box and disabled check",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1093
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 119,
+      "title": "pool share is of total supply with no default; Continue stays disabled until 10 to 90 in steps of 5",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 880
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 139,
+      "title": "4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclusion, own-pools-only blocks",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1288
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 184,
+      "title": "risk tooltips at 320px: every sign stays readable on hover and keyboard focus",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3597
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 184,
+      "title": "risk tooltips at 390px: every sign stays readable on hover and keyboard focus",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3565
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 184,
+      "title": "risk tooltips at 1440px: every sign stays readable on hover and keyboard focus",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3610
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 238,
+      "title": "untested block names expose the status to assistive technology without a risk sign",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 676
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 251,
+      "title": "dependent-removal status describes the removed block and clears after the next draft edit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3808
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 272,
+      "title": "tested marks: a passing entry shows the tick, others say not yet tested",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 664
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 281,
+      "title": "tested marks fall back to the bundled copy when the spec repository cannot be read",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 645
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 288,
+      "title": "the shipped bundled copy is empty, so nothing shows a tick offline",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 634
+        }
+      ]
+    },
+    {
+      "file": "builder.spec.ts",
+      "line": 294,
+      "title": "type C and B settings, own code and the request shape",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 844
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 784
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 782
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 907
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 22,
+      "title": "owner forms validate address arrays and booleans; query-param viewing never unlocks controls",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 842
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 30,
+      "title": "My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 746
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 35,
+      "title": "catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 546
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 41,
+      "title": "failed completion and unavailable result remain explicit, with addresses unknown",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 442
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 44,
+      "title": "result failures are retryable without inventing a live deployment",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 667
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 47,
+      "title": "header switches an unsupported wallet to Ethereum",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 689
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 50,
+      "title": "Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 93
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Run with HOOKS_FORK_URL after the documented local fork setup.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/hook.spec.ts",
+            "line": 51,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 59,
+      "title": "readings refresh after 20 seconds, and a connected non-owner stays locked",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 658
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 65,
+      "title": "unknown-address lookup shows a known fork hook and prefills type C for a known token",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 102
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Requires the documented Ethereum fork.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/hook.spec.ts",
+            "line": 66,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "file": "hook.spec.ts",
+      "line": 74,
+      "title": "Connect keeps a wallet already on Robinhood Chain connected without a switch",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 701
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Store regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 635
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Catalog regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 531
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Builder regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 633
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Launch regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 496
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Hook regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 495
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "My hooks regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 490
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Learn regression at 320px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 442
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Store regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 618
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Catalog regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 492
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Builder regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 617
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Launch regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 519
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Hook regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 476
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "My hooks regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 487
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Learn regression at 390px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 441
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Store regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 708
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Catalog regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 554
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Builder regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 726
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Launch regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 528
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Hook regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 523
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "My hooks regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 528
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 31,
+      "title": "Learn regression at 1440px: route, controls, resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 481
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 69,
+      "title": "live free check renders IMD facts and plan, blocks continuation and direct Launch, persists on reload, then clears after a recheck",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1177
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 91,
+      "title": "free check exposes pending, failure and retry without accepting stale or malformed replies",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 812
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 105,
+      "title": "own code resolves through /import before composing, checking or reviewing payment; a changed source relocks the flow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 937
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 126,
+      "title": "relay timeline discovers the current job through matching intake and renders build, audit and deployment progress",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 587
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 141,
+      "title": "pond ticker names only store-matched API launches, casts only a newly live launch, and updates while reduced motion stays still",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 646
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 157,
+      "title": "rendered job 5 evidence: Store and checked Builder first screens at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 707
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 169,
+      "title": "configured relay panels, long names and errors wrap at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 897
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 169,
+      "title": "configured relay panels, long names and errors wrap at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 900
+        }
+      ]
+    },
+    {
+      "file": "job5.spec.ts",
+      "line": 169,
+      "title": "configured relay panels, long names and errors wrap at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 981
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live store at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 669
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live catalog at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 564
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live builder at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 648
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live launch at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 680
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live hook at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 541
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live mine at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 421
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live learn at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 492
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live store at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 666
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live catalog at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 564
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live builder at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 651
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live launch at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 647
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live hook at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 512
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live mine at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 447
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live learn at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 481
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live store at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 740
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live catalog at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 623
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live builder at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 802
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live launch at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 675
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live hook at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 564
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live mine at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 496
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 35,
+      "title": "go-live learn at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 549
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 80,
+      "title": "non-JSON relay failure locks continuation and direct Launch until a successful retry",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1063
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 101,
+      "title": "a pinned own-code import survives Builder to Launch with genuinely full native session storage",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 839
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 127,
+      "title": "the ticker ages identical relay timestamps at least once a minute without moving a reduced-motion pond",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 746
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 138,
+      "title": "a reorg removes the request from catalog state and storage after refresh and reload",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 783
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 138,
+      "title": "a reorg removes the completion from catalog state and storage after refresh and reload",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 834
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 208,
+      "title": "a cancelled approval exits pending and a fresh approval retry succeeds",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 837
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 208,
+      "title": "a replaced approval exits pending and a fresh approval retry succeeds",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 846
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 208,
+      "title": "a reverted approval exits pending and a fresh approval retry succeeds",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 694
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 220,
+      "title": "a repriced approval verifies the replacement receipt and unlocks Launch without a second approval",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 646
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 226,
+      "title": "saved approval recovery handles a missing receipt without trapping a confirmed failure",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 617
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 226,
+      "title": "saved approval recovery handles a reverted receipt without trapping a confirmed failure",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 597
+        }
+      ]
+    },
+    {
+      "file": "job6.spec.ts",
+      "line": 226,
+      "title": "saved approval recovery handles a unknown receipt without trapping a confirmed failure",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 584
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: lp-lock+hours locks both routes at 320px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 773
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: max-buy+max-swap locks both routes at 320px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 767
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Every swap fee must be paid in ETH. locks Check and Launch at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 764
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use Chainlink VRF to draw the pot and pay the winner at 0x3f252e859a277a86a3967c11d4e054b2f07a1f22. locks Check and Launch at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 749
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use the USDC/ETH pool for pricing. locks Check and Launch at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 750
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Send swap fees to Bob. locks Check and Launch at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 763
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Swap fees go to Bob. locks Check and Launch at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 749
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 75,
+      "title": "revision: recorded token_split locks 65% allocation through reload until an explicit opt-out is rechecked at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 983
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 98,
+      "title": "revision: supplied Observe swaps example remains usable at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 595
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: lp-lock+hours locks both routes at 390px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 853
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: max-buy+max-swap locks both routes at 390px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 763
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Every swap fee must be paid in ETH. locks Check and Launch at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 757
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use Chainlink VRF to draw the pot and pay the winner at 0x3f252e859a277a86a3967c11d4e054b2f07a1f22. locks Check and Launch at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 766
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use the USDC/ETH pool for pricing. locks Check and Launch at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 763
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Send swap fees to Bob. locks Check and Launch at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 747
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Swap fees go to Bob. locks Check and Launch at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 765
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 75,
+      "title": "revision: recorded token_split locks 65% allocation through reload until an explicit opt-out is rechecked at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1062
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 98,
+      "title": "revision: supplied Observe swaps example remains usable at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 598
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: lp-lock+hours locks both routes at 1440px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 805
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 41,
+      "title": "revision: max-buy+max-swap locks both routes at 1440px and removing a rule repairs it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 790
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Every swap fee must be paid in ETH. locks Check and Launch at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 849
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use Chainlink VRF to draw the pot and pay the winner at 0x3f252e859a277a86a3967c11d4e054b2f07a1f22. locks Check and Launch at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 850
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Use the USDC/ETH pool for pricing. locks Check and Launch at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 844
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Send swap fees to Bob. locks Check and Launch at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 815
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 64,
+      "title": "revision: custom rule Swap fees go to Bob. locks Check and Launch at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 831
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 75,
+      "title": "revision: recorded token_split locks 65% allocation through reload until an explicit opt-out is rechecked at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1113
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 98,
+      "title": "revision: supplied Observe swaps example remains usable at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 676
+        }
+      ]
+    },
+    {
+      "file": "job7-revision.spec.ts",
+      "line": 110,
+      "title": "revision: ETH pairing rejects an IMD payment sentence and an addressed fixed remainder conflicts",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 797
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 28,
+      "title": "mismatched currency names the sentence and blocks the free check and direct Launch until corrected",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 832
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 46,
+      "title": "my wallet is resolved from the connected payer and treasury choices use the pinned address",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 685
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 62,
+      "title": "an explicit recipient recovered from an older request stays visible and is not rerouted to my wallet",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 548
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 75,
+      "title": "unavailable lending deployments and contradictory rules lock the composed request",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 648
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 86,
+      "title": "fixed fact conflict is visible and persists on Launch until an explicit request opt-out is checked",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1224
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 107,
+      "title": "the IMD fee opt-out resolves the fixed ETH conversion default in the understood panel",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 627
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 320px shows both IMD question fields and Fix in Builder restores the exact submitted draft",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1041
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 320px shows both IMD question fields and Fix in Builder restores an older on-chain request",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1096
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 390px shows both IMD question fields and Fix in Builder restores the exact submitted draft",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1067
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 390px shows both IMD question fields and Fix in Builder restores an older on-chain request",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1116
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 1440px shows both IMD question fields and Fix in Builder restores the exact submitted draft",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1220
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 116,
+      "title": "blocked job at 1440px shows both IMD question fields and Fix in Builder restores an older on-chain request",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1233
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 180,
+      "title": "a reorg retracts the pond announcement and its age, including after another minute",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 742
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 238,
+      "title": "a confirmed cancelled launch fails, persists and retries without another approval",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 997
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 238,
+      "title": "a confirmed replaced launch fails, persists and retries without another approval",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 925
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 250,
+      "title": "a repriced launch verifies the exact Requested event and finishes without a second payment",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 772
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 250,
+      "title": "a replacement-request launch verifies the exact Requested event and finishes without a second payment",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 761
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 255,
+      "title": "a genuinely unknown launch stays pending across reload and receipt retry",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1154
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety store at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 645
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety catalog at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 547
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety builder at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 631
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety launch at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 612
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety hook at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 497
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety mine at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 415
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety learn at 320px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 480
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety store at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 634
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety catalog at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 548
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety builder at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 668
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety launch at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 625
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety hook at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 513
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety mine at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 447
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety learn at 390px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 496
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety store at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 758
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety catalog at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 620
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety builder at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 774
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety launch at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 704
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety hook at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 579
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety mine at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 500
+        }
+      ]
+    },
+    {
+      "file": "job7.spec.ts",
+      "line": 273,
+      "title": "launch safety learn at 1440px: route, primary interaction, export resources and reflow",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 540
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in prompt at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1017
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in custom at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 897
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in prompt at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1137
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in custom at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1013
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in prompt at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1118
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 44,
+      "title": "job8 revision written fees and PoolId correction in custom at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1063
+        }
+      ]
+    },
+    {
+      "file": "job8-revision.spec.ts",
+      "line": 103,
+      "title": "job8 revision palette explains conflicting pairs and the peak-fee cap locks until corrected",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 877
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/prompt/320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1446
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/custom/320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1450
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/prompt/320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1397
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/custom/320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1449
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/prompt/390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1448
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/custom/390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1467
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/prompt/390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1414
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/custom/390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1432
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/prompt/1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1882
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees B/custom/1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1832
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/prompt/1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1613
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 44,
+      "title": "job8 written fees C/custom/1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1566
+        }
+      ]
+    },
+    {
+      "file": "job8-written-fees.spec.ts",
+      "line": 95,
+      "title": "job8 combined written and block cap locks Check, Continue and direct Launch until corrected",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 786
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder prompt interactions and reflow at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 852
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder blocks interactions and reflow at 320px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 886
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder prompt interactions and reflow at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 877
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder blocks interactions and reflow at 390px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 863
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder prompt interactions and reflow at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 981
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 39,
+      "title": "job8 Builder blocks interactions and reflow at 1440px",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1079
+        }
+      ]
+    },
+    {
+      "file": "job8.spec.ts",
+      "line": 83,
+      "title": "job8 Custom rule warning, disabled catalog entries, visible palette switch, size notice and split destination",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1060
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 42,
+      "title": "job9 automatic proven summary and exact request at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 933
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent failed-import fallback at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 783
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent no-relay fallback at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 830
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent index-failed fallback at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 831
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent wrong-pin fallback at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 812
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 79,
+      "title": "job9 contracts-only live, deployer reading, Copy link and one notification at 320",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1260
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 42,
+      "title": "job9 automatic proven summary and exact request at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 930
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent failed-import fallback at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 783
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent no-relay fallback at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 750
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent index-failed fallback at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 767
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent wrong-pin fallback at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 746
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 79,
+      "title": "job9 contracts-only live, deployer reading, Copy link and one notification at 390",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1245
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 42,
+      "title": "job9 automatic proven summary and exact request at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1035
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent failed-import fallback at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1015
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent no-relay fallback at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 975
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent index-failed fallback at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 973
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 65,
+      "title": "job9 silent wrong-pin fallback at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 969
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 79,
+      "title": "job9 contracts-only live, deployer reading, Copy link and one notification at 1440",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1287
+        }
+      ]
+    },
+    {
+      "file": "job9.spec.ts",
+      "line": 138,
+      "title": "job9 changing chain or block set invalidates a match; Advanced own source overrides automatic reuse",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1087
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 65,
+      "title": "wrong payment chain keeps approval and launch locked until switching",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 683
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 74,
+      "title": "zero price refuses approval and offers a read retry",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 614
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 83,
+      "title": "rejected approval signature recovers without unlocking launch",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 647
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 91,
+      "title": "in-progress flag keeps live payments locked while review and copy work",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 578
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 99,
+      "title": "Robinhood Anvil fork pays for type A, gates receipts, parses id and preserves preview bytes",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 103
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Requires the local fork setup; never uses a public wallet transport.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/launch.spec.ts",
+            "line": 100,
+            "column": 53
+          }
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 99,
+      "title": "Robinhood Anvil fork pays for type B, gates receipts, parses id and preserves preview bytes",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 100
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Requires the local fork setup; never uses a public wallet transport.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/launch.spec.ts",
+            "line": 100,
+            "column": 53
+          }
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 127,
+      "title": "type C resolves hook(), shows zero as pending, passes PoolId and prepares a dynamic-fee pool call",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 803
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 193,
+      "title": "a refresh recovers the approval receipt without another payment or approval",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 91
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Requires the guarded local fork.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/launch.spec.ts",
+            "line": 194,
+            "column": 53
+          }
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 207,
+      "title": "launch review fits 320px and keeps the complete summary, fees and wallet steps",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 736
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 207,
+      "title": "launch review fits 390px and keeps the complete summary, fees and wallet steps",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 736
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 207,
+      "title": "launch review fits 821px and keeps the complete summary, fees and wallet steps",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 618
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 207,
+      "title": "launch review fits 1440px and keeps the complete summary, fees and wallet steps",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 831
+        }
+      ]
+    },
+    {
+      "file": "launch.spec.ts",
+      "line": 221,
+      "title": "Copy request copies the exact compact preview JSON",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 673
+        }
+      ]
+    },
+    {
+      "file": "live-relay.spec.ts",
+      "line": 7,
+      "title": "one real free check from the production export through the owner relay; no wallet or launch",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 99
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Opt in once with HOOKS_LIVE_RELAY=1. This makes a real free check.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/live-relay.spec.ts",
+            "line": 8,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "file": "live-rpc.spec.ts",
+      "line": 4,
+      "title": "a fresh browser settles both real RPC histories within 30 seconds",
+      "status": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 105
+        }
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Opt in to real, read-only public RPC calls with HOOKS_LIVE_RPC=1.",
+          "location": {
+            "file": "/tmp/hooks-job9/web/tests/live-rpc.spec.ts",
+            "line": 5,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "file": "pond.spec.ts",
+      "line": 24,
+      "title": "water click draws every cast frame in order with specified timings, then returns through idle",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2630
+        }
+      ]
+    },
+    {
+      "file": "pond.spec.ts",
+      "line": 47,
+      "title": "reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 824
+        }
+      ]
+    },
+    {
+      "file": "pond.spec.ts",
+      "line": 58,
+      "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 997
+        }
+      ]
+    },
+    {
+      "file": "pond.spec.ts",
+      "line": 77,
+      "title": "cast queue is capped at three and a keyboard press on the water also casts",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 606
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 320px; product and describe action visible",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 963
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 390px; product and describe action visible",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 924
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 1440px; product and describe action visible",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1132
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 821px, search >=120 and connected width unchanged",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 576
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 1024px, search >=120 and connected width unchanged",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 596
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 1440px, search >=120 and connected width unchanged",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 648
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 75,
+      "title": "search shows the no-match state over the empty pond; Enter scrolls to Results",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 499
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 86,
+      "title": "a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 612
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 101,
+      "title": "describe saves required draft key, preserves other fields and opens the describe editor",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 588
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 115,
+      "title": "only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 651
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 127,
+      "title": "swarm failure hides all metrics; successful response uses actual fields with honest labels",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 741
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 134,
+      "title": "public config flag removes the in-progress banner",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 506
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 138,
+      "title": "keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 645
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 146,
+      "title": "export works offline at a gateway subpath with local fonts and a single beige theme",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 614
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 158,
+      "title": "empty or blocked storage never silently loses a description",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 653
+        }
+      ]
+    },
+    {
+      "file": "store.spec.ts",
+      "line": 169,
+      "title": "catalog navigation does not restore a stale Learn scroll",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 426
+        }
+      ]
+    },
+    {
+      "file": "wallet.spec.ts",
+      "line": 34,
+      "title": "EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 690
+        }
+      ]
+    },
+    {
+      "file": "wallet.spec.ts",
+      "line": 50,
+      "title": "mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 663
+        }
+      ]
+    }
+  ]
+}

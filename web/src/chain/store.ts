@@ -3,14 +3,15 @@ import { toHex, parseAbi, zeroAddress, type Address, type Hex } from 'viem';
 import type { SiteConfig } from '../config';
 import { CHAINS, type Launch } from '../types.ts';
 import { cast } from '../../../src/scene/cast.ts';
-import { applyCompleted, applyResult, launchFromRequested, pondMessage, resultUrl, type RawLog } from './decode.ts';
+import { applyCompleted, applyResult, applyLaunchRecord, launchFromRequested, pondMessage, resultUrl, type RawLog } from './decode.ts';
+import { intakeJob, relayFetch } from '../relay.ts';
 import { publicClients, readCache, writeCache, type ReadClient } from './clients.ts';
 import { creatorName } from './ens.ts';
 export const REQUEST_TOPIC = '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41fe2a576074379063';
 export const COMPLETE_TOPIC = '0xd4ad2d2ef4e8ea9995103f34e322dbefb2534f3a52984a308f7db8e257b76fa1';
 const CACHE_VERSION = 2;
 export const cacheKey = (chainId: number) => `hooks-store:intake:v${CACHE_VERSION}:${chainId}`;
-type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; hookRead?: { deployer: string; address: string } };
+type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; relayLaunchId?: string; launchRecord?: unknown; hookRead?: { deployer: string; address: string } };
 export const deployerAbi = parseAbi(['function hook() view returns (address)']);
 type ChainCache = { version: number; head: string; cursor: string; records: Record<string, RecordEntry>; completions: Record<string, RawLog> };
 const sameLog = (a: RawLog, b: RawLog) => !b.removed && BigInt(a.blockNumber) === BigInt(b.blockNumber)
@@ -48,6 +49,7 @@ export class LaunchStore {
   private pendingHead = new Set<number>();
   private resultDue = new Map<string, number>();
   private hookDue = new Map<string, number>();
+  private recordDue = new Map<string, number>();
   private named = new Set<string>();
   private state: StoreState;
   readonly config: SiteConfig;
@@ -81,9 +83,11 @@ export class LaunchStore {
     if (!row) return null;
     if (entry.completed) row = applyCompleted(row, entry.completed);
     if (entry.result && row.completion?.status === 0) row = applyResult(row, entry.result);
+    if (!row.launchId && entry.relayLaunchId) row.launchId = entry.relayLaunchId;
+    if (entry.launchRecord) row = applyLaunchRecord(row, entry.launchRecord);
     if (row.deployerAddress && entry.hookRead?.deployer.toLowerCase() === row.deployerAddress.toLowerCase()) {
       const pending = entry.hookRead.address.toLowerCase() === zeroAddress;
-      row = { ...row, hookAddress: pending ? null : entry.hookRead.address, hookPending: pending, status: pending ? 'in-progress' : 'live' };
+      row = { ...row, hookAddress: pending ? null : entry.hookRead.address, hookPending: pending };
     }
     if (row.completion) row.resultUrl = resultUrl(row.completion.uri, this.config.intake.ipfsGateway);
     return row;
@@ -100,7 +104,7 @@ export class LaunchStore {
     return () => { ++this.epoch; clearInterval(this.timer); };
   }
   private poll = () => { for (const chain of this.config.chains) void this.run(chain.id, this.epoch); };
-  retry = () => { this.resultDue.clear(); this.hookDue.clear(); this.poll(); };
+  retry = () => { this.resultDue.clear(); this.hookDue.clear(); this.recordDue.clear(); this.poll(); };
   private async run(chainId: number, epoch: number) {
     if (this.busy.has(chainId)) { this.pendingHead.add(chainId); return; }
     this.busy.add(chainId);
@@ -269,6 +273,26 @@ export class LaunchStore {
             entry.result = data; row = this.hydrate(entry, chainId)!;
           } catch { row.resultError = 'The result file is unavailable. It will be retried on the next refresh.'; }
         } else row.resultError = 'Intake completed this request without a supported IPFS result URI.';
+      }
+      if (!current()) return;
+      if (row.type !== 'A' && row.status !== 'failed' && this.config.relayUrl && (this.recordDue.get(row.id) ?? 0) <= Date.now()) {
+        this.recordDue.set(row.id, Date.now() + 20000);
+        try {
+          let launchId = row.launchId;
+          if (!launchId) {
+            const jobId = row.jobIds[0] ?? intakeJob(await relayFetch(this.config.relayUrl, `/intake/${chainId}/${entry.requested.transactionHash}`), row.requestId);
+            if (jobId) {
+              const job = await relayFetch(this.config.relayUrl, `/jobs/${encodeURIComponent(jobId)}`) as { launch?: { id?: string }; launchId?: string };
+              launchId = job.launch?.id ?? job.launchId;
+            }
+          }
+          if (launchId && /^[\w-]+$/.test(launchId)) {
+            const detail = await relayFetch(this.config.relayUrl, `/launches/${encodeURIComponent(launchId)}`);
+            if (!current()) return;
+            entry.relayLaunchId = launchId; entry.launchRecord = detail;
+            row = this.hydrate(entry, chainId)!;
+          }
+        } catch { row.resultError = 'Deployed addresses and Live confirmation are unavailable from IMD. Retry the reading.'; }
       }
       if (!current()) return;
       if (row.deployerAddress && (this.hookDue.get(row.id) ?? 0) <= Date.now()) {

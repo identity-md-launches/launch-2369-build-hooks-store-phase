@@ -1,6 +1,7 @@
 import type { Body, Draft } from '../../src/lib/compose.ts';
 import type { Launch } from './types.ts';
 import { checkConsistency } from '../../src/lib/safety.ts';
+import type { ProvenLaunch } from '../../src/lib/proven.ts';
 
 export type CheckResult = {
   facts: { id: string; label: string; state: string; required?: boolean; assumed?: string; example?: string }[];
@@ -46,6 +47,17 @@ export async function importSource(relay: string, draft: Draft, signal?: AbortSi
   const source = object(data.source);
   if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(source.repoUrl ?? '') || !/^[\da-f]{40}$/i.test(source.baseCommit ?? '')) throw new Error('The import did not return a pinned GitHub source. Try again.');
   return { repoUrl: source.repoUrl, baseCommit: source.baseCommit };
+}
+
+/** Automatic reuse is best effort. Explicit own-code imports keep their existing error flow. */
+export async function importProvenSource(relay: string | null, entry: ProvenLaunch, signal?: AbortSignal): Promise<ProvenLaunch | null> {
+  if (!relay) return null;
+  try {
+    const data = object(await relayFetch(relay, '/import', { url: entry.repoUrl, ref: entry.commit, kind: 'contracts' }, signal));
+    const source = object(data.source);
+    if (data.ok !== true || source.repoUrl !== entry.repoUrl || String(source.baseCommit).toLowerCase() !== entry.commit) return null;
+    return entry;
+  } catch { return null; }
 }
 
 export type RelayLaunch = { id: string; name: string; chainId: number; updatedAt: string; status: string; hookAddress: string | null; sourceRepoUrl: string | null };

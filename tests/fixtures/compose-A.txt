@@ -1,6 +1,6 @@
 Launch Pondside (POND) with a Uniswap v4 hook on Robinhood Chain, paired with IMD.
 Token: Pondside (POND), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.
-beforeInitialize accepts only the IMD launch factory, passed as the constructor argument $factory; any other initialization reverts; the hook serves only the pool the factory initializes. Constructor arguments: the Robinhood Chain PoolManager 0x8366a39CC670B4001A1121B8F6A443A643e40951, $owner and $factory.
+beforeInitialize accepts only the IMD launch factory, passed as the constructor argument $factory; any other initialization reverts; the hook serves only the pool the factory initializes. Constructor arguments: the Robinhood Chain PoolManager 0x8366a39cc670b4001a1121b8f6a443a643e40951, $owner and $factory.
 In this hook, the token is Pondside (POND), the launch token; its total supply is that token's totalSupply().
 Every pool-dependent view, state, window and limit is keyed by PoolId and isolated per pool; pass the pool id to each pool-dependent function.
 The hook does exactly the following, and nothing else:

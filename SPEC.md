@@ -1,8 +1,14 @@
 # The Hooks Store — product and build specification
 
-Version 1.31 · 2026-10-21 · Status: draft for review, then handed to the IMD swarm job by job.
+Version 1.34 · 2026-10-22 · Status: draft for review, then handed to the IMD swarm job by job.
 
 This document is a specification, not a wish list. Every section says exactly what to build, what data it uses, and how to tell when it is done. The clickable mockup in `mockup/index.html` is the visual reference; where the mockup and this text disagree, this text wins.
+
+Changes in 1.34 (2026-10-22): proven launches are automatic (decision 26 amended): no switch; a matching stack is built from the proven repository in the background, the summary shows one line, and a failed import falls back silently to a fresh build. Only the creator's own repository in Advanced overrides it.
+
+Changes in 1.33 (2026-10-22): the wait. A hook takes one to three hours because every one is written, tested and audited; the owner decided two answers (decisions 26 and 27). Proven launches (4.17): the store indexes every verified launch and lets a user who stacks the same blocks start from its audited repository, so the swarm adapts and re-audits instead of writing from scratch; the wait is stated before payment and the hook page can be left and found again. Instant hooks (6.8, phase 3): for stacks with a proven launch the swarm builds an audited factory per chain, and the Builder offers "Create instantly, gas only" beside the swarm launch for hook-only and existing-token stacks. Job 9 ships 4.17 with the open carry-overs; the ads move to jobs 10a and 10; the factories are phase 3.
+
+Changes in 1.32 (2026-10-22): launch 1 is live and its hook PondsideGuard is deployed, the store's first. Found on the way: for a contracts-only launch the result file the Completed event points at is written before deployment and never names an address, so Live cannot come from the chain alone; 7.3 now says the hook page takes the deployed addresses from the launch record's artifacts through the relay, reads hook() when the artifact is a deployer, and treats the Completed event with status 0 as the chain confirmation. Job 9 carries it.
 
 Changes in 1.31 (2026-10-21): section 4.16 is rewritten in full after an independent review that read the audit findings of all four launches, IMD's own successful hook launch on Robinhood Chain and 18 more free checks (evidence/review-2026-10-21/). Corrections: the deployer mines its salt inside its constructor (an off-chain salt cannot be known), partial fills that specify the pair-currency amount revert, the no-fee sentence uses IMD's phrasing "Hook fee rate: 0%". New: type A hooks accept initialization only from the IMD launch factory ($factory), the Buyback jar cannot burn the standard token and keeps the tokens instead, the buyback happens only inside buyback(), fee blocks are tied together with one rate and one destination, liquidity rules are keyed per position, time is measured in seconds (Robinhood Chain's block number is the L1's), incompatible advanced blocks exclude each other, Batch auctions leaves version 1, the dynamic-fee flag, pull payments for the prize pot, the owner always in the body, and a no-outside-dependency sentence in every request. Job 8 ships all of it.
 
@@ -85,7 +91,7 @@ Goals, in priority order:
 Non-goals for version 1:
 
 - No store-operated review pipeline, requester or gated deployer. The `AutoHookJobRequester`, `HookRequestCodec` and `GatedHookDeployer` contracts from the foundation repo are **not used**.
-- No "buy this hook from its creator" marketplace. Free listings and paid #ad slots (`HookListingRegistry`, `FeaturedPlacements` from the foundation repo) are phase 2 (job 9); the carousel slot exists from day one.
+- No "buy this hook from its creator" marketplace. Free listings and paid #ad slots (`HookListingRegistry`, `FeaturedPlacements` from the foundation repo) are phase 2 (job 10); the carousel slot exists from day one.
 - No AI chat. "Describe it" is a text box whose contents become requirements in the launch request; IMD's free check reports what the swarm understood. The site does not interpret text itself.
 - No backend, database or accounts. A small optional relay (7.4) is the only server-side piece and the site works without it.
 
@@ -371,6 +377,15 @@ IMD's builders stop and ask when a request leaves them a guess, the audit panel 
 29. **Copy to verify before advertising:** whether `poolBps` is a share of the creator's 90% or of the total supply (IMD's own launch describes 8,000 as "80% pool, 10% remainder, 10% swarm").
 30. **One launch per kind after a fix,** every builder question into `src/blocks/known-questions.json` (6.7), and every audit read on the explorer and turned into a rule here.
 
+### 4.17 Proven launches: start from audited source
+
+Every launch through the store leaves a public, audited repository (IMD delivers each launch to `identity-md-launches/launch-<number>-…`). The spec repository keeps `evidence/proven-launches.json`, one entry per launch the owner has verified: `{launchId, launchNumber, chainId, type, blocks: [block ids], repoUrl, commit, hookAddress, deployerAddress, name, verifiedAt}`. The site fetches it at load from raw.githubusercontent.com, like the tested marks of 4.14, and never bundles it.
+
+- **Matching, automatic.** A draft matches a proven launch when the launch type and the set of block ids are the same and the chain is the same; parameters may differ, and extra words or a Custom rule are allowed. Nothing is asked: the match is applied in the background, the summary shows one line, "Built from a proven launch: {name} (launch {number}, audited {date})", and the hook page carries the same line after launch. A creator's own repository in Advanced (start from my own code) overrides the match; there is no other control.
+- **The request.** When a match applies, the body carries `repoUrl` and `baseCommit` from the entry, resolved first through the relay's `/import` (7.4); if the import fails or the relay is absent, the request is composed from scratch with no notice beyond the longer wait estimate, and the composed text says, after the first sentence: "Start from the audited source at {repoUrl} commit {commit}: keep its behavior, apply the parameters and rules of this request, adapt the deployer to 4.16 item 1 if it mines its salt after deployment, and audit it as imported code." Every other sentence of 5.1 and 4.16 stays, so the request is complete on its own.
+- **The wait, stated.** The Builder's summary and the Launch page say "Typically 1 to 3 hours: the swarm writes, tests, audits with four auditors and a judge, then deploys. From a proven launch, usually less." The hook page offers Copy link, asks once for permission to show a browser notification when the launch goes live, and the pond announces it. Nothing promises a time IMD does not promise.
+- **Owner's step.** After verifying a launch the way 15.4 describes, the owner adds its entry; a launch whose audit left an unresolved finding is never listed.
+
 ## 5. Composing the launch request
 
 ### 5.1 The description text (at most 7,500 characters)
@@ -460,7 +475,7 @@ The foundation repo's `FeaturedPlacements` (0.1 IMD for 7 days, ordered by purch
 
 - Duration 24 hours; base price 0.1 IMD per placement; one live placement per listing; `#ad` on every placement and event; the same deposit, withdraw, cancel with pro-rata refund of the base price, settle, proceeds recipient and two-step owner as before. No proxy, no upgrade, no self-destruct.
 - `boost(placementId, amount)`: anyone may add IMD from their deposited balance to an open placement. Boosts are never refunded: on cancel they go to the pinned proceeds recipient, on settle both base and boosts do. `rankOf(id)` returns base plus boosts; `featured(cursor, scanLimit)` returns each placement's total so the site sorts by total paid, ties by the earlier purchase.
-- Deployed through an IMD contracts launch (`jobs/job-9a-ads-contract.json`, `evm_contracts`, one launch per chain: Robinhood Chain, then Ethereum), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
+- Deployed through an IMD contracts launch (`jobs/job-10a-ads-contract.json`, `evm_contracts`, one launch per chain: Robinhood Chain, then Ethereum), which includes the audit panel; the free check's answer is saved as `evidence/check-job-6a`. The listing registry deploys unchanged beside it.
 
 ### 6.7 Request safety: never pay for a question
 
@@ -471,6 +486,10 @@ IMD keeps the fee once a request is on chain, refunds nothing, and lets nobody a
 - **IMD's fixed facts are read.** The free check answers with the rules IMD will apply (for example that an IMD-side fee is sold for ETH unless told otherwise). When a fixed fact conflicts with the request, the "What the swarm understood" panel shows the conflict and Launch stays locked until the request opts out explicitly; the composer adds the opt-out for IMD pairs by itself.
 - **A blocked launch is explained, not guessed at.** The hook page shows the builder's question as IMD reports it (`blockedReason`, the failed node's `failureReason`, read through the relay) under Needs attention, with a Fix in Builder button that reopens the draft that produced the request with the question beside it. The question joins `src/blocks/known-questions.json`, which the check applies, so the same question never costs a second person.
 - **Plain copy.** The fee table (6.3) and the Launch page say that a request the swarm has to stop on still spends the fee, and that these checks exist to make that rare.
+
+### 6.8 Instant hooks from audited factories (phase 3)
+
+For hook-only and existing-token stacks that have a proven launch (4.17), the swarm builds a factory contract per chain through a contracts launch: the factory holds the audited hook code for that exact block set, takes the block parameters, the owner and the fee recipient as arguments to `create(...)`, mines the CREATE2 salt inside the call so the hook's address carries its permission bits, emits the hook's address, and has no owner functions. IMD's audit panel reviews each factory once. In the Builder, a stack with a live factory on the chosen chain shows two buttons: "Create instantly, gas only" (the site sends `create` from the connected wallet and jumps to the hook page) and "Launch with the swarm, 0.5 IMD" (anything custom, or the creator's choice). Token launches never take the instant lane: IMD creates the token and the pool. Open decisions before phase 3 starts: which stacks get a factory first (the default stack is the obvious one), whether an instant hook pays a small fee in IMD and to whom, and how the hook page reads a factory-made hook (its `HookCreated` event is the chain record).
 
 ## 7. Data: how a static site reads everything
 
@@ -487,6 +506,8 @@ RPCs and windows (`site-config.json`, measured 2026-10-21): Ethereum reads go to
 ### 7.3 Status for the user's own launches
 
 Same logs filtered by payer, plus pending request ids saved in `localStorage` when launched from this site.
+
+Contracts-only launches (types B and C): the result file that the chain's Completed event points at is written when the job completes, before deployment, and names no address (launch 1, 2026-10-22). So the Completed event with status 0 is the chain confirmation that the launch finished, and the deployed addresses come from the launch record (`GET /launches/:id` through the relay, `artifacts[].address`, with `attestation.contracts` naming each contract). When the artifact is a deployer (4.16 item 1, and launch 1's `deploy(salt)` design), the hook page reads `hook()` from it and shows both addresses; while `hook()` is zero it says "hook not deployed yet". The Live step turns green when the Completed event has status 0 and the launch record reads live; the hook's address is a separate line, never a condition for Live.
 
 ### 7.4 Optional relay
 
@@ -557,8 +578,9 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 | 6 | Go live | The seven findings of job 5's reviews (timeline node states, the pair-currency fee sentence, relay error text, cancelled-approval retry, reorged events dropped, import kept on full storage, ticker timestamp), then `relayUrl` set to the owner's deployed worker and `inProgress` false: the banner goes and Approve and Launch work |
 | 7 | Launch safety | The fee wording of 5.1 for every block and pairing, the consistency check and the fixed-facts comparison of 6.7, the builder's question on the hook page with Fix in Builder, the known-questions list, the spent-fee copy, plus the carry-overs: no hat, cancelled launch transaction retry, reorged ticker |
 | 8 | Catalog hardening | A two-step chain: `build-website` for everything in 4.16: the deployer for hook-only and existing-token launches, pair-currency thresholds, the Yield block by chain, the fee destinations, the Volatility fee dependency, the token definition, references on every kind, the words-mode warning and checklist, the hidden-stack and owner-footer fixes; then `adversarial-review` by a different seat, read-only, of the composed requests for every block under every type and pairing, the consistency check, the fixed-facts comparison and the deployer wording |
-| 9a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
-| 9 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
+| 9 | Proven launches and the wait | A two-step chain: `build-website` for 4.17 (the proven index, matching, the import through the relay, the request sentence, the wait copy, Copy link and the notification) plus the carry-overs (the owner lowercase regression, the written-fee detector, Live and addresses for contracts-only launches from the launch record, the residuals of job 8), then `adversarial-review` of the composer and the import path |
+| 10a | Ad contracts (contracts launch, phase 2) | `HookListingRegistry` and `FeaturedPlacementsV2` per 6.6, audited and deployed by IMD on Robinhood Chain and Ethereum |
+| 10 | Listings and #ad (phase 2) | The Promotions panel in My hooks: promote a hook (free listing, deposit, 24-hour placement), boost, cancel, withdraw; the strip reading `featured()` with creator ENS names; the hook page's #ad state |
 
 ## 14. Decisions taken by the owner (2026-10-21)
 
@@ -586,6 +608,9 @@ One IMD website project, built as `job.open` then `job.continue` jobs so each jo
 22. Reviews, not audits (2026-10-21): no standalone audit job is planned. Website jobs that touch the money path or the composer carry a read-only adversarial review as their second step (jobs 5 and 8); every hook launch and the ad contracts launch carry IMD's audit panel by themselves.
 23. Audit-derived wording (2026-10-21): the Anti-sandwich rule caps every swap at the block's opening price in its own direction and donates the withheld difference to liquidity providers; fees are computed on the amount traded; windows start at the first swap; wallets are tx.origin with the limit stated; standalone hooks key everything by pool (4.16 items 11 to 16).
 24. Independent review adopted (2026-10-21): section 4.16 is rewritten in full from the review's findings; the type A factory gate, the in-constructor salt, the revert on partial fills and the jar without burn are decided as written there.
+25. Live for contracts-only launches (2026-10-22, after launch 1): Live comes from the Completed event plus the launch record through the relay; addresses from the record's artifacts and the deployer's hook(); the result file is not the source of addresses (7.3). Job 9 carries it.
+26. Proven launches (2026-10-22, amended the same day): every verified launch is indexed and a draft that stacks the same blocks on the same chain is built from its audited repository automatically, in the background, with one line in the summary and no switch; a failed import falls back silently (4.17). Job 9 ships it.
+27. Instant hooks (2026-10-22): for stacks with a proven launch the swarm builds an audited factory per chain and the Builder offers an instant, gas-only lane beside the swarm launch, inside the stack-blocks mode, for hook-only and existing-token hooks (6.8). Phase 3, after the ads; the open decisions are listed there.
 
 ## 15. From mockup to live
 
@@ -602,6 +627,7 @@ The mockup is a drawing of the product, not the product. The swarm builds the re
    - *IMD hosting.* Every delivery already publishes to `the-hooks-store.sites.imd.fun` and its ENS name `the-hooks-store.site.identitymd.eth`. Done on 2026-10-21 by job 6: the banner is gone and `relayUrl` is set (7.4), the owner having deployed the worker from the delivered `relay/` folder with one wrangler command on a free Cloudflare account; Claude runs that command with the owner. The old `the-hooks-store-uniswap-v4-hooks` name stays on its offline page or is pointed at the new site later.
    - *The owner's own domain.* Cloudflare Pages (free) connected to a fork of the delivered repository under the owner's GitHub account, building `dist/` on every push, with a custom domain such as thehooksstore.xyz. Claude sets it up with the owner in about fifteen minutes. The relay worker (7.4) lives on the same Cloudflare account.
    Both serve the identical build. The IMD name is the canonical, audit-trailed copy; the custom domain is the one to advertise.
-6. **Phase 2.** The ad contracts are deployed by the job 9a launch (one launch per chain: Robinhood Chain, then Ethereum), job 9 wires the Promotions panel and the strip, and the same republish puts it live.
-7. **After that.** Changes are new `job.continue` jobs; the owner never edits code. Operating costs are zero: no server, no database, the relay is within Cloudflare's free tier, and users pay IMD directly for their own launches and placements.
+6. **Phase 2.** The ad contracts are deployed by the job 10a launch (one launch per chain: Robinhood Chain, then Ethereum), job 10 wires the Promotions panel and the strip, and the same republish puts it live.
+7. **Phase 3.** Instant hooks (6.8): one contracts launch per factory per chain, then a website job that adds the instant lane to the Builder and the hook page.
+8. **After that.** Changes are new `job.continue` jobs; the owner never edits code. Operating costs are zero: no server, no database, the relay is within Cloudflare's free tier, and users pay IMD directly for their own launches and placements.
 

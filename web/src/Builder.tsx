@@ -11,6 +11,8 @@ import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
 import { SwarmPanel } from './SwarmPanel';
 import { SafetyNotice } from './SafetyNotice';
 import { Text } from './Text';
+import { ProvenLine, useProvenSource } from './ProvenLaunches';
+import { LAUNCH_WAIT } from '../../src/lib/proven';
 
 const TYPES: [LaunchType, string, string][] = [
   ['A', 'Hook + new token + pool', 'IMD launches your hook, a token and the trading pool together. The simplest path.'],
@@ -103,12 +105,15 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   }, [config.blocksVerifiedUrl]);
 
   const ctx = context(draft, address), s = draft.settings;
+  const automatic = useProvenSource(draft, config.relayUrl);
+  const prepared = ownCode.prepared && (ownCode.needed ? ownCode.prepared : automatic.prepared);
+  const sourceReady = ownCode.ready && automatic.ready;
   const [correction] = useState(loadCorrection);
-  const text = ownCode.prepared ? compose(ownCode.prepared, address) : 'Resolve your repository in Settings to compose the request from its pinned source.';
-  const requestJson = ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null;
+  const text = prepared ? compose(prepared, address) : 'Resolve your repository in Settings to compose the request from its pinned source.';
+  const requestJson = prepared && sourceReady ? JSON.stringify(body(prepared, address)) : null;
   const check = useSwarmCheck(config.relayUrl, requestJson, address);
-  const issues = useMemo(() => [...validate(draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [draft, address, config.enabledDeployChains]);
-  const bytes = ownCode.prepared ? bodyBytes(body(ownCode.prepared, address)) : 0;
+  const issues = useMemo(() => [...validate(prepared ?? draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [prepared, draft, address, config.enabledDeployChains]);
+  const bytes = prepared ? bodyBytes(body(prepared, address)) : 0;
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);
   const splitDestination = rules.some(block => block.id === 'fee-split');
   const summaryOf = (block: BlockEntry) => splitDestination && ['swap-fee', 'fee-dir'].includes(block.id) ? shortOf(block, ctx).replace(/→ .+$/, '→ Split the fee distribution') : shortOf(block, ctx);
@@ -261,6 +266,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const typeLabel = draft.type === 'A' ? 'Hook + new token + pool' : draft.type === 'B' ? 'Hook only, no token' : `Hook for existing token ${s.token ? s.token.slice(0, 10) + '…' : '(address missing)'}`;
   const preview = <aside className="preview panel" aria-label="Preview">
     <h2>Your hook, in short</h2>
+    <ProvenLine entry={automatic.proven} />
     <ul className="sum">
       <li><b>Type</b><span>{typeLabel}</span></li>
       {draft.type === 'A' ? <li><b>Token</b><span>{ctx.name} (${ctx.symbol}){has(draft, 'own-token') ? ', your own' : ', standard'}</span></li> : <li><b>Hook</b><span>{ctx.name}</span></li>}
@@ -270,6 +276,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <li><b>Owner</b><span>{powers.length ? `${s.owner.trim() || address || 'the paying wallet'} may ${powers.join(', ')}` : words || rules.some(b => b.id === 'custom') ? `The functions your written rules grant to ${s.owner.trim() || address || 'the paying wallet'}.` : 'no owner powers'}</span></li>
       {draft.type === 'A' && <li><b>Pool</b><span>{poolMissing ? <span className="pending">Not chosen yet: set the pool share in settings.</span> : <><span className="num">{s.pool}%</span> of total supply in the pool; <span className="num">10%</span> swarm; <span className="num">{90 - s.pool!}%</span> remainder to {s.rem.trim() || address || 'the paying wallet'}.</>}</span></li>}
     </ul>
+    <p className="launch-wait">{LAUNCH_WAIT}</p>
     {rules.length > 6 && <p className="notice block-count" role="status">Every extra rule is more for the audit panel to refuse. The contract has a <span className="num">24 KB</span> size limit. Keep the stack to six blocks when possible.</p>}
     <details className="exact"><summary>Exact text the swarm receives</summary><div><pre id="composed">{text}</pre></div></details>
     <SafetyNotice findings={check.consistency} />
@@ -280,9 +287,9 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <div><span>Request body</span><strong>{(bytes / 1024).toFixed(1)} / 16 KiB</strong></div>
     </div>
     <div className="actions">
-      <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !ownCode.ready || issues.length > 0 || check.consistency.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
-      <button className="btn primary" type="button" disabled={issues.length > 0 || !ownCode.ready || !!check.gate} aria-describedby={issues.length ? 'continue-note' : 'check-note'}
-        onClick={() => { if (!issues.length && ownCode.ready && !check.gate) location.hash = '#launch'; }}>Continue to launch</button>
+      <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !sourceReady || issues.length > 0 || check.consistency.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
+      <button className="btn primary" type="button" disabled={issues.length > 0 || !sourceReady || !!check.gate} aria-describedby={issues.length ? 'continue-note' : 'check-note'}
+        onClick={() => { if (!issues.length && sourceReady && !check.gate) location.hash = '#launch'; }}>Continue to launch</button>
     </div>
     <p className="small muted" id="check-note" role="status">{!config.relayUrl ? 'The free check needs the relay, which is not set up yet.' : !ownCode.ready ? 'Resolve your repository in Settings before continuing.' : check.gate || 'The free check sends this request to IMD. No wallet, payment or launch.'}</p>
     {check.error && <p className="field-error" role="alert">{check.error}</p>}

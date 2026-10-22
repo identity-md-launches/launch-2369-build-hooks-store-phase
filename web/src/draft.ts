@@ -1,4 +1,5 @@
 import { normalizeDraft, type Draft } from '../../src/lib/compose';
+import { parseProvenLaunches, provenFromRequest } from '../../src/lib/proven';
 
 export const DRAFT_KEY = 'hooks-store:draft:v2';
 export function saveDraft(patch: { prompt?: string; mode: 'prompt' | 'blocks' }) {
@@ -38,6 +39,12 @@ export function submittedDraft(chain: number, id: string, request: string): Draf
     const value = submitted.get(draftKey(chain, id)) ?? JSON.parse(localStorage.getItem(draftKey(chain, id)) ?? 'null');
     return value?.request === request ? normalizeDraft(value.draft) : null;
   } catch { return null; }
+}
+export function submittedProven(chain: number, id: string, request: string) {
+  try {
+    const value = submitted.get(draftKey(chain, id)) ?? JSON.parse(localStorage.getItem(draftKey(chain, id)) ?? 'null');
+    return value?.request === request ? provenFromRequest(request, parseProvenLaunches({ launches: [value.draft?.proven] })) : undefined;
+  } catch { return undefined; }
 }
 export function loadCorrection(): Correction | null {
   if (correction) return correction;

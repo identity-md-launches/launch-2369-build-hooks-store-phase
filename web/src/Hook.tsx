@@ -4,7 +4,7 @@ import { CHAINS, STATUSES, type Launch } from './types';
 import type { SiteConfig } from './config';
 import type { LaunchStore, StoreState } from './chain/store';
 import { blockShortOf, matchRule, requestContext, safeUrl } from './chain/decode';
-import { storeDraft, submittedDraft, openCorrection, clearCorrection } from './draft';
+import { storeDraft, submittedDraft, submittedProven, openCorrection, clearCorrection } from './draft';
 import { WarnSign } from './Builder';
 import { Text } from './Text';
 import { AddressValue } from './AddressValue';
@@ -13,6 +13,9 @@ import { ReadStatus } from './ReadStatus';
 import { OpenPool } from './OpenPool';
 import { getLaunchNotice } from './LaunchReview';
 import { RelayTimeline } from './RelayTimeline';
+import { ProvenLine, useProvenLaunches } from './ProvenLaunches';
+import { provenFromRequest } from '../../src/lib/proven';
+import { LaunchNotifications } from './LaunchNotifications';
 
 export function copyLaunchDraft(launch: Launch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
@@ -50,6 +53,8 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
   const parts = route.replace(/^#/, '').split('?')[0].split('/'), chain = Number(parts[1]), id = parts[2]?.toLowerCase();
   const launch = data.launches.find(l => l.intakeChainId === chain && l.requestId.toLowerCase() === id);
   const [error, setError] = useState('');
+  const [copyNote, setCopyNote] = useState('');
+  const proven = useProvenLaunches();
   const notice = getLaunchNotice(chain, id ?? '');
   const manage = new URLSearchParams(route.split('?')[1] ?? '').get('manage') === '1';
   useEffect(() => {
@@ -71,12 +76,15 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
       <h1 id="hook-h"><Text>{launch.name}</Text></h1>{launch.symbol && <p className="hook-symbol num">${launch.symbol}</p>}
       <p className="small creator">by {launch.creatorName ? <span>{launch.creatorName}</span> : <code>{launch.payer}</code>}</p>
     </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
+    <ProvenLine entry={submittedProven(chain, id, launch.request) ?? provenFromRequest(launch.request, proven)} />
+    <div className="actions hook-link"><button className="btn" onClick={async () => { try { const url = new URL(location.href); url.hash = `hook/${chain}/${id}`; await navigator.clipboard.writeText(url.href); setCopyNote('Link copied.'); } catch { setCopyNote(`Copy this page’s address: ${location.href}`); } }}>Copy link</button><span role="status" className="copy-status">{copyNote}</span></div>
+    <LaunchNotifications key={launch.id} launch={launch} />
     {notice && <div className="notice launch-done" role="status"><strong>The swarm has your request…</strong><p>Watch this page for the build result. Your payment is confirmed on {CHAINS[chain]}.</p><AddressValue value={notice.requestId} label="confirmed request id" /><a href="https://explorer.imd.fun/" target="_blank" rel="noreferrer">Open IMD explorer</a> · <a href={`#hook/${chain}/${notice.requestId}`}>Hook page</a>{!notice.saved && <p className="field-error">Browser storage was unavailable. Copy the request id or bookmark this page.</p>}</div>}
     {error && <p className="form-error" role="alert">{error}</p>}
     <RelayTimeline launch={launch} relay={config.relayUrl} onFix={questions => {
       if (!openCorrection(correctionDraft(launch), { questions, request: launch.request, hookRoute: `#hook/${chain}/${id}` })) setError('Could not save this correction. Allow site storage and try again.');
     }} />
-    {launch.status === 'in-progress' && <p className="notice" role="status">{launch.hookPending ? 'hook not deployed yet' : launch.deployerAddress ? 'Reading hook() from the deployed contract before opening hook controls.' : launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
+    {(launch.hookPending || launch.status === 'in-progress') && <p className="notice" role="status">{launch.hookPending ? 'hook not deployed yet' : launch.deployerAddress ? 'Reading hook() from the deployed contract before opening hook controls.' : launch.type !== 'A' ? 'Reading deployed addresses and Live confirmation from the launch record…' : launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
     {!!launch.completion?.status && <p className="notice" role="status">Failed: <code>{launch.completion.reason}</code></p>}
     {launch.resultError && <p className="notice" role="status">{launch.resultError} <button className="link-button" onClick={store.retry}>Retry result</button></p>}
     <div className="detail-data"><section className="box addresses" aria-labelledby="addresses-h"><h2 id="addresses-h">Addresses</h2><dl className="kv">
@@ -99,7 +107,7 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
       const match = launch.matchedBlocks.find(b => BY_ID[b.id] && label === shortLabel(b, launch));
       return <li key={`${index}:${label}`}><Text>{label}</Text>{match && <WarnSign def={BY_ID[match.id]} tested={true} />}</li>;
     })}</ul>{!launch.blocks.length && <p>This hook was described in words.</p>}<details><summary>Request text as sent</summary><div><pre>{launch.request}</pre></div></details></section>
-    {launch.type === 'C' && launch.status === 'live' && <OpenPool launch={launch} client={store.clients[launch.chainId]} explorer={deployment.explorerUrl} />}
+    {launch.type === 'C' && launch.status === 'live' && launch.hookAddress && <OpenPool launch={launch} client={store.clients[launch.chainId]} explorer={deployment.explorerUrl} />}
   </section>;
 }
 const shortLabel = (block: Launch['matchedBlocks'][number], launch: Launch) => blockShortOf(block, requestContext(launch.request, launch.payer));

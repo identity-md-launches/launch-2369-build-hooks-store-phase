@@ -15,6 +15,8 @@ import { cast } from '../../src/scene/cast';
 import { useOwnCode, useSwarmCheck } from './useSwarmCheck';
 import { SwarmPanel } from './SwarmPanel';
 import { SafetyNotice } from './SafetyNotice';
+import { ProvenLine, useProvenSource } from './ProvenLaunches';
+import { LAUNCH_WAIT } from '../../src/lib/proven';
 
 type Step = { hash?: Hex; phase: 'idle' | 'wallet' | 'pending' | 'success' | 'failed'; error?: string; price?: bigint; replacement?: boolean };
 const idle: Step = { phase: 'idle' };
@@ -24,6 +26,8 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const { address, chainId, isConnected } = useAccount(), { data: wallet } = useWalletClient();
   const ctx = context(draft, address);
   const ownCode = useOwnCode(draft, config.relayUrl);
+  const automatic = useProvenSource(draft, config.relayUrl);
+  const prepared = ownCode.prepared && (ownCode.needed ? ownCode.prepared : automatic.prepared);
   const { mutateAsync: switchChain, isPending: switching } = useSwitchChain();
   const [paymentChain, setPaymentChain] = useState(() => chainId && config.paymentChains.includes(chainId) ? chainId : config.paymentChains[0]);
   const [price, setPrice] = useState<bigint | null>(null), [priceError, setPriceError] = useState(''), [revision, setRevision] = useState(0);
@@ -31,10 +35,11 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const flight = useRef(false);
   const client = store.clients[paymentChain], payment = config.chains.find(c => c.id === paymentChain)!;
   const preview = useMemo(() => { try {
-    if (!ownCode.prepared) throw new Error('Resolve your repository in the Builder before launching.');
-    return { ...launchBody(ownCode.prepared, config, address), error: '' };
-  } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [ownCode.prepared, config, address]);
-  const check = useSwarmCheck(config.relayUrl, ownCode.prepared ? JSON.stringify(body(ownCode.prepared, address)) : null, address);
+    if (!prepared) throw new Error('Resolve your repository in the Builder before launching.');
+    if (!automatic.ready) return { json: '', bytes: '0x' as Hex, error: 'Preparing request…' };
+    return { ...launchBody(prepared, config, address), error: '' };
+  } catch (e) { return { json: '', bytes: '0x' as Hex, error: launchError(e) }; } }, [prepared, automatic.ready, config, address]);
+  const check = useSwarmCheck(config.relayUrl, prepared && automatic.ready ? JSON.stringify(body(prepared, address)) : null, address);
   const identity = `${address}:${paymentChain}:${preview.bytes}`;
   const attemptKey = `hooks-store:launch-tx:${keccak256(stringToHex(identity))}`;
   const [storageNote, setStorageNote] = useState('');
@@ -67,7 +72,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const finish = (receipt: TransactionReceipt, operation: LaunchContext, paid: bigint) => {
     const id = requestedId(receipt, operation, paid);
     clearCorrection();
-    if (!saveSubmittedDraft(operation.chainId, id, ownCode.prepared ?? draft, compose(ownCode.prepared ?? draft, operation.account))) setStorageNote('The launch is confirmed, but this browser could not save its draft. The original request is still available on the Hook page.');
+    if (!saveSubmittedDraft(operation.chainId, id, prepared ?? draft, compose(prepared ?? draft, operation.account))) setStorageNote('The launch is confirmed, but this browser could not save its draft. The original request is still available on the Hook page.');
     const pending = { requestId: id, chainId: operation.chainId, payer: operation.account, txHash: receipt.transactionHash, createdAt: new Date().toISOString() };
     let saved = true;
     try { localStorage.setItem(PENDING_KEY, JSON.stringify([...pendingRequests().filter(p => p.requestId !== id || p.chainId !== operation.chainId), pending])); } catch { saved = false; }
@@ -143,11 +148,13 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     ...(draft.type === 'A' ? [['Pairing', draft.settings.pair.toUpperCase()], ['Pool', draft.settings.pool === null ? 'Not chosen' : `${draft.settings.pool}% of total supply in the pool; 10% swarm; ${90 - draft.settings.pool}% remainder to ${draft.settings.rem || address || 'the paying wallet'}`]] : []),
     ['Owner', powersOf(draft).length || cleanText(draft.prompt) || activeBlocks(draft).some(block => block.id === 'custom') ? draft.settings.owner || address || 'The paying wallet' : 'No owner powers'],
     ['Words', cleanText(draft.prompt) || 'none'],
-    ['Description length', `${compose(draft, address).length} / 7,500 characters`],
+    ['Description length', `${compose(prepared ?? draft, address).length} / 7,500 characters`],
   ];
   const summaryOf = (block: ReturnType<typeof activeBlocks>[number]) => block.id === 'custom' ? sentenceOf(block, ctx)
     : activeBlocks(draft).some(rule => rule.id === 'fee-split') && ['swap-fee', 'fee-dir'].includes(block.id) ? shortOf(block, ctx).replace(/→ .+$/, '→ Split the fee distribution') : shortOf(block, ctx);
   return <section className="wrap page launch-review"><div className="detail-head"><div><h1>Review your launch</h1><p>Check the request, then pay the swarm to build it.</p></div><a className="btn" href="#builder">Edit in Builder</a></div>
+    <ProvenLine entry={automatic.proven} />
+    <p className="launch-wait">{LAUNCH_WAIT}</p>
     <div className="launch-columns"><section className="box"><h2>Your hook, in short</h2><table className="review-table"><tbody>{rows.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Text>{value}</Text></td></tr>)}<tr><th scope="row">Rules</th><td>{activeBlocks(draft).length ? <ol>{activeBlocks(draft).map((b, i) => <li key={b.id}><Text>{`${i + 1}. ${summaryOf(b)}`}</Text><WarnSign def={BY_ID[b.id]} tested={false} /></li>)}</ol> : 'No block rules; the description above applies.'}</td></tr></tbody></table>{activeBlocks(draft).length > 6 && <p className="notice">Every extra rule is more for the audit panel to refuse. The contract has a <Text>24 KB</Text> size limit.</p>}</section>
     <section className="box"><h2>What you pay</h2><table className="review-table fee-table"><tbody>
       <tr><th scope="row">Swarm + audit panel</th><td><Text>{`${price === null ? '0.5' : formatUnits(price, 18)} IMD once`}</Text>{price === null && <span className="small muted"> · maximum; {priceError ? 'live price unavailable' : 'checking live price'}</span>}</td></tr>
@@ -160,7 +167,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
     {draft.type === 'C' && <p>The site prepares the pool-opening call after your hook is live. Copy it into a v4 interface; sending it here opens in phase <Text>2b</Text>.</p>}
     {!config.relayUrl && <div className="notice"><strong>A refused request still spends the fee.</strong><p>The free check is unavailable without the relay. Read the exact request before paying.</p><button className="btn" disabled={!!preview.error} onClick={() => void copy()}>Copy request</button><span role="status" className="copy-status">{copyNote}</span></div>}
     <SafetyNotice findings={check.consistency} />
-    {config.relayUrl && <section className="box launch-check"><h2>Check before paying</h2><p>A refused request still spends the fee. A request the swarm has to stop on also spends the fee. These checks exist to make that rare. A free check does not guarantee acceptance or replace the audit panel.</p><button className="btn" disabled={!!preview.error || check.busy || busy || check.consistency.length > 0} onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button><p role="status" className="small">{check.gate || (check.result ? 'The check matches the exact request below.' : 'You can check this request with IMD before paying.')}</p>{check.error && <p role="alert" className="field-error">{check.error}</p>}{check.result && <SwarmPanel result={check.result} conflicts={check.conflicts} objective={compose(draft, address)} />}</section>}
+    {config.relayUrl && <section className="box launch-check"><h2>Check before paying</h2><p>A refused request still spends the fee. A request the swarm has to stop on also spends the fee. These checks exist to make that rare. A free check does not guarantee acceptance or replace the audit panel.</p><button className="btn" disabled={!!preview.error || check.busy || busy || check.consistency.length > 0} onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button><p role="status" className="small">{check.gate || (check.result ? 'The check matches the exact request below.' : 'You can check this request with IMD before paying.')}</p>{check.error && <p role="alert" className="field-error">{check.error}</p>}{check.result && <SwarmPanel result={check.result} conflicts={check.conflicts} objective={compose(prepared ?? draft, address)} />}</section>}
     <details className="box exact-launch"><summary>Exact request the swarm receives</summary><div><pre data-testid="launch-json">{preview.json || (!ownCode.ready ? 'Resolve your repository in the Builder to compose the request from its pinned source.' : compose(draft, address))}</pre></div></details>
     {preview.error && <p className="form-error" role="alert">{preview.error} <a href="#builder">Edit in Builder</a></p>}
     {config.inProgress && <p className="notice">Launches open when the site banner goes away. You can review and copy your request now.</p>}

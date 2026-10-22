@@ -49,10 +49,10 @@ test('my wallet is resolved from the connected payer and treasury choices use th
   await expect(page.locator('.safety-notice')).toContainText('Connect the paying wallet');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   await page.locator('#connect').click(); await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
-  await expect(page.locator('#composed')).toContainText(`send it to ${getAddress(owner)}`);
+  await expect(page.locator('#composed')).toContainText(`send it to ${owner.toLowerCase()}`);
   await expect(page.locator('.safety-notice')).toHaveCount(0);
   await page.locator('.blk[data-block="swap-fee"] select').last().selectOption("IMD's treasury");
-  await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22');
+  await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86a3967c11d4e054b2f07a1f22');
   await expect(page.locator('#composed')).toContainText('settled in IMD');
   await expect(page.locator('#composed')).toContainText('do not convert the fee to ETH and do not use any other pool');
   await page.locator('#s-pair').selectOption('eth');
@@ -68,7 +68,7 @@ test('an explicit recipient recovered from an older request stays visible and is
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   await expect(page.locator('.blk[data-block="swap-fee"] .field-error')).toContainText('choose one of the available options');
   await page.locator('.blk[data-block="swap-fee"]').getByLabel('Send to').selectOption("IMD's treasury");
-  await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22');
+  await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86a3967c11d4e054b2f07a1f22');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled(); await fits(page, 320);
 });
 

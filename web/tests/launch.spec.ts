@@ -131,6 +131,10 @@ test('type C resolves hook(), shows zero as pending, passes PoolId and prepares 
   let deployedHook:`0x${string}`=zeroAddress;
   const readCalls:{to:string;data:string}[]=[];
   await interceptChains(page,{result:{...jsonResult,launch:{...jsonResult.launch,hookAddress:undefined,tokenAddress:site.chains.find(c=>c.id===1)!.imdAddress,artifacts:[{role:'other',name:'LaunchGuardDeployer',address:deployer}]}}});
+  // Contracts-only deployments are confirmed by the launch record, not the earlier result file.
+  const record = { id: jsonResult.launch.id, chainId: 1, status: 'live', artifacts: [{ role: 'other', name: 'LaunchGuardDeployer', address: deployer }] };
+  await page.route('**/site-config.json', r => r.fulfill({ json: { ...site, chains: site.chains.map(c => ({ ...c, intakeFromBlock: Number(BigInt(logs.requested.blockNumber)) - 20 })) } }));
+  await page.route(`${site.relayUrl}/**`, r => r.fulfill({ json: r.request().url().includes('/launches/') ? record : { id: jsonResult.jobId, nodes: [], state: 'completed', launch: record } }));
   // Seed a genuine composer-shaped C request in the normal cached-read format.
   const {storeLogs}=await import('./chain-fixture');const {body}=await import('../../src/lib/compose');const {stringToHex,encodeEventTopics}=await import('viem');
   const logs=storeLogs(),d=addBlock(validDraft('C'),'lp-fee');

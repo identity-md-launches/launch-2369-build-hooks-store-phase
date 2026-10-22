@@ -188,13 +188,44 @@ export function applyResult(launch: Launch, input: unknown): Launch {
   const launchId = typeof rawId === 'string' && /^(?:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}|[1-9]\d*)$/i.test(rawId) ? rawId : Number.isSafeInteger(rawId) && rawId > 0 ? String(rawId) : null;
   const jobId = typeof root.jobId === 'string' ? root.jobId : null;
   const poolId = [data.poolId, pool.id, root.poolId].find(v => typeof v === 'string' && /^0x[\da-fA-F]{64}$/.test(v)) ?? null;
-  return { ...launch, hookAddress: deployer ? null : hook, deployerAddress: deployer, hookPending: false, tokenAddress: token, distributorAddress: distributor, poolId,
-    status: hook && !deployer ? 'live' : 'in-progress', resultLoaded: true, resultError: undefined,
+  return { ...launch, hookAddress: launch.type === 'A' ? hook : null, deployerAddress: launch.type === 'A' ? deployer : null, hookPending: false, tokenAddress: launch.type === 'A' ? token : launch.tokenAddress, distributorAddress: launch.type === 'A' ? distributor : null, poolId: launch.type === 'A' ? poolId : null,
+    status: launch.type === 'A' && hook && !deployer ? 'live' : 'in-progress', resultLoaded: true, resultError: undefined,
     launchId, launchNumber: Number.isSafeInteger(number) && number > 0 ? number : null,
     currencies: [pool.currency0, pool.currency1, data.currency0, data.currency1].filter((v): v is string => !!address(v)),
     sourceRepoUrl: safeUrl(object(root.delivery).repoUrl) ?? safeUrl(data.repoUrl) ?? launch.sourceRepoUrl,
     jobIds: jobId ? [jobId] : [], auditUrl: safeUrl(data.auditUrl ?? root.auditUrl),
     txHashes: [...new Set([...launch.txHashes, ...[data.transactionHash, data.txHash, data.deployTxHash, ...contracts.map((c: any) => c.txHash)].filter((v): v is string => typeof v === 'string' && /^0x[\da-fA-F]{64}$/.test(v))])],
+  };
+}
+/** Contracts-only addresses are delivered after the result file was written.
+ * The relay record supplements a matching on-chain request; it cannot confirm it. */
+export function applyLaunchRecord(launch: Launch, value: unknown): Launch {
+  const root = object(value), data = Object.keys(object(root.launch)).length ? object(root.launch) : root;
+  if (launch.type === 'A') return launch;
+  if (String(data.id) !== launch.launchId || Number(data.chainId) !== launch.chainId) return { ...launch, resultError: 'Launch record does not match this request and deploy chain. Retry the reading.' };
+  const artifacts: Record<string, any>[] = Array.isArray(data.artifacts) ? data.artifacts.map(object) : [];
+  const attestation = object(data.attestation ?? root.attestation);
+  const contracts: Record<string, any>[] = Array.isArray(attestation.contracts) ? attestation.contracts.map(object) : [];
+  const manifest = object(attestation.manifest);
+  const manifestContracts: Record<string, any>[] = Array.isArray(manifest.contracts) ? manifest.contracts.map(object) : [];
+  const named: Record<string, any>[] = artifacts.map((artifact, index) => {
+    const name = artifact.name ?? artifact.contractName ?? manifestContracts[index]?.contract ?? (artifacts.length === 1 && contracts.length === 1 ? contracts[0].name : undefined);
+    const contract = contracts.find(c => c.name === name || c.contractName === name);
+    return { ...artifact, name: contract?.name ?? contract?.contractName ?? name };
+  });
+  const deployer = named.find(a => a.role === 'deployer' || /deployer$/i.test(String(a.name ?? '')));
+  const hook = named.find(a => a.role === 'hook' && !/deployer$/i.test(String(a.name ?? '')))
+    ?? named.find(a => /hook/i.test(String(a.name ?? '')) && !/deployer$/i.test(String(a.name ?? '')))
+    ?? (named.length === 1 && !deployer ? named[0] : undefined);
+  const number = Number(data.launchNumber);
+  return { ...launch, launchRecordStatus: typeof data.status === 'string' ? data.status : undefined,
+    status: launch.completion?.status === 0 && data.status === 'live' ? 'live' : launch.status === 'failed' ? 'failed' : 'in-progress',
+    deployerAddress: address(deployer?.address), hookAddress: deployer ? null : address(hook?.address), hookPending: false,
+    launchNumber: Number.isSafeInteger(number) && number > 0 ? number : launch.launchNumber,
+    sourceRepoUrl: safeUrl(data.sourceRepoUrl) ?? launch.sourceRepoUrl,
+    jobIds: [...new Set([...launch.jobIds, ...(Array.isArray(data.jobs) ? data.jobs.map(object).map(j => j.id).filter((id: unknown): id is string => typeof id === 'string' && /^[\w-]+$/.test(id)) : [])])],
+    resultError: undefined,
+    txHashes: [...new Set([...launch.txHashes, ...artifacts.map(a => a.txHash).filter((tx: unknown): tx is string => typeof tx === 'string' && /^0x[\da-fA-F]{64}$/.test(tx))])],
   };
 }
 export function matchesQuery(launch: Launch, query: string) {

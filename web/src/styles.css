@@ -388,6 +388,10 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .address-value .btn { flex: 0 0 auto; }
 .copy-status { font-size: var(--text-body); flex-basis: 100%; }
 .copy-status:empty { display: none; }
+.proven-line { color: var(--pine); overflow-wrap: anywhere; }
+.launch-wait { max-width: 70ch; }
+.notification-prompt .actions, .hook-link { flex-wrap: wrap; }
+.hook-link { margin-block-end: 20px; }
 .detail-head { display: flex; justify-content: space-between; gap: 24px; align-items: start; margin-bottom: 24px; }
 .detail-head > div { min-width: 0; }
 .detail-head .btn { flex-shrink: 0; }

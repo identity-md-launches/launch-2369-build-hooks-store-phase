@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { decodeFunctionData, encodeAbiParameters, encodeEventTopics, parseAbiParameters, stringToHex, zeroAddress } from '../web/node_modules/viem/_esm/index.js';
 import * as C from '../src/lib/compose.ts';
-import { applyResult, blockShortOf, intakeAbi, launchFromRequested, matchRule, parseObjective } from '../web/src/chain/decode.ts';
+import { applyResult, applyLaunchRecord, blockShortOf, intakeAbi, launchFromRequested, matchRule, parseObjective } from '../web/src/chain/decode.ts';
 import { argumentValues, functionAbi, managementFunctions } from '../web/src/chain/manage.ts';
 import { DYNAMIC_FEE_FLAG, initializeAbi, poolCall } from '../web/src/chain/pool.ts';
 import { cacheKey, COMPLETE_TOPIC, LaunchStore, REQUEST_TOPIC } from '../web/src/chain/store.ts';
@@ -94,23 +94,25 @@ test('the verified deployer is resolved through hook(), including zero, retry an
     data: encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'), [stringToHex(JSON.stringify(C.body(d, payer))), payer, '0x00000000', token, 500000000000000000n]) };
   const completed = { ...base, logIndex: '0x1', topics: encodeEventTopics({ abi: intakeAbi, eventName: 'Completed', args: { requestId } }),
     data: encodeAbiParameters(parseAbiParameters('uint8,bytes32,string,bool'), [0, stringToHex('', { size: 32 }), 'ipfs://bafybeiehm6g5f64gnapfl2elqikvaxb2paxsljvhrow43dxoidn6macbpm/result.json', false]) };
-  const result = { launch: { chainId: 1, artifacts: [{ role: 'other', name: 'PondGuardDeployer', address: payer }] } };
+  const result = { launch: { id: '2424', chainId: 1 } };
+  const launchRecord = { id: '2424', chainId: 1, status: 'live', artifacts: [{ role: 'other', name: 'PondGuardDeployer', address: payer }] };
   const launch = launchFromRequested(requested, 1, config.intake.launchAction);
-  assert.equal(applyResult(launch, result).deployerAddress, payer);
+  assert.equal(applyResult(launch, result).deployerAddress, null);
+  assert.equal(applyLaunchRecord(applyResult(launch, result), launchRecord).deployerAddress, payer);
   assert.equal(applyResult(launch, result).hookAddress, null);
   const storage = new Map(); globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
   t.after(() => { delete globalThis.localStorage; });
   const block = String(BigInt(base.blockNumber));
-  storage.set(cacheKey(1), JSON.stringify({ version: 2, head: block, cursor: String(BigInt(block) - 1n), records: { [requestId]: { requested, completed, result, timestamp: 1792563203 } }, completions: {} }));
+  storage.set(cacheKey(1), JSON.stringify({ version: 2, head: block, cursor: String(BigInt(block) - 1n), records: { [requestId]: { requested, completed, result, launchRecord, timestamp: 1792563203 } }, completions: {} }));
   let returnedHook = zeroAddress, reads = 0;
   const client = { getChainId: async () => 1, getBlockNumber: async () => BigInt(block), getBlock: async () => ({ hash: base.blockHash, timestamp: 1792563203n }), getEnsName: async () => null,
     request: async ({ params: [q] }) => q.topics[0] === REQUEST_TOPIC ? [requested] : [completed],
     readContract: async call => { assert.equal(call.address, payer); assert.equal(call.functionName, 'hook'); reads++; return returnedHook; } };
-  const site = { ...config, chains: [{ ...config.chains.find(chain => chain.id === 1), intakeFromBlock: Number(block) }], intake: { ...config.intake, pollIntervalMs: 60000 } };
+  const site = { ...config, relayUrl: null, chains: [{ ...config.chains.find(chain => chain.id === 1), intakeFromBlock: Number(block) }], intake: { ...config.intake, pollIntervalMs: 60000 } };
   const store = new LaunchStore(site, { 1: client }), stop = store.start(); t.after(stop);
   const eventually = async predicate => { for (let i = 0; i < 100 && !predicate(); i++) await new Promise(resolve => setTimeout(resolve, 5)); assert.ok(predicate()); };
   await eventually(() => store.getSnapshot().launches[0]?.hookPending);
-  assert.equal(store.getSnapshot().launches[0].status, 'in-progress');
+  assert.equal(store.getSnapshot().launches[0].status, 'live');
   assert.equal(store.getSnapshot().launches[0].hookAddress, null);
   assert.equal(new LaunchStore(site, { 1: client }).getSnapshot().launches[0].hookPending, true);
   returnedHook = hook; store.retry();

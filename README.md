@@ -1,12 +1,12 @@
 # The Hooks Store
 
-Phase 1, jobs 1–8: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
+Phase 1, jobs 1–9: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
 
-Job 8 implements catalog hardening against **SPEC 1.31, section 4.16**. Every launch carries references and an explicit owner; B/C launches request a constructor-mined CREATE2 deployer and resolve its `hook()` before exposing controls. Type A restricts initialization to `$factory`. Fees, thresholds and units follow the pair, incompatible blocks are rejected, and Describe it never composes a hidden stack. The existing relay, chain configuration, wallet layer and lockfile are retained. Source and the finished `dist/` are delivered together.
+Job 9 implements **SPEC 1.34 §4.17** and the open launch/fee corrections. Matching block sets automatically resolve audited source through the relay before reuse. The runtime index is fetched at site load and is never bundled; failed imports compose a complete fresh request. Advanced own-code sources override automatic matching. Both review pages state the typical wait; hook pages retain provenance, offer Copy link and ask once about browser notifications.
 
-The independent read-only review and concrete follow-ups are in [tests/results/job8/ADVERSARIAL-REVIEW.md](tests/results/job8/ADVERSARIAL-REVIEW.md). Build, interaction, design and service observations are in [tests/results/job8/REVIEW.md](tests/results/job8/REVIEW.md). These checks do not certify a paid launch or its eventual contract.
+Request addresses are lowercase, including checksummed connected wallets and embedded addresses. Structural written-fee analysis resolves named recipients, parses whole amounts and checks the combined 5% cap per direction; ambiguous amounts lock payment. Contracts-only Live requires Completed status 0 plus a live relay launch record. Deployer and hook addresses come from that record and `hook()` independently; zero keeps hook controls locked while Live can be confirmed.
 
-The first job 8 revision fixed seven reopened findings; its evidence remains in [tests/results/job8/revision/REVIEW.md](tests/results/job8/revision/REVIEW.md). The second revision reproduces and fixes the three further written-fee findings and the combined-cap advisory. Current results and limitations are in [tests/results/job8/revision-2/REVIEW.md](tests/results/job8/revision-2/REVIEW.md); [.imd-responses.json](.imd-responses.json) answers all four. Earlier results remain historical evidence.
+Current evidence is in [tests/results/job9/REVIEW.md](tests/results/job9/REVIEW.md), with the separate read-only [adversarial review](tests/results/job9/ADVERSARIAL-REVIEW.md). Production build/typecheck, **1,145 unit tests and 234 browser tests passed**, with seven optional service/fork cases skipped. Earlier job results remain historical evidence. No paid launch or deployment was made.
 
 ## Install, preview and rebuild
 
@@ -51,9 +51,15 @@ Checks and imports use this tab’s `sessionStorage` (`hooks-store:check:v1`, `h
 
 The Store polls `/launches?limit=100` every 20 seconds. Names come from returned token/hook artifacts, including standalone hooks reported as `other`. Only entries matched by chain and launch id/hook address to a chain-proven store request can appear in its ticker. Initial history does not cast; a newly live matching entry casts once. Reduced motion keeps the canvas still while updating the message. The relative timestamp refreshes at least every minute, independently of cast deduplication. Long names wrap fully. An unavailable relay retains the chain-based ticker and catalog.
 
-Hook timelines discover pending jobs from the matching `/intake/<paymentChain>/<requestTx>` entry, or use the delivered job id. They poll `/jobs/:id` for **Building**, **Audit panel** and **Deploying** using the API’s `waiting`, `working`, `accepted` and `failed` node states. A completed job whose launch is not yet live activates Deploying. Live/Failed still depend on chain completion/result reads. Missing job data gets a Retry action without inventing progress. The relay caches successful GETs for 30 seconds, so those optional stages and names may lag that cache window.
+Hook timelines discover pending jobs from the matching `/intake/<paymentChain>/<requestTx>` entry, or use the delivered job id. They poll `/jobs/:id` for **Building**, **Audit panel** and **Deploying** using the API’s `waiting`, `working`, `accepted` and `failed` node states. A completed job whose launch is not yet live activates Deploying. Type A Live uses chain completion/result reads. Types B/C require Completed status 0 and a matching live launch record; their deployer/hook addresses are read separately and never gate Live. Failed remains the Intake completion status. Missing job data gets a Retry action without inventing progress. The relay caches successful GETs for 30 seconds, so those optional stages and names may lag that cache window.
 
 The scene keeps bank reeds, the distant boat and one or two birds over sparse canopy tiles. The hat overlay is removed; Pepe’s source grids are unchanged. It retains the existing monochrome inks, cell sizes, fish and cast timings.
+
+## Proven source and the wait
+
+`src/lib/proven.ts` fetches the spec repository's `evidence/proven-launches.json` once at site load with no bundled or cached-index fallback. Match type, chain and the set of active block ids; parameters, extra words and Custom rule do not break a match. A matched entry passes through `/import` automatically. Only a successful, matching pin adds `repoUrl`, `baseCommit`, the audited-source instruction after the opening sentence and the single provenance line. Failed, malformed or unavailable imports silently retain the fresh request and its normal wait estimate. Editing the stack/chain invalidates the match. An explicit Advanced source takes precedence and retains its existing manual resolution flow.
+
+Provenance follows the exact request on its Hook page, from the runtime index or the locally saved submitted source. Copy link copies the canonical hash route. The notification prompt is remembered once per browser; an opted-in launch is watched across hash navigation, and one notification is sent when it becomes Live. **The site must remain open**; this static export has no closed-tab push service. Browser permission and platform support still determine delivery.
 
 ## Launch safety and corrected requests
 
@@ -63,7 +69,7 @@ Every fee template uses IMD for an IMD-paired type A launch and ETH otherwise. I
 
 Written fees recognize `%`, `percent`, `per cent`, basis points, bps and common word fractions such as “half a percent”, including “goes to”, “tax”, “skim” and “keep” phrasings. They receive the same pair-side, settlement, recipient, claim and partial-fill facts. Explicit destinations, including “payable to”, feed the B/C constructor and fee footer; without one the request names the paying wallet. Unclear amounts, unresolved destinations and disagreements lock the free check and Launch. A percentage used for a price trigger or limit cannot supply a missing fee rate: the amount must be attached to the charge. The final-body guard also rejects a contradictory generated zero-fee line. A percentage protection limit without a charge still receives `Hook fee rate: 0%.`.
 
-The 5% cap counts the highest base/fade/volatility rate once, then adds Whale, jar, pot and written charges. Written fees are counted conservatively as additional charges; use the fee blocks for replacement schedules. A 3% Swap fee plus an additional written 4% fee totals 7% and locks submission. Fade starts at 3% by default and its input stops at 5%; combining it with other charges can still exceed the cap. Existing incompatible sell/liquidity promises have palette exclusions in both addition orders. B/C written pool-dependent interfaces must accept PoolId; both supplied pause and price-reading examples include it.
+The 5% cap is evaluated separately for buys and sells. Each direction counts its highest base/fade/volatility rate once, then adds applicable Whale, jar, buy-only pot and written charges. Written fees are counted conservatively as additional charges; use the fee blocks for replacement schedules. A 3% Swap fee plus an additional written 4% fee totals 7% and locks submission. Fade starts at 3% by default and its input stops at 5%; combining it with other charges can still exceed the cap. Existing incompatible sell/liquidity promises have palette exclusions in both addition orders. B/C written pool-dependent interfaces must accept PoolId; both supplied pause and price-reading examples include it.
 
 Yield blocks have no verified Aave/Morpho deployment in this project, so they are refused on both deploy chains. Batch auctions is dimmed as not in this version. Other checks cover fee-side/settlement mismatches, missing external addresses, every declared exclusion, base-fee dependencies, fixed/dynamic LP fee conflicts, incompatible opening/sunset dates, owner-power conflicts, unconditional liquidity promises and contradictory swap restrictions. Hook donations are explicitly exempt from Donation rules. Percentage inputs must follow their configured step so displayed rounding cannot evade the fee cap. Arbitrary natural language is not formally proven by these deterministic rules; the free check and audit remain necessary safeguards. No check guarantees that a paid build can finish.
 
@@ -92,6 +98,8 @@ Every Ethereum application read, including ENS, uses the configured mevblocker t
 
 The reader fetches Requested and Completed once for each shared window, matches completions by request id, and remembers completions encountered before older requests. Four historical windows run concurrently. Any failed window is halved until it is at most 1,000 blocks before the chain is reported unreadable. Failed groups never advance the history cursor. A 20-second head poll overlaps twelve blocks and reconciles cached events against successful canonical rereads. Removed/absent requests disappear from records, catalog and saved pending cards; removed completions also discard their derived result and Live status. Cached event block hashes are checked on refresh, including events older than the overlap. A failed read preserves cached data with an error. Late IPFS responses cannot restore an orphaned completion. Optional timestamps, ENS and IPFS result files do not delay the chain-read status.
 
+Contracts-only result files may predate deployment. The reader obtains `GET /launches/:id` through the relay, matches its id and deploy chain, identifies deployers using artifact/attestation names, and reads `hook()` on the deploy chain. A missing result can discover the launch via the matching Intake admission and job. Cached relay/hook data is invalidated with an orphaned completion.
+
 Only `univ4_hook` / `evm_contracts` bodies ending in this store's fixed composer marker become cards. Other IMD launches remain absent from the catalog. Address resolution describes an external hook as **A v4 hook not launched through this store**. There is no bundled launch snapshot. Completion failures, missing results and unavailable RPCs remain explicit and retryable.
 
 | Browser key | Content |
@@ -105,6 +113,23 @@ Only `univ4_hook` / `evm_contracts` bodies ending in this store's fixed composer
 Hook management and My hooks retain the delivered ownership gates: owner reads gate privileged functions, public functions and views derive from matched catalog rules, unknown addresses stay unknown, and query-param wallet viewing never authorizes writes. Current pool-dependent controls pass a selected PoolId. Earlier requests use the retained legacy catalog signatures; they are not silently changed. Featured placements remain phase 2.
 
 ## Validation
+
+Job 9 used an isolated `/tmp` dependency installation with the unchanged lockfile. Current results are in `tests/results/job9/`; the final production export is in `dist/`.
+
+```sh
+npm --prefix web run typecheck
+npm --prefix web run build
+npm --prefix web test
+npm --prefix web run test:e2e
+node scripts/check-delivery.mjs --out tests/results/job9
+```
+
+The Playwright suite serves the production export under `/preview/`, with deterministic relay/RPC fixtures. Seven live-service/local-fork cases require explicit opt-in. The final run passed 234 tests and skipped those seven; the job-specific tests cover proven matching/fallback at 320/390/1440, own-source override, checksummed wallets, Live with a zero hook, Copy link and notification deduplication. Accessibility checks on five rendered surfaces found zero WCAG A/AA violations; the design probe passed 13/16, with its remaining flags matching the prescribed pixel style. See the review for manual coverage and limitations.
+
+Required source and runtime assets are complete. Representative screenshots use compact WebP evidence. Historical PNG evidence was repacked losslessly to meet the 8 MiB bundle cap; `historical-png-packing.json` records matching decoded RGBA hashes, and no historical screenshot was removed. No ignore files, existing build configuration, dependency manifests, lockfiles or submodules changed.
+
+The following commands and results are retained from earlier jobs:
+
 
 ```sh
 npm --prefix web test

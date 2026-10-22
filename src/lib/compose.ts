@@ -1,7 +1,8 @@
 // SPEC 4 and 5: the block catalog, the combination rules of 4.10, the description text of 5.1 and the body of 5.2.
 // Pure functions only, so the same code runs in the Builder and in `node --test`.
 import catalogJson from '../blocks/catalog.json' with { type: 'json' };
-import { writtenFeeClauses, writtenFeeRateTotal, writtenFeeTargets } from './writtenFees.ts';
+import { writtenFeeClauses, writtenFeeRates, writtenFeeTargets } from './writtenFees.ts';
+import { matchProvenLaunch, type ProvenLaunch } from './proven.ts';
 
 export type LaunchType = 'A' | 'B' | 'C';
 export type Mode = 'prompt' | 'blocks';
@@ -25,7 +26,7 @@ export type Settings = {
   chain: number | null; pair: 'eth' | 'imd'; pool: number | null; rem: string; owner: string;
   token: string; tsym: string; hname: string; repo: string; commit: string;
 };
-export type Draft = { v: 2; type: LaunchType; mode: Mode | null; prompt: string; blocks: BlockEntry[]; settings: Settings; seeded: boolean };
+export type Draft = { v: 2; type: LaunchType; mode: Mode | null; prompt: string; blocks: BlockEntry[]; settings: Settings; seeded: boolean; proven?: ProvenLaunch };
 export type Issue = { field: string; message: string };
 
 export const CATALOG = catalogJson as { version: number; groups: { id: string; title: string }[]; blocks: BlockDef[] };
@@ -34,8 +35,8 @@ export const BY_ID: Record<string, BlockDef> = Object.fromEntries(BLOCKS.map(b =
 export const TOKEN_IDS = ['token', 'own-token'];
 export const CHAIN_NAMES: Record<number, string> = { 4663: 'Robinhood Chain', 1: 'Ethereum' };
 export const POOL_MANAGERS: Record<number, string> = {
-  1: '0x000000000004444c5dc75cB358380D2e3dE08A90',
-  4663: '0x8366a39CC670B4001A1121B8F6A443A643e40951',
+  1: '0x000000000004444c5dc75cb358380d2e3de08a90',
+  4663: '0x8366a39cc670b4001a1121b8f6a443a643e40951',
 };
 export const MAX_TEXT = 7500;
 export const MAX_WORDS = 3000;
@@ -60,7 +61,8 @@ const grouped = (v: ParamValue) => {
 export const shortAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a) ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
 export const isAddress = (a: string) => /^0x[0-9a-fA-F]{40}$/.test(a.trim());
 
-export const IMD_TREASURY = '0x3f252e859a277a86A3967c11D4E054B2f07a1F22';
+export const IMD_TREASURY = '0x3f252e859a277a86a3967c11d4e054b2f07a1f22';
+export const lowercaseAddresses = (text: string) => text.replace(/\b0x[\da-fA-F]{40}\b/g, address => address.toLowerCase());
 export const IMD_FEE_OPT_OUT = 'do not convert the fee to ETH and do not use any other pool';
 export const pairCurrency = (d: Draft) => d.type === 'A' && d.settings.pair === 'imd' ? 'IMD' : 'ETH';
 export type Context = { symbol: string; name: string; pair?: string; wallet?: string; destination?: string; jarAction?: string; feeBasis?: string; walletLimit?: string; baseRate?: string; feeApplies?: string; type?: LaunchType };
@@ -118,16 +120,23 @@ const walletOr = (v: string, wallet?: string) => v.trim() || wallet || 'the payi
 
 /** Section 4.10: the highest simultaneous pair-side rate, including replacement schedules. */
 export function rateTotal(d: Draft) {
-  let total = 0, base = 0;
+  const base = { buy: 0, sell: 0 }, extra = { buy: 0, sell: 0 };
+  const swap = activeBlocks(d).find(b => b.id === 'swap-fee');
   for (const b of activeBlocks(d)) {
-    if (b.id === 'swap-fee') base = Math.max(base, Number(b.p.rate) || 0);
-    if (b.id === 'fee-fade') base = Math.max(base, Number(b.p.start) || 0);
-    if (b.id === 'fee-vol') base = Math.max(base, Number(b.p.fee) || 0);
-    if (b.id === 'jar' || b.id === 'pot') total += Number(b.p.rate) || 0;
-    if (b.id === 'fee-size') total += Number(b.p.extra) || 0;
-    if (b.id === 'fee-dir') base = Math.max(base, Number(b.p.buy) || 0, Number(b.p.sell) || 0);
+    for (const direction of ['buy', 'sell'] as const) {
+      const applies = (b.id === 'swap-fee' ? b : swap)?.p.applies ?? 'buy and sell';
+      if (String(applies).includes(direction)) {
+        if (b.id === 'swap-fee') base[direction] = Math.max(base[direction], Number(b.p.rate) || 0);
+        if (b.id === 'fee-fade') base[direction] = Math.max(base[direction], Number(b.p.start) || 0);
+        if (b.id === 'fee-vol') base[direction] = Math.max(base[direction], Number(b.p.fee) || 0);
+      }
+      if (b.id === 'fee-dir') base[direction] = Math.max(base[direction], Number(b.p[direction]) || 0);
+      if (b.id === 'jar' || b.id === 'pot' && direction === 'buy') extra[direction] += Number(b.p.rate) || 0;
+      if (b.id === 'fee-size') extra[direction] += Number(b.p.extra) || 0;
+    }
   }
-  return Math.round((total + base) * 1000) / 1000 + writtenFeeRateTotal(writtenRules(d).join('\n'));
+  const written = writtenFeeRates(writtenRules(d).join('\n'));
+  return Math.max(...(['buy', 'sell'] as const).map(direction => Math.round((base[direction] + extra[direction]) * 1000) / 1000 + written[direction]));
 }
 
 /** Why a palette entry cannot be added right now, as its grey state pill; null when ADD is offered. */
@@ -231,7 +240,15 @@ export function compose(d: Draft, wallet?: string): string {
   }
   if (s.repo.trim()) lines.push(`Start from the creator’s own source at ${s.repo.trim()}${s.commit.trim() ? ` commit ${s.commit.trim()}` : ''}: audit it as imported code, adapt it to this launch, and keep its behavior.`);
   lines.push(`Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store${blocks.length ? ' block builder' : ''}.`);
-  return lines.join('\n');
+  const proven = d.proven && matchProvenLaunch(d, [d.proven]);
+  // The first line can contain several sentences in contracts-only launches.
+  if (proven) {
+    const instruction = `Start from the audited source at ${proven.repoUrl} commit ${proven.commit}: keep its behavior, apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as imported code.`;
+    const end = lines[0].indexOf('. ');
+    if (end < 0) lines.splice(1, 0, instruction);
+    else { const rest = lines[0].slice(end + 2); lines[0] = lines[0].slice(0, end + 1); lines.splice(1, 0, instruction, rest); }
+  }
+  return lowercaseAddresses(lines.join('\n').replace(/\bmy wallet\b/gi, wallet && isAddress(wallet) ? wallet.trim() : 'my wallet'));
 }
 
 export const feeRecipient = (d: Draft, wallet?: string): string => {
@@ -254,13 +271,15 @@ export const feeRecipient = (d: Draft, wallet?: string): string => {
 export type Body = Record<string, unknown>;
 /** Section 5.2, with references and an explicit owner for every launch kind. */
 export function body(d: Draft, wallet?: string): Body {
-  const s = d.settings, b: Body = { objective: compose(d, wallet), references: ['uniswap-v4-hooks', 'uniswap-v4-security'], owner: s.owner.trim() || wallet || '' };
+  const s = d.settings, b: Body = { objective: compose(d, wallet), references: ['uniswap-v4-hooks', 'uniswap-v4-security'], owner: (s.owner.trim() || wallet?.trim() || '').toLowerCase() };
   if (d.type === 'A') {
     Object.assign(b, { shape: 'chain', steps: [{ skill: 'build-contract-project' }, { skill: 'adversarial-review' }], onchain: 'univ4_hook', chainId: s.chain, pairWith: s.pair });
     if (s.pool !== null) b.economics = { poolBps: s.pool * 100, ...(s.rem.trim() ? { remainderTo: s.rem.trim().toLowerCase() } : {}) };
     if (tokenEntry(d)?.id === 'own-token') b.customToken = true;
   } else Object.assign(b, { onchain: 'evm_contracts', chainId: s.chain });
   if (s.repo.trim() && s.commit.trim()) { b.repoUrl = s.repo.trim(); b.baseCommit = s.commit.trim(); }
+  const proven = d.proven && matchProvenLaunch(d, [d.proven]);
+  if (proven) { b.repoUrl = proven.repoUrl; b.baseCommit = proven.commit; }
   b.github = true;
   return b;
 }

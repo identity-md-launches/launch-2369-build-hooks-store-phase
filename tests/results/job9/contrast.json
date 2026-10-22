@@ -1,0 +1,37 @@
+{
+  "method": "WCAG 2 relative luminance; computed foreground/background tokens confirmed on rendered surfaces. Transparent Launch container resolves to the paper page. Canvas/gradient text is excluded.",
+  "pairs": [
+    {
+      "role": "Proven line on Builder summary",
+      "foreground": "#1e5a3a",
+      "background": "#dfd3b0",
+      "ratio": 5.460833652038955,
+      "required": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Proven line on Launch page",
+      "foreground": "#1e5a3a",
+      "background": "#e9dfc3",
+      "ratio": 6.129992556369783,
+      "required": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Notice and wait text on panel",
+      "foreground": "#15130f",
+      "background": "#dfd3b0",
+      "ratio": 12.440861989686235,
+      "required": 4.5,
+      "passed": true
+    },
+    {
+      "role": "Neutral Copy link text",
+      "foreground": "#15130f",
+      "background": "#f3ecd8",
+      "ratio": 15.725927108116537,
+      "required": 4.5,
+      "passed": true
+    }
+  ]
+}

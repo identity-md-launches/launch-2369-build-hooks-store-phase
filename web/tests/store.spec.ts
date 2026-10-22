@@ -96,7 +96,7 @@ test('a filter shows the no-match state, and reset restores the empty pond, stat
   await expect(page.getByRole('checkbox', { name: 'Ethereum', exact: true })).toBeChecked();
   await expect(page.getByRole('checkbox', { name: 'Own source', exact: true })).toBeChecked();
   await expect(page.locator('.empty-pond')).toBeVisible(); await expect(page.locator('.card')).toHaveCount(0);
-  expect(await page.evaluate(() => performance.getEntriesByType('resource').some(r => r.name.includes('launches.json')))).toBe(false);
+  expect(await page.evaluate(() => performance.getEntriesByType('resource').some(r => /\/launches\.json$/.test(new URL(r.name).pathname)))).toBe(false);
 });
 test('describe saves required draft key, preserves other fields and opens the describe editor', async ({ page }) => {
   await ready(page);

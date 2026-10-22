@@ -7,7 +7,10 @@ import { execFileSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
-const out = 'tests/results/job8'; mkdirSync(out, { recursive: true });
+const outIndex = process.argv.indexOf('--out');
+const out = outIndex >= 0 ? process.argv[outIndex + 1] : 'tests/results/job8';
+if (!/^tests\/results\/job\d+(?:\/[\w-]+)*$/.test(out ?? '')) throw new Error('Use a job results directory under tests/results.');
+mkdirSync(out, { recursive: true });
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const walk = directory => readdirSync(directory).flatMap(name => {
   const path = join(directory, name); return statSync(path).isDirectory() ? walk(path) : [path];

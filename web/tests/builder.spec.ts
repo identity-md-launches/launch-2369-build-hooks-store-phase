@@ -132,7 +132,7 @@ test('pool share is of total supply with no default; Continue stays disabled unt
   }
   await page.locator('#s-pool').fill('50');
   await expect(continueButton(page)).toBeEnabled();
-  expect(await exact(page)).toContain(`Pool: 50% of the total supply seeds the pool; 10% goes to the swarm; the remaining 40% goes to ${getAddress(owner)}.`);
+  expect(await exact(page)).toContain(`Pool: 50% of the total supply seeds the pool; 10% goes to the swarm; the remaining 40% goes to ${owner.toLowerCase()}.`);
   await continueButton(page).click(); await expect(page).toHaveURL(/#launch$/);
 });
 

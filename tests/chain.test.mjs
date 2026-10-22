@@ -77,12 +77,12 @@ test('real result JSON for a completed build without addresses never fabricates 
  for(const bad of ['https://evil.example/result.json','ipfs://../../bad','ipfs://CID/other.json'])assert.equal(D.resultUrl(bad,config.intake.ipfsGateway),null);
  assert.equal(D.safeUrl('javascript:alert(1)'),null);
 });
-test('Live result mapping and 40/64-hex searches use exact launch addresses and hashes',()=>{
+test('Type A Live result mapping and 40/64-hex searches use exact launch addresses and hashes',()=>{
  // Schema fixture uses only real observed addresses; it is deliberately not represented as a captured result.json.
  const hook='0x82f636a92364d13754d7b3e72d460f0be20a28cc', token='0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86', dist='0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', currency='0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7';
  // Existing job7 requests identify a hook directly; job8 Deployer requests must
  // instead resolve hook() (covered in job8-ui.test.mjs).
- const direct={...launch(),request:launch().request.replace(/^Deploy one contract, [^\n]+/, 'Deploy one contract: PondGuard, a standalone Uniswap v4 hook on Robinhood Chain.')};
+ const direct={...launch(),type:'A',request:launch().request.replace(/^Deploy one contract, [^\n]+/, 'Deploy one contract: PondGuard, a standalone Uniswap v4 hook on Robinhood Chain.')};
  const row=D.applyResult(direct,{launch:{launchNumber:2336,hookAddress:hook,tokenAddress:token,distributorAddress:dist,poolKey:{currency0:token,currency1:currency}}});
  assert.equal(row.status,'live');assert.equal(row.launchNumber,2336);
  for(const q of [hook,token,dist,currency,row.requestId,row.txHashes[0],token.slice(2)])assert.equal(D.matchesQuery(row,q),true,q);
@@ -178,7 +178,7 @@ async function reorgStore(t, withCompletion = true, delayedResult = false) {
  const storage = new Map();
  globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) };
  t.after(() => { delete globalThis.localStorage; });
- const request = { ...requested(), blockNumber: reorg.requestBlock, blockHash: reorg.originalHash };
+ const request = { ...requested(body('A')), blockNumber: reorg.requestBlock, blockHash: reorg.originalHash };
  const completion = { ...completed(), blockNumber: reorg.completionBlock, blockHash: reorg.originalHash, logIndex: '0x1' };
  const canonical = { head: BigInt(reorg.initialHead), requests: [request], completions: withCompletion ? [completion] : [], hashes: new Map([[reorg.requestBlock, reorg.originalHash], [reorg.completionBlock, reorg.originalHash]]), fail: false };
  let release;

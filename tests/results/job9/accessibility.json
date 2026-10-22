@@ -1,0 +1,192 @@
+{
+  "engine": "Chromium via Playwright",
+  "offlineMockedServices": true,
+  "results": [
+    {
+      "route": "store",
+      "width": 390,
+      "violations": [],
+      "passes": 28,
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ],
+      "scrollWidth": 390,
+      "fonts": [
+        {
+          "family": "Pixelify Sans",
+          "status": "loaded"
+        },
+        {
+          "family": "Press Start 2P",
+          "status": "loaded"
+        },
+        {
+          "family": "VT323",
+          "status": "loaded"
+        }
+      ],
+      "proven": [],
+      "mainActions": [
+        {
+          "text": "Describe it",
+          "rect": {
+            "x": 25,
+            "y": 521.15625,
+            "width": 340,
+            "height": 44,
+            "top": 521.15625,
+            "right": 365,
+            "bottom": 565.15625,
+            "left": 25
+          }
+        }
+      ]
+    },
+    {
+      "route": "builder",
+      "width": 320,
+      "violations": [],
+      "passes": 30,
+      "incomplete": [
+        "color-contrast",
+        "label-content-name-mismatch"
+      ],
+      "scrollWidth": 320,
+      "fonts": [
+        {
+          "family": "Pixelify Sans",
+          "status": "loaded"
+        },
+        {
+          "family": "Press Start 2P",
+          "status": "loaded"
+        },
+        {
+          "family": "VT323",
+          "status": "loaded"
+        }
+      ],
+      "proven": [
+        {
+          "text": "Built from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22)",
+          "color": "rgb(30, 90, 58)",
+          "background": "rgb(223, 211, 176)",
+          "font": "500 18px / 27px \"Pixelify Sans\", \"Trebuchet MS\", system-ui, sans-serif"
+        }
+      ],
+      "mainActions": [],
+      "rtl": {
+        "scrollWidth": 320,
+        "width": 320
+      }
+    },
+    {
+      "route": "builder",
+      "width": 390,
+      "violations": [],
+      "passes": 30,
+      "incomplete": [
+        "color-contrast",
+        "label-content-name-mismatch"
+      ],
+      "scrollWidth": 390,
+      "fonts": [
+        {
+          "family": "Pixelify Sans",
+          "status": "loaded"
+        },
+        {
+          "family": "Press Start 2P",
+          "status": "loaded"
+        },
+        {
+          "family": "VT323",
+          "status": "loaded"
+        }
+      ],
+      "proven": [
+        {
+          "text": "Built from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22)",
+          "color": "rgb(30, 90, 58)",
+          "background": "rgb(223, 211, 176)",
+          "font": "500 18px / 27px \"Pixelify Sans\", \"Trebuchet MS\", system-ui, sans-serif"
+        }
+      ],
+      "mainActions": []
+    },
+    {
+      "route": "builder",
+      "width": 1440,
+      "violations": [],
+      "passes": 30,
+      "incomplete": [
+        "color-contrast",
+        "label-content-name-mismatch"
+      ],
+      "scrollWidth": 1440,
+      "fonts": [
+        {
+          "family": "Pixelify Sans",
+          "status": "loaded"
+        },
+        {
+          "family": "Press Start 2P",
+          "status": "loaded"
+        },
+        {
+          "family": "VT323",
+          "status": "loaded"
+        }
+      ],
+      "proven": [
+        {
+          "text": "Built from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22)",
+          "color": "rgb(30, 90, 58)",
+          "background": "rgb(223, 211, 176)",
+          "font": "500 18px / 27px \"Pixelify Sans\", \"Trebuchet MS\", system-ui, sans-serif"
+        }
+      ],
+      "mainActions": []
+    },
+    {
+      "route": "launch",
+      "width": 390,
+      "violations": [],
+      "passes": 32,
+      "incomplete": [],
+      "scrollWidth": 390,
+      "fonts": [
+        {
+          "family": "Pixelify Sans",
+          "status": "loaded"
+        },
+        {
+          "family": "Press Start 2P",
+          "status": "loaded"
+        },
+        {
+          "family": "VT323",
+          "status": "loaded"
+        }
+      ],
+      "proven": [
+        {
+          "text": "Built from a proven launch: PondsideGuard (launch 2424, audited 2026-10-22)",
+          "color": "rgb(30, 90, 58)",
+          "background": "rgba(0, 0, 0, 0)",
+          "font": "500 18px / 27px \"Pixelify Sans\", \"Trebuchet MS\", system-ui, sans-serif"
+        }
+      ],
+      "mainActions": []
+    }
+  ],
+  "focus": {
+    "tag": "BUTTON",
+    "text": "Continue to launch",
+    "outlineStyle": "solid",
+    "outlineWidth": "3px"
+  },
+  "errors": [],
+  "localResourceFailures": []
+}

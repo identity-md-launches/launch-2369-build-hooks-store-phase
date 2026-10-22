@@ -44,7 +44,7 @@ test('written percent, basis points, word fractions and flat fees never get a ze
 test('uncertain written fee amounts block the actual body; protection percentages and explicit no-fee rules retain the zero default', () => {
   for (const mode of ['prompt', 'custom']) {
     const d = draft('B', mode);
-    for (const prose of ['Charge a small hook fee on every swap.', 'Take a reasonable fee for the owner.', 'Use a swap fee.', 'Charge eleven basis points as a swap fee.']) {
+    for (const prose of ['Charge a small hook fee on every swap.', 'Take a reasonable fee for the owner.', 'Use a swap fee.', 'Charge an unspecified number of basis points as a swap fee.']) {
       words(d, prose);
       assert.ok(!C.compose(d, payer).includes('Hook fee rate: 0%.'));
       assert.ok(checkConsistency(C.body(d, payer)).some(f => f.code === 'fee-rate'), prose);

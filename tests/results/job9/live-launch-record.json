@@ -1,0 +1,44 @@
+{
+  "observedAt": "2026-10-22T02:23:12.337Z",
+  "source": "GET https://hooks-store-relay.hooks-store.workers.dev/launches/9f778988-4553-4ff6-99fb-706824bb9e31",
+  "id": "9f778988-4553-4ff6-99fb-706824bb9e31",
+  "launchNumber": 2424,
+  "chainId": 4663,
+  "status": "live",
+  "artifacts": [
+    {
+      "role": "other",
+      "name": "PondsideGuardDeployer",
+      "address": "0x0c45bc8ca7b4e08ea65962ae6837af0992809517",
+      "creationCodeHash": "cc42e83cf650a10b1d02e95b192ca3ecd149a5d4a48cdc9f41745fa3555821af",
+      "txHash": "0x314290c1b93c9498860169d616b014a5edbb9b547056e495f7422336ab24a6cd",
+      "blockNumber": 94682949,
+      "verifiedAt": "2026-10-22T00:01:12.373Z",
+      "verifyFailure": null
+    }
+  ],
+  "attestation": {
+    "contracts": [
+      {
+        "name": "PondsideGuard",
+        "path": "src/PondsideGuard.sol"
+      },
+      {
+        "name": "PondsideGuardDeployer",
+        "path": "src/PondsideGuardDeployer.sol"
+      }
+    ],
+    "manifest": {
+      "contracts": [
+        {
+          "contract": "PondsideGuardDeployer",
+          "constructorArgs": [
+            "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+            "$owner",
+            "$owner"
+          ]
+        }
+      ]
+    }
+  }
+}

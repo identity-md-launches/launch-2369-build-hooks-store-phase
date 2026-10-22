@@ -36,7 +36,7 @@ export function RelayTimeline({ launch, relay, onFix }: { launch: Launch; relay:
   const items = [
     { title: 'Requested', state: 'complete', detail: 'Seen on chain' },
     ...(stages ?? ['Building', 'Audit panel', 'Deploying'].map(title => ({ title, state: 'pending', detail: relay ? 'Waiting for IMD stage details' : 'No separate chain event' }))),
-    { title: final, state: terminal ? 'complete' : 'pending', detail: launch.status === 'live' ? 'Addresses delivered' : launch.status === 'failed' ? 'Intake reported failure' : 'Waiting for chain confirmation' },
+    { title: final, state: terminal ? 'complete' : 'pending', detail: launch.status === 'live' ? launch.type === 'A' ? 'Addresses delivered' : 'Intake confirmed; launch record is live' : launch.status === 'failed' ? 'Intake reported failure' : 'Waiting for chain and launch confirmation' },
   ];
   const current = terminal ? 4 : items.findIndex(i => i.state === 'active' || i.state === 'failed');
   return <>

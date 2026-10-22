@@ -1,0 +1,92 @@
+{
+  "screenshots": [
+    {
+      "path": "tests/results/job9/summary-fallback-390.webp",
+      "sourceSha256": "c5d7ffa963f428449dd38bb9520357a1548bed71842a0f279398d6f95c512280",
+      "sourceDimensions": [
+        390,
+        844
+      ],
+      "dimensions": [
+        390,
+        844
+      ],
+      "clip": null,
+      "encoding": "WebP quality 72; no resize",
+      "bytes": 22310
+    },
+    {
+      "path": "tests/results/job9/summary-proven-1440.webp",
+      "sourceSha256": "d5e356415887da5f3e6dc9a5a4655a3b008d566fac614783134043fe744193ce",
+      "sourceDimensions": [
+        1440,
+        844
+      ],
+      "dimensions": [
+        340,
+        454
+      ],
+      "clip": [
+        954,
+        156,
+        1294,
+        610
+      ],
+      "encoding": "WebP quality 72; no resize",
+      "bytes": 15034
+    },
+    {
+      "path": "tests/results/job9/hook-live-zero-390.webp",
+      "sourceSha256": "aeaeec86b59fdca2ce569ce95ce53204d7e97f1edbda11c6b396dfde59633a3f",
+      "sourceDimensions": [
+        390,
+        844
+      ],
+      "dimensions": [
+        390,
+        844
+      ],
+      "clip": null,
+      "encoding": "WebP quality 72; no resize",
+      "bytes": 20306
+    },
+    {
+      "path": "tests/results/job9/store-390.webp",
+      "sourceSha256": "0ab21827ecf7d7b743371f523a3dd16ff602ff7f0af9b4cf4c3d98d98d2a79d4",
+      "sourceDimensions": [
+        390,
+        844
+      ],
+      "dimensions": [
+        390,
+        844
+      ],
+      "clip": null,
+      "encoding": "WebP quality 72; no resize",
+      "bytes": 26472
+    },
+    {
+      "path": "tests/results/job9/builder-summary-complete-390.webp",
+      "sourceSha256": "f5d7af1721695cd03bad9cdb74eb394dab6ded856ba4b65c7606bd5ef5f36ed0",
+      "sourceDimensions": [
+        390,
+        5907
+      ],
+      "dimensions": [
+        358,
+        1153
+      ],
+      "clip": [
+        16,
+        4667,
+        374,
+        5820
+      ],
+      "encoding": "Full-page Chromium capture cropped to actual preview bounds, WebP quality 72; no resize",
+      "bytes": 42148
+    }
+  ],
+  "allThreeWidthsTested": true,
+  "hookScreenshotRepresentativeWidth": 390,
+  "note": "Representative screenshots retained; the full Playwright result list records all 320, 390 and 1440 cases. Desktop image is cropped to the summary column without scaling."
+}

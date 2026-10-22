@@ -16,6 +16,11 @@ function draft(type = 'A', pair = 'imd', chain = 1) {
 function custom(text, type = 'A', pair = 'imd', chain = 1) {
   const d = draft(type, pair, chain); d.blocks.push({ id: 'custom', p: { text } }); return d;
 }
+// Settlement/destination modifiers below attach to an explicitly rated charge.
+function feeCustom(text, type, pair, chain) {
+  const d = custom(text, type, pair, chain), fee = entry('swap-fee');
+  fee.p.to = "IMD's treasury"; d.blocks.push(fee); return d;
+}
 const findings = d => checkConsistency(body(d, payer));
 
 for (const type of ['A', 'B', 'C']) for (const pair of ['imd', 'eth']) for (const chain of [1, 4663]) {
@@ -40,19 +45,19 @@ for (const type of ['A', 'B', 'C']) for (const pair of ['imd', 'eth']) for (cons
   test(`custom fee settlement assertions/${type}/${pair}/${chain}`, () => {
     const expected = type === 'A' && pair === 'imd' ? 'IMD' : 'ETH', wrong = expected === 'IMD' ? 'ETH' : 'IMD';
     for (const phrase of ['Every swap fee must be paid in', 'Swap fees are paid out in', 'Pay the swap fees in', 'All hook fees are denominated in', 'Distribute the fee in', 'Swap fees are payable in', 'All hook fees must be sent in', 'Fee payments must be made in', 'The fee payment currency is']) {
-      const bad = `${phrase} ${wrong}.`, f = findings(custom(bad, type, pair, chain));
+      const bad = `${phrase} ${wrong}.`, f = findings(feeCustom(bad, type, pair, chain));
       assert.ok(f.some(f => f.code === 'fee-settlement' && f.sentence.includes(bad)), bad);
-      assert.deepEqual(findings(custom(`${phrase} ${expected}.`, type, pair, chain)), []);
+      assert.deepEqual(findings(feeCustom(`${phrase} ${expected}.`, type, pair, chain)), []);
     }
-    assert.deepEqual(findings(custom(`Do not pay the fee in ${wrong}.`, type, pair, chain)), []);
+    assert.deepEqual(findings(feeCustom(`Do not pay the fee in ${wrong}.`, type, pair, chain)), []);
   });
   test(`fee recipient clauses/${type}/${pair}/${chain}`, () => {
     for (const clause of ['Send swap fees to', 'Send all accrued hook fees to', 'The fees go to', 'Swap fees must go to', 'Send the fee to']) {
       for (const target of ['Bob', 'bob.eth', `0x${'0'.repeat(40)}`]) {
         const text = `${clause} ${target}.`;
-        assert.ok(findings(custom(text, type, pair, chain)).some(f => f.code === 'recipient' && f.sentence.includes(text)), text);
+        assert.ok(findings(feeCustom(text, type, pair, chain)).some(f => f.code === 'recipient' && f.sentence.includes(text)), text);
       }
-      assert.deepEqual(findings(custom(`${clause} ${IMD_TREASURY}.`, type, pair, chain)), []);
+      assert.deepEqual(findings(feeCustom(`${clause} ${IMD_TREASURY}.`, type, pair, chain)), []);
     }
   });
   test(`dependency addresses belong to the service, not the recipient/${type}/${pair}/${chain}`, () => {
