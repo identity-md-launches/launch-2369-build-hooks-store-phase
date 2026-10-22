@@ -1,0 +1,87 @@
+{
+  "job": 12,
+  "specVersion": "1.50",
+  "productionBuild": "passed",
+  "typecheck": "passed",
+  "unit": {
+    "passed": 1177,
+    "failed": 0
+  },
+  "relay": {
+    "passed": 9,
+    "failed": 0
+  },
+  "chromium": {
+    "startTime": "2026-10-22T19:39:06.187Z",
+    "duration": 112996.826,
+    "expected": 277,
+    "skipped": 7,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "job12BrowserCases": 23,
+  "designProbe": {
+    "passed": 13,
+    "total": 16,
+    "retainedSpecExceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "liveRequestSmoke": {
+    "readOnly": true,
+    "connectedWallet": false,
+    "requests": [
+      {
+        "number": 2456,
+        "requestId": "0xbb2e520598c9b6866601219205d5893cd734fcd3bd6bf74f874cc3272fc087ca",
+        "passed": true,
+        "elapsedMs": 3941,
+        "heading": "Contracts launch 2456, live",
+        "explorer": "https://explorer.imd.fun/jobs/a9818b4d-a1fe-4ef7-bab0-82509f56b0ac"
+      },
+      {
+        "number": 2454,
+        "requestId": "0xd6e3f156fa71d5d898c6cbc288082788ab70a76909e4b4f81298c24a18afcb1a",
+        "passed": true,
+        "elapsedMs": 5820,
+        "heading": "Contracts launch 2454, live",
+        "explorer": "https://explorer.imd.fun/jobs/7f951ad8-ac62-41f0-b968-79737c96623e"
+      }
+    ],
+    "pageErrors": [],
+    "passed": true
+  },
+  "limitations": [
+    "Seven existing opt-in tests skipped; see validation.md.",
+    "Browser connector could not find Chrome; rendered checks used Playwright Chromium.",
+    "Physical devices, screen readers and native browser zoom were not tested."
+  ],
+  "job12FinalRerun": {
+    "passed": 23,
+    "failed": 0,
+    "catalogViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1100,
+        800
+      ],
+      [
+        1920,
+        1080
+      ]
+    ]
+  },
+  "delivery": {
+    "exportIntegrityPassed": true,
+    "budgetReport": "submission-budget.json",
+    "limitBytes": 8388608,
+    "protectedPathsChanged": [],
+    "dependencyOrCachePaths": [],
+    "submodules": []
+  }
+}

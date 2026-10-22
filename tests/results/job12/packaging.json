@@ -1,0 +1,32 @@
+{
+  "reason": "Fit the complete 8 MiB submission while preserving all current source, runtime assets and current validation evidence.",
+  "retired": [
+    {
+      "path": "artifacts/builder-320.png",
+      "bytes": 27737
+    },
+    {
+      "path": "artifacts/builder-390.png",
+      "bytes": 29259
+    },
+    {
+      "path": "artifacts/builder-768.png",
+      "bytes": 35121
+    },
+    {
+      "path": "artifacts/builder-1100.png",
+      "bytes": 69604
+    },
+    {
+      "path": "artifacts/builder-1440.png",
+      "bytes": 73925
+    },
+    {
+      "path": "artifacts/builder-2560.png",
+      "bytes": 80163
+    }
+  ],
+  "replacement": "Current Builder JPEGs and complete width/scroll results in tests/results/job12/. Historical reports under tests/results/ retained.",
+  "ignoreFilesChanged": false,
+  "requiredDeliverablesRemoved": false
+}

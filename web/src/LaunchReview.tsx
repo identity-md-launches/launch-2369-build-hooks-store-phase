@@ -153,7 +153,7 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const summaryOf = (block: ReturnType<typeof activeBlocks>[number]) => block.id === 'custom' ? sentenceOf(block, ctx)
     : activeBlocks(draft).some(rule => rule.id === 'fee-split') && ['swap-fee', 'fee-dir'].includes(block.id) ? shortOf(block, ctx).replace(/→ .+$/, '→ Split the fee distribution') : shortOf(block, ctx);
   return <section className="wrap page launch-review"><div className="detail-head"><div><h1>Review your launch</h1><p>Check the request, then pay the swarm to build it.</p></div><a className="btn" href="#builder">Edit in Builder</a></div>
-    <ProvenLine entry={automatic.proven} />
+    <ProvenLine entry={automatic.proven} draft={draft} />
     <p className="launch-wait">{LAUNCH_WAIT}</p>
     <div className="launch-columns"><section className="box"><h2>Your hook, in short</h2><table className="review-table"><tbody>{rows.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Text>{value}</Text></td></tr>)}<tr><th scope="row">Rules</th><td>{activeBlocks(draft).length ? <ol>{activeBlocks(draft).map((b, i) => <li key={b.id}><Text>{`${i + 1}. ${summaryOf(b)}`}</Text><WarnSign def={BY_ID[b.id]} tested={false} /></li>)}</ol> : 'No block rules; the description above applies.'}</td></tr></tbody></table>{activeBlocks(draft).length > 6 && <p className="notice">Every extra rule is more for the audit panel to refuse. The contract has a <Text>24 KB</Text> size limit.</p>}</section>
     <section className="box"><h2>What you pay</h2><table className="review-table fee-table"><tbody>

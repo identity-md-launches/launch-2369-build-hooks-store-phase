@@ -21,10 +21,39 @@ export type Placement = { id: bigint; listingId: bigint; revision: bigint; payer
 export type Ad = { chainId: number; placement: Placement; listing: Listing; metadata: Metadata; total: bigint; launch?: Launch };
 export const activePlacement = (p: Placement, now = Math.floor(Date.now() / 1000)) => Number(p.status) === 1 && p.endsAt > BigInt(now);
 export const sortAds = (ads: Ad[]) => ads.sort((a, b) => a.total === b.total ? a.placement.id < b.placement.id ? -1 : a.placement.id > b.placement.id ? 1 : a.chainId - b.chainId : a.total > b.total ? -1 : 1);
-/** Ordinal position in the same combined, store-only strip shown on Store. */
+export type MergedAd = Ad & { placements: Ad[] };
+const hookIdentity = (ad: Ad) => ad.listing ? `${ad.listing.chainId}:${ad.listing.hook.toLowerCase()}` : ad.launch?.id ?? `${ad.chainId}:${ad.placement.id}`;
+/** One strip card per deployed hook, funded by any number of promotion chains. */
+export function mergeAds(ads: Ad[]): MergedAd[] {
+  const groups = new Map<string, MergedAd>();
+  for (const ad of ads.filter(a => !!a.launch && activePlacement(a.placement))) {
+    const key = hookIdentity(ad), previous = groups.get(key);
+    if (!previous) { groups.set(key, { ...ad, placement: { ...ad.placement }, placements: [ad] }); continue; }
+    previous.total += ad.total; previous.placements.push(ad);
+    if (ad.placement.endsAt > previous.placement.endsAt) previous.placement.endsAt = ad.placement.endsAt;
+    if (ad.placement.startsAt < previous.placement.startsAt) previous.placement.startsAt = ad.placement.startsAt;
+  }
+  const firstPurchase = (ad: MergedAd) => ad.placements.reduce((first, next) =>
+    next.placement.startsAt < first.placement.startsAt || next.placement.startsAt === first.placement.startsAt && (next.placement.id < first.placement.id || next.placement.id === first.placement.id && next.chainId < first.chainId) ? next : first);
+  return [...groups.values()].sort((a, b) => {
+    if (a.total !== b.total) return a.total > b.total ? -1 : 1;
+    const first = firstPurchase(a), second = firstPurchase(b);
+    return first.placement.startsAt !== second.placement.startsAt ? first.placement.startsAt < second.placement.startsAt ? -1 : 1
+      : first.placement.id < second.placement.id ? -1 : first.placement.id > second.placement.id ? 1 : first.chainId - second.chainId;
+  });
+}
+/** Position uses the same combined hook totals as the Store strip. */
 export function placementPosition(ads: Ad[], ad: Ad) {
-  const visible = sortAds(ads.filter(a => !!a.launch && activePlacement(a.placement)));
-  return { rank: visible.findIndex(a => a.chainId === ad.chainId && a.placement.id === ad.placement.id) + 1, total: visible.length };
+  const visible = mergeAds(ads);
+  return { rank: visible.findIndex(a => a.placements.some(p => p.chainId === ad.chainId && p.placement.id === ad.placement.id)) + 1, total: visible.length };
+}
+/** Keep wallet funds distinct from the deposit inside the promotion contract. */
+export async function readPromotionBalances(client: ReadClient, config: AdsConfig, imd: Address, account: Address) {
+  const [wallet, deposited] = await Promise.all([
+    client.readContract({ address: imd, abi: erc20Abi, functionName: 'balanceOf', args: [account] }),
+    client.readContract({ address: config.placements, abi: placementsAbi, functionName: 'available', args: [account] }) as Promise<bigint>,
+  ]);
+  return { wallet, deposited };
 }
 export const listingIdentity = (chainId: number, hook: Address, account: Address) => keccak256(encodeAbiParameters([{ type: 'uint256' }, { type: 'address' }, { type: 'address' }], [BigInt(chainId), hook, account]));
 export function listingMetadata(launch: Launch): Metadata {
@@ -70,7 +99,7 @@ export async function readAds(client: ReadClient, chainId: number, config: AdsCo
   }
   return sortAds(rows);
 }
-export type AdsWallet = { client: ReadClient; wallet: WalletClient; account: Address; chainId: number; config: AdsConfig; imd: Address; onHash?: (hash: Address | `0x${string}`) => void };
+export type AdsWallet = { client: ReadClient; wallet: WalletClient; account: Address; chainId: number; config: AdsConfig; imd: Address; onHash?: (hash: Address | `0x${string}`) => void; onConfirmed?: () => void };
 export async function sendAdTransaction(ctx: AdsWallet, address: Address, abi: Abi, functionName: string, args: unknown[]): Promise<TransactionReceipt> {
   if (await ctx.client.getChainId() !== ctx.chainId || await ctx.wallet.getChainId() !== ctx.chainId) throw new Error('Switch your wallet to the promotion chain and try again.');
   if ((await ctx.wallet.getAddresses())[0]?.toLowerCase() !== ctx.account.toLowerCase()) throw new Error('The connected wallet changed. Review the promotion again.');
@@ -78,6 +107,7 @@ export async function sendAdTransaction(ctx: AdsWallet, address: Address, abi: A
   const hash = await ctx.wallet.writeContract({ ...simulation.request, chain: ctx.client.chain }); ctx.onHash?.(hash);
   const receipt = await ctx.client.waitForTransactionReceipt({ hash });
   if (receipt.status !== 'success') throw new Error('Transaction reverted. Retry after checking the current terms.');
+  ctx.onConfirmed?.();
   return receipt;
 }
 export async function depositFor(ctx: AdsWallet, required: bigint) {

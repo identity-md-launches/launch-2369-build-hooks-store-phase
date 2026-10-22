@@ -147,7 +147,7 @@ test('export works offline at a gateway subpath with local fonts and a single be
   await page.route('**/*', route => route.request().url().startsWith('http://127.0.0.1:4173/') ? route.continue() : route.abort());
   await page.emulateMedia({ colorScheme: 'dark' }); await page.goto('#store');
   await expect(page.locator('.empty-pond')).toBeVisible(); await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => ['Press Start 2P', 'Pixelify Sans', 'VT323'].every(f => document.fonts.check(`16px "${f}"`)))).toBe(true);
+  expect(await page.evaluate(() => ['Press Start 2P', 'Atkinson Hyperlegible', 'JetBrains Mono'].every(f => document.fonts.check(`16px "${f}"`)))).toBe(true);
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(233, 223, 195)'); await expect(page.locator('.stats')).toHaveCount(0);
   const assets = await page.locator('script[src],link[rel=stylesheet]').evaluateAll(els => els.map(el => el.getAttribute('src') ?? el.getAttribute('href')));
   expect(assets.every(url => url?.startsWith('./'))).toBe(true);

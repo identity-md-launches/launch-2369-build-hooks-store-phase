@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-22T19:18:12.774Z",
+  "readOnly": true,
+  "chains": [
+    {
+      "chainId": 4663,
+      "registryHasCode": true,
+      "placementsHaveCode": true,
+      "registryMatchesConfig": true,
+      "imdConfigured": true,
+      "proceedsRecipientConfigured": true,
+      "placementCount": "1"
+    },
+    {
+      "chainId": 1,
+      "registryHasCode": true,
+      "placementsHaveCode": true,
+      "registryMatchesConfig": true,
+      "imdConfigured": true,
+      "proceedsRecipientConfigured": true,
+      "placementCount": "0"
+    }
+  ],
+  "limitation": "Contract setup is read live. An unset IMD or proceeds recipient disables deposit and purchase; only the contract owner can configure them. This task never changes live chain state. Payment validation uses an isolated local fork."
+}

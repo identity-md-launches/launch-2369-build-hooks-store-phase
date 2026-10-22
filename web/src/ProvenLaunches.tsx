@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Draft } from '../../src/lib/compose';
-import { fetchProvenLaunches, matchProvenLaunch, provenLine, type ProvenLaunch } from '../../src/lib/proven';
+import { fetchProvenLaunches, matchProvenLaunch, provenLine, provenRequestLine, type ProvenLaunch } from '../../src/lib/proven';
 import { importProvenSource } from './relay';
 
 const ProvenContext = createContext<{ entries: ProvenLaunch[]; loaded: boolean }>({ entries: [], loaded: false });
@@ -15,8 +15,8 @@ export function ProvenLaunches({ children }: { children: ReactNode }) {
   }, []);
   return <ProvenContext.Provider value={{ entries, loaded }}>{children}</ProvenContext.Provider>;
 }
-export function ProvenLine({ entry }: { entry?: ProvenLaunch }) {
-  return entry ? <p className="proven-line">{provenLine(entry)}</p> : null;
+export function ProvenLine({ entry, draft, request }: { entry?: ProvenLaunch; draft?: Draft; request?: string }) {
+  return entry ? <p className="proven-line">{request ? provenRequestLine(entry, request) : provenLine(entry, draft)}</p> : null;
 }
 
 const resolved = new Map<string, ProvenLaunch | null>();

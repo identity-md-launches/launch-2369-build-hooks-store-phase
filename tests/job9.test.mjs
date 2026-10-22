@@ -52,7 +52,7 @@ test('proven match compares type, chain and id set; parameters, words and Custom
   assert.equal(input.objective.replace(instruction + '\n', '').replace(/\n/g, ' '), fresh.objective.replace(/\n/g, ' '));
   assert.equal(provenFromRequest(input.objective, [proven]), proven);
   assert.deepEqual(checkConsistency(input), []);
-  for (const changed of [{ ...d, type: 'C' }, { ...d, settings: { ...d.settings, chain: 1 } }, C.addBlock(d, 'oracle'), { ...d, mode: 'prompt' }]) {
+  for (const changed of [{ ...d, type: 'C' }, { ...d, blocks: [C.entry('oracle')] }, { ...d, mode: 'prompt' }]) {
     assert.equal(matchProvenLaunch(changed, [proven]), undefined);
     assert.equal(C.body({ ...changed, proven }, payer).repoUrl, undefined);
     assert.ok(!C.compose({ ...changed, proven }, payer).includes('Start from the audited source'));

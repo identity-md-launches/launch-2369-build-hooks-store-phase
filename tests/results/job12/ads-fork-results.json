@@ -1,0 +1,15 @@
+{
+  "localOnly": true,
+  "fork": "Robinhood Chain",
+  "contractsFromCommit": "952e62de284440144a24fc4ec4868461e4534612",
+  "checks": [
+    "createListing",
+    "approve and deposit real fork IMD",
+    "purchase",
+    "carousel retains purchased revision after edit",
+    "second wallet deposit and boost",
+    "cancel removes ad and refunds only pro-rata base; boosts forfeited",
+    "withdraw available balance"
+  ],
+  "passed": true
+}

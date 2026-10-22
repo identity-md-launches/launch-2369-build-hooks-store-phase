@@ -571,7 +571,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     </div>
     {/* SPEC 3.2: the card never exceeds the viewport; its details scroll inside it and the actions stay in reach. */}
     <div className="hc-scroll" tabIndex={0} role="region" aria-label="Rules, money and readiness">
-      <ProvenLine entry={automatic.proven} />
+      <ProvenLine entry={automatic.proven} draft={draft} />
       {tiles}
       <div className="flow"><b>Where the money goes</b><span>{money.join(' · ')}</span>{hasFees && <span className="muted">Fees are taken on the {pair} side and settled in {pair}.</span>}</div>
       {readyList}
@@ -579,7 +579,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     </div>
     <div className="hc-foot">
     <div className="cost"><span>Swarm fee <strong>0.5 IMD</strong></span><span>Gas <strong>2 tx</strong></span></div>
-    <p className="launch-wait">{LAUNCH_WAIT}</p>
+    <p className="launch-wait">{LAUNCH_WAIT}{automatic.proven && <span className="audited-stack">This stack starts from audited code.</span>}</p>
     <div className="hc-actions">
       <button className="btn" type="button" disabled={!config.relayUrl || check.busy || !sourceReady || issues.length > 0 || check.consistency.length > 0} aria-describedby="check-note" onClick={() => void check.run()}>{check.busy ? 'Checking with the swarm…' : 'Check with the swarm (free)'}</button>
       <button className="btn primary" type="button" disabled={!ready} aria-describedby="check-note"

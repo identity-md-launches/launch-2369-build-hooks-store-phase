@@ -1,0 +1,32 @@
+[WebServer] (node:31) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 23 tests using 1 worker
+
+(node:43) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/job12.spec.ts:27:65 › nearest match, exact sheet and paid swarm review at 390 (1.2s)
+  ✓   2 tests/job12.spec.ts:27:65 › nearest match, exact sheet and paid swarm review at 1100 (1.1s)
+  ✓   3 tests/job12.spec.ts:27:65 › nearest match, exact sheet and paid swarm review at 1920 (1.3s)
+  ✓   4 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 320x900 (654ms)
+  ✓   5 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 390x844 (641ms)
+  ✓   6 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 768x900 (698ms)
+  ✓   7 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 1100x800 (707ms)
+  ✓   8 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 1366x768 (696ms)
+  ✓   9 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 1440x900 (704ms)
+  ✓  10 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 1920x1080 (742ms)
+  ✓  11 tests/job12.spec.ts:42:119 › fluid Builder edges, fixed type and card fit at 2560x1440 (798ms)
+  ✓  12 tests/job12.spec.ts:51:55 › seven findings do not leave a phantom scroll gap at 1920x1080 (645ms)
+  ✓  13 tests/job12.spec.ts:51:55 › seven findings do not leave a phantom scroll gap at 1366x768 (592ms)
+  ✓  14 tests/job12.spec.ts:66:64 › proven catalog card and hook preload their audited blocks at 390 (934ms)
+  ✓  15 tests/job12.spec.ts:66:64 › proven catalog card and hook preload their audited blocks at 1100 (993ms)
+  ✓  16 tests/job12.spec.ts:66:64 › proven catalog card and hook preload their audited blocks at 1920 (1.1s)
+  ✓  17 tests/job12.spec.ts:72:31 › loaded reading, rule, address, request and cost fonts at 390 (929ms)
+  ✓  18 tests/job12.spec.ts:72:31 › loaded reading, rule, address, request and cost fonts at 1440 (945ms)
+  ✓  19 tests/job12.spec.ts:82:225 › public ads request 2454 resolves its Requested event without a wallet (472ms)
+  ✓  20 tests/job12.spec.ts:82:225 › public ads request 2456 resolves its Requested event without a wallet (453ms)
+  ✓  21 tests/job12.spec.ts:134:1 › two labelled balances and the low-wallet note use controlled RPC readings (599ms)
+  ✓  22 tests/job12.spec.ts:140:1 › Robinhood hook promoted with IMD on Ethereum reaches Done and refreshes both balances (1.2s)
+  ✓  23 tests/job12.spec.ts:150:1 › one featured card ranks the summed hook total and own placements show both payment chains (668ms)
+
+  23 passed (22.9s)

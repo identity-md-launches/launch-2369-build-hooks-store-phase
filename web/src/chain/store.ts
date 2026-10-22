@@ -51,6 +51,7 @@ export class LaunchStore {
   private hookDue = new Map<string, number>();
   private recordDue = new Map<string, number>();
   private named = new Set<string>();
+  private enrichments = new Map<number, Promise<void>>();
   private state: StoreState;
   readonly config: SiteConfig;
   private onCast: typeof cast;
@@ -103,6 +104,25 @@ export class LaunchStore {
     for (const chain of this.config.chains) void this.run(chain.id, epoch);
     this.timer = setInterval(() => this.poll(), this.config.intake.pollIntervalMs);
     return () => { ++this.epoch; clearInterval(this.timer); };
+  }
+  /** Resolve a public hash route from its Requested event, independently of wallet/history backfill. */
+  async resolveRequest(chainId: number, requestId: string) {
+    const chain = this.config.chains.find(c => c.id === chainId);
+    if (!chain || !/^0x[\da-f]{64}$/i.test(requestId)) return;
+    const client = this.clients[chainId];
+    const head = await client.getBlockNumber({ cacheTime: 0 });
+    const ranges = [...backwardsRanges(BigInt(chain.intakeFromBlock), head, BigInt(chain.logRange))];
+    for (let i = 0; i < ranges.length; i += 4) {
+      const windows = await Promise.all(ranges.slice(i, i + 4).map(([from, to]) => readLogs(client, this.config.intake.address, [REQUEST_TOPIC, requestId as Hex, null, this.config.intake.launchAction as Hex], from, to)));
+      const requests = windows.flat().filter(log => log.topics[1]?.toLowerCase() === requestId.toLowerCase());
+      if (!requests.length) continue;
+      const completions: RawLog[] = [];
+      for (const [from, to] of backwardsRanges(BigInt(requests[0].blockNumber), head, BigInt(chain.logRange))) completions.push(...await readLogs(client, this.config.intake.address, [COMPLETE_TOPIC, requestId as Hex], from, to));
+      this.accept(chainId, requests, completions);
+      writeCache(cacheKey(chainId), this.caches.get(chainId));
+      await this.enrich(chainId, this.epoch);
+      return;
+    }
   }
   private poll = () => { for (const chain of this.config.chains) void this.run(chain.id, this.epoch); };
   retry = () => { this.resultDue.clear(); this.hookDue.clear(); this.recordDue.clear(); this.poll(); };
@@ -228,7 +248,9 @@ export class LaunchStore {
       const row = launchFromRequested(log, chainId, this.config.intake.launchAction);
       if (!row) continue;
       const existed = cache.records[row.requestId];
-      cache.records[row.requestId] = { ...(existed && sameLog(existed.requested, log) ? existed : {}), requested: log };
+      // An identical reread must not invalidate enrichment already in flight.
+      if (existed && sameLog(existed.requested, log)) existed.requested = log;
+      else cache.records[row.requestId] = { requested: log };
       if (!existed && castAfter !== undefined && BigInt(log.blockNumber) > castAfter) this.onCast(pondMessage(row));
     }
     for (const [id, entry] of Object.entries(cache.records)) {
@@ -241,11 +263,23 @@ export class LaunchStore {
     }
     this.emit();
   }
-  private async enrich(chainId: number, epoch: number) {
+  /** A direct request lookup and the history reader may finish together. Serialize enrichment
+   * per chain so a partial row cannot overwrite a completed result or consume its retry window. */
+  private enrich(chainId: number, epoch: number): Promise<void> {
+    const previous = this.enrichments.get(chainId) ?? Promise.resolve();
+    const pending = previous.catch(() => {}).then(() => this.enrichChain(chainId, epoch)).finally(() => {
+      if (this.enrichments.get(chainId) === pending) this.enrichments.delete(chainId);
+    });
+    this.enrichments.set(chainId, pending);
+    return pending;
+  }
+  private async enrichChain(chainId: number, epoch: number) {
     const cache = this.caches.get(chainId)!, entries = Object.values(cache.records);
     for (let i = 0; i < entries.length && epoch === this.epoch; i += 4) await Promise.all(entries.slice(i, i + 4).map(async entry => {
       let row = this.hydrate(entry, chainId);
       if (!row) return;
+      const previous = this.rows.get(row.id);
+      if (row.completion?.txHash === previous?.completion?.txHash) row.resultError ??= previous?.resultError;
       const id = row.requestId, current = () => epoch === this.epoch && cache.records[id] === entry;
       if (!current()) return;
       if (!row.createdAt) {

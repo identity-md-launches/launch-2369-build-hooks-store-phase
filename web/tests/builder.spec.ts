@@ -238,7 +238,7 @@ test('hidden scroll labels do not extend the desktop hook column past its panels
 });
 
 test('the card details preserve the mobile floor and desktop viewport fit', async ({ page }) => {
-  for (const [width, height] of [[390, 844], [320, 900], [768, 900], [1100, 800], [1440, 900], [2560, 1300]]) {
+  for (const [width, height] of [[390, 844], [320, 900], [768, 900], [1100, 800], [1440, 900], [1920, 1080], [2560, 1440]]) {
     await page.setViewportSize({ width, height });
     await open(page, undefined, false);
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -390,18 +390,18 @@ test('where the money goes applies the LP share before the recipient', async ({ 
   await expect(flow).toContainText('into a jar');
 });
 
-for (const width of [320, 390, 768, 1100, 1440, 2560]) {
+for (const width of [320, 390, 768, 1100, 1440, 1920, 2560]) {
   test(`Builder at ${width}px: layout, no horizontal overflow, card within the viewport, screenshot`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await open(page);
     await page.getByRole('button', { name: 'Open all' }).click();
     await noOverflow(page);
     const main = await page.locator('.builder-page').boundingBox();
-    expect(main!.width).toBeLessThanOrEqual(1240.5);
-    if (width >= 1240) expect(Math.abs(main!.x - (width - main!.width) / 2)).toBeLessThan(2);
+    expect(main!.width).toBeLessThanOrEqual(1800.5);
+    if (width >= 1800) expect(Math.abs(main!.x - (width - main!.width) / 2)).toBeLessThan(2);
     const col = await page.locator('.hookcol').boundingBox(), steps = await page.locator('.steps').boundingBox();
     if (width >= 1100) {
-      expect(Math.round(col!.width)).toBe(420);
+      expect(Math.round(col!.width)).toBe(Math.round(Math.min(520, Math.max(420, width * .28))));
       expect(col!.x).toBeGreaterThan(steps!.x + steps!.width);
       expect(col!.height).toBeLessThanOrEqual(900);
       expect((await page.locator('.hookcard').boundingBox())!.height).toBeLessThanOrEqual(900);
@@ -422,7 +422,7 @@ for (const width of [320, 390, 768, 1100, 1440, 2560]) {
   });
 }
 
-for (const [width,height] of [[1440,900],[2560,1300]]) test(`card never collapses after scroll and a keystroke at ${width}x${height}`, async ({ page }) => {
+for (const [width,height] of [[1440,900],[2560,1300],[2560,1440]]) test(`card never collapses after scroll and a keystroke at ${width}x${height}`, async ({ page }) => {
   await page.setViewportSize({width,height}); await open(page, undefined, false);
   const load = await page.locator('.hc-scroll').evaluate(el=>el.clientHeight);
   await page.evaluate(()=>scrollTo(0,1000)); await page.getByLabel('Owner address', {exact:true}).fill('0x6cba4751742f6989fa224b2dc5d5d52fcef98a34');

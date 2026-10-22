@@ -1,0 +1,93 @@
+{
+  "pageErrors": [],
+  "geometry": [
+    {
+      "width": 1440,
+      "height": 900,
+      "load": {
+        "height": 204,
+        "content": 726
+      },
+      "details": 351,
+      "content": 726,
+      "cardTop": 84,
+      "cardBottom": 883.796875,
+      "documentWidth": 1440
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "load": {
+        "height": 439,
+        "content": 597
+      },
+      "details": 586,
+      "content": 597,
+      "cardTop": 84,
+      "cardBottom": 1064.296875,
+      "documentWidth": 1920
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "load": {
+        "height": 597,
+        "content": 597
+      },
+      "details": 597,
+      "content": 597,
+      "cardTop": 84,
+      "cardBottom": 1075.640625,
+      "documentWidth": 2560
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "load": {
+        "height": 338,
+        "content": 793
+      },
+      "details": 338,
+      "content": 793,
+      "cardTop": 371.1875,
+      "cardBottom": 1146.859375,
+      "documentWidth": 390
+    },
+    {
+      "width": 320,
+      "height": 900,
+      "load": {
+        "height": 360,
+        "content": 816
+      },
+      "details": 360,
+      "content": 816,
+      "cardTop": 381.578125,
+      "cardBottom": 1278.046875,
+      "documentWidth": 320
+    }
+  ],
+  "firstScreen": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "documentWidth": 390,
+    "primary": {
+      "x": 25,
+      "y": 521.15625,
+      "width": 340,
+      "height": 44,
+      "top": 521.15625,
+      "right": 365,
+      "bottom": 565.15625,
+      "left": 25
+    },
+    "fonts": [
+      "Atkinson Hyperlegible",
+      "JetBrains Mono",
+      "Press Start 2P"
+    ]
+  },
+  "passed": true
+}

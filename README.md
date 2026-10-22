@@ -1,10 +1,8 @@
 # The Hooks Store
 
-A static React/TypeScript storefront for describing, launching and managing Uniswap v4 hooks. This delivery implements **SPEC 1.43, job 10**: the carry-overs, free listings and paid #AD placements. Source, the existing dependency lockfile and the production export in `dist/` are included. Relative assets and hash routing support static hosting and IPFS gateway subpaths.
+A static React/TypeScript storefront for composing, launching and managing Uniswap v4 hooks. This delivery implements **job 12, the proven lane**, including carry-overs (h)–(m), against the current **SPEC 1.50**. Source, the existing package manifest/lockfile and the production export in `dist/` are included. Hash routes and relative runtime assets support static hosting and IPFS gateway subpaths.
 
-The existing pond, pixel design, Builder v2, launch/payment safety and wallet connectors are retained. Current verification is in [VALIDATION.md](VALIDATION.md), [artifacts/validation.md](artifacts/validation.md) and the test reports under `artifacts/`. Older results under `tests/results/` are historical.
-
-This revision reproduces and fixes all three reopened findings: named fee payees after trade introductions now require an address, hidden labels no longer extend the Builder column's scroll range, and a completed promotion can start a fresh checkout. `dist/` has been rebuilt. [Revision results](artifacts/validation.md) record **1,167 unit tests, 9 relay tests and 252 Chromium cases passed**, with seven existing opt-in browser cases skipped. The design probe passed 12/16 checks; retained pixel-design exceptions and unavailable WebKit/browser-tool checks are documented there. Per-finding responses are in `.imd-responses.json`.
+Every launch still uses the swarm, costs 0.5 IMD plus gas and receives its own audit. No factory or instant/free launch option is offered. No public-chain transaction, deployment or publication was performed by this job.
 
 ## Install, preview and rebuild
 
@@ -16,72 +14,46 @@ npm --prefix web run dev -- --host 127.0.0.1
 npm --prefix web run typecheck
 npm --prefix web run build
 node scripts/serve.mjs --port 4173
-# Open http://127.0.0.1:4173/preview/#store
 ```
 
-Vite uses root `index.html`, `base: './'` and root `dist/`. No route rewrites or backend credentials are needed. Fonts, wallet icons, favicon and share image are local. The existing canonical Open Graph image URL is retained. This job did not publish the site or send a public-chain transaction.
+Open `http://127.0.0.1:4173/preview/#store`. Vite uses the root `index.html`, `base: './'` and root `dist/`. The committed export can be served directly; it needs no server rewrites or secrets. Fonts, icons, favicon and share image are local. Rebuilding replaces `dist/`.
 
-For this task, dependencies were installed in an isolated temporary directory from the **unchanged** `web/package.json` and `web/package-lock.json`. An isolated copy of the source used those dependencies for build/test, and its `dist/` was copied back. No package manifest, lockfile, existing build configuration, ignore file or dependency directory was changed in the repository.
+This task installed the unchanged `web/package.json` and `web/package-lock.json` in a temporary checkout for build/test. No existing build configuration, manifest, lockfile, ignore file or dependency directory in this repository was changed.
 
-## Free listings and advertisements
+## Proven launches
 
-`public/site-config.json` contains an `ads` map by chain id:
+The site fetches `evidence/proven-launches.json` from the spec repository's raw URL at runtime; it has no bundled index fallback. Additional index fields do not affect matching.
 
-| Chain | Registry | Placements | Launch |
-| --- | --- | --- | --- |
-| Robinhood Chain (4663) | `0x366c84a2971713fc8fa24d3d4b8abd2f4f085625` | `0x63b59cbf5b535e46815ae5d4cf126bf409dba69c` | 2454 |
-| Ethereum (1) | `0xff8b7110525c1ec39d6df825880890e7d9184f06` | `0x1da6f19ee08365813651de6420603fea4fbcdc9a` | 2456 |
+Exact matches retain their existing request sentence. Otherwise the Builder chooses the launch of the same type with the most shared block ids, breaking ties by newer launch number. At least one shared behavior block is required; token-only and words-only drafts never match. Exact matches require the same chain; a nearest match can adapt to a different chain. Explicit own-code sources override automatic reuse.
 
-The map also pins each source commit. Generated ABIs and their provenance are under `src/abi/`; both pinned sources compile to identical ABI arrays. Missing addresses hide the strip and Promotions panel for that chain.
+The summary names the source, audit date and blocks removed/added. After a successful relay import, the complete request pins that repository and commit and asks for adaptation and a new audit. Failed or unavailable imports keep the existing silent fresh-build fallback. Indexed launches carry a PROVEN pill on catalog and hook pages; Build one like this preloads their blocks without copying the previous owner's wallet or allocation.
 
-The Store scans `featured(1,100)` and subsequent pages, then checks every candidate with `getPlacement`. Cancelled and expired placements are excluded even when featured returns them, and empty pages do not end the scan. Reads use one block per chain for consistent ranking. `rankOf` supplies each total; descending totals and ascending placement id determine order. `getMetadata(listingId, purchasedRevision)` supplies the card name. Editing a listing cannot change an existing ad. Only hooks associated with this store's chain-proven requests enter its featured strip. The open slot is last; refresh is every 60 seconds. Hover/focus pauses the marquee and reduced motion uses a scrollable row.
+The Builder now fills the window minus scaling gutters, up to 1800px. Its desktop card grows from 420px to 520px; reading paragraphs retain their 65ch measure. Press Start 2P remains in its established roles. Reading text uses self-hosted Atkinson Hyperlegible; amounts, addresses, signatures and exact requests use JetBrains Mono, with the existing sizes and line heights. License texts are in `LICENSES/`.
 
-**My hooks → Promotions** is the only spending surface for ads. Select the hook's chain and a live hook launched by the connected wallet, then:
+## Promotions and public request pages
 
-1. Create or reuse a free listing. Its name, source/audit evidence, callback mask, fee disclosures and admin disclosures come from the hook page. Listing creation costs gas, with no listing fee.
-2. Approve and deposit the missing part of 0.1 IMD. Existing available balance is used first; approval is limited to the missing deposit.
-3. Review the listing revision and live proceeds recipient; purchase 24 hours for 0.1 IMD with a ten-minute transaction deadline.
-4. Open the carousel from the done state. The hook page also shows its active #AD state.
+My hooks → Promotions uses the promotion chain as **where you pay**. Its hook selector includes the wallet's live store hooks on both chains, labelled with each hook's deployment chain. A free listing on the payment chain records the hook's own chain id and address. Deposit, purchase, boost, cancel and withdrawal use the relevant promotion chain; own-placement rows include both chains and offer switching where needed.
 
-Placement rows show hours left, total paid and rank across the same combined store-only strip on both chains. BOOST asks for a positive IMD amount and explicit acceptance of its non-refundable, no-deadline terms before deposit/boost. CANCEL explains the pro-rata base refund and forfeited boosts before confirmation. Refunds return to available balance; Withdraw sends that balance to the connected wallet. Every write checks chain/account, simulates first, waits for a successful receipt and exposes its transaction hash. A rejected step remains retryable.
+The panel separately reads **In your wallet on …** from the configured IMD token's `balanceOf` and **Deposited for promotions** from the placement contract's `available`. Both refresh after every confirmed transaction, including intermediate approvals/deposits. Wallet balances below 0.1 IMD receive the specified funding note. The featured strip reads both chains, groups by hook chain/address, sums totals and ranks one logical card per hook; its decorative marquee copy is hidden from assistive technology. Hook pages recognize ads paid on either chain.
 
-**Live setup limitation:** read-only checks found code at both placement addresses and the expected registry, but both `imd()` and `proceedsRecipient()` were still unset. The UI displays that setup state and disables deposits/purchases until the contract owner configures them. It never guesses a recipient or changes live contract state. Free listing creation remains available. `artifacts/live-ads-read.json` records those reads. All payment checks ran on a local Anvil fork.
+Public ad-contract request links resolve the Intake's Requested event by request id, then follow its transaction's admission and launch record. Visitors need no wallet to see “Contracts launch 2454, live” or “Contracts launch 2456, live”, the “Not a hook” explanation and IMD explorer link. Direct and history reads serialize enrichment to preserve Live results and retry messages.
 
-## Carry-over fixes
+The existing configured registries and placement contracts are unchanged. Read-only observations during this job found code, the expected registry, and configured IMD/proceeds recipients on both chains. Contract setup remains checked at runtime. `tests/results/job12/live-ads-read.json` records the observation.
 
-- Builder details use viewport geometry, requestAnimationFrame scroll updates and resize handling; the sticky card retains its load details height. Below 720px its details have a 40vh floor. The two desktop scroll/type cases and both phone sizes are covered.
-- All six previously ignored job 7–9 browser specs use v2 controls and selectors. `testIgnore` is removed; no spec file is excluded. Findings quote a short faulty phrase without the redundant “in the request.” suffix.
-- Type A reads launch-record artifacts by role, verifies hook code and computes the seeded PoolKey id with ABI encoding and keccak256. The recorded 2448 fixture yields `0xccab6575b5cdd5798731f62f9299c442f954366e91b9513386d83e249cb99843` and preselects it.
-- Type C owner reads rerun when the deployer resolves the hook. Its distributor row is absent, an uncreated pool is named plainly, and Open the pool remains available. Sending pool initialization from the site remains phase 2b; this panel prepares/copies the call.
-- Non-hook ad-contract launches are excluded from catalog/pond hook activity and appear as a plain contracts row linking to the build job in My hooks. Direct old hook links also reach that contracts row.
-- Post-payment and evidence links use Intake admission job ids, with the explorer root until admission; unsupported `/launches/` links and the redundant Hook page link are removed.
-- Range-order wording adds the appropriate liquidity gate and beforeAddLiquidity callback to timed rules. Max buy/swap and Cooldown state the one-sided-liquidity limitation. The consistency checker scopes that exemption to liquidity, preserving swap fees. Conflicting liquidity-lock combinations are refused.
-- Fee sentences include exact-input/exact-output mulDiv formulas. Requests without Dynamic LP fee reject the dynamic-fee flag. Written fees accept pct and ratio phrasing, flag unreadable amounts and require addresses for unknown active payees.
-- Proven-source imports normalize case, trailing slash and `.git`; mocks use IMD's returned `.git` shape. Notifications watch own requests only. The wait line says 30–90 minutes, sometimes up to three hours.
-- Pool-dependent controls wait without attempting a read, offer Initialize-event pools plus a typed id, and simulate Send with plain action errors. The source artifact ABI at the launch commit overrides catalog signatures by function name. A pinned control ABI excerpt keeps launch 2424's global pause/claimFees usable when its unpublished raw `out/` artifact returns 404; other missing artifacts fall back to catalog signatures.
-
-## Wallets and reads
-
-The existing single Connect control supports EIP-6963 browser wallets, wallet-browser deep links on phones and Coinbase Smart Wallet. There is no WalletConnect relay or project id. Query-address viewing never authorizes a transaction; owner actions require the current `owner()` wallet.
-
-The configured public RPCs are `https://rpc.mainnet.chain.robinhood.com` and `https://rpc.mevblocker.io`. The existing Intake reader walks inclusive ranges, reconciles canonical logs/reorgs and polls the head every 20 seconds. The optional relay provides admission, launch records, stage details, source import and free checks; failure remains visible and retryable. It never receives private keys or wallet signatures. [relay/README.md](relay/README.md) documents that existing worker.
-
-Launches still cost 0.5 IMD and gas. The Builder and final signing guard check the exact request; fixed-fact conflicts and unresolved inputs lock payment. Arbitrary prose and external contract code are not formally proven by those checks. Locally submitted drafts and watch choices stay in browser storage; notifications require keeping the site open.
-
-## Run the checks
+## Validation
 
 ```sh
 npm --prefix web run typecheck
 npm --prefix web run build
-npm --prefix web test
+node --test --test-concurrency=1 tests/*.test.mjs
 node --test relay/worker.test.mjs
 cd web
 npx playwright install chromium
 npx playwright test --workers=3
 ```
 
-The new promotion suite automatically starts and stops an isolated Anvil fork and compiles the pinned contracts. It requires `forge`, `anvil`, solc 0.8.26 and access to the configured public Robinhood RPC. Compiler flags match both pinned repositories: Cancun, optimizer 200, no CBOR/bytecode hash metadata. Fork-only impersonation and balance overrides never reach a public RPC. To run just its contract checks, use `node web/scripts/check-ads-fork.mjs` from the repository root; add `--with-browser` for its three-width browser flow. Pin details are in [src/abi/PROVENANCE.md](src/abi/PROVENANCE.md).
+The promotion regression suite also requires `forge`, `anvil`, solc 0.8.26 and access to the configured public Robinhood RPC. It compiles the pinned contract fixtures and sends transactions only to its isolated local fork. The controlled-RPC job 12 suite requires no public RPC or signer: `npx playwright test job12.spec.ts` from `web/`.
 
-Current revision results: typecheck/build passed; **1,167 unit tests**, **9 relay tests**, and **252 Chromium cases** passed. Seven older optional live RPC/relay or additional fork cases were skipped under their existing opt-in guards; every spec was collected. The ad fork and its real wallet flows at 320, 390 and 1440 ran. The exhaustive pair sweep covers 1,221 enabled pairs: 1,156 accepted cleanly and 65 refused before payment. These are worker observations, not independent certification.
+Actual results, the six-domain Better Interface review, screenshots, export checks and limitations are recorded in [VALIDATION.md](VALIDATION.md) and [tests/results/job12/validation.md](tests/results/job12/validation.md). Older reports are historical, not claims about this run. [DESIGN.md](DESIGN.md) documents the final implemented system.
 
-[DESIGN.md](DESIGN.md) describes the implemented tokens, typography, layout and components. `artifacts/packaging.json` records compaction of old Lighthouse diagnostic details and retirement of four redundant historical screenshots to meet the submission budget. Current source, runtime assets, pinned evidence and current test results remain complete. No ignore file was changed.
+Final results: production build and separate typecheck passed; 1,177 unit tests, 9 relay tests and 277 Chromium cases passed, with 7 existing opt-in cases skipped. The design probe passed 13/16 checks; the three retained exceptions follow the required pixel design. Screen readers, physical devices and native zoom were not tested. The supplied browser connector lacked Chrome, so rendered checks used Playwright Chromium. See the linked validation report for the exact skipped cases and review evidence.

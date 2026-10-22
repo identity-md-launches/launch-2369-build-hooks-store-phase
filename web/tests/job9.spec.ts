@@ -134,14 +134,14 @@ for (const width of [320, 390, 1440]) {
   });
 }
 
-test('job9 changing chain or block set invalidates a match; Advanced own source overrides automatic reuse', async ({ page }) => {
+test('job9 changing chain or blocks adapts a match; Advanced own source overrides automatic reuse', async ({ page }) => {
   const calls = await setup(page, draft()); await expect(page.locator('.proven-line')).toHaveCount(1);
-  await page.locator('#s-chain').selectOption('1'); await expect(page.locator('.proven-line')).toHaveCount(0); await expect(page.locator('#composed')).not.toContainText('Start from the audited source');
+  await page.locator('#s-chain').selectOption('1'); await expect(page.locator('.proven-line')).toContainText('Adapted from a proven launch'); await expect(page.locator('#composed')).toContainText('audit it as a new hook');
   await page.locator('#s-chain').selectOption('4663'); await expect(page.locator('.proven-line')).toHaveCount(1);
   await page.locator('.shelf-tabs button').filter({ hasText: /^Custom/ }).click();
   await page.getByRole('button', { name: 'Add Custom rule', exact: true }).click(); await page.locator('.rule[data-block="custom"] textarea').fill('Observe swaps.'); await expect(page.locator('.proven-line')).toHaveCount(1);
   await page.locator('.shelf-tabs button').filter({ hasText: /^Advanced/ }).click();
-  await page.getByRole('button', { name: 'Add Price oracle', exact: true }).click(); await expect(page.locator('.proven-line')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add Price oracle', exact: true }).click(); await expect(page.locator('.proven-line')).toContainText('adds Price oracle');
   await page.getByRole('button', { name: 'Remove Price oracle', exact: true }).click(); await expect(page.locator('.proven-line')).toHaveCount(1);
   await page.getByRole('button', { name: /^From my own code/ }).click();
   const repo = 'https://github.com/the-hook-store/hooks-store-spec'; await page.locator('#s-repo').fill(repo); await page.locator('#s-commit').fill(proven.commit);

@@ -1,26 +1,19 @@
-# Job 10 validation
+# Job 12 validation
 
-Revision: all three reopened findings were reproduced and fixed. The rebuilt export passed a separate typecheck, production build, 1,167 unit tests, 9 relay tests and 252 Chromium cases; seven existing opt-in cases were skipped. The final design probe passed 12/16 checks with the established pixel-design exceptions retained. Reproductions, scoped six-domain review, actual commands and limitations are in [artifacts/validation.md](artifacts/validation.md); current logs and screenshots are in [artifacts/revision/](artifacts/revision/). The table below records the preceding accepted submission, not this revision's run.
+Complete for the stated scope. The final source and static export implement the proven lane and all carry-overs (h)–(m), with the existing wallet, swarm payment and launch safety flows retained.
 
-The committed result summary is [tests/results/job10-revision.json](tests/results/job10-revision.json). New regressions cover unresolved payees after trade prefixes (including recovery to a full address), the desktop column ending at its last panel plus padding, and a real local-wallet purchase followed by a fresh checkout. The column's measured blank range fell from 324.8125px to rounding only, with unchanged panel dimensions. All three existing promotion widths and the Anvil listing/deposit/purchase/second-wallet boost/cancel/withdraw checks passed.
-
-The six-domain revision review checked native labels, disabled states and retained scroll focus (accessibility); viewport/scroll geometry and screenshots (layout); address-correction and checkout copy (writing); retained fonts and wrapping (typography); sampled solid-background contrast (colors); and invalid, corrected, pending, completed and reopened flows (UI). The design probe's four exceptions are the established pixel capitals/labels, type scale, and ink border/shadow treatment. WebKit lacks required system libraries; the supplied browser connector could not initialize Chromium, so rendered checks used the working Playwright Chromium runner. Physical devices, screen readers, native zoom and slow-motion animation review were not performed. No public-chain write or publication was attempted.
-
-The final source and `dist/` implement SPEC 1.43: all carry-overs, free listings and paid #AD placement flows. The detailed review, requirement mapping, six Better Interface domains, findings/fixes and limitations are in [artifacts/validation.md](artifacts/validation.md).
-
-| Check | Actual result |
+| Check | Actual final result |
 | --- | --- |
-| Production build and separate typecheck | Passed |
-| Unit tests | 1,166 passed |
-| Relay worker tests | 9 passed |
-| Chromium | 249 passed; 7 older optional cases skipped; no spec ignored |
-| Catalog pair sweep | 1,221 pairs: 1,156 accepted cleanly, 65 refused before payment |
-| Anvil fork | Listing, deposit, purchase, second-wallet boost, cancel/refund, withdraw and revision pinning passed |
-| Promotion browser flow | Real local wallet calls at 320, 390 and 1440px |
-| Export | Relative runtime references, all metadata and local assets checked |
-| Design probe | 13/16; the three retained exceptions follow the supplied pixel mockup |
-| Bundle | Under 8 MiB; exact final size in [bundle-budget.json](artifacts/bundle-budget.json) |
+| Production build and separate TypeScript check | Passed |
+| Unit tests | 1,177 passed, 0 failed |
+| Relay tests | 9 passed, 0 failed |
+| Chromium production-export suite | 277 passed, 7 existing opt-in cases skipped, 0 failed |
+| Job 12 browser cases | All 23 passed within the full suite |
+| Local Anvil fork | Listing, approve/deposit, purchase, metadata revision pinning, second-wallet boost, cancel/refund and withdrawal passed; browser payments passed at 320, 390 and 1440px |
+| Real public request links, no wallet | Launches 2456 and 2454 reached Live and their real IMD build links in 3.9s and 5.8s |
+| Better Interface/design probe | All six domains reviewed; 13/16 probe checks passed; three required pixel-style exceptions retained |
+| Export integrity and submission budget | Passed; complete snapshot about 7.83 MiB, under 8 MiB. See final [export-integrity.json](tests/results/job12/export-integrity.json) and [submission-budget.json](tests/results/job12/submission-budget.json) |
 
-Read-only public checks at 2026-10-22 17:03 UTC found both deployed placement contracts **still missing their IMD and proceeds-recipient setup**. The UI explains this and disables payment until the contract owner configures them. Free listings remain available. This job sends no live transaction and does not publish the site.
+Detailed coverage, source locations, findings/fixes, actual commands, screenshots and limitations are in [tests/results/job12/validation.md](tests/results/job12/validation.md). Machine-readable results are in [tests/results/job12/summary.json](tests/results/job12/summary.json). [README.md](README.md) explains installation, preview and rebuild; [DESIGN.md](DESIGN.md) documents the final system.
 
-[README.md](README.md) explains installation, preview, rebuild and checks. [DESIGN.md](DESIGN.md) documents the final implemented system. Current raw results are in `artifacts/`; earlier records under `tests/results/` are historical. These are worker observations and do not independently certify behavior.
+These are worker observations, not independent certification. No public-chain transaction, token deployment, factory deployment or publication was performed. Screen readers, physical devices and native zoom were not tested. The supplied browser connector could not locate Chrome; all rendered checks used the working Playwright Chromium runner. Older validation files remain historical.

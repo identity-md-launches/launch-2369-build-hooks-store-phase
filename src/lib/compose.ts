@@ -2,7 +2,7 @@
 // Pure functions only, so the same code runs in the Builder and in `node --test`.
 import catalogJson from '../blocks/catalog.json' with { type: 'json' };
 import { writtenFeeClauses, writtenFeeRates, writtenFeeTargets } from './writtenFees.ts';
-import { matchProvenLaunch, type ProvenLaunch } from './proven.ts';
+import { matchProvenLaunch, provenInstruction, type ProvenLaunch } from './proven.ts';
 
 export type LaunchType = 'A' | 'B' | 'C';
 export type Mode = 'prompt' | 'blocks';
@@ -249,7 +249,7 @@ export function compose(d: Draft, wallet?: string): string {
   // The first line can contain several sentences in contracts-only launches. Its first sentence
   // ends where it was built, never at a '. ' inside a free-text token name such as 'Dr. Pond'.
   if (proven) {
-    const instruction = `Start from the audited source at ${proven.repoUrl} commit ${proven.commit}: keep its behavior, apply the parameters and rules of this request, adapt the deployer to mine its salt inside its constructor if it mines after deployment, and audit it as imported code.`;
+    const instruction = provenInstruction(d, proven);
     const rest = lines[0].slice(firstSentence).trim();
     lines[0] = lines[0].slice(0, firstSentence);
     lines.splice(1, 0, instruction, ...(rest ? [rest] : []));

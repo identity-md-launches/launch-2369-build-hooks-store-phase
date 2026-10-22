@@ -6,13 +6,18 @@ import type { LaunchStore, StoreState } from './chain/store';
 import { ReadStatus } from './ReadStatus';
 import { AddressValue } from './AddressValue';
 import { newDraft, shortAddress } from '../../src/lib/compose';
-import { storeDraft } from './draft';
+import { clearCorrection, storeDraft } from './draft';
 export { matchesQuery } from './chain/decode';
 import { useAds } from './Ads';
 import { Text } from './Text';
+import { useProvenLaunches } from './ProvenLaunches';
+import { provenForLaunch } from '../../src/lib/proven';
+import { copyLaunchDraft } from './Hook';
+import { mergeAds } from './chain/ads';
 
 const ALL_GROUPS: string[] = GROUPS.map(([id]) => id), ALL_CHAINS = [4663, 1];
 export function Catalog({ query, clearQuery, data, store }: { query: string; clearQuery: () => void; data: StoreState; store: LaunchStore }) {
+  const proven = useProvenLaunches();
   const launches = data.launches.filter(l => l.isHook !== false);
   const address = searchAddress(query), known = address ? launches.some(l => matchesQuery(l, address)) : false;
   const [resolution, setResolution] = useState<{ found: ResolvedAddress[]; unavailable: number[] } | null>(null), [resolving, setResolving] = useState(false), [attempt, setAttempt] = useState(0), [error, setError] = useState('');
@@ -60,11 +65,12 @@ export function Catalog({ query, clearQuery, data, store }: { query: string; cle
         ? <div className="empty box"><p>No hooks match. <button className="link-button" onClick={clear}>Clear search and filters</button> or <a href="#builder">build the first one</a>.</p></div>
         : <div className="empty-pond box"><h3>Nothing on the pond yet</h3><p>Hooks launched through this store appear here. Be the first to cast.</p><a className="btn primary" href="#builder">Describe a hook</a></div>)}
       <div className="grid">{rows.map(launch => <article className="card" key={launch.id} data-launch-id={launch.id}>
-        <div className="card-top"><span className="pill chain"><Text>{CHAINS[launch.chainId] ?? `Chain ${launch.chainId}`}</Text></span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span></div>
+        <div className="card-top">{provenForLaunch(launch, proven) && <span className="pill proven">PROVEN</span>}<span className="pill chain"><Text>{CHAINS[launch.chainId] ?? `Chain ${launch.chainId}`}</Text></span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span></div>
         <h3><Text>{launch.name}</Text>{launch.symbol && <small>${launch.symbol}</small>}</h3>
         <p><Text>{launch.summary}</Text></p>
         <ul className="blocks" aria-label="Request blocks">{launch.blocks.map(label => <li key={label}><Text>{label}</Text></li>)}</ul>
         <div className="card-foot"><span className="muted">{launch.status === 'live' && launch.launchNumber !== null && <>Launch <span className="num">#{launch.launchNumber}</span></>}</span><a href={hookHref(launch)} aria-label={`View ${launch.name}`}>View</a></div>
+        {provenForLaunch(launch, proven) && <button className="btn tiny" onClick={() => { if (storeDraft(copyLaunchDraft(launch, provenForLaunch(launch, proven)))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button>}
       </article>)}</div>
     </div>
   </section>;
@@ -72,7 +78,7 @@ export function Catalog({ query, clearQuery, data, store }: { query: string; cle
 export function Featured() {
   const { ads, errors, enabled, refresh } = useAds();
   if (!enabled) return null;
-  const active = ads.filter(p => p.launch);
+  const active = mergeAds(ads);
   const scrolling = active.length > 0;
   return <section className="ads" id="featured" aria-labelledby="featured-h">
     <div className="ads-head"><h2 id="featured-h">Featured <span className="pill ad">#AD</span></h2><p className="muted">Paid placements, <span className="num">0.1 IMD</span> for <span className="num">24</span> hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</p></div>

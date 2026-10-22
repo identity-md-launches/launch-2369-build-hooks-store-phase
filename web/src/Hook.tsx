@@ -14,18 +14,24 @@ import { OpenPool } from './OpenPool';
 import { getLaunchNotice } from './LaunchReview';
 import { RelayTimeline } from './RelayTimeline';
 import { ProvenLine, useProvenLaunches } from './ProvenLaunches';
-import { provenFromRequest } from '../../src/lib/proven';
+import { provenFromRequest, provenForLaunch, type ProvenLaunch } from '../../src/lib/proven';
 import { useAds } from './Ads';
 import { intakeJob, relayFetch } from './relay';
 import { LaunchNotifications } from './LaunchNotifications';
 
-export function copyLaunchDraft(launch: Launch): Draft {
+export function copyLaunchDraft(launch: Launch, proven?: ProvenLaunch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
   const token = entry('token'); token.p.name = launch.name; token.p.symbol = launch.symbol ?? 'TOKEN';
   const unknownRules = Array.from(launch.request.matchAll(/^\d+\. (.+)$/gm), m => m[1]).filter(rule =>
     !matchRule(rule, requestContext(launch.request, launch.payer)));
   const customWords = Array.from(launch.request.matchAll(/<custom>([\s\S]*?)<\/custom>/g), match => match[1]);
-  const blocks = [token, ...launch.matchedBlocks.map(b => ({ id: b.id, p: { ...b.p } }))];
+  const ids = proven?.blocks ?? launch.matchedBlocks.map(b => b.id);
+  const rules = ids.filter(id => BY_ID[id] && !['token', 'own-token'].includes(id)).map(id => {
+    const matched = launch.matchedBlocks.find(b => b.id === id);
+    return matched ? { id, p: { ...matched.p } } : entry(id);
+  });
+  const base = proven?.blocks.includes('own-token') ? { ...entry('own-token'), p: { ...entry('own-token').p, name: launch.name, symbol: launch.symbol ?? 'TOKEN' } } : token;
+  const blocks = [base, ...rules];
   if (unknownRules.length || customWords.length) blocks.push({ id: 'custom', p: { text: [...unknownRules, ...customWords].join(' ') } });
   return { ...draft, type: launch.type, mode: words && !launch.matchedBlocks.length && blocks.length === 1 ? 'prompt' : 'blocks', prompt: words, blocks, seeded: true,
     settings: { ...draft.settings, chain: launch.chainId, hname: launch.type === 'A' ? '' : launch.name,
@@ -55,6 +61,13 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
   const parts = route.replace(/^#/, '').split('?')[0].split('/'), chain = Number(parts[1]), id = parts[2]?.toLowerCase();
   const launch = data.launches.find(l => l.intakeChainId === chain && l.requestId.toLowerCase() === id);
   const [error, setError] = useState('');
+  const [resolving, setResolving] = useState(false), [lookupError, setLookupError] = useState(''), [lookupRevision, setLookupRevision] = useState(0);
+  useEffect(() => {
+    if (launch || !CHAINS[chain] || !/^0x[\da-f]{64}$/.test(id ?? '')) return;
+    let active = true; setResolving(true); setLookupError('');
+    void store.resolveRequest(chain, id).catch(() => { if (active) setLookupError('Could not read this request from the chain. Retry the request reading.'); }).finally(() => { if (active) setResolving(false); });
+    return () => { active = false; };
+  }, [store, chain, id, !!launch, lookupRevision]);
   const [copyNote, setCopyNote] = useState('');
   const [admittedJob, setAdmittedJob] = useState<string | null>(null);
   useEffect(() => {
@@ -77,22 +90,23 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
   }, [launch?.id, manage]);
   if (!CHAINS[chain] || !/^0x[\da-f]{64}$/.test(id ?? '')) return <section className="wrap page"><h1>Hook not found</h1><p>This link needs a supported chain and a full request id.</p><a href="#catalog">Browse hooks</a></section>;
   if (!launch) {
-    const checking = data.chains.some(c => c.chainId === chain && (c.loading || c.backfilling));
-    return <section className="wrap page"><h1>{checking ? 'Looking for this hook' : 'Hook not found'}</h1><ReadStatus data={data} retry={store.retry} /><p>{checking ? 'Reading launch history. This page will open when the request is found.' : 'This request was not found among launches made through this store.'}</p><AddressValue value={id} label="request id" /><a href="#catalog">Browse hooks</a></section>;
+    const checking = resolving || data.chains.some(c => c.chainId === chain && (c.loading || c.backfilling));
+    return <section className="wrap page"><h1>{checking ? 'Looking for this hook' : 'Hook not found'}</h1><ReadStatus data={data} retry={store.retry} /><p>{checking ? 'Reading launch history. This page will open when the request is found.' : 'This request was not found among launches made through this store.'}</p><AddressValue value={id} label="request id" />{lookupError && <p className="notice" role="status">{lookupError} <button className="link-button" onClick={() => setLookupRevision(n => n + 1)}>Retry request</button></p>}<a href="#catalog">Browse hooks</a></section>;
   }
   const jobs = [...new Set([...launch.jobIds, ...(admittedJob ? [admittedJob] : [])])];
   const buildUrl = jobs[0] ? `https://explorer.imd.fun/jobs/${encodeURIComponent(jobs[0])}` : 'https://explorer.imd.fun/';
-  if (launch.isHook === false) return <section className="wrap page"><h1>Contracts launch {launch.launchNumber ?? ''}, {launch.status}</h1><p>This launch contains contracts for the store.</p><a href={buildUrl} target="_blank" rel="noreferrer">Open IMD explorer</a></section>;
+  if (launch.isHook === false) return <section className="wrap page"><h1>Contracts launch {launch.launchNumber ?? ''}, {launch.status}</h1><p>Not a hook: a contracts launch for the store</p><a href={buildUrl} target="_blank" rel="noreferrer">Open IMD explorer</a></section>;
+  const indexed = provenForLaunch(launch, proven);
   const deployment = config.chains.find(c => c.id === launch.chainId)!, payment = config.chains.find(c => c.id === launch.intakeChainId)!;
   const templates = config.tradeUrlTemplates as Record<string, string>;
   const trade = templates[String(launch.chainId)];
   const tradeUrl = trade ? safeUrl(trade.replaceAll('{hook}', launch.hookAddress ?? '').replaceAll('{token}', launch.tokenAddress ?? '').replaceAll('{poolId}', launch.poolId ?? '').replaceAll('{chainId}', String(launch.chainId))) : null;
   return <section className="wrap page hook-page" aria-labelledby="hook-h">
-    <div className="detail-head"><div><div className="detail-pills">{ads.some(a => a.launch?.id === launch.id) && <span className="pill ad">#AD · active placement</span>}<span className="pill chain">{CHAINS[launch.chainId]}</span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span>{launch.launchNumber && <span className="num">Launch #{launch.launchNumber}</span>}</div>
+    <div className="detail-head"><div><div className="detail-pills">{indexed && <span className="pill proven">PROVEN</span>}{ads.some(a => a.launch?.id === launch.id) && <span className="pill ad">#AD · active placement</span>}<span className="pill chain">{CHAINS[launch.chainId]}</span><span className={`pill status-${launch.status}`}>{STATUSES[launch.status]}</span>{launch.launchNumber && <span className="num">Launch #{launch.launchNumber}</span>}</div>
       <h1 id="hook-h"><Text>{launch.name}</Text></h1>{launch.symbol && <p className="hook-symbol num">${launch.symbol}</p>}
       <p className="small creator">by {launch.creatorName ? <span>{launch.creatorName}</span> : <code>{launch.payer}</code>}</p>
-    </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
-    <ProvenLine entry={submittedProven(chain, id, launch.request) ?? provenFromRequest(launch.request, proven)} />
+    </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch, indexed))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
+    <ProvenLine entry={submittedProven(chain, id, launch.request) ?? provenFromRequest(launch.request, proven)} request={launch.request} />
     <div className="actions hook-link"><button className="btn" onClick={async () => { try { const url = new URL(location.href); url.hash = `hook/${chain}/${id}`; await navigator.clipboard.writeText(url.href); setCopyNote('Link copied.'); } catch { setCopyNote(`Copy this page’s address: ${location.href}`); } }}>Copy link</button><span role="status" className="copy-status">{copyNote}</span></div>
     <LaunchNotifications key={launch.id} launch={launch} />
     {notice && <div className="notice launch-done" role="status"><strong>The swarm has your request…</strong><p>Watch this page for the build result. Your payment is confirmed on {CHAINS[chain]}.</p><AddressValue value={notice.requestId} label="confirmed request id" /><a href={buildUrl} target="_blank" rel="noreferrer">{jobs.length ? 'Open IMD explorer' : 'IMD explorer'}</a>{!notice.saved && <p className="field-error">Browser storage was unavailable. Copy the request id or bookmark this page.</p>}</div>}
