@@ -19,8 +19,8 @@ const TYPES: [LaunchType, string, string][] = [
 ];
 const EXAMPLES = [
   'Observe swaps without changing them. No owner functions.',
-  'Only the owner may pause and unpause swaps through pause() and unpause(); paused() reports the current state. No other owner functions.',
-  'Publish a time-weighted average price from this pool through twap(uint32 secondsAgo), without changing swaps. No owner functions.',
+  'Only the owner may pause and unpause swaps through pause(PoolId poolId) and unpause(PoolId poolId); paused(PoolId poolId) reports the current state. No other owner functions.',
+  'Publish a time-weighted average price from this pool through twap(PoolId poolId, uint32 secondsAgo), without changing swaps. No owner functions.',
 ];
 const EXAMPLE_LABELS = ['Observe swaps', 'Owner pause controls', 'Price reading'];
 const HEADS_UP = 'Heads up: this block is easy to work around or needs care.';

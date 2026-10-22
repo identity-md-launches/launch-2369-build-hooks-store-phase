@@ -1,0 +1,31 @@
+{
+  "limitBytes": 8388608,
+  "candidateFiles": 508,
+  "rawFileBytes": 15358756,
+  "bundles": [
+    {
+      "mode": "defaultRepack",
+      "bytes": 7654631,
+      "completeCurrentTree": true,
+      "standaloneVerified": true,
+      "prerequisiteCommits": 0
+    },
+    {
+      "mode": "denseRepack",
+      "bytes": 7587185,
+      "completeCurrentTree": true,
+      "standaloneVerified": true,
+      "prerequisiteCommits": 0
+    }
+  ],
+  "reservedMetadataBytes": 16384,
+  "protectedPathsChanged": 0,
+  "dependencyOrCachePaths": 0,
+  "submodules": 0,
+  "workspaceGitWrites": false,
+  "historyAudit": {
+    "verified": false,
+    "reason": "A separate ancestry audit could not finish: historical blob objects are absent from the provided checkout and were not recovered from the public project branch or pull-request refs. The measured bundles contain every current deliverable file and require no prerequisite repository. No workspace Git metadata was changed."
+  },
+  "passed": true
+}

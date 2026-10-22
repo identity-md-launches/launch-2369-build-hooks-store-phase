@@ -1,0 +1,219 @@
+{
+  "context": {
+    "chain": 4663,
+    "hname": "PondHook",
+    "typeForWords": "B",
+    "modeForWords": "prompt",
+    "owner": "0x1111111111111111111111111111111111111111",
+    "payer": "0x1111111111111111111111111111111111111111"
+  },
+  "cases": [
+    {
+      "words": "Charge a fee of 30 basis points on every swap and send it to 0x1111111111111111111111111111111111111111.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Take half a percent of every swap as a fee for the owner.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and sent to 0x1111111111111111111111111111111111111111. No owner functions.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Publish a time-weighted average price from this pool through twap(uint32 secondsAgo), without changing swaps. No owner functions.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": [
+        {
+          "code": "pool-signature",
+          "sentence": "Publish a time-weighted average price from this pool through twap(uint32 secondsAgo), without changing swaps.",
+          "message": "twap is pool-dependent. Use twap(PoolId poolId, uint32 secondsAgo) so each pool is identified."
+        }
+      ]
+    },
+    {
+      "words": "Only the owner may pause and unpause swaps through pause() and unpause(); paused() reports the current state. No other owner functions.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": [
+        {
+          "code": "pool-signature",
+          "sentence": "Only the owner may pause and unpause swaps through pause() and unpause(); paused() reports the current state.",
+          "message": "pause is pool-dependent. Use pause(PoolId poolId) so each pool is identified."
+        }
+      ]
+    },
+    {
+      "words": "Take 1% of the ETH side of every buy as a hook fee, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+      "zeroFooter": false,
+      "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Take 1% of every swap as a fee.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "id": "effective-cap",
+      "rateTotal": 34.9,
+      "validation": [
+        {
+          "field": "block:3:start",
+          "message": "Start: use 1 to 5 %."
+        },
+        {
+          "field": "rates",
+          "message": "Fees total 34.9%. All ETH-side fees together (the highest swap, fade, volatility or buy/sell rate, plus whale fee, buyback jar and prize pot) must stay at or below 5%."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "rates",
+          "sentence": "Take 0.1% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to 0x1111111111111111111111111111111111111111. Expose claimFees(PoolId poolId) that anyone may call to redeem that pool's claims using the same distribution. Fees are computed on the amount actually traded; when the swap specifies its ETH amount and the pool fills only part of it, the swap reverts rather than overpaying.\nReplace only the Swap fee block's rate schedule, for the same buy and sell swaps: the rate starts at 30.0% at the pool's first swap and decreases linearly over 30 minutes of block timestamp to the Swap fee's 0.1%, then stays there. It uses the Swap fee's recipient and distribution, settled in ETH; if Volatility fee also applies, the higher rate wins. Track the first-swap time separately by PoolId. Expose currentFeeBps(PoolId poolId) as a view. Fees are computed on the amount actually traded; when the swap specifies its ETH amount and the pool fills only part of it, the swap reverts rather than overpaying.\nWhen the absolute pool price move over the last 60 seconds of block timestamp exceeds 5.0%, replace the Swap fee's rate with 3.0% for the same buy and sell swaps, using the Swap fee's recipient and distribution, settled in ETH. Otherwise use the Swap fee's rate schedule. If Fee that fades also applies, the higher rate wins. Track price history and volatility separately by PoolId. Expose isVolatile(PoolId poolId) as a view. Fees are computed on the amount actually traded; when the swap specifies its ETH amount and the pool fills only part of it, the swap reverts rather than overpaying.\nCollect 4.9% of the ETH side of every swap into a jar held by the hook, tracked separately by PoolId and settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly). When the jar holds at least 0.1 ETH, anyone may call buyback(PoolId poolId). Buy only inside buyback(), never inside a swap, from this same pool, with a price limit 3% above the pool price at the start of the call; keep any unspent ETH in that pool's jar and anyone may call it again. attempt to burn with the token's burn(uint256); if it has none, or the burn call reverts, keep them in the hook forever; no function can move retained tokens. Expose jar(PoolId poolId) as a view. Fees are computed on the amount actually traded; when the swap specifies its ETH amount and the pool fills only part of it, the swap reverts rather than overpaying.",
+          "message": "The highest simultaneous ETH-side hook fees total 34.9%. Include fade and volatility replacement rates; the total must stay at or below 5%."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "max-buy",
+        "pause"
+      ],
+      "palette": "REMOVE MAX BUY PER WALLET FIRST",
+      "validation": [
+        {
+          "field": "block:1",
+          "message": "Max buy per wallet cannot be combined with Pause switch."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Each wallet may buy at most 2.0% of the token's total supply through this pool in total, for the life of the pool; larger buys revert. Sells are never blocked. Track each wallet's bought total separately by PoolId. Expose boughtBy(PoolId poolId, address wallet) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.\nConflicts with: The owner may pause and unpause swaps separately by PoolId. Liquidity can always be removed while paused. Expose pause(PoolId poolId) and unpause(PoolId poolId) for the owner and paused(PoolId poolId) as a view.",
+          "message": "Max buy per wallet cannot be combined with Pause switch."
+        },
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: The owner may pause and unpause swaps separately by PoolId.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "max-buy",
+        "hours"
+      ],
+      "palette": "REMOVE MAX BUY PER WALLET FIRST",
+      "validation": [
+        {
+          "field": "block:1",
+          "message": "Max buy per wallet cannot be combined with Trading hours."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Each wallet may buy at most 2.0% of the token's total supply through this pool in total, for the life of the pool; larger buys revert. Sells are never blocked. Track each wallet's bought total separately by PoolId. Expose boughtBy(PoolId poolId, address wallet) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.\nConflicts with: Allow swaps only between 9:00 inclusive and 17:00 exclusive UTC each day, judged by block timestamp; if the end precedes the start, the interval crosses midnight. Reject all others. Liquidity changes are always allowed. Apply this schedule separately by PoolId. Expose isOpen(PoolId poolId) as a view.",
+          "message": "Max buy per wallet cannot be combined with Trading hours."
+        },
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: Reject all others.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "max-buy",
+        "breaker"
+      ],
+      "palette": "REMOVE MAX BUY PER WALLET FIRST",
+      "validation": [
+        {
+          "field": "block:1",
+          "message": "Max buy per wallet cannot be combined with Circuit breaker."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Each wallet may buy at most 2.0% of the token's total supply through this pool in total, for the life of the pool; larger buys revert. Sells are never blocked. Track each wallet's bought total separately by PoolId. Expose boughtBy(PoolId poolId, address wallet) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.\nConflicts with: If the absolute pool price move over the last 30 seconds of block timestamp exceeds 20%, reject every swap for the next 5 minutes of block timestamp, then resume automatically. Liquidity can still be removed during the pause. Track price history and the pause separately by PoolId. Expose haltedUntil(PoolId poolId) as a view.",
+          "message": "Max buy per wallet cannot be combined with Circuit breaker."
+        },
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: If the absolute pool price move over the last 30 seconds of block timestamp exceeds 20%, reject every swap for the next 5 minutes of block timestamp, then resume automatically.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "lp-lock",
+        "pause"
+      ],
+      "palette": "REMOVE LIQUIDITY LOCK FIRST",
+      "validation": [
+        {
+          "field": "block:1",
+          "message": "Liquidity lock cannot be combined with Pause switch."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts. Zero-change fee collection is always allowed. Key each position by (sender, tickLower, tickUpper, salt), separately by PoolId. The hook's own positions (Limit orders, Yield) are exempt from every liquidity rule. Expose unlockAt(bytes32 positionKey) as a view; positionKey includes PoolId, sender, tickLower, tickUpper and salt.\nConflicts with: The owner may pause and unpause swaps separately by PoolId. Liquidity can always be removed while paused. Expose pause(PoolId poolId) and unpause(PoolId poolId) for the owner and paused(PoolId poolId) as a view.",
+          "message": "Liquidity lock cannot be combined with Pause switch."
+        },
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts.\nConflicts with: Liquidity can always be removed while paused.",
+          "message": "A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "lp-lock",
+        "breaker"
+      ],
+      "palette": "REMOVE LIQUIDITY LOCK FIRST",
+      "validation": [
+        {
+          "field": "block:1",
+          "message": "Liquidity lock cannot be combined with Circuit breaker."
+        }
+      ],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts. Zero-change fee collection is always allowed. Key each position by (sender, tickLower, tickUpper, salt), separately by PoolId. The hook's own positions (Limit orders, Yield) are exempt from every liquidity rule. Expose unlockAt(bytes32 positionKey) as a view; positionKey includes PoolId, sender, tickLower, tickUpper and salt.\nConflicts with: If the absolute pool price move over the last 30 seconds of block timestamp exceeds 20%, reject every swap for the next 5 minutes of block timestamp, then resume automatically. Liquidity can still be removed during the pause. Track price history and the pause separately by PoolId. Expose haltedUntil(PoolId poolId) as a view.",
+          "message": "Liquidity lock cannot be combined with Circuit breaker."
+        },
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts.\nConflicts with: Liquidity can still be removed during the pause.",
+          "message": "A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception."
+        }
+      ]
+    }
+  ]
+}

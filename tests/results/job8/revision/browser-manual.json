@@ -1,0 +1,27 @@
+{
+  "viewport": 390,
+  "documentWidth": 390,
+  "notice": "Fix the request before payingLaunch is locked. Edit these sentences in the Builder, then check the corrected request.Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. A vague fee cannot be checked or paid for.Charge a reasonable hook fee on every swap.Name one full fee recipient address, or use a fee block.Charge a reasonable hook fee on every swap.The deployer constructor must forward the same fee recipient named by the fee rules.Deploy one contract, PondHookDeployer, on Robinhood Chain: its constructor takes the Robinhood Chain PoolManager 0x8366a39CC670B4001A1121B8F6A443A643e40951, $owner and the fee recipient the paying wallet, takes no salt argument, starts at salt 0 and increments until the CREATE2 address carries the hook's permission flags, then creates PondHook in the launch transaction, passing the PoolManager, $owner and fee recipient unchanged to the hook constructor; neither constructor calls any other contract (apart from the deployer creating the hook). There is no deploy function to call afterwards; hook() returns the hook's address. Enable only the callbacks the behavior below needs.",
+  "foreground": "rgb(21, 19, 15)",
+  "background": "rgb(223, 211, 176)",
+  "contrast": 12.440861989686235,
+  "focused": {
+    "text": "Observe swaps",
+    "outline": "rgb(30, 90, 58) solid 3px"
+  },
+  "fonts": [
+    "Pixelify Sans",
+    "Press Start 2P",
+    "VT323"
+  ],
+  "actions": [
+    {
+      "text": "Check with the swarm (free)",
+      "disabled": true
+    },
+    {
+      "text": "Continue to launch",
+      "disabled": true
+    }
+  ]
+}

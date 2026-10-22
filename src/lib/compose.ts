@@ -1,6 +1,7 @@
 // SPEC 4 and 5: the block catalog, the combination rules of 4.10, the description text of 5.1 and the body of 5.2.
 // Pure functions only, so the same code runs in the Builder and in `node --test`.
 import catalogJson from '../blocks/catalog.json' with { type: 'json' };
+import { writtenFeeClauses, writtenFeeTargets } from './writtenFees.ts';
 
 export type LaunchType = 'A' | 'B' | 'C';
 export type Mode = 'prompt' | 'blocks';
@@ -115,15 +116,18 @@ export const activeBlocks = (d: Draft) => d.mode === 'prompt' ? [] : behaviorBlo
 export const powersOf = (d: Draft) => activeBlocks(d).map(b => b.id === 'donate' && b.p.who !== 'only allowlisted addresses' ? undefined : BY_ID[b.id].ownerPower).filter((x): x is string => !!x);
 const walletOr = (v: string, wallet?: string) => v.trim() || wallet || 'the paying wallet';
 
-/** Section 4.10: the ETH-side rates that must add up to at most 5%. */
+/** Section 4.10: the highest simultaneous pair-side rate, including replacement schedules. */
 export function rateTotal(d: Draft) {
-  let total = 0;
+  let total = 0, base = 0;
   for (const b of activeBlocks(d)) {
-    if (b.id === 'swap-fee' || b.id === 'jar' || b.id === 'pot') total += Number(b.p.rate) || 0;
+    if (b.id === 'swap-fee') base = Math.max(base, Number(b.p.rate) || 0);
+    if (b.id === 'fee-fade') base = Math.max(base, Number(b.p.start) || 0);
+    if (b.id === 'fee-vol') base = Math.max(base, Number(b.p.fee) || 0);
+    if (b.id === 'jar' || b.id === 'pot') total += Number(b.p.rate) || 0;
     if (b.id === 'fee-size') total += Number(b.p.extra) || 0;
-    if (b.id === 'fee-dir') total += Math.max(Number(b.p.buy) || 0, Number(b.p.sell) || 0);
+    if (b.id === 'fee-dir') base = Math.max(base, Number(b.p.buy) || 0, Number(b.p.sell) || 0);
   }
-  return Math.round(total * 1000) / 1000;
+  return Math.round((total + base) * 1000) / 1000;
 }
 
 /** Why a palette entry cannot be added right now, as its grey state pill; null when ADD is offered. */
@@ -174,12 +178,7 @@ export function setParam(d: Draft, index: number, k: string, v: ParamValue): Dra
   return { ...d, blocks: d.blocks.map((b, i) => i === index ? { ...b, p: { ...b.p, [k]: v } } : b) };
 }
 
-// A percentage protection limit is not a fee. Written fee rules may also use a
-// fixed pair-currency amount; a zero default must never contradict that amount.
-const writtenFeeRequested = (text: string) => {
-  const amount = '\\d+(?:\\.\\d+)?(?:%|\\s+(?:IMD|ETH)\\b)';
-  return new RegExp(`\\b(?:take|takes|charge|charges|collect|collects)\\b[^.;]*${amount}|${amount}[^.;]*\\b(?:fees?|jar|pot)\\b|\\b(?:fees?|jar|pot)\\b[^.;]*${amount}`, 'i').test(text);
-};
+const writtenRules = (d: Draft) => [cleanText(d.prompt).slice(0, MAX_WORDS), ...activeBlocks(d).filter(b => b.id === 'custom').map(b => cleanText(b.p.text))].filter(Boolean);
 
 /** SPEC 4.16 overrides the older section 5 templates. */
 export function compose(d: Draft, wallet?: string): string {
@@ -215,9 +214,11 @@ export function compose(d: Draft, wallet?: string): string {
     ? `Owner ${owner} is $owner. Permit only the owner functions expressly granted by the written rules${powers.length ? ` and these block powers: ${powers.join(', ')}` : ''}; a numbered block rule wins on conflict. No backend signer, no upgrade path.`
     : powers.length ? `Owner ${owner} may only: ${powers.join(', ')}, through the functions named above. No other admin function, no backend signer, no upgrade path.`
     : `Owner ${owner} is $owner. No owner functions, no backend signer, no upgrade path.`);
-  const hasFees = blocks.some(b => ['swap-fee', 'fee-dir', 'fee-size', 'fee-fade', 'fee-vol', 'jar', 'pot'].includes(b.id));
-  if (hasFees) lines.push(`Fees are always taken from the ${pairCurrency(d)} (pair currency) side, never from ${c.symbol}; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem. ${blocks.some(b => b.id === 'fee-split') ? 'Fee recipients are exactly the addresses in Split the fee; all claims and no-liquidity fallbacks follow that split.' : `Fee recipient: ${recipient}.`}`);
-  else if (!written.some(writtenFeeRequested)) lines.push('Hook fee rate: 0%.');
+  const hasWrittenFees = written.some(text => writtenFeeClauses(text).length);
+  const hasFees = hasWrittenFees || blocks.some(b => ['swap-fee', 'fee-dir', 'fee-size', 'fee-fade', 'fee-vol', 'jar', 'pot'].includes(b.id));
+  if (hasFees) lines.push(`Fees are always taken from the ${pairCurrency(d)} (pair currency) side, never from ${c.symbol};${hasWrittenFees ? ` settled in ${pairCurrency(d)};` : ''} a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem. ${blocks.some(b => b.id === 'fee-split') ? 'Fee recipients are exactly the addresses in Split the fee; all claims and no-liquidity fallbacks follow that split.' : `Fee recipient: ${recipient}.`}`);
+  else lines.push('Hook fee rate: 0%.');
+  if (hasWrittenFees) lines.push(c.feeBasis!);
   if (pairCurrency(d) === 'IMD') {
     lines.push(`Keep every hook fee in IMD: ${IMD_FEE_OPT_OUT}.`);
     lines.push('The launch token may be currency0 or currency1; handle both orders.');
@@ -236,6 +237,17 @@ export function compose(d: Draft, wallet?: string): string {
 export const feeRecipient = (d: Draft, wallet?: string): string => {
   if (activeBlocks(d).some(b => b.id === 'fee-split')) return walletOr('', wallet);
   const fee = activeBlocks(d).find(b => b.id === 'swap-fee' || b.id === 'fee-dir');
+  if (!fee) {
+    const targets = [...new Map(writtenFeeTargets(writtenRules(d).join('\n')).map(target => {
+      const resolved =
+      /^(?:the )?owner$/i.test(target) ? walletOr(d.settings.owner, wallet)
+        : /^(?:IMD['’]s )?treasury$/i.test(target) ? IMD_TREASURY
+        : /^my wallet$/i.test(target) ? walletOr('', wallet) : target;
+      return [resolved.toLowerCase(), resolved];
+    })).values()];
+    if (targets.length === 1) return targets[0];
+    if (targets.length > 1) return 'the unresolved written fee recipient';
+  }
   const choice = String(fee?.p.to ?? 'my wallet');
   return choice === "IMD's treasury" || choice === 'treasury address' ? IMD_TREASURY : choice === 'my wallet' ? walletOr('', wallet) : choice;
 };
@@ -293,7 +305,7 @@ export function validate(d: Draft, wallet?: string): Issue[] {
   const ids = d.blocks.map(b => b.id);
   if (new Set(ids).size !== ids.length) issues.push({ field: 'rules', message: 'Each block can be added once.' });
   const rate = rateTotal(d);
-  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ${pairCurrency(d)}-side fees together (swap fee or the larger buy/sell fee, whale fee, buyback jar, prize pot) must stay at or below 5%.` });
+  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ${pairCurrency(d)}-side fees together (the highest swap, fade, volatility or buy/sell rate, plus whale fee, buyback jar and prize pot) must stay at or below 5%.` });
   if (d.type !== 'A' && !cleanText(d.prompt) && !activeBlocks(d).length) issues.push({ field: 'rules', message: 'Describe your hook or add at least one block.' });
   if (d.prompt.length > MAX_WORDS) issues.push({ field: 'prompt', message: 'Your description is longer than 3,000 characters.' });
   if (d.type === 'A') {

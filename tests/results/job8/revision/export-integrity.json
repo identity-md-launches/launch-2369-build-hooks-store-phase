@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": true,
+    "favicon": true,
+    "description": true,
+    "ogTitle": true,
+    "ogImage": true
+  },
+  "absoluteRuntimeReferences": 0,
+  "missingReferences": 0,
+  "publicMismatches": 0,
+  "runtimeFiles": 25,
+  "exportHtmlSha256": "0351cef524a9cbc78d28187fecb3e980c0b75e97cec1d873de1a10da1abf8da4",
+  "sourceComposeSha256": "40eafff464e732a25160c0f5e4806364e875439e7dbdb71f423a28a55d7c4a0f",
+  "sourceSafetySha256": "eacd184d4924507fe6f12f6fb264e85d7602a8ec00805e90dab6bb2bdff74c8c",
+  "specSha256": "9932d56ebfa042993b2d766c176ee26a04041d8fb289e2931d1cd2bd7cf2ddd2",
+  "dependencyManifestSha256": "642ac6db2f356b36882b2c7ada7b7d050b6677fa5d0b3f5bb4df1db0a53dcf34",
+  "dependencyLockSha256": "add191991ef191cd54d9de208c59ee81ccd32b1d5092573066ac35cdfeae47ce",
+  "passed": true
+}

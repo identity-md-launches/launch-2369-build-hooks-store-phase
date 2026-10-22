@@ -1,5 +1,7 @@
 # Job 8 validation and design review
 
+Revision results for the seven reopened findings are in [revision/REVIEW.md](revision/REVIEW.md) and the root `.imd-responses.json`. The report below records the preceding accepted round; its counts and observations remain historical evidence.
+
 Implemented against refreshed **SPEC 1.31, section 4.16**. Checked 2026-10-21–22. This report records worker observations and a separate agent's read-only review; it does not independently certify behavior, a paid build, or a deployed contract.
 
 ## Scope and consequential choices

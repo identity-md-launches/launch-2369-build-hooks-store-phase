@@ -1,0 +1,134 @@
+{
+  "cases": [
+    {
+      "words": "Charge a fee of 30 basis points on every swap and send it to 0x1111111111111111111111111111111111111111.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Take half a percent of every swap as a fee for the owner.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and sent to 0x1111111111111111111111111111111111111111. No owner functions.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Publish a time-weighted average price from this pool through twap(uint32 secondsAgo), without changing swaps. No owner functions.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Only the owner may pause and unpause swaps through pause() and unpause(); paused() reports the current state. No other owner functions.",
+      "zeroFooter": true,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Take 1% of the ETH side of every buy as a hook fee, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "words": "Take 1% of every swap as a fee.",
+      "zeroFooter": false,
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "id": "effective-cap",
+      "rateTotal": 5,
+      "validation": [],
+      "consistency": []
+    },
+    {
+      "ids": [
+        "max-buy",
+        "pause"
+      ],
+      "palette": null,
+      "validation": [],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: The owner may pause and unpause swaps separately by PoolId.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "max-buy",
+        "hours"
+      ],
+      "palette": null,
+      "validation": [],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: Reject all others.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "max-buy",
+        "breaker"
+      ],
+      "palette": null,
+      "validation": [],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Sells are never blocked.\nConflicts with: If the absolute pool price move over the last 30 seconds of block timestamp exceeds 20%, reject every swap for the next 5 minutes of block timestamp, then resume automatically.",
+          "message": "Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "lp-lock",
+        "pause"
+      ],
+      "palette": null,
+      "validation": [],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts.\nConflicts with: Liquidity can always be removed while paused.",
+          "message": "A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception."
+        }
+      ]
+    },
+    {
+      "ids": [
+        "lp-lock",
+        "breaker"
+      ],
+      "palette": null,
+      "validation": [],
+      "consistency": [
+        {
+          "code": "contradiction",
+          "sentence": "Liquidity added to a position is locked for 7 days of block timestamp from its latest addition; removing it earlier reverts.\nConflicts with: Liquidity can still be removed during the pause.",
+          "message": "A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception."
+        }
+      ]
+    }
+  ]
+}

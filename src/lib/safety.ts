@@ -1,4 +1,5 @@
-import { BLOCKS, BY_ID, IMD_FEE_OPT_OUT, POOL_MANAGERS, isAddress, type Body, type BlockDef } from './compose.ts';
+import { BLOCKS, BY_ID, IMD_FEE_OPT_OUT, IMD_TREASURY, MAX_ETH_RATE, POOL_MANAGERS, functionsOf, isAddress, type Body, type BlockDef } from './compose.ts';
+import { feeClauses as splitFeeClauses, isFeeProhibition, normalizeFeeAmounts, writtenFeeClauses, writtenFeeTargets } from './writtenFees.ts';
 import knownQuestions from '../blocks/known-questions.json' with { type: 'json' };
 
 export type SafetyFinding = { code: string; sentence: string; message: string };
@@ -31,12 +32,14 @@ const feeScope = (text: string): Set<string> => {
   return new Set(directions.flatMap(d => /^swap/i.test(d) ? ['buy', 'sell'] : [d.toLowerCase().replace(/s$/, '')]));
 };
 const chargedScopes = (text: string): Set<string> => {
+  text = normalizeFeeAmounts(text);
   const scopes = new Set<string>();
   for (const m of text.matchAll(/\b(?:take|collect|charge|and) ([\d.]+)%([^;]*?)(?=\band [\d.]+%|$)/gi)) {
     if (Number(m[1]) > 0) for (const scope of feeScope(m[2])) scopes.add(scope);
   }
   const rate = /\bpays an extra ([\d.]+)%|\bhook fee\b.*?\bis ([\d.]+)%/i.exec(text);
   if (rate && Number(rate[1] ?? rate[2]) > 0) for (const scope of feeScope(text)) scopes.add(scope);
+  if (!scopes.size && writtenFeeClauses(text).length && /\b(?!0+(?:\.0+)?(?:%|\s))\d+(?:\.\d+)?\s*(?:%|IMD\b|ETH\b)/i.test(text)) for (const scope of feeScope(text)) scopes.add(scope);
   return scopes;
 };
 
@@ -64,6 +67,13 @@ export function checkConsistency(input: Body): SafetyFinding[] {
     if (def.requiresAny && !def.requiresAny.some(id => catalogRules.get(id))) add('dependency', rule, `${def.title} needs ${def.requiresAny.map(id => BY_ID[id].title).join(' or ')}.`);
     for (const id of def.excludes ?? []) if (catalogRules.get(id)) add('contradiction', `${rule}\nConflicts with: ${catalogRules.get(id)}`, `${def.title} cannot be combined with ${BY_ID[id].title}.`);
   }
+  // Read the rendered rates, independently of draft validation and its numeric inputs.
+  const rateIn = (id: string, pattern: RegExp) => Number(pattern.exec(catalogRules.get(id) ?? '')?.[1] ?? 0);
+  const buySell = /^Take ([\d.]+)%[^;]*?every buy and ([\d.]+)%/.exec(catalogRules.get('fee-dir') ?? '');
+  const peakRate = Math.max(rateIn('swap-fee', /^Take ([\d.]+)%/), Number(buySell?.[1] ?? 0), Number(buySell?.[2] ?? 0),
+    rateIn('fee-fade', /rate starts at ([\d.]+)%/), rateIn('fee-vol', /replace the Swap fee's rate with ([\d.]+)%/));
+  const totalRate = peakRate + rateIn('fee-size', /pays an extra ([\d.]+)%/) + rateIn('jar', /^Collect ([\d.]+)%/) + rateIn('pot', /^Collect ([\d.]+)%/);
+  if (Math.round(totalRate * 1000) > MAX_ETH_RATE * 1000) add('rates', ['swap-fee', 'fee-dir', 'fee-fade', 'fee-vol', 'fee-size', 'jar', 'pot'].map(id => catalogRules.get(id)).filter(Boolean).join('\n'), `The highest simultaneous ${currency}-side hook fees total ${Number(totalRate.toFixed(3))}%. Include fade and volatility replacement rates; the total must stay at or below 5%.`);
   for (const sentence of lines) {
     // Both catalog prose and ordinary custom wording are checked. Explicit negations are exempt.
     const asserted = sentence.replace(/\b(?:do not|never|not)\s+(?:convert|sell|swap|settle|take|collect|charge|pay|paid|distribute|disburse|remit|receive)[^.;]*/gi, '');
@@ -138,9 +148,46 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   if (open && sunset && Date.parse(sunset[1] + 'Z') <= Date.parse(open[1] + 'Z')) add('contradiction', `${open[0]}\nConflicts with: ${sunset[0]}`, 'Sunset must be after the scheduled opening.');
   const description = /<description>([\s\S]*?)<\/description>/.exec(text)?.[1] ?? '';
   const customRules = Array.from(text.matchAll(/<custom>([\s\S]*?)<\/custom>/g), match => match[1]);
-  const userRules = [...rules, description, ...customRules].filter(Boolean).flatMap(sentences);
-  const feeClauses = userRules.flatMap(s => s.split(/;\s*|\s+(?:but|whereas)\s+|\s+and (?=(?:take|charge|collect)\b)/i));
-  for (const forbidden of feeClauses.filter(s => /\b(?:(?:no|without(?: charging| taking| collecting)?(?: any)?) (?:hook |swap |buy |sell )?fees?|(?:never|do not) (?:take|charge|collect) (?:a |any )?fees?)\b/i.test(s))) {
+  const written = [description, ...customRules].filter(Boolean);
+  const userRules = [...rules, ...written].filter(Boolean).flatMap(sentences);
+  if (input.onchain === 'evm_contracts') {
+    const poolFunctions = new Set(BLOCKS.flatMap(functionsOf).filter(fn => /PoolId/.test(fn.sig)).map(fn => fn.sig.split('(')[0]));
+    for (const sentence of written.flatMap(sentences)) for (const signature of sentence.matchAll(/\b([A-Za-z_]\w*)\(([^()]*)\)/g)) {
+      if (poolFunctions.has(signature[1]) && !/^\s*(?:PoolId\b|bytes32\b|poolId\b)/i.test(signature[2])) add('pool-signature', sentence, `${signature[1]} is pool-dependent. Use ${signature[1]}(PoolId poolId${signature[2].trim() ? `, ${signature[2].trim()}` : ''}) so each pool is identified.`);
+    }
+  }
+  const writtenCharges = written.flatMap(writtenFeeClauses);
+  for (const clause of writtenCharges) {
+    const normalized = normalizeFeeAmounts(clause);
+    if (!/\b\d+(?:\.\d+)?\s*(?:%|IMD\b|ETH\b)/i.test(normalized)) add('fee-rate', clause, 'Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. A vague fee cannot be checked or paid for.');
+    if (/\b\d+(?:\.\d+)?\s*(?:ETH|IMD)\b/i.test(normalized) && !new RegExp(`\\b\\d+(?:\\.\\d+)?\\s+${currency}\\b`, 'i').test(normalized)) add('fee-side', clause, `A flat hook fee must be in ${currency}, the pair currency.`);
+    const rates = [...normalized.matchAll(/\b(\d+(?:\.\d+)?)%/g)].map(m => Number(m[1]));
+    if (rates.some(rate => rate > MAX_ETH_RATE)) add('rates', clause, 'A written hook fee must stay at or below 5%.');
+  }
+  const footer = /^Fee recipient: (.+)\.$/m.exec(text)?.[1] ?? /\bFee recipient: ([^.\n]+)\./.exec(text)?.[1];
+  if (writtenCharges.length) {
+    if (!new RegExp(`\\b${currency}(?: \\(pair currency\\))? side\\b`).test(text)) add('fee-side', writtenCharges[0], `Name the ${currency} fee side, or use a fee block.`);
+    if (!new RegExp(`\\bsettled in ${currency}\\b`, 'i').test(text)) add('fee-settlement', writtenCharges[0], `Name settlement in ${currency}, or use a fee block.`);
+    if (!catalogRules.get('fee-split') && (!footer || !fullAddress(footer))) add('recipient', writtenCharges[0], 'Name one full fee recipient address, or use a fee block.');
+    for (const target of writtenFeeTargets(written.join('\n'))) {
+      const source = written.find(rule => rule.toLowerCase().includes(target.toLowerCase())) ?? written.join('\n');
+      const resolved = /^(?:the )?owner$/i.test(target) ? String(input.owner ?? '') : /^(?:IMD['’]s )?treasury$/i.test(target) ? IMD_TREASURY : target;
+      if (!fullAddress(resolved)) add('recipient', source, 'Name every written fee destination with a full address. Multiple or unresolved destinations must be clarified before paying.');
+      else if (footer && resolved.toLowerCase() !== footer.toLowerCase()) add('fee-recipient', source, `The written fee destination ${resolved} disagrees with Fee recipient: ${footer}. Use one destination or a Split the fee block.`);
+    }
+  }
+  if (input.onchain === 'evm_contracts' && footer) {
+    const constructorRecipient = /\bfee recipient (0x[\da-fA-F]{40})\b/.exec(opening)?.[1];
+    if (!constructorRecipient || constructorRecipient.toLowerCase() !== footer.toLowerCase()) add('fee-recipient', opening, 'The deployer constructor must forward the same fee recipient named by the fee rules.');
+  }
+  const hookFeeIds = ['swap-fee', 'fee-dir', 'fee-size', 'fee-fade', 'fee-vol', 'jar', 'pot'];
+  // LP fees, pool fee tiers and distribution percentages are not hook charges.
+  const nonChargingRules = new Set(['lp-fee', 'pool-rules', 'fee-split', 'lp-share'].map(id => catalogRules.get(id)).filter(Boolean));
+  const feeClauses = [...rules.filter(rule => !nonChargingRules.has(rule)), ...written].flatMap(splitFeeClauses);
+  const zeroFee = lines.find(line => /^Hook fee rate: 0%\.$/.test(line));
+  const hookFeeClauses = [...written.flatMap(splitFeeClauses), ...hookFeeIds.map(id => catalogRules.get(id)).filter((rule): rule is string => !!rule)];
+  if (zeroFee) conflict(zeroFee, hookFeeClauses.find(s => chargedScopes(s).size > 0 || writtenFeeClauses(s).some(clause => !/\b0+(?:\.0+)?%/.test(normalizeFeeAmounts(clause)))), 'The generated zero-fee rule conflicts with a charging rule. Resolve the written fee before checking or paying.');
+  for (const forbidden of feeClauses.filter(isFeeProhibition)) {
     const scope = feeScope(forbidden);
     conflict(forbidden, feeClauses.find(s => [...chargedScopes(s)].some(direction => scope.has(direction))), 'The request both forbids fees and charges a fee on the same trade direction. Remove one rule or give buys and sells compatible fee rules.');
   }

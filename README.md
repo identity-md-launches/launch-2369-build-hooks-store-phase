@@ -6,6 +6,8 @@ Job 8 implements catalog hardening against **SPEC 1.31, section 4.16**. Every la
 
 The independent read-only review and concrete follow-ups are in [tests/results/job8/ADVERSARIAL-REVIEW.md](tests/results/job8/ADVERSARIAL-REVIEW.md). Build, interaction, design and service observations are in [tests/results/job8/REVIEW.md](tests/results/job8/REVIEW.md). These checks do not certify a paid launch or its eventual contract.
 
+The job 8 revision reproduces and fixes all seven reopened findings. Current validation and limitations are in [tests/results/job8/revision/REVIEW.md](tests/results/job8/revision/REVIEW.md); [.imd-responses.json](.imd-responses.json) answers each finding individually. Earlier job results remain historical evidence.
+
 ## Install, preview and rebuild
 
 Use Node.js 24+ and npm. The existing dependency manifest, lockfile and build configuration are unchanged.
@@ -59,6 +61,10 @@ The scene keeps bank reeds, the distant boat and one or two birds over sparse ca
 
 Every fee template uses IMD for an IMD-paired type A launch and ETH otherwise. IMD requests explicitly say **do not convert the fee to ETH and do not use any other pool**. “My wallet” resolves to the connected paying address; the treasury option names **IMD’s treasury**, `0x3f252e859a277a86A3967c11D4E054B2f07a1F22`, on both chains. A missing recipient requires connecting the paying wallet or choosing IMD’s treasury before the free check. Jar and pot readings also use the pair currency. Fees use actual traded amounts and reject partial fills specified in pair currency. Fade and volatility replace one base rate; Whale shares its destination. LP share runs before Split, and neither redistributes jar or pot funds.
 
+Written fees recognize `%`, `percent`, `per cent`, basis points, bps and common word fractions such as “half a percent”. They receive the same pair-side, settlement, recipient, claim and partial-fill facts. An explicit written destination feeds the B/C constructor and fee footer; without one the request names the paying wallet. Unclear amounts, unresolved destinations and disagreements lock the free check and Launch. The final-body guard also rejects a contradictory generated zero-fee line. A percentage protection limit still receives `Hook fee rate: 0%.`.
+
+The 5% cap counts the highest base/fade/volatility rate once, then adds Whale, jar and pot rates. Fade now starts at 3% by default and its input stops at 5%; combining it with other charges can still exceed the cap and locks submission. Existing incompatible sell/liquidity promises now have palette exclusions in both addition orders. B/C written pool-dependent interfaces must accept PoolId; both supplied pause and price-reading examples include it.
+
 Yield blocks have no verified Aave/Morpho deployment in this project, so they are refused on both deploy chains. Batch auctions is dimmed as not in this version. Other checks cover fee-side/settlement mismatches, missing external addresses, every declared exclusion, base-fee dependencies, fixed/dynamic LP fee conflicts, incompatible opening/sunset dates, owner-power conflicts, unconditional liquidity promises and contradictory swap restrictions. Hook donations are explicitly exempt from Donation rules. Percentage inputs must follow their configured step so displayed rounding cannot evade the fee cap. Arbitrary natural language is not formally proven by these deterministic rules; the free check and audit remain necessary safeguards. No check guarantees that a paid build can finish.
 
 Fixed facts are compared with the request. Conflicts remain visible under **What the swarm understood** and lock both continuation and payment, even after navigation/reload. IMD’s conversion default is resolved by the composer’s explicit opt-out. Other supported conflicts show the exact request opt-out to add and require a fresh check. A check for different bytes never unlocks the changed request.
@@ -111,6 +117,8 @@ node --test relay/worker.test.mjs
 node scripts/check-delivery.mjs
 # Job 8 composer corpus and focused browser checks:
 node tests/generate-job8-corpus.mjs
+node --test tests/job8-revision.test.mjs
+npm --prefix web run test:e2e -- tests/job8-revision.spec.ts
 npm --prefix web run test:e2e -- tests/job8.spec.ts tests/builder.spec.ts
 # Launch-safety cases and retained regressions:
 npm --prefix web run test:e2e -- tests/job5.spec.ts tests/job6.spec.ts tests/job7.spec.ts

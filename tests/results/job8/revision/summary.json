@@ -1,0 +1,53 @@
+{
+  "unit": {
+    "passed": 1104,
+    "failed": 0
+  },
+  "browser": {
+    "startTime": "2026-10-22T00:59:32.306Z",
+    "duration": 304118.47400000005,
+    "expected": 202,
+    "skipped": 7,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "design": {
+    "passed": 13,
+    "total": 16,
+    "exceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "responses": [
+    {
+      "finding": "418c451bcc1137d4a273f025748f86fa9ff7576ffbdfa704cac477786a71a2ac",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "69a83369a0280a081c95b0b9bd043f2c343a217b2c65229089d88f56b87fb0cb",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "1a5b8f74b4d641607b5df64116ba5658c8c7f7cd8ed7ae8982dd1643e766626d",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "b3c3f6583bc16b5012c5e817301201c21039876d6f3dd17e59fe60ce1c5621e3",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "f77fb0a974ef1b3f899cd541fb697010d263fdd73287806996e8b5baba0fdcab",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "1f8962730d3d4353f10bcb5b74323e01f6ca4a9337f748fe8c53a6547dacaf54",
+      "verdict": "fixed"
+    },
+    {
+      "finding": "505680786dfbe625f3cf699c27bbf3576c2076461c9f3e0ff238d446e98be240",
+      "verdict": "fixed"
+    }
+  ]
+}

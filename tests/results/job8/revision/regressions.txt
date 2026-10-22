@@ -1,0 +1,16 @@
+✔ written percent, basis points, word fractions and flat fees never get a zero default, in either editor and every launch context (308.434191ms)
+✔ uncertain written fee amounts block the actual body; protection percentages and explicit no-fee rules retain the zero default (30.634542ms)
+✔ generated defaults complete a minimal written fee and the final-body guard rejects missing fee facts (1.690935ms)
+✔ written fee recipients are forwarded unchanged by B/C deployers and compared against the exact body (37.0332ms)
+✔ B/C written pool-dependent functions require a pool argument, in Describe it and Custom rule (18.103239ms)
+✔ a written fee and its destination may span description and Custom rule without defaulting the constructor to the payer (6.340811ms)
+✔ the 5% cap uses the higher replacement rate once, plus every additive fee, and guards rendered requests independently (77.573145ms)
+✔ every reported catalog conflict is explained in the palette, in both addition orders and all launch contexts (128.422014ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 890.275668
