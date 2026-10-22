@@ -109,3 +109,26 @@ test('a words-only draft never matches a proven entry without behavior blocks', 
   const a = words('Reject every swap larger than 10 ETH.', 'A');
   assert.equal(matchProvenLaunch(a, [entryOf('A', ['token'])]), undefined);
 });
+
+test('a passive or active owner payee flows into the constructor and the footer, never the payer', () => {
+  const owner = '0x9a50fd22bcefd3774d796e775a467a7f743e0ab0', payer = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
+  for (const type of ['A', 'B', 'C']) for (const prompt of ['The owner is paid 1% of every swap.', 'The owner gets 1% of every swap.', 'The owner takes 1% of every swap.', 'The owner is credited 1% of each trade.']) {
+    const d = words(prompt, type); d.settings.owner = owner; if (type !== 'A') d.settings.token = lower;
+    assert.deepEqual(writtenFeeTargets(prompt).map(t => t.toLowerCase()), ['the owner'], prompt);
+    const b = C.body(d, payer);
+    assert.equal(b.owner, owner);
+    assert.equal(C.feeRecipient(d, payer), owner, prompt);
+    assert.ok(!new RegExp(`(?:Fee recipient:|fee recipient) ${payer}`, 'i').test(b.objective), `${type} ${prompt}: the payer must not be the recipient`);
+    assert.match(b.objective, new RegExp(`Fee recipient: ${owner}\\.`));
+    if (type !== 'A') assert.match(b.objective, new RegExp(`fee recipient ${owner}\\b`));
+    assert.deepEqual(checkConsistency(b), [], `${type} ${prompt}`);
+  }
+});
+
+test('an unknown passive payee is refused until its address is given', () => {
+  const d = words('Alice is paid 1% of every swap.', 'B'); d.settings.token = lower;
+  const b = C.body(d, wallet);
+  assert.ok(!b.objective.includes(lower) || !/Fee recipient: 0x/.test(b.objective));
+  assert.ok(checkConsistency(b).some(f => f.code === 'recipient'));
+  assert.deepEqual(writtenFeeTargets('The fee is paid in ETH. Charge 1% of every swap.'), []);
+});

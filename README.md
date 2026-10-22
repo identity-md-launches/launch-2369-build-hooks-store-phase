@@ -6,7 +6,7 @@ Job 9 implements **SPEC 1.34 §4.17** and the open launch/fee corrections. Match
 
 Request addresses are lowercase, including checksummed connected wallets and embedded addresses. Structural written-fee analysis resolves named recipients, parses whole amounts and checks the combined 5% cap per direction; ambiguous amounts lock payment. Contracts-only Live requires Completed status 0 plus a live relay launch record. Deployer and hook addresses come from that record and `hook()` independently; zero keeps hook controls locked while Live can be confirmed.
 
-Current evidence is in [tests/results/job9/REVIEW.md](tests/results/job9/REVIEW.md), with the separate read-only [adversarial review](tests/results/job9/ADVERSARIAL-REVIEW.md). Production build/typecheck, **1,145 unit tests and 234 browser tests passed**, with seven optional service/fork cases skipped. Earlier job results remain historical evidence. No paid launch or deployment was made.
+Current evidence is in [tests/results/job9/REVIEW.md](tests/results/job9/REVIEW.md), with the separate read-only [adversarial review](tests/results/job9/ADVERSARIAL-REVIEW.md). Production build/typecheck, **1,155 unit tests and 234 browser tests passed** (revision results in `tests/results/job9/revision/`), with seven optional service/fork cases skipped. Earlier job results remain historical evidence. No paid launch or deployment was made.
 
 ## Install, preview and rebuild
 

@@ -57,3 +57,15 @@ Representative WebP screenshots accompany complete per-test results for every wi
 Dependencies/browser tools were installed only under `/tmp`, using the unchanged lockfile. Source was copied into that isolated checkout, production scripts/tests ran there, and final `dist/` was copied back. The pinned probe also ran from the repository root. An overlapping preview-server run and a broad route in the optional accessibility harness were corrected before final validation.
 
 Seven optional tests require explicit live-service/local-fork opt-in. No real paid launch, native permission dialog, closed-tab push, screen-reader, physical device, WebKit or native zoom claim is made. The Vite 500kB advisory remains. The verifier checks paths and bytes only and does not independently certify behavior.
+
+## Revision: passive owner payee (finding 2e210b89…)
+
+Reproduced on the delivered source: `writtenFeeTargets('The owner is paid 1% of every swap.')` returned `[]`, so with a distinct owner `feeRecipient()`, the deployer constructor and `Fee recipient:` all named the paying wallet while `body.owner` named the owner, and `validate()`/`checkConsistency()` returned `[]`. The same held for `The owner gets/takes … 1% of every swap.`
+
+Fix in `src/lib/writtenFees.ts:135-139`: a named payee (`the owner`, `my wallet`, the treasury, a literal address) followed by a passive payment (`is paid`, `is credited`, `is owed`, `is given`, `is sent` without a following `to/by/in/as/out`) or an active receipt verb (`receives`, `accrues`, `gets`, `earns`, `takes`, `keeps`, `collects`) is a written destination. A clause-initial passive payee that is not a known destination (`Alice is paid 1% of every swap.`) is also a destination; it resolves to no address, so the request is refused with a recipient finding (and `launchBody()` throws) instead of defaulting to the payer. Fee words, amounts, traders and `it/them` are never read as payees, so `The fee is paid in ETH.` still names no destination.
+
+Regressions in `tests/job9-revision.test.mjs` (last two tests): four owner-payee wordings across launch types A, B and C with payer `0x6cba…8a34` and owner `0x9a50…0ab0`; the owner appears in the footer and, for contracts-only launches, the constructor, the payer appears in neither, and both checks return no finding. The unknown-payee case raises `recipient`.
+
+Results after the change, recorded in `revision/`: typecheck and production build passed (`typecheck.txt`, `build.txt`); **1,155 unit tests passed** (`unit.txt`); **234 Playwright cases passed, 7 optional skips** (`playwright.txt`); `export-integrity.json` shows complete metadata and no missing or absolute references; `submission-budget.json` passed with 603,365 bytes of headroom. The UI did not change, so the design probe and accessibility records above stand; only the bundle hash in `dist/` changed.
+
+Limitation: the reorg fixtures in `tests/chain.test.mjs` sometimes miss their 1-second polling window on this machine (one of the four fails in roughly half of the runs, also with the change stashed). They passed in the recorded run. This revision did not touch them.

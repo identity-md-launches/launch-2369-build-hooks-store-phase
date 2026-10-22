@@ -132,11 +132,15 @@ export function writtenFeeTargets(text: string): string[] {
   if (!writtenFeeClauses(text).length) return [];
   const pattern = /(?:\b(?:send|sent|pay|paid|payable|route|transfer|forward|remit|distribute)\s+(?:(?:all|the|swap|hook|buy|sell|accrued|collected|charged)\s+)*(?:(?:fees?(?: revenue| proceeds)?|it|them|revenue|proceeds)\s+)?to|\b(?:fee )?(?:recipient|destination)\s*(?:is|:|=)|\b(?:fees?|it|them)\s+(?:(?:must|shall|will)\s+)?go(?:es)?\s+to|\bfee\s+for\s+(?=(?:the )?owner\b|my wallet\b|(?:(?:the|IMD['’]s) )?treasury\b|0x))\s*([^;,.!?]+)/gi;
   const implied = /\b(?:go(?:es)?\s+to|for(?!\s+(?:(?:every|each|all|the)\s+)?(?:swaps?|trades?|buys?|sells?)\b))\s+([^;,.!?]+)/gi;
-  const ownerReceives = /\b((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-fA-F]{40})\s+(?:receives?|accrues?)\b/gi;
+  const ownerReceives = /\b((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-fA-F]{40})\s+(?:(?:(?:is|are|will be|shall be|gets?)\s+)?(?:paid|credited|owed|given|sent)(?!\s+(?:to|by|in|as|out)\b)|receives?|accrues?|gets?|earns?|takes?|keeps?|collects?)\b/gi;
+  // A passive payee at the head of a clause ('Alice is paid 1% of every swap') names a destination,
+  // known or not; an unknown one stays unresolved so the request asks for its address.
+  const passivePayee = /^(?:then\s+)?((?:(?:the|my|our)\s+)?[a-z][\w'’-]*(?:\s+[a-z][\w'’-]*){0,2}|0x[\da-fA-F]{40})\s+(?:is|are|will be|shall be|gets?)\s+(?:paid|credited|owed|given|sent)\b(?!\s+(?:to|by|in|as|out)\b)/gi;
+  const notPayee = /\b(?:fees?|tax(?:es)?|levy|levies|commission|toll|amount|rate|it|they|them|this|that|swappers?|traders?|buyers?|sellers?|swaps?|trades?|hook|pool|pot|jar|remainder|rest|revenue|proceeds)\b|%/i;
   const explicitTarget = /\b(?:to|for)\s+((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-fA-F]{40})\b/gi;
   const payTarget = /\b(?:pay|paying|credit|reward)\s+(0x[\da-f]{40}|[^\d%;,.!?]+?)\s+(?=\d+(?:\.\d+)?\s*(?:%|imd\b|eth\b))/gi;
   const namedBeforeAmount = /\b((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-f]{40})\s+(?=\d+(?:\.\d+)?\s*(?:%|imd\b|eth\b))/gi;
-  const matches = [...normalizeFeeAmounts(text).matchAll(payTarget), ...normalizeFeeAmounts(text).matchAll(namedBeforeAmount), ...text.matchAll(pattern), ...writtenFeeClauses(text).flatMap(clause => [...clause.matchAll(implied), ...clause.matchAll(ownerReceives), ...clause.matchAll(explicitTarget)])];
+  const matches = [...normalizeFeeAmounts(text).matchAll(payTarget), ...normalizeFeeAmounts(text).matchAll(namedBeforeAmount), ...text.matchAll(pattern), ...writtenFeeClauses(text).flatMap(clause => [...clause.matchAll(implied), ...clause.matchAll(ownerReceives), ...clause.matchAll(explicitTarget), ...[...clause.matchAll(passivePayee)].filter(m => !notPayee.test(m[1]) && !new RegExp(ownerReceives.source, 'i').test(m[0]))])];
   // 'for IMD's treasury and the owner' names two destinations, never one.
   const known = /^(?:0x[\da-fA-F]{40}\b|my wallet\b|(?:the )?owner\b|(?:(?:the|IMD['’]s) )?treasury\b)/i;
   return matches.flatMap(match => {

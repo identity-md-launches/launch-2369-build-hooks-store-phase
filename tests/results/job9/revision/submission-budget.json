@@ -1,11 +1,11 @@
 {
   "limitBytes": 8388608,
-  "candidateFiles": 568,
-  "rawFileBytes": 16808723,
-  "conservativeUncompressedTarBytes": 17256448,
-  "completeSnapshotGitBundleBytes": 8375714,
+  "candidateFiles": 574,
+  "rawFileBytes": 16360716,
+  "conservativeUncompressedTarBytes": 16812544,
+  "completeSnapshotGitBundleBytes": 7768859,
   "reservedMetadataBytes": 16384,
-  "headroomBytes": -3490,
+  "headroomBytes": 603365,
   "protectedPathsChanged": [],
   "dependencyOrCachePaths": [],
   "submodules": [],
@@ -13,5 +13,5 @@
     ".imd/",
     "test/scratch/"
   ],
-  "passed": false
+  "passed": true
 }

@@ -34,14 +34,14 @@
       "sha256": "c98a155dab61d6ccc8680599552244af5e4e4a6153b4e0e4d4b3693aa1fc2a91"
     },
     {
+      "path": "dist/assets/index-B_Rpc49h.js",
+      "bytes": 725661,
+      "sha256": "4dc52b01efa5c2e6cf89478eb897efbbc160ba159f502c2a2cad959593140369"
+    },
+    {
       "path": "dist/assets/index-BmCGiqHK.css",
       "bytes": 33374,
       "sha256": "b92c79df522a1096e62298773ecc676d0fb5044b3707689a7e368fbcda82bf90"
-    },
-    {
-      "path": "dist/assets/index-DL0q_j6F.js",
-      "bytes": 725035,
-      "sha256": "748f3979046cacb141c8d17301fec8b1144e44a3c99376e47f71615d6ceb2a67"
     },
     {
       "path": "dist/assets/isAddressEqual-CZI2hc1A.js",
@@ -101,7 +101,7 @@
     {
       "path": "dist/index.html",
       "bytes": 1830,
-      "sha256": "3d75f0378693f25f672d1f21dde38e9d514425af8ebc0c5d0ae04c773eff0447"
+      "sha256": "afc362ac1fc928d1b2442b9a47b44cba62174ca2b5d0413ee2380ffa665ae02a"
     },
     {
       "path": "dist/og.png",
