@@ -1,0 +1,6 @@
+{
+  "completedPassLines": 125,
+  "failedLinesAfterPreviewStopped": 11,
+  "exitCode": 130,
+  "cause": "The 180-second manual preview used by the first broader run expired. The run was interrupted and repeated using the Playwright-managed preview. This attempt is not counted as successful validation."
+}

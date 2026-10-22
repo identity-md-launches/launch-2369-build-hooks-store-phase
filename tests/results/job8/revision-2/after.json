@@ -1,0 +1,454 @@
+[
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "prompt",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "A",
+    "mode": "custom",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "prompt",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "B",
+    "mode": "custom",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "prompt",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "1% of every swap goes to the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "Add a 2% tax on sells for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 2,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "Skim 1% of every swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "Keep 1% of each swap for the owner.",
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "Charge a 1 percent hook fee on the ETH side of every buy, settled in ETH and payable to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 1,
+    "issues": [],
+    "findings": []
+  },
+  {
+    "type": "C",
+    "mode": "custom",
+    "text": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22. No owner functions.",
+    "recipient": "0x3f252e859a277a86A3967c11D4E054B2f07a1F22",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 0,
+    "issues": [],
+    "findings": [
+      {
+        "code": "fee-rate",
+        "sentence": "When the pool price moves by 1 percent over 30 seconds, charge a small hook fee on the ETH side of every buy, settled in ETH and send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22.",
+        "message": "Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee."
+      }
+    ]
+  },
+  {
+    "advisory": true,
+    "recipient": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "zeroFee": false,
+    "hasSide": true,
+    "rateTotal": 7,
+    "issues": [
+      {
+        "field": "rates",
+        "message": "Fees total 7.0%. All ETH-side fees together (the highest swap, fade, volatility or buy/sell rate, plus whale fee, buyback jar, prize pot and written charges) must stay at or below 5%."
+      }
+    ],
+    "findings": [
+      {
+        "code": "rates",
+        "sentence": "Take 3.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34. Expose claimFees(PoolId poolId) that anyone may call to redeem that pool's claims using the same distribution. Fees are computed on the amount actually traded; when the swap specifies its ETH amount and the pool fills only part of it, the swap reverts rather than overpaying.\nAlso charge a 4% fee on every swap for the owner.",
+        "message": "The highest simultaneous ETH-side hook fees, including written charges, total 7%. All charges together must stay at or below 5%. Use fee blocks for replacement rates."
+      }
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "localVersion": "Version 1.31 \u00b7 2026-10-21 \u00b7 Status: draft for review, then handed to the IMD swarm job by job.",
+  "remoteVersion": "Version 1.32 \u00b7 2026-10-22 \u00b7 Status: draft for review, then handed to the IMD swarm job by job.",
+  "section416Unchanged": true,
+  "decision": "Retain the accepted 1.31 spec and job 8 scope. Upstream 1.32 changes job 9 live-address resolution, outside this revision.",
+  "localSha256": "9932d56ebfa042993b2d766c176ee26a04041d8fb289e2931d1cd2bd7cf2ddd2",
+  "remoteSha256": "11a97f0ae67cebbf5d7866c8143f3c6550fa0df2367569e8f589049891545240"
+}

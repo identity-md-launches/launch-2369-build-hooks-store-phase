@@ -1,0 +1,16 @@
+{
+  "sourceAndConfigMatchBuildCopy": {
+    "src/lib/compose.ts": true,
+    "src/lib/safety.ts": true,
+    "src/lib/writtenFees.ts": true,
+    "web/src/Builder.tsx": true,
+    "web/src/SafetyNotice.tsx": true,
+    "web/src/styles.css": true,
+    "web/package.json": true,
+    "web/package-lock.json": true,
+    "web/vite.config.ts": true,
+    "index.html": true
+  },
+  "completeExportMatchesBuildCopy": true,
+  "passed": true
+}

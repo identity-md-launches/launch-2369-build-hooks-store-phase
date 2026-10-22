@@ -1,5 +1,5 @@
 import { BLOCKS, BY_ID, IMD_FEE_OPT_OUT, IMD_TREASURY, MAX_ETH_RATE, POOL_MANAGERS, functionsOf, isAddress, type Body, type BlockDef } from './compose.ts';
-import { feeClauses as splitFeeClauses, isFeeProhibition, normalizeFeeAmounts, writtenFeeClauses, writtenFeeTargets } from './writtenFees.ts';
+import { feeClauses as splitFeeClauses, isFeeProhibition, normalizeFeeAmounts, writtenFeeAmounts, writtenFeeClauses, writtenFeeRateTotal, writtenFeeTargets } from './writtenFees.ts';
 import knownQuestions from '../blocks/known-questions.json' with { type: 'json' };
 
 export type SafetyFinding = { code: string; sentence: string; message: string };
@@ -158,12 +158,14 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   }
   const writtenCharges = written.flatMap(writtenFeeClauses);
   for (const clause of writtenCharges) {
-    const normalized = normalizeFeeAmounts(clause);
-    if (!/\b\d+(?:\.\d+)?\s*(?:%|IMD\b|ETH\b)/i.test(normalized)) add('fee-rate', clause, 'Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. A vague fee cannot be checked or paid for.');
-    if (/\b\d+(?:\.\d+)?\s*(?:ETH|IMD)\b/i.test(normalized) && !new RegExp(`\\b\\d+(?:\\.\\d+)?\\s+${currency}\\b`, 'i').test(normalized)) add('fee-side', clause, `A flat hook fee must be in ${currency}, the pair currency.`);
-    const rates = [...normalized.matchAll(/\b(\d+(?:\.\d+)?)%/g)].map(m => Number(m[1]));
+    const amounts = writtenFeeAmounts(clause);
+    if (!amounts.length) add('fee-rate', clause, 'Name an exact fee amount, such as 0.3%, 30 basis points or a flat amount in the pair currency. Attach it to the charge; a price trigger or limit does not name the fee.');
+    if (amounts.some(a => a.unit !== '%' && a.unit !== currency)) add('fee-side', clause, `A flat hook fee must be in ${currency}, the pair currency.`);
+    const rates = amounts.filter(a => a.unit === '%').map(a => a.value);
     if (rates.some(rate => rate > MAX_ETH_RATE)) add('rates', clause, 'A written hook fee must stay at or below 5%.');
   }
+  const combinedRate = totalRate + writtenFeeRateTotal(written.join('\n'));
+  if (writtenCharges.length && combinedRate > MAX_ETH_RATE) add('rates', [...['swap-fee', 'fee-dir', 'fee-fade', 'fee-vol', 'fee-size', 'jar', 'pot'].map(id => catalogRules.get(id)).filter(Boolean), ...writtenCharges].join('\n'), `The highest simultaneous ${currency}-side hook fees, including written charges, total ${combinedRate}%. All charges together must stay at or below 5%. Use fee blocks for replacement rates.`);
   const footer = /^Fee recipient: (.+)\.$/m.exec(text)?.[1] ?? /\bFee recipient: ([^.\n]+)\./.exec(text)?.[1];
   if (writtenCharges.length) {
     if (!new RegExp(`\\b${currency}(?: \\(pair currency\\))? side\\b`).test(text)) add('fee-side', writtenCharges[0], `Name the ${currency} fee side, or use a fee block.`);

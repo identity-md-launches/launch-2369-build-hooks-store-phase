@@ -1,0 +1,57 @@
+{
+  "reproducedFindings": 4,
+  "fixedFindings": 4,
+  "productionBuild": {
+    "exitCode": 0
+  },
+  "typecheck": {
+    "exitCode": 0
+  },
+  "fullNodeSuite": {
+    "exitCode": 0,
+    "passed": 1130,
+    "failed": 0,
+    "skipped": 0
+  },
+  "relayUnit": {
+    "exitCode": 0,
+    "passed": 9
+  },
+  "feeRegressionContexts": 24,
+  "feeUnitGroups": 26,
+  "chromium": {
+    "exitCode": 0,
+    "startTime": "2026-10-22T01:32:03.894Z",
+    "duration": 299402.027,
+    "expected": 215,
+    "skipped": 7,
+    "unexpected": 0,
+    "flaky": 0,
+    "viewports": [
+      320,
+      390,
+      1440
+    ]
+  },
+  "designProbe": {
+    "exitCode": 0,
+    "rawPassed": 13,
+    "total": 16,
+    "establishedExceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "webKit": {
+    "attempted": true,
+    "launched": false,
+    "limitation": "WebKit could not start because required browser runtime libraries are unavailable. Chromium coverage is recorded separately."
+  },
+  "limitations": [
+    "No live check, signature, approval, payment or deployment in this revision.",
+    "The seven browser skips require optional live RPC/relay/fork prerequisites.",
+    "Natural-language checks cover tested common forms; they do not prove arbitrary prose.",
+    "Independent different-seat review is performed separately by the network."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "documentWidth": 390,
+  "loadedFonts": [
+    "Pixelify Sans",
+    "Press Start 2P",
+    "VT323"
+  ],
+  "editor": {
+    "fontSize": "16px",
+    "fontFamily": "\"Pixelify Sans\", \"Trebuchet MS\", system-ui, sans-serif",
+    "color": "rgb(21, 19, 15)",
+    "background": "rgb(243, 236, 216)",
+    "contrast": 15.725927108116538
+  },
+  "safetyNotices": 0,
+  "checkEnabled": true,
+  "observation": "At 390px the exact vague price-trigger example produced one blocking fee-rate notice. Replacing the description with the payable-to example removed it. Tab moved from the editor to Observe swaps with a visibly outlined focus ring. No check or signature was sent in this manual session."
+}

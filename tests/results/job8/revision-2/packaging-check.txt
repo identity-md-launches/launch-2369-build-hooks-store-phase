@@ -1,0 +1,18 @@
+{
+  "exportIntegrity": true,
+  "limitBytes": 8388608,
+  "candidateFiles": 542,
+  "rawFileBytes": 16428290,
+  "conservativeUncompressedTarBytes": 16855552,
+  "completeSnapshotGitBundleBytes": 8241003,
+  "reservedMetadataBytes": 16384,
+  "headroomBytes": 131221,
+  "protectedPathsChanged": [],
+  "dependencyOrCachePaths": [],
+  "submodules": [],
+  "excludedInputs": [
+    ".imd/",
+    "test/scratch/"
+  ],
+  "passed": true
+}

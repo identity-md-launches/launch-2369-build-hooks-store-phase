@@ -1,7 +1,7 @@
 // SPEC 4 and 5: the block catalog, the combination rules of 4.10, the description text of 5.1 and the body of 5.2.
 // Pure functions only, so the same code runs in the Builder and in `node --test`.
 import catalogJson from '../blocks/catalog.json' with { type: 'json' };
-import { writtenFeeClauses, writtenFeeTargets } from './writtenFees.ts';
+import { writtenFeeClauses, writtenFeeRateTotal, writtenFeeTargets } from './writtenFees.ts';
 
 export type LaunchType = 'A' | 'B' | 'C';
 export type Mode = 'prompt' | 'blocks';
@@ -127,7 +127,7 @@ export function rateTotal(d: Draft) {
     if (b.id === 'fee-size') total += Number(b.p.extra) || 0;
     if (b.id === 'fee-dir') base = Math.max(base, Number(b.p.buy) || 0, Number(b.p.sell) || 0);
   }
-  return Math.round((total + base) * 1000) / 1000;
+  return Math.round((total + base) * 1000) / 1000 + writtenFeeRateTotal(writtenRules(d).join('\n'));
 }
 
 /** Why a palette entry cannot be added right now, as its grey state pill; null when ADD is offered. */
@@ -305,7 +305,7 @@ export function validate(d: Draft, wallet?: string): Issue[] {
   const ids = d.blocks.map(b => b.id);
   if (new Set(ids).size !== ids.length) issues.push({ field: 'rules', message: 'Each block can be added once.' });
   const rate = rateTotal(d);
-  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ${pairCurrency(d)}-side fees together (the highest swap, fade, volatility or buy/sell rate, plus whale fee, buyback jar and prize pot) must stay at or below 5%.` });
+  if (rate > MAX_ETH_RATE) issues.push({ field: 'rates', message: `Fees total ${fixed1(rate)}%. All ${pairCurrency(d)}-side fees together (the highest swap, fade, volatility or buy/sell rate, plus whale fee, buyback jar, prize pot and written charges) must stay at or below 5%.` });
   if (d.type !== 'A' && !cleanText(d.prompt) && !activeBlocks(d).length) issues.push({ field: 'rules', message: 'Describe your hook or add at least one block.' });
   if (d.prompt.length > MAX_WORDS) issues.push({ field: 'prompt', message: 'Your description is longer than 3,000 characters.' });
   if (d.type === 'A') {

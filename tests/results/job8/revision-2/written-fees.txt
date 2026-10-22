@@ -1,0 +1,34 @@
+✔ written fee regressions A/eth/1/prompt (73.793301ms)
+✔ written fee regressions A/eth/1/custom (25.762781ms)
+✔ written fee regressions A/eth/4663/prompt (25.126003ms)
+✔ written fee regressions A/eth/4663/custom (25.791314ms)
+✔ written fee regressions A/imd/1/prompt (21.821347ms)
+✔ written fee regressions A/imd/1/custom (17.781958ms)
+✔ written fee regressions A/imd/4663/prompt (19.349964ms)
+✔ written fee regressions A/imd/4663/custom (20.506683ms)
+✔ written fee regressions B/eth/1/prompt (26.950206ms)
+✔ written fee regressions B/eth/1/custom (21.467016ms)
+✔ written fee regressions B/eth/4663/prompt (19.659202ms)
+✔ written fee regressions B/eth/4663/custom (26.149432ms)
+✔ written fee regressions B/imd/1/prompt (22.170347ms)
+✔ written fee regressions B/imd/1/custom (20.422336ms)
+✔ written fee regressions B/imd/4663/prompt (20.377552ms)
+✔ written fee regressions B/imd/4663/custom (23.501752ms)
+✔ written fee regressions C/eth/1/prompt (32.199902ms)
+✔ written fee regressions C/eth/1/custom (20.335835ms)
+✔ written fee regressions C/eth/4663/prompt (22.116517ms)
+✔ written fee regressions C/eth/4663/custom (24.199484ms)
+✔ written fee regressions C/imd/1/prompt (23.101295ms)
+✔ written fee regressions C/imd/1/custom (31.047551ms)
+✔ written fee regressions C/imd/4663/prompt (20.715864ms)
+✔ written fee regressions C/imd/4663/custom (23.138684ms)
+✔ the cap combines block and written charges at both validation boundaries, and respects hidden blocks (202.188793ms)
+✔ limits, price triggers and explicit fee prohibitions keep a zero default without a charge (54.85312ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1160.67782

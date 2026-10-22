@@ -6,6 +6,8 @@ A dense retro-pixel storefront for people browsing or describing Uniswap v4 hook
 
 Canonical rules live in `web/src/styles.css`; page composition lives in `App.tsx`, `Landing.tsx`, `Catalog.tsx`, `Builder.tsx`, `Hook.tsx`, `RelayTimeline.tsx`, `SwarmPanel.tsx`, `Management.tsx`, `MyHooks.tsx`, `LaunchReview.tsx`, `OpenPool.tsx` and `Learn.tsx` in that directory. The pond and readability glow are specific to Store. This document describes the final catalog-hardening source against SPEC 1.31. Job 8 retains the established visual system and makes rule composition, unavailable blocks, written-rule risk and pool-scoped controls explicit.
 
+The second job 8 revision reuses `SafetyNotice` and the existing rule notice for written fee corrections. Missing rates explain that a price trigger or limit does not name the fee; cap errors include written charges. No tokens, components or layout rules changed. Current rendered coverage, including both editors at 320/390/1440 and the 390px focus/error review, is recorded in `tests/results/job8/revision-2/REVIEW.md`. Older measurements below keep their stated historical scope.
+
 ## Colors
 
 These are the exact section 8 tokens; no extra palette or dark theme is generated.
@@ -39,11 +41,13 @@ The three Google Fonts are bundled as Latin WOFF2 files in `public/fonts/`, with
 | --- | --- | --- |
 | `--display` | Press Start 2P, Courier New, monospace | Headings, brand, main buttons, nav, pills |
 | `--body` | Pixelify Sans, Trebuchet MS, system-ui, sans-serif | Paragraphs, descriptions, labels |
-| `--mono` | VT323, Courier New, ui-monospace, monospace | Every number/amount, address, symbol, callback, input text, ticker, canvas |
+| `--mono` | VT323, Courier New, ui-monospace, monospace | Numbers/amounts, addresses, symbols, callbacks, single-line input text, ticker, canvas |
 
 Six size tokens: `--text-xs: 8px`, `--text-label: 10px`, `--text-heading: 13px`, `--text-body: 16px`, `--text-large: 18px`, `--text-title: 26px`. Three one-offs copy the mockup exactly, by the owner's decision: the 12px wordmark, 9px nav links (wide desktop), and the 9px landing eyebrow (Press Start 2P, uppercase, pine). The Builder uses only the six tokens; its amounts (cost box 26px, sentences, chips, numeric inputs 18px) are VT323. Body defaults to 18px/1.5 at weight 500; catalog paragraphs use 16px. Display and mono use 400. Pixelify is variable 400–700; body uses 500 and review-table row headers use 600. Headings use line-height 1.6 (landing 1.65) and balanced wrapping. No letter-spacing is added.
 
 `Text` in `web/src/Text.tsx` wraps number/address runs in `.num`; API and Learn text use it. Explicit numerical fields use `.num` or a VT323 container. The canvas draws VT323 at 13px. Paragraphs generally cap at 65ch; Learn uses 75ch. Long API names and callbacks wrap instead of widening the document.
+
+Description and Custom rule textareas use the global `textarea` rule: Pixelify Sans, 16px, weight 500 and line-height 1.4; the description has a 160px minimum height and custom fields an 80px minimum. They resize vertically. The 390px second-revision review confirmed the description's computed font and size.
 
 ## Layout
 
