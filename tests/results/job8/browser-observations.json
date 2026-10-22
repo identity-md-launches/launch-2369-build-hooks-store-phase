@@ -1,0 +1,46 @@
+{
+  "viewports": [
+    320,
+    390,
+    1440
+  ],
+  "firstScreen390": {
+    "height": 844,
+    "documentWidth": 390,
+    "typeTop": 331.59375,
+    "modeButtonBottom": 760.140625,
+    "screenshot": "first-screen-390.webp"
+  },
+  "newNoticeContrast": [
+    {
+      "selector": ".written-rules",
+      "foreground": "rgb(21, 19, 15)",
+      "background": "rgb(223, 211, 176)",
+      "ratio": 12.440861989686235
+    },
+    {
+      "selector": ".safety-notice",
+      "foreground": "rgb(21, 19, 15)",
+      "background": "rgb(223, 211, 176)",
+      "ratio": 12.440861989686235
+    }
+  ],
+  "keyboardSpotCheck": {
+    "path": "Describe it \u2192 Tab \u2192 Stack blocks",
+    "focusOutline": "3px solid rgb(30, 90, 58)"
+  },
+  "fontsLoaded": [
+    "Pixelify Sans",
+    "Press Start 2P",
+    "VT323"
+  ],
+  "pageConsole": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "limitations": [
+    "Keyboard spot-check, not a complete screen-reader or keyboard-only session",
+    "No native zoom or physical-device check",
+    "WebKit launch failed because host libraries are missing"
+  ]
+}

@@ -4,17 +4,18 @@ import { encodeAbiParameters, encodeEventTopics, erc20Abi, getAddress, keccak256
 import site from '../../public/site-config.json' with { type: 'json' };
 import checked from '../../evidence/check-A-default-blocks.response.json' with { type: 'json' };
 import recorded from '../../tests/fixtures/chain/1-intake.json' with { type: 'json' };
-import { newDraft, addBlock, body, compose, BY_ID, fill, context, type Draft } from '../../src/lib/compose';
+import { newDraft, addBlock, body, compose, fill, context, type BlockDef, type Draft } from '../../src/lib/compose';
+import legacyCatalog from '../../src/blocks/legacy-catalog.json' with { type: 'json' };
 import { parseObjective } from '../src/chain/decode';
 import { launchBody } from '../src/chain/launch';
 import { cacheKey, COMPLETE_TOPIC, REQUEST_TOPIC } from '../src/chain/store';
 import { head, hook, injectedOwner, interceptChains, jsonResult, owner, requestId, route, storeLogs } from './chain-fixture';
 
 const relay = 'https://hooks-store-relay.hooks-store.workers.dev';
-const output = '../tests/results/job7';
+const output = '../tests/results/job8/regression-job7';
 const validDraft = (): Draft => {
   const d = newDraft(); d.mode = 'prompt'; d.prompt = 'Observe swaps without fees or owner powers.';
-  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner }; return d;
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner, owner }; return d;
 };
 async function setup(page: Page, draft = validDraft()) {
   await interceptChains(page);
@@ -64,22 +65,26 @@ test('an explicit recipient recovered from an older request stays visible and is
   await setup(page, d); await page.setViewportSize({ width: 320, height: 844 }); await page.goto('#builder');
   await expect(page.locator('.blk[data-block="swap-fee"]')).toContainText(`Recipient from the previous request: ${recipient}`);
   await expect(page.locator('#composed')).toContainText(`send it to ${recipient}`);
+  await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
+  await expect(page.locator('.blk[data-block="swap-fee"] .field-error')).toContainText('choose one of the available options');
+  await page.locator('.blk[data-block="swap-fee"]').getByLabel('Send to').selectOption("IMD's treasury");
+  await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86A3967c11D4E054B2f07a1F22');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled(); await fits(page, 320);
 });
 
 test('unavailable lending deployments and contradictory rules lock the composed request', async ({ page }) => {
-  const d = validDraft(); d.type = 'B'; d.settings.hname = 'SafetyHook'; d.blocks.push({ id: 'yield', p: { proto: 'Aave' } });
+  const d = validDraft(); d.mode = 'blocks'; d.type = 'B'; d.settings.hname = 'SafetyHook'; d.blocks.push({ id: 'yield', p: { proto: 'Aave' } });
   await setup(page, d); await page.goto('#builder');
-  await expect(page.locator('.safety-notice')).toContainText('no verified service address');
+  await expect(page.locator('.safety-notice')).toContainText('Yield on idle liquidity: no verified deployment.');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
-  d.blocks = [{ id: 'token', p: { name: 'Pondside', symbol: 'POND' } }, { id: 'lp-fee', p: { lo: .3, hi: 1 } }, { id: 'pool-rules', p: { tier: '.3' } }];
+  d.blocks = [{ id: 'token', p: { name: 'Pondside', symbol: 'POND' } }, { id: 'lp-fee', p: { lo: .3, hi: 1 } }, { id: 'pool-rules', p: { tier: '0.3' } }];
   await page.goto('#store'); await page.evaluate(d => localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)), d); await page.goto('#builder');
-  await expect(page.locator('.safety-notice')).toContainText('Dynamic LP fees conflict');
+  await expect(page.locator('.safety-notice')).toContainText('Dynamic LP fee cannot be combined with Pool rules');
   await expect(page.getByRole('button', { name: 'Check with the swarm (free)', exact: true })).toBeDisabled();
 });
 
 test('fixed fact conflict is visible and persists on Launch until an explicit request opt-out is checked', async ({ page }) => {
-  const d = validDraft(); d.prompt = 'Observe swaps.'; d.blocks.push({ id: 'pause', p: {} });
+  const d = validDraft(); d.mode = 'blocks'; d.prompt = 'Observe swaps.'; d.blocks.push({ id: 'pause', p: {} });
   d.settings.owner = owner;
   await setup(page, d);
   const fact = { id: 'admin', label: 'No owner functions are permitted by default.', state: 'fixed' };
@@ -90,7 +95,9 @@ test('fixed fact conflict is visible and persists on Launch until an explicit re
   await page.goto('#launch'); await expect(page.locator('.swarm-panel')).toContainText(fact.label);
   await expect(page.getByRole('button', { name: 'Launch hook', exact: true })).toBeDisabled();
   await page.getByRole('link', { name: 'Edit in Builder' }).click();
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await page.locator('#p-text').fill('Observe swaps. Opt out of fixed fact admin. The owner may pause swaps.');
+  await page.getByRole('button', { name: 'Stack blocks', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
   await expect(page.locator('.swarm-panel')).not.toContainText('Fixed facts conflict');
@@ -98,7 +105,7 @@ test('fixed fact conflict is visible and persists on Launch until an explicit re
 });
 
 test('the IMD fee opt-out resolves the fixed ETH conversion default in the understood panel', async ({ page }) => {
-  const d = addBlock(validDraft(), 'swap-fee'); d.blocks.at(-1)!.p.to = "IMD's treasury"; d.prompt = '';
+  const d = addBlock(validDraft(), 'swap-fee'); d.mode = 'blocks'; d.blocks.at(-1)!.p.to = "IMD's treasury"; d.prompt = '';
   await setup(page, d);
   await page.route(`${relay}/check`, r => r.fulfill({ json: { facts: [{ id: 'hook_fee', label: 'The IMD-side fee is sold for ETH unless told otherwise.', state: 'fixed' }], plan: [], blockers: [], suggestions: [] } }));
   await page.goto('#builder'); await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
@@ -108,11 +115,12 @@ test('the IMD fee opt-out resolves the fixed ETH conversion default in the under
 
 for (const width of [320, 390, 1440]) for (const saved of [true, false]) test(`blocked job at ${width}px shows both IMD question fields and Fix in Builder restores ${saved ? 'the exact submitted draft' : 'an older on-chain request'}`, async ({ page }) => {
   await page.setViewportSize({ width, height: 844 });
-  const d = addBlock(validDraft(), 'swap-fee'); d.prompt = 'Observe swaps without changing them.'; d.settings.pool = 65; d.settings.pair = saved ? 'eth' : 'imd';
+  const d = addBlock(validDraft(), 'swap-fee'); d.mode = 'blocks'; d.prompt = 'Observe swaps without changing them.'; d.settings.pool = 65; d.settings.pair = saved ? 'eth' : 'imd';
   let request = compose(d, getAddress(owner));
   if (!saved) {
     const fee = d.blocks.find(b => b.id === 'swap-fee')!;
-    request = request.replace(/^1\. .+$/m, `1. ${fill(BY_ID['swap-fee'].legacySentences![0], BY_ID['swap-fee'], fee.p, context(d, getAddress(owner)))}`)
+    const legacyFee = legacyCatalog.blocks.find(block => block.id === 'swap-fee') as unknown as BlockDef;
+    request = request.replace(/^1\. .+$/m, `1. ${fill(legacyFee.legacySentences![0], legacyFee, fee.p, context(d, getAddress(owner)))}`)
       .replace('Keep every hook fee in IMD: do not convert the fee to ETH and do not use any other pool.\n', '');
   }
   const parsed = parseObjective(request);
@@ -143,13 +151,20 @@ for (const width of [320, 390, 1440]) for (const saved of [true, false]) test(`b
   await page.getByRole('button', { name: 'Fix in Builder', exact: true }).click();
   await expect(page).toHaveURL(/#builder$/); await expect(page.locator('.correction')).toContainText(blockedReason);
   await expect(page.locator('#s-pool')).toHaveValue('65'); await expect(page.locator('#s-pair')).toHaveValue(d.settings.pair);
+  await expect(page.locator('.sum')).toContainText(d.prompt);
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await expect(page.locator('#p-text')).toHaveValue(d.prompt);
   await expect(page.locator('.correction pre')).toHaveText(request);
   await page.locator('#connect').click(); await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
-  if (!saved) { await expect(page.locator('#composed')).toContainText('settled in IMD'); await expect(page.locator('#composed')).toContainText('do not convert the fee to ETH and do not use any other pool'); }
+  if (!saved) {
+    await page.getByRole('button', { name: 'Stack blocks', exact: true }).click();
+    await expect(page.locator('#composed')).toContainText('settled in IMD'); await expect(page.locator('#composed')).toContainText('do not convert the fee to ETH and do not use any other pool');
+    await page.getByRole('button', { name: 'Describe it', exact: true }).click();
+  }
   await fits(page, width);
   if (saved) await page.screenshot({ path: `${output}/fix-builder-${width}.jpg`, type: 'jpeg', quality: 45 });
   await page.locator('#p-text').fill('Observe swaps and reject swaps during a 30-second cooldown.');
+  await page.getByRole('button', { name: 'Stack blocks', exact: true }).click();
   await page.getByRole('button', { name: 'Continue to launch' }).click();
   await page.getByText('Exact request the swarm receives', { exact: true }).click();
   await expect(page.getByTestId('launch-json')).toContainText('30-second cooldown');
@@ -276,8 +291,10 @@ for (const width of [320, 390, 1440]) for (const [name, hash, heading] of [
     await page.getByRole('searchbox').fill('no such hook'); await expect(page.getByText(/No hooks match/)).toBeVisible();
     await page.getByRole('button', { name: 'Clear search and filters' }).click(); await expect(page.locator('.grid .card')).toHaveCount(1);
   } else if (name === 'builder') {
-    await expect(page.locator('#composed')).toContainText('Fees are always taken from the IMD (pair currency) side');
-    await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('Fees are always taken from the ETH (pair currency) side');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
+    await expect(page.locator('#composed')).toContainText('paired with IMD.');
+    await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('paired with ETH.');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
     await page.getByRole('button', { name: 'Continue to launch' }).click(); await expect(page).toHaveURL(/#launch$/);
   } else if (name === 'launch') {
     await expect(page.locator('.launch-check')).toContainText('A refused request still spends the fee.');

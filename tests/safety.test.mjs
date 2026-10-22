@@ -6,9 +6,10 @@ import { checkConsistency, fixedFactConflicts, KNOWN_QUESTIONS } from '../src/li
 const config = JSON.parse(readFileSync(new URL('../public/site-config.json', import.meta.url)));
 const wallet = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 function one(def, type, pair, chain) {
-  const d = newDraft(); d.type = type;
+  const d = newDraft(); d.type = type; d.mode = 'blocks';
   d.settings = { ...d.settings, chain, pair, pool: 50, hname: 'SafetyHook', token: config.chains.find(c => c.id === chain).imdAddress, tsym: 'IMD' };
   if (def.requires) d.blocks.push(entry(def.requires));
+  if (def.requiresAny) d.blocks.push(entry(def.requiresAny[0]));
   if (def.id === 'own-token') d.blocks = [entry(def.id)];
   else if (def.id !== 'token') d.blocks.push(entry(def.id));
   if (def.id === 'fee-split') d.blocks.at(-1).p.b = IMD_TREASURY;
@@ -20,9 +21,9 @@ for (const def of BLOCKS) for (const type of ['A', 'B', 'C']) for (const pair of
   test(`composed ${def.id}/${type}/${pair}/${chain}: currency, recipients, dependencies and consistency`, () => {
     const d = one(def, type, pair, chain), input = body(d, wallet), findings = checkConsistency(input);
     const active = def.types.includes(type);
-    if (def.id === 'yield' && active) {
-      assert.ok(findings.some(f => f.code === 'dependency' && f.sentence.includes('ReHypothecationHook')));
-      assert.equal(blockedReason({ ...d, blocks: d.blocks.filter(b => b.id !== 'yield') }, def), 'NO VERIFIED DEPLOYMENT');
+    if (def.disabled && active) {
+      assert.ok(findings.some(f => f.code === (def.id === 'yield' ? 'dependency' : 'unavailable') && f.message.includes(def.disabled)));
+      assert.equal(blockedReason({ ...d, blocks: d.blocks.filter(b => b.id !== def.id) }, def), def.disabled);
       return;
     }
     assert.deepEqual(findings, []);
@@ -44,18 +45,34 @@ for (const def of BLOCKS) for (const type of ['A', 'B', 'C']) for (const pair of
     else assert.ok(!input.objective.includes(IMD_FEE_OPT_OUT));
   });
 }
-test('all fee recipient and buyback choices resolve to paying wallet, IMD treasury or same-pool burn', () => {
-  for (const id of ['swap-fee', 'fee-dir', 'jar']) for (const type of ['A', 'B', 'C']) for (const pair of ['imd', 'eth']) {
-    const def = BY_ID[id], param = def.params.find(p => p.k === 'to' || p.k === 'act');
+test('fee destination choices resolve to the paying wallet or IMD treasury', () => {
+  for (const id of ['swap-fee', 'fee-dir']) for (const type of ['A', 'B', 'C']) for (const pair of ['imd', 'eth']) {
+    const def = BY_ID[id], param = def.params.find(p => p.k === 'to');
+    assert.deepEqual(param.options, ['my wallet', "IMD's treasury"]);
     for (const value of param.options) {
       const d = one(def, type, pair, 1); d.blocks.at(-1).p[param.k] = value;
       const input = body(d, wallet);
       assert.deepEqual(checkConsistency(input), [], `${id}/${type}/${pair}/${value}`);
       if (value.includes('treasury')) assert.ok(input.objective.includes(IMD_TREASURY));
       if (value === 'my wallet') assert.ok(input.objective.includes(`send it to ${wallet}`));
-      if (value.startsWith('burn') && id !== 'jar') assert.ok(input.objective.includes('from this pool and burn the bought tokens'));
       assert.ok(!input.objective.includes('to my wallet'));
     }
+  }
+});
+test('the Buyback jar action follows token capabilities instead of a selectable burn destination', () => {
+  for (const type of ['A', 'B', 'C']) {
+    const d = one(BY_ID.jar, type, 'eth', 1);
+    assert.ok(!BY_ID.jar.params.some(p => p.k === 'act'));
+    let text = body(d, wallet).objective;
+    assert.match(text, /Buy only inside buyback\(\), never inside a swap/);
+    assert.match(text, /price limit 3% above the pool price at the start of the call/);
+    if (type === 'A') {
+      assert.match(text, /keep the bought tokens in the hook forever; no function can move them/);
+      d.blocks[0] = entry('own-token'); text = body(d, wallet).objective;
+      assert.match(text, /public burn\(uint256\) that burns the caller's own tokens/);
+      assert.match(text, /burn the bought tokens with the token's burn\(uint256\)/);
+    } else assert.match(text, /burn with the token's burn\(uint256\); if it has none, or the burn call reverts, keep them in the hook forever/);
+    assert.deepEqual(checkConsistency(body(d, wallet)), []);
   }
 });
 test('known launch 2 question is a live rule and catches the contradictory historical output', () => {
@@ -83,9 +100,8 @@ test('external services and conversion pools need a deploy-chain address; forbid
   assert.deepEqual(checkConsistency({ ...input, objective: input.objective.replace('Observe swaps without changing them.', 'Do not use Chainlink VRF. Never use another pool.') }), []);
 });
 test('contradictions are reported with both sentences and corrected combinations pass', () => {
-  for (const ids of [['swap-fee','fee-dir'], ['lp-fee','pool-rules'], ['swap-fee','lp-share','donate'], ['max-buy','pause'], ['open-at','sunset']]) {
+  for (const ids of [['swap-fee','fee-dir'], ['lp-fee','pool-rules'], ['max-buy','pause'], ['open-at','sunset']]) {
     const d = one(BY_ID.cooldown, 'B', 'eth', 1); d.blocks = ids.map(entry);
-    if (ids.includes('donate')) d.blocks.find(b => b.id === 'donate').p.who = 'nobody';
     if (ids.includes('sunset')) d.blocks.find(b => b.id === 'sunset').p.when = '2026-01-01 00:00';
     const f = checkConsistency(body(d, wallet)); assert.ok(f.some(f => f.code === 'contradiction'), ids.join('+'));
   }
@@ -95,7 +111,12 @@ test('contradictions are reported with both sentences and corrected combinations
   assert.deepEqual(checkConsistency(body(d, wallet)), []);
   for (const who of ['only the owner', 'only allowlisted addresses', 'nobody']) {
     const donation = one(BY_ID['lp-share'], 'A', 'imd', 1); donation.blocks.push({ id: 'donate', p: { who } });
-    assert.ok(checkConsistency(body(donation, wallet)).some(f => f.code === 'contradiction'), who);
+    assert.deepEqual(checkConsistency(body(donation, wallet)), [], `${who}: the hook's own LP donations are explicitly allowed`);
+    // Preserve the original contradictory-donation regression by removing the
+    // new explicit self-donation exception from a historical request sentence.
+    const input = body(donation, wallet), rule = donation.blocks.find(b => b.id === 'donate');
+    const broken = input.objective.replace(sentenceOf(rule, context(donation, wallet)), `Donations to the pool are allowed from ${who}; all other donations revert.`);
+    assert.ok(checkConsistency({ ...input, objective: broken }).some(f => f.code === 'contradiction'), `${who}: missing own-donation exception is refused`);
   }
   for (const pause of ['pause', 'breaker']) {
     const locked = one(BY_ID['lp-lock'], 'A', 'imd', 1); locked.blocks.push(entry(pause));
@@ -111,14 +132,16 @@ test('fixed IMD fee conversion is shown as a conflict until the request explicit
   assert.deepEqual(fixedFactConflicts(noOptOut, [{ ...facts[0], state: 'stated' }]), []);
   assert.deepEqual(fixedFactConflicts({ ...noOptOut, pairWith: 'eth' }, facts), []);
 });
-test('fixed-fact opt-outs must be positive sentences, and custom owner rules cannot contradict the footer', () => {
+test('fixed-fact opt-outs must be positive and written owner powers survive the generated footer', () => {
   const d = one(BY_ID.pause, 'A', 'imd', 1), facts = [{ id: 'admin', state: 'fixed', label: 'No owner functions are permitted by default.' }];
   d.prompt = 'Do not opt out of fixed fact admin.';
   assert.equal(fixedFactConflicts(body(d, wallet), facts).length, 1);
   d.prompt = 'Opt out of fixed fact admin.';
   assert.deepEqual(fixedFactConflicts(body(d, wallet), facts), []);
   d.blocks = [entry('token')]; d.prompt = 'The owner may pause swaps.';
-  assert.ok(checkConsistency(body(d, wallet)).some(f => f.code === 'contradiction'));
+  assert.deepEqual(checkConsistency(body(d, wallet)), []);
+  assert.match(body(d, wallet).objective, /Permit only the owner functions expressly granted by the written rules/);
+  assert.ok(!body(d, wallet).objective.includes('No owner functions, no backend signer'));
   d.prompt = `Use another pool at ${config.chains[0].imdAddress}.`;
   assert.ok(checkConsistency(body(d, wallet)).some(f => f.code === 'contradiction'));
 });

@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { encodeAbiParameters, parseAbiParameters, toHex, toFunctionSelector, decodeFunctionData, hexToString } from 'viem';
+import { encodeAbiParameters, parseAbiParameters, toHex, toFunctionSelector, decodeFunctionData, hexToString, zeroAddress } from 'viem';
 import site from '../../public/site-config.json' with {type:'json'};
 import { newDraft, addBlock, type LaunchType } from '../../src/lib/compose';
-import { injectedOwner, owner, interceptChains, jsonResult, route } from './chain-fixture';
+import { injectedOwner, owner, hook, interceptChains, jsonResult, route } from './chain-fixture';
 import { intakeAbi } from '../src/chain/decode';
 
 function validDraft(type: LaunchType='A') {
@@ -124,12 +124,17 @@ for(const type of ['A','B'] as const)test(`Robinhood Anvil fork pays for type ${
   await expect(page.locator('.hook-page .detail-pills')).toContainText('Ethereum');
 });
 
-test('type C live hook prepares a copy-only pool call with on-chain decimals',async({page})=>{
-  await interceptChains(page,{result:{...jsonResult,launch:{...jsonResult.launch,tokenAddress:site.chains.find(c=>c.id===1)!.imdAddress}}});
+test('type C resolves hook(), shows zero as pending, passes PoolId and prepares a dynamic-fee pool call',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.clock.install();
+  const deployer=owner, poolId='0x'+'12'.repeat(32);
+  let deployedHook:`0x${string}`=zeroAddress;
+  const readCalls:{to:string;data:string}[]=[];
+  await interceptChains(page,{result:{...jsonResult,launch:{...jsonResult.launch,hookAddress:undefined,tokenAddress:site.chains.find(c=>c.id===1)!.imdAddress,artifacts:[{role:'other',name:'LaunchGuardDeployer',address:deployer}]}}});
   // Seed a genuine composer-shaped C request in the normal cached-read format.
   const {storeLogs}=await import('./chain-fixture');const {body}=await import('../../src/lib/compose');const {stringToHex,encodeEventTopics}=await import('viem');
-  const logs=storeLogs(),d=validDraft('C');
-  logs.requested.data=encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'),[stringToHex(JSON.stringify(body(d))),owner,'0x00000000',site.chains[0].imdAddress as `0x${string}`,500000000000000000n]);
+  const logs=storeLogs(),d=addBlock(validDraft('C'),'lp-fee');
+  logs.requested.data=encodeAbiParameters(parseAbiParameters('bytes,address,bytes4,address,uint256'),[stringToHex(JSON.stringify(body(d,owner))),owner,'0x00000000',site.chains[0].imdAddress as `0x${string}`,500000000000000000n]);
   await page.addInitScript(({logs,requestId})=>localStorage.setItem('hooks-store:intake:v2:1',JSON.stringify({version:2,head:String(BigInt(logs.requested.blockNumber)),cursor:'-1',records:{[requestId]:{requested:logs.requested,completed:logs.completed}},completions:{}})),{logs,requestId:String(logs.requested.topics[1])});
   await page.route('https://rpc.mevblocker.io/**',async r=>{
     const req=r.request().postDataJSON();let result:unknown;
@@ -139,16 +144,42 @@ test('type C live hook prepares a copy-only pool call with on-chain decimals',as
       const q=req.params[0],candidates=q.topics[0]===logs.requested.topics[0]?[logs.requested]:[logs.completed];
       result=candidates.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock));
     }
-    else if(req.method==='eth_call'&&req.params[0].data.slice(0,10)===toFunctionSelector('decimals()'))result=encodeAbiParameters(parseAbiParameters('uint8'),[6]);
-    else if(req.method==='eth_call'&&req.params[0].data.slice(0,10)===toFunctionSelector('poolManager()'))result=encodeAbiParameters(parseAbiParameters('address'),['0x000000000004444c5dc75cB358380D2e3dE08A90']);
+    else if(req.method==='eth_call'){
+      const call=req.params[0]; readCalls.push({to:call.to,data:call.data});
+      const selector=call.data.slice(0,10);
+      if(selector===toFunctionSelector('hook()'))result=encodeAbiParameters(parseAbiParameters('address'),[deployedHook]);
+      else if(selector===toFunctionSelector('decimals()'))result=encodeAbiParameters(parseAbiParameters('uint8'),[6]);
+      else if(selector===toFunctionSelector('poolManager()'))result=encodeAbiParameters(parseAbiParameters('address'),['0x000000000004444c5dc75cB358380D2e3dE08A90']);
+      else if(selector===toFunctionSelector('owner()'))result=encodeAbiParameters(parseAbiParameters('address'),[owner]);
+      else if(selector===toFunctionSelector('paused(bytes32)'))result=encodeAbiParameters(parseAbiParameters('bool'),[false]);
+      else if(selector===toFunctionSelector('currentLpFee(bytes32)'))result=encodeAbiParameters(parseAbiParameters('uint256'),[3000n]);
+      else return r.fulfill({json:{jsonrpc:'2.0',id:req.id,error:{code:3,message:'execution reverted'}}});
+    }
     else return r.fulfill({json:{jsonrpc:'2.0',id:req.id,error:{code:3,message:'execution reverted'}}});
     await r.fulfill({json:{jsonrpc:'2.0',id:req.id,result}});
   });
   await page.goto(`./${route}`);
+  await expect(page.locator('.hook-page .notice').filter({hasText:'hook not deployed yet'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Open the pool',exact:true})).toHaveCount(0);
+  expect(readCalls.some(call=>call.to.toLowerCase()===deployer.toLowerCase()&&call.data===toFunctionSelector('hook()'))).toBe(true);
+  await page.goto(`./#mine?address=${owner}`);
+  await expect(page.locator('.mine-row')).toContainText('hook not deployed yet');
+  await expect(page.getByRole('link',{name:'Manage',exact:true})).toHaveCount(0);
+  deployedHook=hook;
+  await page.goto(`./${route}`); await page.clock.fastForward(20001);
   await expect(page.getByRole('heading',{name:'Open the pool',exact:true})).toBeVisible();
+  await expect(page.locator('.pool-panel')).toContainText('Dynamic fee flag (0x800000)');
+  await page.getByLabel('Pool id for these controls',{exact:true}).fill(poolId);
+  await expect.poll(()=>readCalls.filter(call=>call.data.startsWith(toFunctionSelector('paused(bytes32)'))).length).toBeGreaterThan(0);
+  const pausedCall=readCalls.slice().reverse().find(call=>call.data.startsWith(toFunctionSelector('paused(bytes32)')))!;
+  expect(pausedCall.to.toLowerCase()).toBe(hook);
+  expect(pausedCall.data.slice(10)).toBe(poolId.slice(2));
   await page.getByLabel('Starting price').fill('0.000001');
   await expect(page.getByTestId('sqrt-price')).toHaveText(((1n<<96n)/1000n).toString());
   await expect(page.getByRole('button',{name:'Copy initialize call'})).toBeEnabled();
+  const initialize=JSON.parse((await page.getByTestId('pool-call').textContent())!);
+  expect(initialize.poolKey.hooks.toLowerCase()).toBe(hook);
+  expect(initialize.poolKey.fee).toBe(0x800000);
   await expect(page.locator('.pool-panel button').filter({hasText:/send|initialize pool/i})).toHaveCount(0);
   await page.getByLabel('Starting price').fill('0');
   await expect(page.getByRole('button',{name:'Copy initialize call'})).toBeDisabled();

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 import {
   BLOCKS, BY_ID, CATALOG, CHAIN_NAMES, DEFAULT_STACK, MAX_TEXT, TOKEN_IDS, activeBlocks, addBlock, available, behaviorBlocks, blockedReason,
-  body, bodyBytes, cleanText, compose, context, has, isAddress, moveBlock, powersOf, removeBlock, setParam, shortOf, validate,
+  body, bodyBytes, cleanText, compose, context, has, isAddress, moveBlock, powersOf, removeBlock, sentenceOf, setParam, shortOf, validate,
   type BlockDef, type BlockEntry, type Draft, type Issue, type LaunchType, type Mode, type Param, type Settings,
 } from '../../src/lib/compose';
 import { assetUrl, type SiteConfig } from './config';
@@ -18,14 +18,22 @@ const TYPES: [LaunchType, string, string][] = [
   ['C', 'Hook for my existing token', 'Deploy the hook, then open a pool for a token that is already live.'],
 ];
 const EXAMPLES = [
-  'Every time someone buys, 2% of the ETH goes into a prize pot. Once an hour the pot goes to a random buyer from that hour, weighted by how much they bought.',
-  'Take 1% of every sell and buy my token back with it, then burn what was bought. No fees on buys.',
-  'For the first 10 minutes nobody can buy more than 0.5% of the supply, and each wallet must wait 30 seconds between swaps.',
-  'Liquidity is locked for 30 days and anyone who adds and removes liquidity within 10 blocks forfeits their fees.',
+  'Observe swaps without changing them. No owner functions.',
+  'Only the owner may pause and unpause swaps through pause() and unpause(); paused() reports the current state. No other owner functions.',
+  'Publish a time-weighted average price from this pool through twap(uint32 secondsAgo), without changing swaps. No owner functions.',
 ];
-const EXAMPLE_LABELS = ['Prize pot for buyers', 'Buy back and burn', 'Fair launch limits', 'Locked liquidity'];
+const EXAMPLE_LABELS = ['Observe swaps', 'Owner pause controls', 'Price reading'];
 const HEADS_UP = 'Heads up: this block is easy to work around or needs care.';
 const UNTESTED = 'not yet proven in a live launch';
+const WRITTEN_WARNING = 'Written rules are riskier than blocks. If the builder has to stop and ask a question after you pay, the 0.5 IMD is spent. Blocks are checked sentences; words are yours.';
+
+function WrittenRulesNotice() {
+  return <div className="notice written-rules">
+    <p>{WRITTEN_WARNING}</p>
+    <ul><li>Name every address, currency, amount and time.</li><li>Say who may call what, or say there are no owner functions.</li><li>Name no outside pool, token or service unless with its address on the deploy chain.</li></ul>
+    <p className="small">A numbered block rule wins over a Custom rule and your description.</p>
+  </div>;
+}
 
 /** SPEC 4.14: the spec repository's record first, then the bundled copy. */
 async function loadVerified(url: string): Promise<Set<string>> {
@@ -48,9 +56,10 @@ export function WarnSign({ def, tested }: { def: BlockDef; tested: boolean }) {
 function BlockName({ def, tested, children }: { def: BlockDef; tested: boolean; children?: ReactNode }) {
   return <><span className="block-name" title={tested ? 'proven in a live launch' : UNTESTED}>{children ?? def.title}{!tested && <span className="sr">, {UNTESTED}</span>}</span><WarnSign def={def} tested={tested} /></>;
 }
-function manageNote(def: BlockDef) {
+function manageNote(def: BlockDef, entry?: BlockEntry) {
   const lower = (list?: { label: string }[]) => (list ?? []).map(f => f.label.toLowerCase()).join(', ');
-  const bits = [def.owner && `Owner buttons: ${lower(def.owner)}`, def.anyone && `Anyone can: ${lower(def.anyone)}`, def.user && `Users get: ${lower(def.user)}`, def.view && `Readings: ${lower(def.view)}`].filter(Boolean);
+  const owner = def.id === 'donate' && entry?.p.who !== 'only allowlisted addresses' ? undefined : def.owner;
+  const bits = [owner && `Owner buttons: ${lower(owner)}`, def.anyone && `Anyone can: ${lower(def.anyone)}`, def.user && `Users get: ${lower(def.user)}`, def.view && `Readings: ${lower(def.view)}`].filter(Boolean);
   return <p className="manage-note"><strong>Who uses it:</strong> {def.who}{bits.length > 0 && <> <strong>On the hook page:</strong> {bits.join('. ')}.</>}</p>;
 }
 function FieldError({ issues, field }: { issues: Issue[]; field: string }) {
@@ -59,10 +68,10 @@ function FieldError({ issues, field }: { issues: Issue[]; field: string }) {
 }
 const errId = (issues: Issue[], field: string) => issues.some(i => i.field === field) ? `err-${field.replace(/[^\w-]/g, '-')}` : undefined;
 
-function ParamField({ param, value, index, issues, onChange }: { param: Param; value: string | number; index: number; issues: Issue[]; onChange: (v: string | number) => void }) {
+function ParamField({ param, value, index, issues, onChange, disabled = false }: { param: Param; value: string | number; index: number; issues: Issue[]; onChange: (v: string | number) => void; disabled?: boolean }) {
   const id = `p-${index}-${param.k}`, field = `block:${index}:${param.k}`, invalid = issues.some(i => i.field === field);
   const label = `${param.label}${param.unit ? ` (${param.unit})` : ''}`;
-  const common = { id, 'aria-invalid': invalid || undefined, 'aria-describedby': errId(issues, field) };
+  const common = { id, disabled, 'aria-invalid': invalid || undefined, 'aria-describedby': errId(issues, field) };
   const keptRecipient = param.k === 'to' && isAddress(String(value));
   return <div className="param">
     <label htmlFor={id}>{label}</label>
@@ -101,6 +110,8 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const issues = useMemo(() => [...validate(draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [draft, address, config.enabledDeployChains]);
   const bytes = ownCode.prepared ? bodyBytes(body(ownCode.prepared, address)) : 0;
   const powers = powersOf(draft), rules = activeBlocks(draft), words = cleanText(draft.prompt);
+  const splitDestination = rules.some(block => block.id === 'fee-split');
+  const summaryOf = (block: BlockEntry) => splitDestination && ['swap-fee', 'fee-dir'].includes(block.id) ? shortOf(block, ctx).replace(/→ .+$/, '→ Split the fee distribution') : shortOf(block, ctx);
   const tested = (id: string) => verified.has(id);
   const update = (next: Draft) => { setBlocked(null); setDraft(next); };
   const settings = (patch: Partial<Settings>) => update({ ...draft, settings: { ...draft.settings, ...patch } });
@@ -110,10 +121,12 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     if (mode === 'blocks' && !draft.seeded && behaviorBlocks(draft).length === 0) for (const id of DEFAULT_STACK) next = addBlock(next, id);
     update({ ...next, seeded: draft.seeded || mode === 'blocks' });
   };
-  const add = (id: string) => update(addBlock(draft, id));
+  // A palette addition always reveals the stack that will be composed.
+  const add = (id: string) => update(TOKEN_IDS.includes(id) ? addBlock(draft, id) : { ...addBlock(draft, id), mode: 'blocks', seeded: true });
   const remove = (index: number) => {
-    const gone = draft.blocks[index], dependants = draft.blocks.filter(b => BY_ID[b.id]?.requires === gone.id).map(b => BY_ID[b.id].title);
-    update(removeBlock(draft, index));
+    const gone = draft.blocks[index], next = removeBlock(draft, index);
+    const dependants = draft.blocks.filter(b => b !== gone && !next.blocks.includes(b)).map(b => BY_ID[b.id].title);
+    update(next);
     setBlocked(dependants.length ? { source: BY_ID[gone.id].title, titles: dependants } : null);
   };
   const enabledChains: number[] = config.enabledDeployChains;
@@ -122,6 +135,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
 
   const palette = <aside className="palette panel" aria-label="Block palette">
     <h2>Blocks</h2>
+    {draft.mode === 'prompt' && <p className="small muted">Adding a block switches to Stack blocks so every composed rule is visible.</p>}
     {CATALOG.groups.map((g, gi) => {
       if (g.id === 'token' && draft.type !== 'A') return null;
       const items = BLOCKS.filter(b => b.group === g.id);
@@ -131,7 +145,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
           const why = blockedReason(draft, def);
           return <div className={`pal-item${why && why !== 'ADDED' && why !== 'ALWAYS' ? ' off' : ''}`} key={def.id} data-block={def.id}>
             <div className="pal-text"><strong><BlockName def={def} tested={tested(def.id)} /></strong><span className="b">{def.blurb}</span></div>
-            {why ? <span className="pill state">{why}</span> : <button className="btn tiny" type="button" onClick={() => add(def.id)} aria-label={`Add ${def.title}`}>Add</button>}
+            {why ? <span className="pill state">{draft.mode === 'prompt' && why === 'ADDED' ? 'SAVED IN STACK' : why}</span> : <button className="btn tiny" type="button" onClick={() => add(def.id)} aria-label={`Add ${def.title}`}>Add</button>}
           </div>;
         })}</div>
       </details>;
@@ -150,6 +164,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
           : <button className="btn tiny" type="button" onClick={() => add('own-token')}>Bring my own</button>}</div></div>
       <p className="sentence">{shortOf(t, ctx)}</p>
       <div className="params">{def.params.map(x => <ParamField key={x.k} param={x} index={index} value={t.p[x.k]} issues={issues} onChange={v => update(setParam(draft, index, x.k, v))} />)}</div>
+      {t.id === 'own-token' && <p className="small muted">Supply is capped at <span className="num">1,000,000,000,000</span> whole tokens.</p>}
     </div>;
   })();
 
@@ -159,27 +174,29 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     {behaviorBlocks(draft).length === 0 && <div className="empty">No blocks yet. Add some from the palette, or describe your hook in words.</div>}
     {draft.blocks.map((b, index) => {
       if (TOKEN_IDS.includes(b.id)) return null;
-      const def = BY_ID[b.id], off = !available(def, draft.type);
+      const def = BY_ID[b.id], off = !available(def, draft.type) || !!def.disabled;
       if (!off) n++;
       return <div className={`blk${off ? ' off' : ''}`} key={b.id} data-block={b.id}>
         <div className="blk-head">
-          <h3>{!off && <span className="num">{n}.</span>} <BlockName def={def} tested={tested(def.id)} />{tested(def.id) && <span className="tested">✓ proven in a live launch</span>}{off && <span className="pill state">Not for this launch type</span>}</h3>
+          <h3>{!off && <span className="num">{n}.</span>} <BlockName def={def} tested={tested(def.id)} />{tested(def.id) && <span className="tested">✓ proven in a live launch</span>}{off && <span className="pill state">{def.disabled ?? 'Not for this launch type'}</span>}</h3>
           <div className="order">
             <button className="btn tiny" type="button" onClick={() => update(moveBlock(draft, index, -1))} aria-label={`Move ${def.title} up`}>▲</button>
             <button className="btn tiny" type="button" onClick={() => update(moveBlock(draft, index, 1))} aria-label={`Move ${def.title} down`}>▼</button>
             <button className="btn tiny" type="button" onClick={() => remove(index)} aria-label={`Remove ${def.title}`}>Remove</button>
           </div>
         </div>
-        <p className="sentence">{shortOf(b, ctx)}</p>
-        {def.params.length > 0 && <div className="params">{def.params.map(x => <ParamField key={x.k} param={{ ...x, unit: x.unit?.replace('{@pair}', ctx.pair!) }} index={index} value={b.p[x.k]} issues={off ? [] : issues} onChange={v => update(setParam(draft, index, x.k, v))} />)}</div>}
+        <p className="sentence">{summaryOf(b)}</p>
+        {b.id === 'custom' && <WrittenRulesNotice />}
+        {def.params.length > 0 && <div className="params">{def.params.map(x => <ParamField key={x.k} param={{ ...x, unit: x.unit?.replace('{@pair}', ctx.pair!) }} index={index} value={b.p[x.k]} issues={off ? [] : issues} disabled={splitDestination && ['swap-fee', 'fee-dir'].includes(b.id) && x.k === 'to'} onChange={v => update(setParam(draft, index, x.k, v))} />)}</div>}
+        {splitDestination && ['swap-fee', 'fee-dir'].includes(b.id) && <p className="small">Split the fee replaces this destination. The saved choice applies again if you remove Split the fee.</p>}
         {def.params.some(x => x.options?.some(o => o.includes("IMD's treasury"))) && <p className="small treasury-note">IMD's treasury: <code>0x3f252e859a277a86A3967c11D4E054B2f07a1F22</code> on both chains.</p>}
-        {manageNote(def)}
+        {manageNote(def, b)}
         {!off && <FieldError issues={issues} field={`block:${index}`} />}
       </div>;
     })}
   </div>;
 
-  const added = <div className="added" aria-label="Blocks added from the palette">
+  const added = <div className="added" aria-label="Saved blocks, not included in Describe it mode">
     {behaviorBlocks(draft).length ? behaviorBlocks(draft).map(b => {
       const def = BY_ID[b.id], off = !available(def, draft.type);
       return <span className={`chip${off ? ' off' : ''}`} key={b.id} data-block={b.id}>{shortOf(b, ctx)}{off && ' (not for this launch type)'}<button type="button" onClick={() => remove(draft.blocks.indexOf(b))} aria-label={`Remove ${def.title}`}>✕</button></span>;
@@ -187,15 +204,14 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   </div>;
 
   const describe = <div className="box editor">
+    <WrittenRulesNotice />
     <label htmlFor="p-text">What should it do? (max <span className="num">3,000</span> characters)</label>
     <textarea id="p-text" maxLength={3000} value={draft.prompt} onChange={e => update({ ...draft, prompt: e.target.value })} aria-describedby="p-count"
-      placeholder="Every time someone buys, 2% of the ETH goes into a prize pot. Once an hour the pot goes to a random buyer from that hour, weighted by how much they bought. No team wallet, no pause button." />
+      placeholder="Describe every rule, its units and timing, and who may call each function." />
     <p className="small muted count-line" id="p-count"><span className="num">{draft.prompt.length.toLocaleString('en-US')}</span> / <span className="num">3,000</span></p>
     <p className="small muted">Try a starting point:</p>
     <div className="chips">{EXAMPLES.map((example, i) => <button className="chip" type="button" key={i} onClick={() => update({ ...draft, prompt: example })}>{EXAMPLE_LABELS[i]}</button>)}</div>
-    <h3 className="added-h">Blocks added from the palette</h3>
-    <p className="small muted rule-line">Blocks become numbered rules under your words; if your words and a rule disagree, the rule wins.</p>
-    {added}
+    {behaviorBlocks(draft).length > 0 && <><h3 className="added-h">Saved stack, not included</h3><p className="small muted rule-line">Describe it sends only your words and token choice. Switch to Stack blocks to include and edit these saved rules.</p>{added}<button className="btn tiny" type="button" onClick={() => chooseMode('blocks')}>Use saved stack</button></>}
   </div>;
 
   const setting = (field: keyof Settings, label: ReactNode, input: ReactNode) => <div><label htmlFor={`s-${field}`}>{label}</label>{input}<FieldError issues={issues} field={`settings.${field}`} /></div>;
@@ -221,16 +237,16 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       </div>
       {draft.type === 'A' && <div className="field-row">
         <div>
-          <label htmlFor="s-pool">Pool share of your <span className="num">90%</span> (%) · your choice</label>
+          <label htmlFor="s-pool">Pool share of total supply (%) · your choice</label>
           <input id="s-pool" type="number" className="mono-input" min={10} max={90} step={5} placeholder="10 to 90" inputMode="numeric"
             value={s.pool ?? ''} aria-invalid={(s.pool !== null && issues.some(i => i.field === 'settings.pool')) || undefined} aria-describedby="pool-help"
             onChange={e => settings({ pool: e.target.value === '' ? null : Number(e.target.value) })} />
-          <p className="small muted" id="pool-help">How much of your share seeds the trading pool. The rest goes to your remainder address. Nothing is chosen for you.</p>
+          <p className="small muted" id="pool-help">This percentage of the total supply seeds the pool. The swarm receives <span className="num">10%</span>; the remaining <span className="num">{s.pool === null ? '90 minus your choice' : 90 - s.pool}%</span> goes to your remainder address. Nothing is chosen for you.</p>
           {s.pool !== null && <FieldError issues={issues} field="settings.pool" />}
         </div>
         {setting('rem', 'Remainder goes to', textInput('rem', 'your connected wallet', true))}
       </div>}
-      {setting('owner', 'Owner address (used only if a block adds an owner power)', textInput('owner', 'your connected wallet', true))}
+      {setting('owner', 'Owner address', textInput('owner', 'your connected wallet', true))}
       <details className="advanced" open={!!(s.repo || s.commit) || undefined}>
         <summary>Advanced: start from my own code</summary>
         <div><p className="small">Point the swarm at a public GitHub repository with your hook. It is audited as imported code, adapted to the launch, and reviewed before deploying.</p>
@@ -249,12 +265,14 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <li><b>Type</b><span>{typeLabel}</span></li>
       {draft.type === 'A' ? <li><b>Token</b><span>{ctx.name} (${ctx.symbol}){has(draft, 'own-token') ? ', your own' : ', standard'}</span></li> : <li><b>Hook</b><span>{ctx.name}</span></li>}
       <li><b>Chain</b><span>{s.chain ? CHAIN_NAMES[s.chain] : 'Choose a chain in Settings'}{draft.type === 'A' ? `, paired with ${s.pair.toUpperCase()}` : ''}</span></li>
-      <li><b>Words</b><span className="muted">{words ? `“${words.slice(0, 110)}${words.length > 110 ? '…' : ''}”` : 'none'}</span></li>
-      <li><b>Rules</b>{rules.length ? <ol>{rules.map(b => <li key={b.id} data-block={b.id}>{shortOf(b, ctx)}<WarnSign def={BY_ID[b.id]} tested={tested(b.id)} /></li>)}</ol> : <span className="muted">none</span>}</li>
-      <li><b>Owner</b><span>{powers.length ? `${s.owner.trim() || address || 'the paying wallet'} may ${powers.join(', ')}` : 'no owner powers'}</span></li>
-      {draft.type === 'A' && <li><b>Pool</b><span>{poolMissing ? <span className="pending">Not chosen yet: set the pool share in settings.</span> : <><span className="num">{s.pool}%</span> of your share, rest to {s.rem.trim() || address || 'the paying wallet'}</>}</span></li>}
+      <li><b>Words</b><span className="muted">{words ? `“${words}”` : 'none'}</span></li>
+      <li><b>Rules</b>{rules.length ? <ol>{rules.map(b => <li key={b.id} data-block={b.id}>{b.id === 'custom' ? sentenceOf(b, ctx) : summaryOf(b)}<WarnSign def={BY_ID[b.id]} tested={tested(b.id)} /></li>)}</ol> : <span className="muted">{draft.mode === 'prompt' ? 'Your description above; no block rules are included.' : 'none'}</span>}</li>
+      <li><b>Owner</b><span>{powers.length ? `${s.owner.trim() || address || 'the paying wallet'} may ${powers.join(', ')}` : words || rules.some(b => b.id === 'custom') ? `The functions your written rules grant to ${s.owner.trim() || address || 'the paying wallet'}.` : 'no owner powers'}</span></li>
+      {draft.type === 'A' && <li><b>Pool</b><span>{poolMissing ? <span className="pending">Not chosen yet: set the pool share in settings.</span> : <><span className="num">{s.pool}%</span> of total supply in the pool; <span className="num">10%</span> swarm; <span className="num">{90 - s.pool!}%</span> remainder to {s.rem.trim() || address || 'the paying wallet'}.</>}</span></li>}
     </ul>
+    {rules.length > 6 && <p className="notice block-count" role="status">Every extra rule is more for the audit panel to refuse. The contract has a <span className="num">24 KB</span> size limit. Keep the stack to six blocks when possible.</p>}
     <details className="exact"><summary>Exact text the swarm receives</summary><div><pre id="composed">{text}</pre></div></details>
+    <SafetyNotice findings={check.consistency} />
     <div className="cost">
       <div><span>Swarm fee</span><strong>0.5 IMD</strong></div>
       <div><span>Gas</span><strong>2 tx</strong></div>
@@ -276,7 +294,6 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     <div className="block-head"><h1 id="builder-h">Builder</h1><span className="small muted">Drafts save in this browser. Free checks send your request; launching needs payment.</span></div>
     {storageError && <div className="notice" role="alert">This browser is not saving your draft. Allow site storage to keep it after a reload.</div>}
     {correction && <section className="notice correction" aria-labelledby="correction-h"><h2 id="correction-h">Needs attention</h2><p>IMD stopped the previous request with this question. Edit the draft below before relaunching; a new launch spends a new fee.</p>{correction.questions.map((question, i) => <blockquote key={i}><Text>{question}</Text></blockquote>)}<details><summary>Previous request as sent</summary><pre>{correction.request}</pre></details><a href={correction.hookRoute}>Return to the original launch</a></section>}
-    <SafetyNotice findings={check.consistency} />
     <div className="builder">
       {palette}
       <div className="canvas">

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { parseCheck, checkRequest, importSource, intakeJob, jobAttention, jobStages, parseLaunches, matchesLaunch, relativeTime, relayFetch } from '../web/src/relay.ts';
 import { newDraft, body, normalizeDraft } from '../src/lib/compose.ts';
 
-const safeDraft = () => { const d = newDraft(); d.settings.chain = 1; return body(d); };
+const safeDraft = () => { const d = newDraft(); d.settings.chain = 1; d.settings.pool = 50; return body(d, '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34'); };
 const result = JSON.parse(readFileSync(new URL('../evidence/check-A-default-blocks.response.json', import.meta.url)));
 test('IMD facts, states, plan titles, blockers and suggestions are retained without inventing success', () => {
   const parsed = parseCheck(result); assert.equal(parsed.facts[0].state, 'stated'); assert.equal(parsed.plan[0].title, 'Build and test the contracts');

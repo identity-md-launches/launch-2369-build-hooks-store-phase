@@ -36,7 +36,7 @@ test('requires launch action, accepted kind and an exact terminal marker; handle
  assert.equal(D.parseBody('0x6e6f742d6a736f6e'),null);
 });
 test('every numbered rule template matches its own rendered sentence; label parameters and repeated values survive',()=>{
- for(const def of C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)&&b.id!=='custom')){const block=C.entry(def.id),ctx={name:'Pond',symbol:'POND',pair:'ETH',wallet:'0x6cba4751742f6989fa224b2dc5d5d52fcef98a34',destination:'send it to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34'};const rendered=C.sentenceOf(block,ctx);const match=D.matchRule(rendered,ctx);assert.equal(match?.id,def.id,rendered);assert.equal(C.shortOf(match,ctx),C.shortOf(block,ctx));}
+ for(const def of C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)&&b.id!=='custom')){const block=C.entry(def.id),draft=C.addBlock(C.newDraft(),'swap-fee');draft.settings.pair='eth';const ctx=C.context(draft,'0x6cba4751742f6989fa224b2dc5d5d52fcef98a34');const rendered=C.sentenceOf(block,ctx);const match=D.matchRule(rendered,ctx);assert.equal(match?.id,def.id,rendered);assert.equal(C.shortOf(match,ctx),C.shortOf(block,ctx));}
  const row=launch();assert.deepEqual(row.blocks,['owner can pause','30s between swaps per wallet']);assert.deepEqual(row.matchedBlocks.map(b=>b.id),['pause','cooldown']);
  const altered=D.parseObjective(body().objective.replace('1. The owner','1. Extra wording. The owner'));assert.ok(altered.blocks.includes('Custom'));assert.equal(altered.matchedBlocks.some(b=>b.id==='pause'),false);
 });
@@ -80,7 +80,10 @@ test('real result JSON for a completed build without addresses never fabricates 
 test('Live result mapping and 40/64-hex searches use exact launch addresses and hashes',()=>{
  // Schema fixture uses only real observed addresses; it is deliberately not represented as a captured result.json.
  const hook='0x82f636a92364d13754d7b3e72d460f0be20a28cc', token='0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86', dist='0x559ca7521402ea519363e0a5b2b7dd97c3f9f48f', currency='0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7';
- const row=D.applyResult(launch(),{launch:{launchNumber:2336,hookAddress:hook,tokenAddress:token,distributorAddress:dist,poolKey:{currency0:token,currency1:currency}}});
+ // Existing job7 requests identify a hook directly; job8 Deployer requests must
+ // instead resolve hook() (covered in job8-ui.test.mjs).
+ const direct={...launch(),request:launch().request.replace(/^Deploy one contract, [^\n]+/, 'Deploy one contract: PondGuard, a standalone Uniswap v4 hook on Robinhood Chain.')};
+ const row=D.applyResult(direct,{launch:{launchNumber:2336,hookAddress:hook,tokenAddress:token,distributorAddress:dist,poolKey:{currency0:token,currency1:currency}}});
  assert.equal(row.status,'live');assert.equal(row.launchNumber,2336);
  for(const q of [hook,token,dist,currency,row.requestId,row.txHashes[0],token.slice(2)])assert.equal(D.matchesQuery(row,q),true,q);
  assert.equal(D.matchesQuery(row,'GUARD pause'),true);assert.equal(D.matchesQuery(row,'missing pause'),false);
@@ -88,7 +91,7 @@ test('Live result mapping and 40/64-hex searches use exact launch addresses and 
 });
 test('owner/public/view minimal ABI deduplicates functions, validates each argument and formats readings',()=>{
  const all=managementFunctions(C.BLOCKS.filter(b=>!C.TOKEN_IDS.includes(b.id)).map(b=>C.entry(b.id)));
- assert.equal(all.filter(f=>f.sig==='claimFees()').length,1);
+ assert.equal(all.filter(f=>f.sig==='claimFees(PoolId poolId)').length,1);
  const args=functionAbi('setAllowed(address[] accounts, bool allowed)',false), addr=realRequest.payer;
  assert.deepEqual(argumentValues(args,[`${addr}, ${addr}`,'false']),[[addr,addr],false]);
  assert.throws(()=>argumentValues(args,['bad','true']),/address/);assert.throws(()=>argumentValues(args,[addr,'']),/choose true or false/);
@@ -184,18 +187,20 @@ async function reorgStore(t, withCompletion = true, delayedResult = false) {
   return Response.json(reorg.result);
  });
  const client = { getChainId: async () => 1, getBlockNumber: async () => canonical.head, getEnsName: async () => null,
+  readContract: async ({functionName}) => { assert.equal(functionName, 'hook'); return reorg.result.launch.hookAddress; },
   getBlock: async ({ blockNumber }) => ({ timestamp: 1792563203n, hash: canonical.hashes.get(String(blockNumber)) }),
   request: async ({ params: [q] }) => {
    if (canonical.fail) throw new Error('RPC unavailable');
    return (q.topics[0] === REQUEST_TOPIC ? canonical.requests : canonical.completions).filter(log => BigInt(log.blockNumber) >= BigInt(q.fromBlock) && BigInt(log.blockNumber) <= BigInt(q.toBlock));
   } };
  const site = { ...config, chains: [{ ...config.chains.find(c => c.id === 1), intakeFromBlock: 90 }], intake: { ...config.intake, pollIntervalMs: 60000 } };
- const store = new LaunchStore(site, { 1: client }), stop = store.start(); t.after(stop);
+ const clients = { 1: client, 4663: client };
+ const store = new LaunchStore(site, clients), stop = store.start(); t.after(stop);
  await eventually(() => !store.getSnapshot().chains[0].loading);
  if (withCompletion) await eventually(() => delayedResult ? !!release : store.getSnapshot().launches[0]?.status === 'live');
  const saved = () => JSON.parse(storage.get(cacheKey(1)));
  const refresh = async () => { const previous = saved().head; canonical.head++; store.retry(); await eventually(() => saved().head !== previous); };
- return { store, canonical, storage, saved, refresh, request, completion, restore: () => new LaunchStore(site, { 1: client }), release: () => release?.() };
+ return { store, canonical, storage, saved, refresh, request, completion, restore: () => new LaunchStore(site, clients), release: () => release?.() };
 }
 for (const removed of [false, true]) test(`reorg fixture retracts an orphaned request from rows and persistent records (${removed ? 'removed log' : 'absent on reread'})`, async t => {
  const h = await reorgStore(t, false);
@@ -214,7 +219,7 @@ for (const removed of [false, true]) test(`reorg fixture retracts an orphaned co
  await h.refresh();
  const row = h.store.getSnapshot().launches[0], entry = h.saved().records[row.requestId];
  assert.equal(row.status, 'requested'); assert.equal(row.hookAddress, null); assert.equal(row.completion, undefined);
- assert.equal(entry.completed, undefined); assert.equal(entry.result, undefined); assert.deepEqual(h.saved().completions, {});
+ assert.equal(entry.completed, undefined); assert.equal(entry.result, undefined); assert.equal(entry.hookRead, undefined); assert.deepEqual(h.saved().completions, {});
  assert.equal(h.restore().getSnapshot().launches[0].status, 'requested');
 });
 for (const event of ['request', 'completion']) test(`refresh checks the canonical block hash of a cached ${event}, even outside the overlap`, async t => {

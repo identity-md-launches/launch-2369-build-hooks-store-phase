@@ -1,0 +1,27 @@
+{
+  "action": "launch.open",
+  "input": {
+    "objective": "Launch Pondside (POND) with a Uniswap v4 hook on Robinhood Chain, paired with IMD.\nToken: Pondside (POND), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.\nbeforeInitialize accepts only the IMD launch factory, passed as the constructor argument $factory; any other initialization reverts; the hook serves only the pool the factory initializes. Constructor arguments: the Robinhood Chain PoolManager 0x8366a39CC670B4001A1121B8F6A443A643e40951, $owner and $factory.\nIn this hook, the token is Pondside (POND), the launch token; its total supply is that token's totalSupply().\nEvery pool-dependent view, state, window and limit is keyed by PoolId and isolated per pool; pass the pool id to each pool-dependent function.\nThe hook does exactly the following, and nothing else:\n1. Take 1.0% of the IMD side of every buy and sell as a hook fee, settled in IMD inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34. Expose claimFees(PoolId poolId) that anyone may call to redeem that pool's claims using the same distribution. Fees are computed on the amount actually traded; when the swap specifies its IMD amount and the pool fills only part of it, the swap reverts rather than overpaying.\n2. For the first 10 minutes of block timestamp after the pool's first swap, each wallet may buy at most 1.0% of the token's total supply in total; larger buys revert. Track the window and each wallet's bought total separately by PoolId. Expose windowEndsAt(PoolId poolId) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.\n3. Collect 1.0% of the IMD side of every swap into a jar held by the hook, tracked separately by PoolId and settled in IMD inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly). When the jar holds at least 0.1 IMD, anyone may call buyback(PoolId poolId). Buy only inside buyback(), never inside a swap, from this same pool, with a price limit 3% above the pool price at the start of the call; keep any unspent IMD in that pool's jar and anyone may call it again. keep the bought tokens in the hook forever; no function can move them. Expose jar(PoolId poolId) as a view. Fees are computed on the amount actually traded; when the swap specifies its IMD amount and the pool fills only part of it, the swap reverts rather than overpaying.\nOwner 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34 is $owner. No owner functions, no backend signer, no upgrade path.\nFees are always taken from the IMD (pair currency) side, never from POND; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem. Fee recipient: 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34.\nKeep every hook fee in IMD: do not convert the fee to ETH and do not use any other pool.\nThe launch token may be currency0 or currency1; handle both orders.\nThe hook uses no outside pool, token, price feed or service; every price it needs comes from its own pool.\nUse mulDiv for every percentage calculation, including fees, shares, limits and price moves, to avoid intermediate multiplication overflow.\nThe launch factory ($factory) may always add liquidity and collect fees with a zero-change modify. Enable beforeInitialize and only the callbacks the behavior above needs.\nPool: 50% of the total supply seeds the pool; 10% goes to the swarm; the remaining 40% goes to 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34. economics.poolBps=5000, in basis points of the total supply.\nKeep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.",
+    "references": [
+      "uniswap-v4-hooks",
+      "uniswap-v4-security"
+    ],
+    "owner": "0x6cba4751742f6989fa224b2dc5d5d52fcef98a34",
+    "shape": "chain",
+    "steps": [
+      {
+        "skill": "build-contract-project"
+      },
+      {
+        "skill": "adversarial-review"
+      }
+    ],
+    "onchain": "univ4_hook",
+    "chainId": 4663,
+    "pairWith": "imd",
+    "economics": {
+      "poolBps": 5000
+    },
+    "github": true
+  }
+}

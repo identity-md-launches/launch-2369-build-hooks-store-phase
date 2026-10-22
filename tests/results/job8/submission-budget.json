@@ -1,0 +1,17 @@
+{
+  "limitBytes": 8388608,
+  "candidateFiles": 479,
+  "rawFileBytes": 14181553,
+  "conservativeUncompressedTarBytes": 14562304,
+  "completeSnapshotGitBundleBytes": 7152559,
+  "reservedMetadataBytes": 16384,
+  "headroomBytes": 1219665,
+  "protectedPathsChanged": [],
+  "dependencyOrCachePaths": [],
+  "submodules": [],
+  "excludedInputs": [
+    ".imd/",
+    "test/scratch/"
+  ],
+  "passed": true
+}

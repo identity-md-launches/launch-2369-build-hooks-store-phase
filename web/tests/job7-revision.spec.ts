@@ -6,10 +6,10 @@ import { newDraft, entry, IMD_TREASURY, type Draft } from '../../src/lib/compose
 import { head, interceptChains, owner } from './chain-fixture';
 
 const relay = 'https://hooks-store-relay.hooks-store.workers.dev';
-const output = '../tests/results/job7';
+const output = '../tests/results/job8/regression-job7';
 function draft(): Draft {
   const d = newDraft(); d.mode = 'blocks';
-  d.settings = { ...d.settings, chain: 1, pool: 50, rem: IMD_TREASURY };
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: IMD_TREASURY, owner };
   return d;
 }
 async function setup(page: Page, d: Draft, facts: unknown[] = []) {
@@ -95,11 +95,12 @@ for (const width of [320, 390, 1440]) {
     await expect(page.locator('.swarm-panel [role="alert"]')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled(); expect(calls()).toBe(2);
   });
-  test(`revision: supplied Buy back and burn example remains usable at ${width}px`, async ({ page }) => {
+  test(`revision: supplied Observe swaps example remains usable at ${width}px`, async ({ page }) => {
     const d = draft(); d.mode = 'prompt'; d.settings.pair = 'eth';
     await setup(page, d); await page.setViewportSize({ width, height: 844 }); await page.goto('#builder');
-    await page.getByRole('button', { name: 'Buy back and burn', exact: true }).click();
-    await expect(page.locator('#composed')).toContainText('No fees on buys.');
+    await page.getByRole('button', { name: 'Observe swaps', exact: true }).click();
+    await expect(page.locator('#composed')).toContainText('Observe swaps without changing them. No owner functions.');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
     await expect(page.locator('.safety-notice')).toHaveCount(0);
     await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled(); await fits(page, width);

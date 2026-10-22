@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
-const out = 'tests/results/job7'; mkdirSync(out, { recursive: true });
+const out = 'tests/results/job8'; mkdirSync(out, { recursive: true });
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const walk = directory => readdirSync(directory).flatMap(name => {
   const path = join(directory, name); return statSync(path).isDirectory() ? walk(path) : [path];

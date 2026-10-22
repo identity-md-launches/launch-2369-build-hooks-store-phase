@@ -309,6 +309,12 @@ textarea { display: block; width: 100%; min-height: 160px; resize: vertical; bor
 .order { display: flex; gap: 6px; }
 .order .btn.tiny { min-width: 40px; }
 .editor { padding: 14px; margin-bottom: 16px; }
+.written-rules { margin: 0 0 16px; padding: 12px; }
+.written-rules p { margin: 0 0 8px; }
+.written-rules p:last-child { margin-bottom: 0; }
+.written-rules ul { padding-inline-start: 20px; margin: 8px 0; }
+.editor > .btn.tiny { margin-top: 12px; }
+.block-count { font-size: var(--text-body); }
 .editor label { margin-top: 0; }
 .count-line { text-align: right; margin: 4px 0 8px; max-width: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
@@ -429,6 +435,9 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .function-head .btn { flex: 0 0 auto; max-width: 150px; }
 .reading { font: 400 var(--text-large)/1.3 var(--mono); color: var(--pine); max-width: 50%; overflow-wrap: anywhere; text-align: end; }
 .function-form { display: grid; gap: 12px; margin-top: 16px; }
+.management-pool { margin-bottom: 20px; }
+.management-pool label { display: block; margin-bottom: 8px; }
+.management-pool input { width: 100%; }
 .function-form label { display: block; font-size: var(--text-body); }
 .function-form .btn { justify-self: start; }
 .function-feedback:empty { display: none; }

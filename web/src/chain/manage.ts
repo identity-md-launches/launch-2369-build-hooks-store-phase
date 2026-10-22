@@ -1,17 +1,22 @@
 import { parseAbiItem, isAddress, getAddress, formatEther, type AbiFunction } from 'viem';
 import { BY_ID, type BlockEntry, type Fn } from '../../../src/lib/compose.ts';
+import legacyCatalog from '../../../src/blocks/legacy-catalog.json' with { type: 'json' };
+const LEGACY_BY_ID = Object.fromEntries(legacyCatalog.blocks.map(block => [block.id, block])) as typeof BY_ID;
 export type ManagementFn = Fn & { access: 'owner' | 'anyone' | 'user' | 'view'; abi: AbiFunction };
 const boolViews = new Set(['isVolatile', 'isLpAllowed', 'isOpen', 'isAllowed', 'paused']);
 export function functionAbi(sig: string, view: boolean): AbiFunction {
   const name = sig.split('(')[0];
   const result = name === 'owner' ? 'address' : boolViews.has(name) ? 'bool' : name === 'twap' ? 'uint160' : 'uint256';
-  return parseAbiItem(`function ${sig}${view ? ` view returns (${result})` : name === 'placeOrder' ? ' returns (uint256)' : ''}`) as AbiFunction;
+  // Solidity's PoolId is a bytes32 user-defined value type at the ABI boundary.
+  const abiSig = sig.replace(/\bPoolId(?:\s+poolId)?\b/g, 'bytes32 poolId');
+  return parseAbiItem(`function ${abiSig}${view ? ` view returns (${result})` : name === 'placeOrder' ? ' returns (uint256)' : ''}`) as AbiFunction;
 }
 export const ownerAbi = [functionAbi('owner()', true)];
 export function managementFunctions(blocks: BlockEntry[]) {
   const seen = new Set<string>(), rows: ManagementFn[] = [];
   for (const block of blocks) for (const access of ['owner', 'anyone', 'user', 'view'] as const) {
-    for (const fn of BY_ID[block.id]?.[access] ?? []) {
+    for (const fn of (block.legacy ? LEGACY_BY_ID : BY_ID)[block.id]?.[access] ?? []) {
+      if (!block.legacy && block.id === 'donate' && block.p.who !== 'only allowlisted addresses' && fn.sig.startsWith('setDonor(')) continue;
       if (seen.has(fn.sig)) continue;
       seen.add(fn.sig); rows.push({ ...fn, access, abi: functionAbi(fn.sig, access === 'view') });
     }
@@ -29,6 +34,11 @@ export function argumentValues(abi: AbiFunction, values: string[]): unknown[] {
     if (input.type === 'bool') {
       if (!['true', 'false'].includes(raw)) throw new Error(`${label}: choose true or false.`);
       return raw === 'true';
+    }
+    if (/^bytes\d+$/.test(input.type)) {
+      const length = Number(input.type.slice(5));
+      if (!new RegExp(`^0x[\\da-fA-F]{${length * 2}}$`).test(raw)) throw new Error(`${input.name === 'poolId' ? 'Pool id' : label}: enter a full ${length}-byte 0x value.`);
+      return raw;
     }
     const int = /^(u?int)(\d*)$/.exec(input.type);
     if (int) {

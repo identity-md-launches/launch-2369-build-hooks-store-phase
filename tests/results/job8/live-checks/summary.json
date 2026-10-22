@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-10-22T00:13:54.723Z",
+  "endpoint": "https://hooks-store-relay.hooks-store.workers.dev/check",
+  "purpose": "Free-check validation only; public recorded fixture payer, no account connection, signature, payment or deployment.",
+  "cases": [
+    {
+      "case": "A-imd",
+      "httpStatus": 200,
+      "judged": true,
+      "blockers": [],
+      "fixedConflicts": [],
+      "consistency": []
+    },
+    {
+      "case": "A-eth",
+      "httpStatus": 200,
+      "judged": true,
+      "blockers": [],
+      "fixedConflicts": [],
+      "consistency": []
+    },
+    {
+      "case": "B",
+      "httpStatus": 200,
+      "judged": true,
+      "blockers": [],
+      "fixedConflicts": [],
+      "consistency": []
+    },
+    {
+      "case": "C",
+      "httpStatus": 200,
+      "judged": true,
+      "blockers": [],
+      "fixedConflicts": [],
+      "consistency": []
+    }
+  ]
+}

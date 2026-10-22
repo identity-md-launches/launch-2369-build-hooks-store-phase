@@ -7,6 +7,7 @@ export type Launch = {
   launchId?: string | null; createdAt: string | null; blockNumber: string;
   summary: string; request: string; blocks: string[]; matchedBlocks: BlockEntry[]; groups: string[];
   hookAddress: string | null; tokenAddress: string | null; distributorAddress: string | null; poolId: string | null;
+  deployerAddress?: string | null; hookPending?: boolean;
   payer: string; creatorName?: string | null; txHashes: string[]; currencies: string[];
   sourceRepoUrl: string | null; jobIds: string[]; auditUrl?: string | null; resultUrl?: string | null;
   completion?: { status: number; reason: string; uri: string; blockNumber: string; txHash: string };

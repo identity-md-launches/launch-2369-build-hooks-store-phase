@@ -1,4 +1,4 @@
-import { BLOCKS, IMD_FEE_OPT_OUT, POOL_MANAGERS, isAddress, type Body } from './compose.ts';
+import { BLOCKS, BY_ID, IMD_FEE_OPT_OUT, POOL_MANAGERS, isAddress, type Body, type BlockDef } from './compose.ts';
 import knownQuestions from '../blocks/known-questions.json' with { type: 'json' };
 
 export type SafetyFinding = { code: string; sentence: string; message: string };
@@ -7,6 +7,21 @@ const addressPattern = '0x[0-9a-fA-F]{40}';
 const fullAddress = (value: string) => isAddress(value) && !/^0x0{40}$/i.test(value);
 const sentences = (text: string) => text.split(/\n|(?<=[.!?])\s+(?=[A-Z])/).map(s => s.trim()).filter(Boolean);
 const numbered = (text: string) => Array.from(text.matchAll(/^\d+\. (.+)$/gm), m => m[1]);
+const escapePattern = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const matchesTemplate = (rule: string, template: string, def: BlockDef) => {
+  let pattern = '', from = 0;
+  for (const match of template.matchAll(/\{(@?)(\w+)(?::(\w+))?\}/g)) {
+    pattern += escapePattern(template.slice(from, match.index));
+    const param = def.params.find(p => p.k === match[2]);
+    if (match[1] && match[2] === 'pair') pattern += '(?:ETH|IMD)';
+    else if (match[1] && match[2] === 'feeApplies') pattern += '(?:buy and sell|buy|sell)';
+    else if (param?.type === 'number' || match[2] === 'baseRate') pattern += '[+-]?[\\d,]+(?:\\.\\d+)?';
+    else if (param?.options) pattern += '(?:' + param.options.map(escapePattern).join('|') + ')';
+    else pattern += '[\\s\\S]+?';
+    from = match.index! + match[0].length;
+  }
+  return new RegExp('^' + pattern + escapePattern(template.slice(from)) + '$').test(rule);
+};
 
 // Scope a fee assertion to the trade it charges, not a later buyback action.
 const feeScope = (text: string): Set<string> => {
@@ -41,6 +56,14 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   };
   if (!text) return [{ code: 'request', sentence: '(empty request)', message: 'Write a complete request before checking or launching.' }];
   const lines = sentences(text), rules = numbered(text);
+  const catalogRules = new Map(BLOCKS.map(def => [def.id, rules.find(rule => [def.sentence, ...Object.values(def.optionSentences ?? {})].some(template => matchesTemplate(rule, template, def)))]));
+  for (const def of BLOCKS) {
+    const rule = catalogRules.get(def.id); if (!rule) continue;
+    if (def.disabled) add(def.id === 'yield' ? 'dependency' : 'unavailable', rule, `${def.title}: ${def.disabled}. Remove this block before paying.`);
+    if (def.requires && !catalogRules.get(def.requires)) add('dependency', rule, `${def.title} needs ${BY_ID[def.requires].title}.`);
+    if (def.requiresAny && !def.requiresAny.some(id => catalogRules.get(id))) add('dependency', rule, `${def.title} needs ${def.requiresAny.map(id => BY_ID[id].title).join(' or ')}.`);
+    for (const id of def.excludes ?? []) if (catalogRules.get(id)) add('contradiction', `${rule}\nConflicts with: ${catalogRules.get(id)}`, `${def.title} cannot be combined with ${BY_ID[id].title}.`);
+  }
   for (const sentence of lines) {
     // Both catalog prose and ordinary custom wording are checked. Explicit negations are exempt.
     const asserted = sentence.replace(/\b(?:do not|never|not)\s+(?:convert|sell|swap|settle|take|collect|charge|pay|paid|distribute|disburse|remit|receive)[^.;]*/gi, '');
@@ -56,13 +79,14 @@ export function checkConsistency(input: Body): SafetyFinding[] {
     }
     if (/\b(?:my wallet|treasury address|the second address|connect to resolve|0x…|0x\.\.\.)\b/i.test(sentence)) add('recipient', sentence, 'Replace the recipient with its full address. Connect the paying wallet for “my wallet”.');
     for (const match of sentence.matchAll(/(?:send (?:it|them|the (?:bought |remaining )?tokens|the pot) to|send (?:[\w-]+\s+){0,4}fees?(?: (?:revenue|proceeds|payouts?))? to|\bfees? (?:revenue |proceeds )?(?:(?:must|shall|will) )?go(?:es)? to|remainder goes to|\d+(?:\.\d+)?% to)\s+([^;,.]+(?:\.[^\s]+)?)/gi)) {
+      if (/^the (?:fee )?recipient\b/i.test(match[1]) && (new RegExp(`Fee recipient: ${addressPattern}\\.`).test(text) || !!catalogRules.get('fee-split'))) continue;
       const target = /^0x[\da-fA-F]{40}\b/.exec(match[1].trim())?.[0] ?? match[1].trim().split(/\s/)[0];
       if (!fullAddress(target)) add('recipient', sentence, 'Every fee or remainder recipient must be a full, nonzero address.');
     }
-    const owner = /^Owner (.+?) may only:/.exec(sentence);
+    const owner = /^Owner (.+?) (?:may only:|is \$owner\.)/.exec(sentence);
     if (owner && !fullAddress(owner[1])) add('recipient', sentence, 'Connect the paying wallet or enter a full owner address.');
     // Missing or shortened literal addresses never pass as recipients or dependencies.
-    for (const match of sentence.matchAll(/\b0x[\da-z]+/gi)) if (!new RegExp(`^${addressPattern}$`).test(match[0])) add('address', sentence, 'Use a full address on the deploy chain.');
+    for (const match of sentence.matchAll(/\b0x[\da-z]+/gi)) if (match[0] !== '0x800000' && !new RegExp(`^${addressPattern}$`).test(match[0])) add('address', sentence, 'Use a full address on the deploy chain.');
   }
   const chain = String(input.chainId);
   const opening = text.split('\n')[0];
@@ -71,9 +95,20 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   if (input.onchain === 'evm_contracts') {
     const manager = POOL_MANAGERS[Number(input.chainId)];
     if (manager && !opening.toLowerCase().includes(manager.toLowerCase())) add('dependency', opening, 'Name the verified PoolManager address on the deploy chain.');
-    const token = /existing token (\S+)/.exec(opening);
-    if (token && !fullAddress(token[1].replace(/[,.]$/, ''))) add('dependency', opening, 'The existing token needs its full deploy-chain address.');
+    const token = /existing token (0x[\da-fA-F]+|\([^)]*\))/.exec(text);
+    if (token && !fullAddress(token[1])) add('dependency', opening, 'The existing token needs its full deploy-chain address.');
+    if (!/^Deploy one contract, [A-Za-z][A-Za-z0-9]*Deployer,/.test(opening) || !/takes no salt argument/.test(opening) || !/starts at salt 0 and increments/.test(opening) || !/creates .+ in the launch transaction/.test(opening) || !/passing the PoolManager, \$owner and fee recipient unchanged/.test(opening) || !/neither constructor calls any other contract/.test(opening) || !/no deploy function to call afterwards/i.test(opening) || !/hook\(\)/.test(opening)) add('deployer', opening, 'Use a deployer whose constructor mines from salt 0 and creates the hook immediately, forwarding PoolManager, $owner and recipient unchanged, with hook() and no later deploy step.');
+    if (/\bfactory\b/i.test(text)) add('factory', lines.find(line => /factory/i.test(line))!, 'Hook-only and existing-token requests must not mention a launch factory.');
+    if (!text.includes('Only pools whose currency0 is native ETH may be initialized with this hook; any other initialization reverts.')) add('pool-scope', opening, 'Restrict initialization to pools whose currency0 is native ETH.');
+    if (!text.includes("In this hook, the token is the pool's non-ETH currency and its total supply is that token's totalSupply().")) add('token-definition', opening, 'Define the token as the non-ETH currency and use its totalSupply().');
+  } else if (input.onchain === 'univ4_hook') {
+    if (!text.includes('beforeInitialize accepts only the IMD launch factory, passed as the constructor argument $factory; any other initialization reverts; the hook serves only the pool the factory initializes.')) add('factory', opening, 'Restrict beforeInitialize to the IMD launch factory passed as $factory.');
+    const manager = POOL_MANAGERS[Number(input.chainId)];
+    if (manager && !text.includes(`PoolManager ${manager}, $owner and $factory.`)) add('factory', opening, 'Constructor arguments must be the deploy-chain PoolManager, $owner and $factory.');
   }
+  if (!fullAddress(String(input.owner ?? ''))) add('owner', opening, 'Connect the paying wallet or enter a full owner address; the body always carries owner.');
+  else if (!new RegExp(`^Owner ${escapePattern(String(input.owner))} (?:may only:|is \\$owner\\.)`, 'im').test(text)) add('owner', opening, 'The request body owner must match the owner named in the text.');
+  if (!Array.isArray(input.references) || !['uniswap-v4-hooks', 'uniswap-v4-security'].every(ref => (input.references as unknown[]).includes(ref))) add('references', opening, 'Include both uniswap-v4-hooks and uniswap-v4-security references.');
   // A service is refused until an address has been verified for this chain. No guessed deployments.
   for (const block of BLOCKS.filter(b => b.dependencies?.length)) {
     for (const sentence of rules.filter(s => /ReHypothecationHook|\blent (?:on|out)\b/i.test(s))) {
@@ -82,7 +117,7 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   }
   for (const sentence of lines.filter(s => /\b(?:use|using|read|via|through|from|on|depends on|convert|conversion)\b/i.test(s))) {
     if (findings.some(f => f.code === 'dependency' && f.sentence.includes(sentence))) continue;
-    const dependencyText = sentence.replace(/\b(?:do not|never|not)\s+(?:use|read|depend on|call|swap through|convert through)[^.;]*/gi, '');
+    const dependencyText = sentence.replace(/The hook uses no outside pool, token, price feed or service/gi, '').replace(/\b(?:do not|never|not)\s+(?:use|read|depend on|call|swap through|convert through)[^.;]*/gi, '');
     for (const dependency of [...dependencyText.matchAll(externalDependency), ...dependencyText.matchAll(namedTokenDependency)]) {
       const tail = dependencyText.slice(dependency.index! + dependency[0].length);
       const address = dependencyAddress.exec(tail)?.[1];
@@ -97,20 +132,26 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   const conflict = (a: string | undefined, b: string | undefined, message: string) => { if (a && b) add('contradiction', `${a}\nConflicts with: ${b}`, message); };
   conflict(findRule(/^Take [\d.]+% of .* every buy and sell/), findRule(/^Take [\d.]+% of .* every buy and [\d.]+%/), 'Choose Swap fee or Different buy and sell fees.');
   conflict(findRule(/pool uses a dynamic LP fee/), findRule(/fee tier is [\d.]+%/), 'Dynamic LP fees conflict with a fixed Pool rules fee tier.');
-  conflict(findRule(/PoolManager’s donate/), findRule(/Donations to the pool are allowed from (?:nobody|only the owner|only allowlisted addresses)/), 'LP fee sharing donates from the hook. The donation restriction must explicitly permit that, or be removed.');
-  conflict(findRule(/Liquidity added to the pool is locked/), findRule(/Liquidity can always be removed while paused|Liquidity can still be removed during the pause|Liquidity changes are always allowed/), 'A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception.');
-  const open = /Reject every swap before ([\d-]+ [\d:]+) UTC/.exec(text), sunset = /After ([\d-]+ [\d:]+) UTC every rule/.exec(text);
+  conflict(findRule(/PoolManager[’']s donate/), findRule(/Donations to the pool are allowed from (?:nobody|only the owner|only allowlisted addresses)/), 'LP fee sharing donates from the hook. The donation restriction must explicitly permit that, or be removed.');
+  conflict(findRule(/Liquidity added to (?:the pool|a position) is locked/), findRule(/Liquidity can always be removed while paused|Liquidity can still be removed during the pause|Liquidity changes are always allowed/), 'A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception.');
+  const open = /Reject every swap before ([\d-]+ [\d:]+) UTC/.exec(text), sunset = /After ([\d-]+ [\d:]+) UTC every (?:other )?rule/.exec(text);
   if (open && sunset && Date.parse(sunset[1] + 'Z') <= Date.parse(open[1] + 'Z')) add('contradiction', `${open[0]}\nConflicts with: ${sunset[0]}`, 'Sunset must be after the scheduled opening.');
   const description = /<description>([\s\S]*?)<\/description>/.exec(text)?.[1] ?? '';
-  const userRules = [...rules, description].filter(Boolean).flatMap(sentences);
+  const customRules = Array.from(text.matchAll(/<custom>([\s\S]*?)<\/custom>/g), match => match[1]);
+  const userRules = [...rules, description, ...customRules].filter(Boolean).flatMap(sentences);
   const feeClauses = userRules.flatMap(s => s.split(/;\s*|\s+(?:but|whereas)\s+|\s+and (?=(?:take|charge|collect)\b)/i));
   for (const forbidden of feeClauses.filter(s => /\b(?:(?:no|without(?: charging| taking| collecting)?(?: any)?) (?:hook |swap |buy |sell )?fees?|(?:never|do not) (?:take|charge|collect) (?:a |any )?fees?)\b/i.test(s))) {
     const scope = feeScope(forbidden);
     conflict(forbidden, feeClauses.find(s => [...chargedScopes(s)].some(direction => scope.has(direction))), 'The request both forbids fees and charges a fee on the same trade direction. Remove one rule or give buys and sells compatible fee rules.');
   }
-  conflict(userRules.find(s => /\bowner (?:may|can|must)\b/i.test(s)), /^No owner functions[^\n]*/m.exec(text)?.[0], 'The request grants an owner power but its owner sentence forbids all owner functions. Add the matching owner-power block or remove the custom owner power.');
+  conflict(userRules.find(s => /\bowner (?:may|can|must)\b/i.test(s) && !/owner may donate/.test(s)), lines.find(line => /^No owner functions/.test(line)), 'The request grants an owner power but its owner sentence forbids all owner functions. Add the matching owner-power block or remove the custom owner power.');
   conflict(userRules.find(s => /\b(?:no|without) owner (?:powers|functions)\b/i.test(s)), userRules.find(s => /\bowner (?:may|can|must)\b/i.test(s)), 'The request both forbids and grants owner powers. Remove one rule.');
   if (text.includes(IMD_FEE_OPT_OUT)) conflict(userRules.find(s => /\b(?:use|swap through|convert through) (?:an? |the )?(?:other|another|external|conversion) pool\b/i.test(s) && !/do not|never/i.test(s)), IMD_FEE_OPT_OUT, 'An IMD-paired request forbids other pools. Remove the external-pool rule.');
+  const noOutside = 'The hook uses no outside pool, token, price feed or service; every price it needs comes from its own pool.';
+  if (text.includes(noOutside)) conflict(userRules.find(s => {
+    if (!/\b(?:use|using|read|via|through|from|on|depends on|convert|conversion)\b/i.test(s) || /\b(?:do not|never|not)\s+(?:use|read|depend on|call)/i.test(s)) return false;
+    return new RegExp(externalDependency.source, 'i').test(s) || new RegExp(namedTokenDependency.source).test(s);
+  }), noOutside, 'This request expressly forbids outside dependencies. Remove the outside pool, token, feed or service rule, even when it has an address.');
   conflict(userRules.find(s => /\b(?:sells are never blocked|never (?:block|reject) sells)\b/i.test(s)), userRules.find(s => /reject every swap|pause and unpause swaps|reject all others|reject any single swap .* in either direction|wallet must wait .* between its swaps/i.test(s)), 'Unrestricted sells conflict with a rule that can reject sells. Remove one rule or compose an explicit compatible sell exception.');
   // Opposite literal custom rules cannot both be implemented. Do not claim to prove arbitrary prose.
   for (const a of userRules) for (const b of userRules) if (a !== b) {
@@ -128,10 +169,13 @@ export function fixedFactConflicts(input: Body, facts: FixedFact[], payingWallet
   const conflicts: SafetyFinding[] = [];
   for (const fact of facts.filter(f => f.state === 'fixed')) {
     const factId = fact.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    if (new RegExp(`(?:^|[.!?]\\s+|<description>)Opt out of fixed fact ${factId}\\.(?:\\s|<|$)`, 'i').test(text)) continue;
+    if (new RegExp(`(?:^|[.!?]\\s+|<(?:description|custom)>)Opt out of fixed fact ${factId}\\.(?:\\s|<|$)`, 'i').test(text)) continue;
     const claim = `${fact.label} ${fact.assumed ?? ''}`;
     if (fact.id === 'token_split' && input.onchain === 'univ4_hook') {
-      const requested = /^Pool: ([\d.]+)% of my ([\d.]+)% share seeds the pool; the remainder goes to (.+)\.$/m.exec(text);
+      const legacyAllocation = /^Pool: ([\d.]+)% of my ([\d.]+)% share seeds the pool; the remainder goes to (.+)\.$/m.exec(text);
+      const parameterAllocation = /^Pool allocation parameter: poolBps=(\d+); the remainder recipient is (.+)\.$/m.exec(text);
+      const totalAllocation = /^Pool: ([\d.]+)% of the total supply seeds the pool; 10% goes to the swarm; the remaining [\d.]+% goes to (0x[\da-fA-F]{40})\./m.exec(text);
+      const requested = legacyAllocation ?? (parameterAllocation ? [parameterAllocation[0], String(Number(parameterAllocation[1]) / 100), '', parameterAllocation[2]] : totalAllocation ? [totalAllocation[0], totalAllocation[1], '', totalAllocation[2]] : null);
       const fixedPool = /([\d.]+)% (?:into|to) the pool/i.exec(claim);
       const fixedRecipient = /(?:the rest|the remainder|remainder) (?:goes )?to\s+(.+?)(?:[.;]|$)/i.exec(claim)?.[1].trim();
       const fixedAddress = fixedRecipient && (new RegExp(`^${addressPattern}$`).test(fixedRecipient) ? fixedRecipient : /^(?:your|the paying) wallet$/i.test(fixedRecipient) ? payingWallet : undefined);
@@ -147,7 +191,7 @@ export function fixedFactConflicts(input: Body, facts: FixedFact[], payingWallet
     }
     const supply = /Supply: ([\d,]+) with (\d+) decimals/i.exec(claim), requested = /supply ([\d,]+), (\d+) decimals/i.exec(text);
     if (supply && requested && (supply[1] !== requested[1] || supply[2] !== requested[2]) && input.customToken !== true) conflicts.push({ code: `fixed:${fact.id}`, sentence: fact.label, message: 'The requested supply or decimals conflict with the fixed token supply. Explicitly choose a custom token.' });
-    if (/no owner (?:functions|powers)/i.test(claim) && /^Owner .+ may only:/m.test(text)) conflicts.push({ code: `fixed:${fact.id}`, sentence: fact.label, message: `This fixed fact forbids the requested owner powers. Remove them or add “Opt out of fixed fact ${fact.id}.” to the request, then check again.` });
+    if (/no owner (?:functions|powers)/i.test(claim) && (/^Owner .+ may only:/m.test(text) || /and these block powers:/.test(text) || /<(?:description|custom)>[^<]*\bowner (?:may|can|must)\b/i.test(text))) conflicts.push({ code: `fixed:${fact.id}`, sentence: fact.label, message: `This fixed fact forbids the requested owner powers. Remove them or add “Opt out of fixed fact ${fact.id}.” to the request, then check again.` });
   }
   return conflicts;
 }

@@ -70,7 +70,14 @@ for (const type of ['A', 'B', 'C']) for (const pair of ['imd', 'eth']) for (cons
       `Use the USDC/ETH pool at ${site.chains.find(c => c.id === chain).imdAddress} for pricing.`,
       `Use the USDC token at ${site.chains.find(c => c.id === chain).imdAddress}.`,
       'Do not use Chainlink VRF. Never use another pool.',
-    ]) assert.deepEqual(findings(custom(text, type, pair, chain)), [], text);
+    ]) {
+      const result = findings(custom(text, type, pair, chain));
+      if (/^Do not/.test(text)) assert.deepEqual(result, [], text);
+      else {
+        assert.ok(!result.some(finding => finding.code === 'dependency'), 'The named service has its own address.');
+        assert.ok(result.some(finding => finding.code === 'contradiction'), 'SPEC 4.16.5 still forbids outside dependencies in this request.');
+      }
+    }
   });
 }
 
@@ -119,4 +126,14 @@ test('fixed token_split compares concrete remainder addresses and resolves your 
   d.settings.rem = payer;
   assert.deepEqual(fixedFactConflicts(body(d, payer), [fact]), []);
   assert.deepEqual(fixedFactConflicts(body(d, payer), [splitFact], payer), []);
+});
+
+
+test('type C accepts a full existing-token address with no optional symbol', () => {
+  for (const chain of [1, 4663]) {
+    const d = draft('C', 'eth', chain); d.blocks.push(entry('cooldown'));
+    assert.equal(d.settings.tsym, '');
+    assert.deepEqual(findings(d), []);
+    assert.ok(body(d, payer).objective.includes(`existing token ${d.settings.token}; only pools`));
+  }
 });

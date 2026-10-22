@@ -1,0 +1,7 @@
+Production export: /tmp/hooks-job8/dist, served at /preview/ on an isolated local port.
+Command: PLAYWRIGHT_BROWSERS_PATH=/tmp/hooks-job8-browsers node_modules/.bin/playwright test tests/job8.spec.ts --config job8-playwright.config.ts
+Temporary config copied the project config and changed only local preview port (4188), baseURL and results JSON path; no committed build configuration changed.
+Result: 7 passed (10.7s), exit 0.
+Coverage: Builder in Describe it and Stack blocks at 320, 390 and 1440 CSS pixels; full words, owner powers, hidden saved stack exclusion, mode retention during token changes, restored stack edits, Custom rule warning/checklist, disabled Batch auctions and Yield, six-block notice, split destination replacement, page-error and horizontal-overflow checks.
+Limitations: Chromium desktop emulation; no real wallet transaction or on-chain deployment sent.
+Earlier run at shared port 4173 reached a stale root export and was superseded by this isolated production export run.

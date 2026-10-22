@@ -1,0 +1,17 @@
+✔ the exact GET allowlist forwards paths and queries to the fixed production origin (52.775728ms)
+✔ POST check and import preserve JSON bytes, never forward credentials, and never cache (5.533188ms)
+✔ successful GETs cache for 30 seconds, with query strings as separate keys (3.696696ms)
+✔ all other paths and methods are rejected locally, including path-prefix and encoded-path attacks (3.072405ms)
+✔ CORS preflight accepts only the route method and safe headers (1.249796ms)
+✔ upstream errors retain status and CORS, are not cached, and can be retried (1.358364ms)
+✔ network failures and redirects fail closed with CORS (1.10616ms)
+✔ non-JSON and oversized POSTs do not reach IMD (1.547845ms)
+✔ cache failures still return a CORS-enabled upstream response (1.236806ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.663568

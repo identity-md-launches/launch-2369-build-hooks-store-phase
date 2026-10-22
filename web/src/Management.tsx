@@ -7,20 +7,21 @@ import { argumentValues, contractError, formatReading, managementFunctions, owne
 import { Text } from './Text';
 import { AddressValue } from './AddressValue';
 
-function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revision, explorer }: {
-  fn: ManagementFn; launch: Launch; client: ReadClient; ownerAllowed: boolean; owner: string | null; refresh: () => void; revision: number; explorer: string;
+function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revision, explorer, poolId }: {
+  fn: ManagementFn; launch: Launch; client: ReadClient; ownerAllowed: boolean; owner: string | null; refresh: () => void; revision: number; explorer: string; poolId: string;
 }) {
   const id = useId(), { address, chainId, isConnected } = useAccount();
   const { data: wallet } = useWalletClient(), { mutateAsync: switchChain, isPending: switching } = useSwitchChain();
   const view = fn.access === 'view';
-  const [open, setOpen] = useState(view && fn.abi.inputs.length > 0);
-  const [values, setValues] = useState<string[]>(fn.abi.inputs.map(p => p.type === 'address' ? address ?? '' : p.type === 'bool' ? '' : fn.abi.name === 'twap' ? '300' : ''));
+  const [open, setOpen] = useState(view && fn.abi.inputs.some(p => p.name !== 'poolId'));
+  const [values, setValues] = useState<string[]>(fn.abi.inputs.map(p => p.name === 'poolId' ? poolId : p.type === 'address' ? address ?? '' : p.type === 'bool' ? '' : fn.abi.name === 'twap' ? '300' : ''));
   const [reading, setReading] = useState<string | null>(null), [error, setError] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [hash, setHash] = useState<string | null>(null);
   const live = launch.status === 'live' && !!launch.hookAddress;
   let inputError = '';
   try { argumentValues(fn.abi, values); } catch (e) { inputError = (e as Error).message; }
   const argsKey = JSON.stringify(values);
   useEffect(() => { if (address) setValues(old => old.map((v, i) => !v && fn.abi.inputs[i].type === 'address' ? address : v)); }, [address]);
+  useEffect(() => { setValues(old => old.map((v, i) => fn.abi.inputs[i].name === 'poolId' ? poolId : v)); }, [poolId, fn.sig]);
   useEffect(() => {
     if (!view || !live || inputError) { setReading(null); return; }
     let active = true, running = false;
@@ -64,9 +65,9 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
         }}>{busy ? 'Sending…' : !isConnected && allowed ? 'Connect wallet' : needsSwitch && allowed ? `Switch to ${CHAINS[launch.chainId]}` : fn.abi.inputs.length ? open ? 'Close form' : 'Open form' : 'Send'}</button>}
     </div>
     {open && <form className="function-form" onSubmit={event => { event.preventDefault(); if (view) refresh(); else void send(); }}>
-      {fn.abi.inputs.map((input, index) => <div key={index}><label htmlFor={`${id}-${index}`}>{input.name || (input.type === 'address' ? 'Wallet address' : `Argument ${index + 1}`)} <code>({input.type})</code></label>
+      {fn.abi.inputs.map((input, index) => input.name === 'poolId' ? <p key={index} className="small muted">Pool id comes from the pool selection above.</p> : <div key={index}><label htmlFor={`${id}-${index}`}>{input.name || (input.type === 'address' ? 'Wallet address' : /bytes\d+/.test(input.type) ? 'Position key' : `Argument ${index + 1}`)} <code>({input.type})</code></label>
         {input.type === 'bool' ? <select id={`${id}-${index}`} value={values[index]} onChange={e => setValues(old => old.map((v, i) => i === index ? e.target.value : v))}><option value="">Choose a value</option><option value="true">true · allow</option><option value="false">false · disallow</option></select>
-          : <input id={`${id}-${index}`} className="mono-input" spellCheck={false} value={values[index]} placeholder={input.type === 'address[]' ? '0x… , 0x…' : input.type === 'address' ? '0x…' : 'Whole number'} aria-invalid={values[index] !== '' && !!inputError || undefined} aria-describedby={inputError ? `${id}-error` : undefined} onChange={e => setValues(old => old.map((v, i) => i === index ? e.target.value : v))} />}
+          : <input id={`${id}-${index}`} className="mono-input" spellCheck={false} value={values[index]} placeholder={input.type === 'address[]' ? '0x… , 0x…' : input.type === 'address' || /bytes\d+/.test(input.type) ? '0x…' : 'Whole number'} aria-invalid={values[index] !== '' && !!inputError || undefined} aria-describedby={inputError ? `${id}-error` : undefined} onChange={e => setValues(old => old.map((v, i) => i === index ? e.target.value : v))} />}
       </div>)}
       {inputError && <p id={`${id}-error`} className={values.some(value => value.trim()) ? "field-error" : "small muted"}>{values.some(value => value.trim()) ? inputError : "Fill in each argument to continue."}</p>}
       {fn.abi.inputs.some(i => /int/.test(i.type)) && <p className="small muted">Whole numbers in the contract’s units.{fn.abi.name === 'placeOrder' ? ' Amount is in token base units; tick is the pool price tick.' : ''}</p>}
@@ -81,7 +82,12 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
 export function Management({ launch, client, explorer }: { launch: Launch; client: ReadClient; explorer: string }) {
   const { address, isConnected } = useAccount();
   const [owner, setOwner] = useState<string | null>(null), [ownerError, setOwnerError] = useState(''), [revision, setRevision] = useState(0);
+  const [poolId, setPoolId] = useState(launch.poolId ?? '');
+  const poolInput = useId();
   const functions = useMemo(() => managementFunctions(launch.matchedBlocks), [launch.request]);
+  const needsPool = functions.some(fn => fn.abi.inputs.some(input => input.name === 'poolId'));
+  const poolValid = /^0x[\da-fA-F]{64}$/.test(poolId);
+  useEffect(() => { setPoolId(launch.poolId ?? ''); }, [launch.id, launch.poolId]);
   const owners = functions.filter(f => f.access === 'owner'), publicRows = functions.filter(f => f.access !== 'owner');
   const ownerAllowed = isConnected && !!owner && owner.toLowerCase() === address?.toLowerCase();
   useEffect(() => {
@@ -94,16 +100,19 @@ export function Management({ launch, client, explorer }: { launch: Launch; clien
     } catch { if (active) { setOwner(null); setOwnerError('Owner could not be read. Controls stay locked; retry the reading.'); } } finally { running = false; } };
     void read(); const timer = setInterval(read, 20000); return () => { active = false; clearInterval(timer); };
   }, [client, launch.hookAddress, launch.status, launch.request, revision]);
-  const rows = (list: ManagementFn[]) => list.map(fn => <FunctionRow key={fn.sig} fn={fn} launch={launch} client={client} ownerAllowed={ownerAllowed} owner={owner} refresh={() => setRevision(v => v + 1)} revision={revision} explorer={explorer} />);
-  return <div className="management-grid" id="manage">
+  const rows = (list: ManagementFn[]) => list.map(fn => <FunctionRow key={fn.sig} fn={fn} launch={launch} client={client} ownerAllowed={ownerAllowed} owner={owner} refresh={() => setRevision(v => v + 1)} revision={revision} explorer={explorer} poolId={poolId} />);
+  return <div id="manage">
+    {needsPool && <div className="box management-pool"><label htmlFor={poolInput}>Pool id for these controls</label><input id={poolInput} className="mono-input" spellCheck={false} value={poolId} placeholder="0x… (32 bytes)" aria-describedby={`${poolInput}-help`} aria-invalid={!!poolId && !poolValid || undefined} onChange={event => setPoolId(event.target.value.trim())} /><p id={`${poolInput}-help`} className={poolId && !poolValid ? 'field-error' : 'small muted'}>{poolId && !poolValid ? 'Enter a full 32-byte pool id.' : 'Every pool-dependent reading and action below uses this pool id. Select the pool you intend to manage.'}</p></div>}
+    <div className="management-grid">
     <section className="box management-panel" aria-labelledby="owner-h"><h2 id="owner-h">Owner controls</h2>
       {owners.length ? <><p className="small">{ownerAllowed ? 'Connected as the owner. Changes require a wallet transaction.' : 'Connect the owner wallet to use these'}</p>{!isConnected && <button className="link-button" onClick={() => document.getElementById('connect')?.click()}>Connect owner wallet</button>}
         {owner && <div className="owner-address"><span className="small muted">Owner on chain</span><AddressValue value={owner} label="owner address" explorer={explorer} /></div>}
         {ownerError && <p className="field-error" role="status">{ownerError} <button className="link-button" onClick={() => setRevision(v => v + 1)}>Retry owner</button></p>}{rows(owners)}</>
-        : <p>{launch.matchedBlocks.length || launch.request.includes('No owner functions') ? 'No owner powers. This hook runs itself.' : 'Managed outside the store'}</p>}
+        : <p>{launch.request.includes('No owner functions') || launch.matchedBlocks.length && !launch.matchedBlocks.some(block => block.id === 'custom') && !launch.request.includes('<description>') ? 'No owner powers. This hook runs itself.' : 'Written owner functions are managed outside the store. Check the verified contract.'}</p>}
     </section>
     <section className="box management-panel" aria-labelledby="public-h"><h2 id="public-h">Traders, anyone, and readings</h2><p className="small muted">Readings refresh every <Text>20</Text> seconds. Public actions need a connected wallet.</p>
       {publicRows.length ? rows(publicRows) : <p>No public buttons or readings are defined by these blocks.</p>}
     </section>
+    </div>
   </div>;
 }

@@ -8,7 +8,7 @@ import { interceptChains, route, requestId, head, jsonResult, hook, owner, injec
 const relay = 'https://relay.hooks.test';
 const validDraft = (): Draft => {
   const d = newDraft(); d.mode = 'prompt'; d.prompt = 'Observe swaps without fees or owner powers.';
-  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner }; return d;
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner, owner }; return d;
 };
 async function setup(page: Page, options: { relay?: boolean; draft?: Draft; noLogs?: boolean; inProgress?: boolean; result?: unknown } = {}) {
   await interceptChains(page, { noLogs: options.noLogs, result: options.result });
@@ -43,9 +43,11 @@ for (const width of [320, 390, 1440]) for (const [name, hash, heading] of [
   } else if (name === 'Builder') {
     await expect(page.locator('#s-pair option')).toHaveText(['IMD', 'ETH']); await expect(page.locator('#s-pair')).toHaveValue('imd');
     await expect(page.locator('#composed')).toContainText('paired with IMD.');
-    await expect(page.locator('#composed')).toContainText('Fees are always taken from the IMD (pair currency) side');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
+    await expect(page.locator('#composed')).not.toContainText('Fees are always taken from');
     await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('paired with ETH.');
-    await expect(page.locator('#composed')).toContainText('Fees are always taken from the ETH (pair currency) side');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
+    await expect(page.locator('#composed')).not.toContainText('Fees are always taken from');
     await expect(page.locator('.preview .sum')).toContainText('paired with ETH');
     await page.getByRole('button', { name: 'Continue to launch' }).click(); await expect(page).toHaveURL(/#launch$/);
   } else if (name === 'Catalog') {

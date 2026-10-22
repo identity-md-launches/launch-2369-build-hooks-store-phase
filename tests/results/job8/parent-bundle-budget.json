@@ -1,0 +1,63 @@
+{
+  "candidateFiles": 479,
+  "rawFileBytes": 14180060,
+  "limitBytes": 8388608,
+  "existingHistoryBundleBytes": 8013307,
+  "bundles": [
+    {
+      "kind": "snapshot",
+      "bytes": 7032879,
+      "within8388608": true,
+      "standalone": true,
+      "revisionCount": 1
+    },
+    {
+      "kind": "parentHistory",
+      "bytes": 8492896,
+      "within8388608": false,
+      "standalone": true,
+      "revisionCount": 20
+    }
+  ],
+  "normalRepack": [
+    {
+      "kind": "snapshot",
+      "bytes": 7058091,
+      "within8388608": true
+    },
+    {
+      "kind": "parentHistory",
+      "bytes": 8352701,
+      "within8388608": true
+    }
+  ],
+  "optimizedCompression9Window250Depth100": [
+    {
+      "kind": "snapshot",
+      "bytes": 6977553,
+      "within8388608": true
+    },
+    {
+      "kind": "parentHistory",
+      "bytes": 8269042,
+      "within8388608": true
+    }
+  ],
+  "notes": [
+    "All Git writes, fetches, commits, repacking and bundles were confined to temporary bare repositories; no workspace Git/config/dependency changes.",
+    "The parent-history tree explicitly deletes its inherited tree before adding current candidate files, so deleted old export assets are absent from the final tree while prior commits remain in history.",
+    "All bundles use complete refs without revision exclusions; no prerequisite history is omitted.",
+    "Candidate files include tracked and untracked nonignored regular files, excluding .imd/ and test/scratch/.",
+    "The measurement includes final source, export, screenshots, test reports and review documents already present at measurement time. This small audit report was updated afterwards and is covered by the 16 KiB metadata reserve.",
+    "No required deliverable, pixel content, runtime asset or historical evidence was removed for this measurement."
+  ],
+  "publicHistorySource": "https://github.com/identity-md-launches/launch-2369-build-hooks-store-phase",
+  "method": "In a temporary bare repository, use read-only workspace object alternates, fetch missing historical objects from the public project repository into that temporary repository, and fast-import the complete candidate tree once as a root commit and once with the workspace HEAD as parent. Create standalone bundles without revision exclusions. Repeat after ordinary git repack -adf using default packing settings, then with compression 9, window 250 and depth 100.",
+  "reservedMetadataBytes": 16384,
+  "normalRepackFullHistoryHeadroomBytes": 35907,
+  "normalRepackFullHistoryHeadroomAfterReserveBytes": 19523,
+  "denseFullHistoryHeadroomBytes": 119566,
+  "defaultAndDenseFullHistoryFitWithReserve": true,
+  "conclusion": "All current candidate files, including final screenshot evidence, source, runtime assets and prior Git history, fit in a standalone complete Git bundle after ordinary default-setting repacking, with more than 16 KiB reserved for final metadata. Dense repacking also fits. An unrepacked bundle that reuses the fetched historical pack layout exceeds the limit, so pack layout matters. The actual network upload packaging method was not independently established.",
+  "workspaceGitWrites": false
+}

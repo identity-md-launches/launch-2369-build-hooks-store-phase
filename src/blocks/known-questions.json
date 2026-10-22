@@ -7,5 +7,21 @@
     "rule": "pair-currency-fee",
     "requireImdOptOut": true,
     "message": "Launch 2 stopped for an IMD/ETH conversion pool. Name IMD for the fee side and settlement, and explicitly forbid conversion and any other pool."
+  },
+  {
+    "id": "launch-3-hook-address-bits",
+    "launch": 3,
+    "question": "node manifest: needs_input: A change to the accepted source, which the manifest assignment may not make. ImdGuard's constructor calls Hooks.validateHookPermissions on its own address (permissions 0x0088: beforeSwap and beforeSwapReturnDelta), so it only deploys at an address whose low 14 bits are 0x0088. The evm_contracts launch deploys every manifest contract at a CREATE2 address salted by the launch number, which nobody mines, so a direct deployment of ImdGuard reverts for all but 1 salt in 16,384. The accepted source (src/) contains only ImdGuard and the OpeningPrice library: there is no launch contract that could dep",
+    "source": "https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/launch-3-job-blocked.json",
+    "rule": "constructor-deployer",
+    "message": "Launch 3 stopped because ImdGuard was deployed directly without permission-bit mining. The deployer must mine its salt inside its constructor and create the hook in the launch transaction, with no later deploy step."
+  },
+  {
+    "id": "launch-4-hook-address-bits",
+    "launch": 4,
+    "question": "node manifest: needs_input: WordsmithHook needs a mined CREATE2 salt so its address carries permission bits 0x20cc, but an evm_contracts launch deploys it at an unmined, launch-number-salted address, where its constructor reverts. The accepted source has no deployer contract, and this task may only edit launch.json and must use kind evm_contracts. \u2014 Should this launch become a univ4_hook manifest, whose deployer mines the hook salt, or should the source gain a deployer contract that CREATE2-deploys WordsmithHook with an off-chain-mined salt and then list that deployer in an evm_contracts launch.json?",
+    "source": "https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/launch-4-job-blocked.json",
+    "rule": "constructor-deployer",
+    "message": "Launch 4 stopped because WordsmithHook was deployed directly without permission-bit mining. The deployer must mine its salt inside its constructor and create the hook in the launch transaction, with no later deploy step."
   }
 ]

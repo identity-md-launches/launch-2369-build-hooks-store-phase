@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
 import { formatUnits, keccak256, stringToHex, type Hex, type TransactionReceipt } from 'viem';
 import { loadDraft, saveSubmittedDraft, clearCorrection } from './draft';
-import { BY_ID, CHAIN_NAMES, activeBlocks, body, compose, context, powersOf, shortOf } from '../../src/lib/compose';
+import { BY_ID, CHAIN_NAMES, activeBlocks, body, cleanText, compose, context, powersOf, sentenceOf, shortOf } from '../../src/lib/compose';
 import { Text } from './Text';
 import { WarnSign } from './Builder';
 import { AddressValue } from './AddressValue';
@@ -140,16 +140,19 @@ export function LaunchReview({ config, store }: { config: SiteConfig; store: Lau
   const rows = [
     ['Type', TYPES[draft.type]], [draft.type === 'A' ? 'Token' : 'Hook', `${ctx.name}${draft.type === 'A' ? ` (${ctx.symbol})` : ''}`],
     ...(draft.type === 'C' ? [['Existing token', draft.settings.token]] : []), ['Deploy chain', CHAIN_NAMES[draft.settings.chain!] ?? 'Choose in the Builder'],
-    ...(draft.type === 'A' ? [['Pairing', draft.settings.pair.toUpperCase()], ['Pool', `${draft.settings.pool ?? 'Not chosen'}% of your 90% share; remainder to ${draft.settings.rem || address || 'the paying wallet'}`]] : []),
-    ['Owner', powersOf(draft).length ? draft.settings.owner || address || 'The paying wallet' : 'No owner powers'],
+    ...(draft.type === 'A' ? [['Pairing', draft.settings.pair.toUpperCase()], ['Pool', draft.settings.pool === null ? 'Not chosen' : `${draft.settings.pool}% of total supply in the pool; 10% swarm; ${90 - draft.settings.pool}% remainder to ${draft.settings.rem || address || 'the paying wallet'}`]] : []),
+    ['Owner', powersOf(draft).length || cleanText(draft.prompt) || activeBlocks(draft).some(block => block.id === 'custom') ? draft.settings.owner || address || 'The paying wallet' : 'No owner powers'],
+    ['Words', cleanText(draft.prompt) || 'none'],
     ['Description length', `${compose(draft, address).length} / 7,500 characters`],
   ];
+  const summaryOf = (block: ReturnType<typeof activeBlocks>[number]) => block.id === 'custom' ? sentenceOf(block, ctx)
+    : activeBlocks(draft).some(rule => rule.id === 'fee-split') && ['swap-fee', 'fee-dir'].includes(block.id) ? shortOf(block, ctx).replace(/→ .+$/, '→ Split the fee distribution') : shortOf(block, ctx);
   return <section className="wrap page launch-review"><div className="detail-head"><div><h1>Review your launch</h1><p>Check the request, then pay the swarm to build it.</p></div><a className="btn" href="#builder">Edit in Builder</a></div>
-    <div className="launch-columns"><section className="box"><h2>Your hook, in short</h2><table className="review-table"><tbody>{rows.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Text>{value}</Text></td></tr>)}<tr><th scope="row">Rules</th><td>{activeBlocks(draft).length ? <ol>{activeBlocks(draft).map((b, i) => <li key={b.id}><Text>{`${i + 1}. ${shortOf(b, ctx)}`}</Text><WarnSign def={BY_ID[b.id]} tested={false} /></li>)}</ol> : 'Described in words'}</td></tr></tbody></table></section>
+    <div className="launch-columns"><section className="box"><h2>Your hook, in short</h2><table className="review-table"><tbody>{rows.map(([label, value]) => <tr key={label}><th scope="row">{label}</th><td><Text>{value}</Text></td></tr>)}<tr><th scope="row">Rules</th><td>{activeBlocks(draft).length ? <ol>{activeBlocks(draft).map((b, i) => <li key={b.id}><Text>{`${i + 1}. ${summaryOf(b)}`}</Text><WarnSign def={BY_ID[b.id]} tested={false} /></li>)}</ol> : 'No block rules; the description above applies.'}</td></tr></tbody></table>{activeBlocks(draft).length > 6 && <p className="notice">Every extra rule is more for the audit panel to refuse. The contract has a <Text>24 KB</Text> size limit.</p>}</section>
     <section className="box"><h2>What you pay</h2><table className="review-table fee-table"><tbody>
       <tr><th scope="row">Swarm + audit panel</th><td><Text>{`${price === null ? '0.5' : formatUnits(price, 18)} IMD once`}</Text>{price === null && <span className="small muted"> · maximum; {priceError ? 'live price unavailable' : 'checking live price'}</span>}</td></tr>
       <tr><th scope="row">Wallet gas</th><td><Text>2 transactions, paid in ETH</Text></td></tr>
-      {draft.type === 'A' ? <><tr><th scope="row">Token supply</th><td><Text>{`10% swarm / 90% you; ${draft.settings.pool ?? 'choose'}% of yours in the pool`}</Text></td></tr><tr><th scope="row">Pool trading fee</th><td><Text>1.25% (1% to you, 0.25% network) plus the hook’s own fee</Text></td></tr></> : <tr><th scope="row">Token and pool</th><td>None created. The swarm builds and reviews the hook contract.</td></tr>}
+      {draft.type === 'A' ? <><tr><th scope="row">Token supply</th><td><Text>{draft.settings.pool === null ? '10% swarm; choose the pool allocation in the Builder.' : `${draft.settings.pool}% pool / 10% swarm / ${90 - draft.settings.pool}% remainder`}</Text></td></tr><tr><th scope="row">Pool trading fee</th><td><Text>1.25% (1% to you, 0.25% network) plus the hook’s own fee</Text></td></tr></> : <tr><th scope="row">Token and pool</th><td>None created. The swarm builds and reviews the hook contract.</td></tr>}
       {draft.type === 'C' && <tr><th scope="row">Opening the pool</th><td>One more transaction from your wallet after the hook is live, prepared by the site.</td></tr>}
       <tr><th scope="row">Deployment</th><td>Paid by IMD</td></tr>
     </tbody></table><p className="small">A request the swarm has to stop on still spends the fee. These checks exist to make that rare.</p><p className="small muted">USD context is unavailable. Gas is estimated by your wallet.</p></section></div>

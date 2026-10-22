@@ -3,7 +3,7 @@ import { BY_ID, entry, newDraft, type Draft } from '../../src/lib/compose';
 import { CHAINS, STATUSES, type Launch } from './types';
 import type { SiteConfig } from './config';
 import type { LaunchStore, StoreState } from './chain/store';
-import { matchRule, safeUrl } from './chain/decode';
+import { blockShortOf, matchRule, requestContext, safeUrl } from './chain/decode';
 import { storeDraft, submittedDraft, openCorrection, clearCorrection } from './draft';
 import { WarnSign } from './Builder';
 import { Text } from './Text';
@@ -18,10 +18,11 @@ export function copyLaunchDraft(launch: Launch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
   const token = entry('token'); token.p.name = launch.name; token.p.symbol = launch.symbol ?? 'TOKEN';
   const unknownRules = Array.from(launch.request.matchAll(/^\d+\. (.+)$/gm), m => m[1]).filter(rule =>
-    !matchRule(rule, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token'), pair: launch.type === 'A' && /paired with IMD\./.test(launch.request) ? 'IMD' : 'ETH', wallet: launch.payer }));
+    !matchRule(rule, requestContext(launch.request, launch.payer)));
+  const customWords = Array.from(launch.request.matchAll(/<custom>([\s\S]*?)<\/custom>/g), match => match[1]);
   const blocks = [token, ...launch.matchedBlocks.map(b => ({ id: b.id, p: { ...b.p } }))];
-  if (unknownRules.length) blocks.push({ id: 'custom', p: { text: unknownRules.join(' ') } });
-  return { ...draft, type: launch.type, mode: words ? 'prompt' : 'blocks', prompt: words, blocks, seeded: true,
+  if (unknownRules.length || customWords.length) blocks.push({ id: 'custom', p: { text: [...unknownRules, ...customWords].join(' ') } });
+  return { ...draft, type: launch.type, mode: words && !launch.matchedBlocks.length && blocks.length === 1 ? 'prompt' : 'blocks', prompt: words, blocks, seeded: true,
     settings: { ...draft.settings, chain: launch.chainId, hname: launch.type === 'A' ? '' : launch.name,
       token: launch.type === 'C' ? launch.tokenAddress ?? '' : '', tsym: launch.symbol ?? '',
       pair: /paired with IMD/.test(launch.request) ? 'imd' : 'eth',
@@ -38,9 +39,9 @@ export function correctionDraft(launch: Launch): Draft {
   const draft = copyLaunchDraft(launch), request = launch.request;
   const ownToken = /^Token: my own token (.+?) \(([^)]+)\), supply ([\d,]+), (\d+) decimals,/m.exec(request);
   if (ownToken && launch.type === 'A') draft.blocks[0] = { id: 'own-token', p: { name: ownToken[1], symbol: ownToken[2], supply: Number(ownToken[3].replaceAll(',', '')), dec: Number(ownToken[4]) } };
-  const pool = /Pool: ([\d.]+)% of my 90% share/.exec(request);
-  const remainder = /the remainder goes to (0x[\da-fA-F]{40})/.exec(request);
-  const owner = /^Owner (0x[\da-fA-F]{40}) may only:/m.exec(request);
+  const pool = /Pool: ([\d.]+)% of (?:my 90% share|(?:the )?total supply)/.exec(request);
+  const remainder = /(?:the remainder goes to|remainder (?:goes )?to|remaining [\d.]+% goes to) (0x[\da-fA-F]{40})/.exec(request);
+  const owner = /^Owner (0x[\da-fA-F]{40}) (?:may only:|is \$owner)/m.exec(request);
   const source = /own source at (https:\/\/github\.com\/\S+?)(?: commit ([\da-f]{40}))?: audit/.exec(request);
   return { ...draft, settings: { ...draft.settings, pool: pool ? Number(pool[1]) : null,
     rem: remainder?.[1] ?? '', owner: owner?.[1] ?? '', repo: source?.[1] ?? '', commit: source?.[2] ?? '' } };
@@ -75,11 +76,12 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
     <RelayTimeline launch={launch} relay={config.relayUrl} onFix={questions => {
       if (!openCorrection(correctionDraft(launch), { questions, request: launch.request, hookRoute: `#hook/${chain}/${id}` })) setError('Could not save this correction. Allow site storage and try again.');
     }} />
-    {launch.status === 'in-progress' && <p className="notice">{launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
+    {launch.status === 'in-progress' && <p className="notice" role="status">{launch.hookPending ? 'hook not deployed yet' : launch.deployerAddress ? 'Reading hook() from the deployed contract before opening hook controls.' : launch.resultLoaded ? 'The build result is available, but it does not yet report a deployed hook address.' : 'Intake completed the request. Reading its result file…'}</p>}
     {!!launch.completion?.status && <p className="notice" role="status">Failed: <code>{launch.completion.reason}</code></p>}
     {launch.resultError && <p className="notice" role="status">{launch.resultError} <button className="link-button" onClick={store.retry}>Retry result</button></p>}
     <div className="detail-data"><section className="box addresses" aria-labelledby="addresses-h"><h2 id="addresses-h">Addresses</h2><dl className="kv">
-      {([['Hook', launch.hookAddress], ['Token', launch.tokenAddress], ['Distributor', launch.distributorAddress], ['Pool id', launch.poolId]] as const).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{launch.type === 'B' && label !== 'Hook' && !value ? <span className="muted">Not created by this launch</span> : <AddressValue value={value} label={label.toLowerCase()} explorer={label === 'Pool id' ? undefined : deployment.explorerUrl} />}</dd></div>)}
+      {launch.deployerAddress && <div><dt>Deployer</dt><dd><AddressValue value={launch.deployerAddress} label="deployer address" explorer={deployment.explorerUrl} /></dd></div>}
+      {([['Hook', launch.hookAddress], ['Token', launch.tokenAddress], ['Distributor', launch.distributorAddress], ['Pool id', launch.poolId]] as const).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{label === 'Hook' && launch.hookPending ? <span className="muted">hook not deployed yet</span> : launch.type === 'B' && label !== 'Hook' && !value ? <span className="muted">Not created by this launch</span> : <AddressValue value={value} label={label.toLowerCase()} explorer={label === 'Pool id' ? undefined : deployment.explorerUrl} />}</dd></div>)}
       <div><dt>Creator</dt><dd><AddressValue value={launch.payer} label="creator address" explorer={payment.explorerUrl} /></dd></div>
     </dl></section>
     <section className="box evidence" aria-labelledby="evidence-h"><h2 id="evidence-h">Evidence</h2><ul>
@@ -100,5 +102,4 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
     {launch.type === 'C' && launch.status === 'live' && <OpenPool launch={launch} client={store.clients[launch.chainId]} explorer={deployment.explorerUrl} />}
   </section>;
 }
-import { shortOf } from '../../src/lib/compose';
-const shortLabel = (block: Launch['matchedBlocks'][number], launch: Launch) => shortOf(block, { name: launch.name, symbol: launch.symbol ?? (launch.type === 'C' ? 'the token' : 'the pool’s token'), pair: launch.type === 'A' && /paired with IMD\./.test(launch.request) ? 'IMD' : 'ETH' });
+const shortLabel = (block: Launch['matchedBlocks'][number], launch: Launch) => blockShortOf(block, requestContext(launch.request, launch.payer));

@@ -1,6 +1,14 @@
+# Worker validation — job 8
+
+Current source and `dist/` implement SPEC **1.31, section 4.16**. Production build and typecheck passed; **1,096 unit tests**, **9 relay tests**, and **195 Chromium browser cases** passed, with **7 optional browser cases skipped**, no failures or flaky cases. Both Builder modes were exercised at **320, 390 and 1440px**. All four live free-check cases returned HTTP 200 with zero blockers and fixed-fact conflicts. No approval, payment or deployment was sent.
+
+The separate read-only review checked all 35 blocks and the 420-case request corpus, and records **four specification-policy follow-ups** for the owner's next job. They are not presented as resolved or as deployment proof. WebKit could not launch because required host libraries are missing. Screen-reader, native zoom and physical-device checks were not performed.
+
+Actual commands, six-domain coverage, corrected findings and limitations are in [tests/results/job8/REVIEW.md](tests/results/job8/REVIEW.md); concrete sentence reproductions are in [ADVERSARIAL-REVIEW.md](tests/results/job8/ADVERSARIAL-REVIEW.md). Export integrity and bundle measurements are in the same results directory. The records below remain historical job 7 evidence.
+
 # Worker validation — job 7 revision
 
-The six reported findings were reproduced and fixed; the accepted visual system, build/dependency configuration, contracts and economics remain. Source and the rebuilt `dist/` accompany this revision. Each finding has a decision in [.imd-responses.json](.imd-responses.json).
+The six reported findings were reproduced and fixed; the accepted visual system, build/dependency configuration, contracts and economics remain. Source and the rebuilt `dist/` accompany this revision. The findings and corrections are recorded in [REVISION.md](tests/results/job7/REVISION.md).
 
 Final revision checks: **643 unit tests**, **9 relay tests**, **188 Chromium cases** passed, with seven optional browser cases skipped and no failures/flaky cases. Typecheck and production build passed. All seven routes and the new correction flows were exercised at **320, 390 and 1440px**. A fresh browser settled both real public RPC histories in **8,892ms**. No real signature or transaction was sent. The offline design probe passed **13/16**, retaining the three established pixel-style exceptions.
 

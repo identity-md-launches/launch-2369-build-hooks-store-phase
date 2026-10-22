@@ -13,7 +13,7 @@ const relay = 'https://hooks-store-relay.hooks-store.workers.dev';
 const output = '../tests/results/job6';
 const validDraft = (): Draft => {
   const d = newDraft(); d.mode = 'prompt'; d.prompt = 'Observe swaps without fees or owner powers.';
-  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner }; return d;
+  d.settings = { ...d.settings, chain: 1, pool: 50, rem: owner, owner }; return d;
 };
 async function setup(page: Page, draft = validDraft()) {
   await interceptChains(page);
@@ -53,8 +53,12 @@ for (const width of [320, 390, 1440]) for (const [name, hash, heading] of [
     await page.getByRole('searchbox').fill('no such hook'); await expect(page.getByText(/No hooks match/)).toBeVisible();
     await page.getByRole('button', { name: 'Clear search and filters' }).click(); await expect(page.locator('.grid .card')).toHaveCount(1);
   } else if (name === 'builder') {
-    await expect(page.locator('#composed')).toContainText('Fees are always taken from the IMD (pair currency) side');
-    await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('Fees are always taken from the ETH (pair currency) side');
+    await expect(page.locator('#composed')).toContainText('paired with IMD.');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
+    await expect(page.locator('#composed')).not.toContainText('Fees are always taken from');
+    await page.locator('#s-pair').selectOption('eth'); await expect(page.locator('#composed')).toContainText('paired with ETH.');
+    await expect(page.locator('#composed')).toContainText('Hook fee rate: 0%.');
+    await expect(page.locator('#composed')).not.toContainText('Fees are always taken from');
     await page.getByRole('button', { name: 'Continue to launch' }).click(); await expect(page).toHaveURL(/#launch$/);
   } else if (name === 'launch') {
     await expect(page.locator('.launch-check')).toContainText('A refused request still spends the fee.');

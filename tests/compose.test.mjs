@@ -7,7 +7,7 @@ import * as C from '../src/lib/compose.ts';
 const fixtureWallet = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 const fixture = name => readFileSync(new URL(`fixtures/${name}`, import.meta.url), 'utf8');
 const draftOf = (type, ids, settings = {}) => {
-  let d = { ...C.newDraft(), type };
+  let d = { ...C.newDraft(), type, mode: 'blocks' };
   for (const id of ids) d = C.addBlock(d, id);
   return { ...d, settings: { ...d.settings, chain: 4663, ...settings } };
 };
@@ -21,43 +21,64 @@ test('catalog has every section 4 block with the required fields', () => {
     for (const k of ['id', 'group', 'title', 'blurb', 'types', 'params', 'short', 'sentence', 'who']) assert.ok(b[k] !== undefined, `${b.id}.${k}`);
     for (const p of b.params) assert.ok('default' in p && p.label, `${b.id}.${p.k} default`);
     if (b.requires) assert.ok(C.BY_ID[b.requires], `${b.id} requires`);
-    if (b.excludes) assert.ok(C.BY_ID[b.excludes], `${b.id} excludes`);
+    if (b.requiresAny) for (const id of b.requiresAny) assert.ok(C.BY_ID[id], `${b.id} alternative requirement`);
+    assert.ok(!b.excludes || Array.isArray(b.excludes), `${b.id} excludes is a list`);
+    for (const id of b.excludes ?? []) assert.ok(C.BY_ID[id], `${b.id} excludes ${id}`);
   }
   assert.equal(C.BY_ID.pot.group, 'games');
-  assert.deepEqual(C.BLOCKS.filter(b => b.risk).map(b => b.id).sort(), ['anti-sniper', 'breaker', 'cooldown', 'max-buy', 'max-swap', 'pot']);
+  assert.deepEqual(C.BLOCKS.filter(b => b.risk).map(b => b.id).sort(), ['anti-sniper', 'breaker', 'cooldown', 'custom', 'max-buy', 'max-swap', 'pot']);
 });
 
-test('every block renders its sentence with defaults under each allowed type, ending with its 4.11 functions', () => {
+test('every available block renders its sentence and the applicable 4.11 functions under every allowed type', () => {
   let rendered = 0;
-  for (const def of C.BLOCKS) {
-    for (const type of def.types) {
-      let d = { ...C.newDraft(), type };
-      if (def.requires) d = C.addBlock(d, def.requires);
-      d = def.id === 'token' ? d : C.addBlock(d, def.id);
-      assert.ok(C.has(d, def.id), `${def.id} addable under ${type}`);
-      const sentence = C.sentenceOf(d.blocks.find(b => b.id === def.id), C.context(d));
-      assert.ok(sentence.length > 10 && !/[{}]/.test(sentence), `${def.id}/${type}: ${sentence}`);
-      const text = C.compose(d);
-      assert.ok(text.includes(sentence), `${def.id}/${type} in text`);
-      for (const fn of C.functionsOf(def)) assert.ok(sentence.includes(fn.sig), `${def.id}/${type} names ${fn.sig}`);
-      const names = C.functionsOf(def).map(f => f.sig.split('(')[0]);
-      if (names.length) assert.match(sentence, /Expose [^.]*\.$|Expose .*$/, `${def.id} ends with Expose`);
-      if (names.length) assert.ok(names.every(n => sentence.lastIndexOf('Expose') < sentence.lastIndexOf(n)), `${def.id} functions are in the final Expose sentence`);
-      rendered++;
+  for (const def of C.BLOCKS) for (const type of def.types) {
+    let d = { ...C.newDraft(), type, mode: 'blocks' };
+    if (def.disabled) {
+      assert.equal(C.blockedReason(d, def), def.disabled);
+      assert.equal(C.addBlock(d, def.id), d, `${def.id} cannot be selected`);
+      const imported = { ...d, blocks: [...d.blocks, C.entry(def.id)] };
+      assert.ok(C.validate(imported).some(i => i.message.includes(def.disabled)), `${def.id} imported draft blocked`);
+      continue;
     }
+    if (def.requires) d = C.addBlock(d, def.requires);
+    if (def.requiresAny) d = C.addBlock(d, def.requiresAny[0]);
+    d = def.id === 'token' ? d : C.addBlock(d, def.id);
+    if (def.id === 'custom') d = C.setParam(d, d.blocks.findIndex(b => b.id === 'custom'), 'text', 'Observe swaps without changing them.');
+    assert.ok(C.has(d, def.id), `${def.id} addable under ${type}`);
+    const sentence = C.sentenceOf(d.blocks.find(b => b.id === def.id), C.context(d));
+    assert.ok(sentence.length > 10 && !/[{}]/.test(sentence), `${def.id}/${type}: ${sentence}`);
+    assert.ok(C.compose(d).includes(sentence), `${def.id}/${type} in text`);
+    // Donation management exists only for the allowlisted option, not owner-only/nobody.
+    const functions = def.id === 'donate' ? [] : C.functionsOf(def);
+    for (const fn of functions) assert.ok(sentence.includes(fn.sig), `${def.id}/${type} names ${fn.sig}`);
+    rendered++;
   }
-  assert.ok(rendered >= 90);
+  assert.ok(rendered >= 85);
 });
 
-test('blocks a launch type does not allow are dimmed in the palette and left out of the request', () => {
-  const d = draftOf('B', ['async', 'curve']);
+test('Donation rules exposes allowlist management only for its allowlisted option', () => {
+  const d = draftOf('A', ['donate'], { pool: 50 });
+  const i = d.blocks.findIndex(b => b.id === 'donate');
+  for (const who of ['only the owner', 'only allowlisted addresses', 'nobody']) {
+    const selected = C.setParam(d, i, 'who', who), text = C.compose(selected, fixtureWallet);
+    assert.equal(text.includes('Expose setDonor('), who === 'only allowlisted addresses');
+    assert.equal(C.powersOf(selected).includes('change the donation allowlist'), who === 'only allowlisted addresses');
+    assert.ok(text.includes("The hook's own donations (Share fees with LPs, the anti-sandwich difference) are always allowed."));
+  }
+});
+
+test('type-restricted and disabled blocks are dimmed and cannot be selected', () => {
+  const d = draftOf('B', ['curve']);
   const a = { ...d, type: 'A' };
-  assert.equal(C.blockedReason(a, C.BY_ID.async), 'ADDED');
   assert.equal(C.blockedReason({ ...C.newDraft(), type: 'A' }, C.BY_ID['lp-fee']), 'OWN POOLS ONLY');
   assert.equal(C.blockedReason({ ...C.newDraft(), type: 'B' }, C.BY_ID['own-token']), 'TOKEN LAUNCH ONLY');
   assert.equal(C.activeBlocks(a).length, 0);
-  assert.ok(!C.compose(a).includes('BaseAsyncSwap'));
-  assert.ok(C.compose(d).includes('BaseAsyncSwap'));
+  assert.ok(!C.compose(a).includes('BaseCustomCurve'));
+  assert.ok(C.compose(d).includes('BaseCustomCurve'));
+  for (const [id, reason] of [['async', 'not in this version'], ['yield', 'no verified deployment']]) {
+    assert.equal(C.blockedReason(d, C.BY_ID[id]), reason);
+    assert.equal(C.addBlock(d, id), d);
+  }
 });
 
 test('composed text equals the three fixtures byte for byte', () => {
@@ -73,37 +94,42 @@ test('words and rules together: numbered rules win; owner sentence names the fun
   const text = C.compose(d);
   assert.ok(text.includes('The hook does exactly what the creator describes, plus the numbered rules, and nothing else. If the description and a numbered rule disagree, the numbered rule wins.'));
   assert.ok(text.includes('<description>Buyers love b this /b second line</description>'));
-  assert.ok(text.includes('Owner 0x9a50fd22bcefd3774d796e775a467a7f743e0ab0 may only: pause and unpause swaps, add and remove buyer allowlist addresses, through the functions named above. No other admin function, no backend signer, no upgrade path.'));
+  assert.ok(text.includes('Owner 0x9a50fd22bcefd3774d796e775a467a7f743e0ab0 is $owner. Permit only the owner functions expressly granted by the written rules and these block powers: pause and unpause swaps, add and remove buyer allowlist addresses'));
+  assert.ok(!text.includes('No owner functions, no backend signer'), 'written owner powers are preserved');
   assert.ok(text.endsWith('Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.'));
-  const words = C.compose({ ...C.newDraft(), prompt: 'Only words', settings: { ...C.emptySettings(), pool: 50 } });
+  const words = C.compose({ ...d, mode: 'prompt', prompt: 'Only words' });
+  assert.ok(!words.includes('Expose pause('), 'Describe mode omits the hidden stack');
   assert.ok(words.includes('The hook does exactly what the creator describes below, and nothing else.'));
   assert.ok(words.endsWith('Composed with The Hooks Store.'));
 });
 
 test('request bodies follow 5.2 for every type and stay under 16 KiB', () => {
-  const a = C.body(fixtureA());
-  assert.deepEqual(Object.keys(a), ['objective', 'shape', 'references', 'steps', 'onchain', 'chainId', 'pairWith', 'economics', 'github']);
+  const a = C.body(fixtureA(), fixtureWallet);
+  assert.deepEqual(Object.keys(a).sort(), ['objective', 'shape', 'references', 'steps', 'onchain', 'chainId', 'pairWith', 'economics', 'github', 'owner'].sort());
+  assert.equal(a.owner, fixtureWallet);
   assert.deepEqual(a.economics, { poolBps: 5000 });
   assert.equal(a.onchain, 'univ4_hook'); assert.equal(a.customToken, undefined);
   const own = C.body({ ...C.addBlock(fixtureA(), 'own-token'), settings: { ...fixtureA().settings, rem: '0x9A50fd22bcefd3774d796e775a467a7f743e0ab0', owner: '0x9A50fd22bcefd3774d796e775a467a7f743e0ab0' } });
-  assert.equal(own.customToken, true); assert.equal(own.owner, '0x9a50fd22bcefd3774d796e775a467a7f743e0ab0');
+  assert.equal(own.customToken, true); assert.equal(own.owner.toLowerCase(), '0x9a50fd22bcefd3774d796e775a467a7f743e0ab0');
   assert.deepEqual(own.economics, { poolBps: 5000, remainderTo: '0x9a50fd22bcefd3774d796e775a467a7f743e0ab0' });
-  const b = C.body(fixtureB());
-  assert.deepEqual(Object.keys(b), ['objective', 'onchain', 'chainId', 'github']);
+  const b = C.body(fixtureB(), fixtureWallet);
+  assert.deepEqual(Object.keys(b).sort(), ['objective', 'onchain', 'chainId', 'github', 'owner', 'references'].sort());
+  assert.equal(b.owner, fixtureWallet);
+  assert.deepEqual(b.references, ['uniswap-v4-hooks', 'uniswap-v4-security']);
   assert.equal(b.onchain, 'evm_contracts');
   const repo = { repo: 'https://github.com/the-hook-store/hooks-store-spec', commit: '3d4ef5b0000000000000000000000000000000aa' };
   const c = C.body({ ...fixtureC(), settings: { ...fixtureC().settings, ...repo } });
   assert.equal(c.repoUrl, repo.repo); assert.equal(c.baseCommit, repo.commit);
   assert.ok(c.objective.includes(`Start from the creator’s own source at ${repo.repo} commit ${repo.commit}: audit it as imported code, adapt it to this launch, and keep its behavior.`));
-  // The largest possible stack still fits: every block allowed under B with long words.
+  // Long imported requests are measured and blocked instead of assumed to fit.
   let all = { ...C.newDraft(), type: 'B', prompt: 'x'.repeat(3000), settings: { ...C.emptySettings(), hname: 'BigHook' } };
   for (const def of C.BLOCKS) all = C.addBlock(all, def.id);
   for (const d of [fixtureA(), fixtureB(), fixtureC()]) assert.ok(C.bodyBytes(C.body(d)) < C.MAX_BODY_BYTES);
-  assert.ok(C.bodyBytes(C.body(all)) < C.MAX_BODY_BYTES, 'all-blocks body under 16 KiB');
+  assert.ok(C.validate(all).some(i => i.field === 'length'), 'oversize all-block request cannot continue');
   assert.ok(C.validate({ ...all, prompt: 'y'.repeat(3001) }).some(i => i.field === 'prompt'));
 });
 
-test('pool share has no default: economics only once chosen, Continue blocked until 10 to 90 in steps of 5', () => {
+test('pool allocation is a percentage of total supply with no default, chosen from 10 to 90 in steps of 5', () => {
   const d = draftOf('A', ['swap-fee']);
   assert.equal(d.settings.pool, null);
   assert.equal(C.body(d).economics, undefined);
@@ -111,6 +137,9 @@ test('pool share has no default: economics only once chosen, Continue blocked un
   assert.ok(C.validate(d).some(i => i.field === 'settings.pool'));
   for (const bad of [5, 12, 95, 100, 0]) assert.ok(C.validate({ ...d, settings: { ...d.settings, pool: bad } }).some(i => i.field === 'settings.pool'), String(bad));
   for (const good of [10, 25, 90]) assert.ok(!C.validate({ ...d, settings: { ...d.settings, pool: good } }).some(i => i.field === 'settings.pool'), String(good));
+  const chosen = { ...d, settings: { ...d.settings, pool: 55 } };
+  assert.equal(C.body(chosen, fixtureWallet).economics.poolBps, 5500);
+  assert.ok(C.compose(chosen, fixtureWallet).includes(`Pool: 55% of the total supply seeds the pool; 10% goes to the swarm; the remaining 35% goes to ${fixtureWallet}.`));
 });
 
 test('the 5% rule counts swap fee or the larger buy/sell fee, whale fee, jar and pot', () => {
@@ -195,7 +224,10 @@ test('the fee sentence names the actual pair currency; hook-only and existing-to
     assert.ok(C.compose(d).includes(`Fees are always taken from the ${pair.toUpperCase()} (pair currency) side`));
   }
   for (const type of ['B', 'C']) {
-    const d = draftOf(type, [], { pair: 'imd' });
+    const d = draftOf(type, ['swap-fee'], { pair: 'imd' });
     assert.match(C.compose(d), /Fees are always taken from the ETH \(pair currency\) side/);
+    const noFee = draftOf(type, ['cooldown'], { pair: 'imd' });
+    assert.match(C.compose(noFee), /Hook fee rate: 0%\./);
+    assert.ok(!C.compose(noFee).includes('Fees are always taken from'));
   }
 });

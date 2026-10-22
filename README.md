@@ -1,8 +1,10 @@
 # The Hooks Store
 
-Phase 1, jobs 1–7: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
+Phase 1, jobs 1–8: a static React storefront, block Builder, chain-backed catalog, wallet launch flow, optional IMD relay, Hook management and My hooks. The complete production export is in `dist/`, with relative assets and hash routes for static hosting and IPFS gateway subpaths.
 
-Job 7 implements launch safety against **SPEC 1.25**: pair-currency fees and concrete recipients, checks before the free check and signing, fixed-fact conflicts, and blocked-job questions with **Fix in Builder**. It removes Pepe’s hat, makes confirmed launch replacements retryable and retracts reorged pond announcements. The owner’s relay, chains, economics and wallet layer stay configured as delivered. Source, the existing lockfile and `dist/` are delivered together.
+Job 8 implements catalog hardening against **SPEC 1.31, section 4.16**. Every launch carries references and an explicit owner; B/C launches request a constructor-mined CREATE2 deployer and resolve its `hook()` before exposing controls. Type A restricts initialization to `$factory`. Fees, thresholds and units follow the pair, incompatible blocks are rejected, and Describe it never composes a hidden stack. The existing relay, chain configuration, wallet layer and lockfile are retained. Source and the finished `dist/` are delivered together.
+
+The independent read-only review and concrete follow-ups are in [tests/results/job8/ADVERSARIAL-REVIEW.md](tests/results/job8/ADVERSARIAL-REVIEW.md). Build, interaction, design and service observations are in [tests/results/job8/REVIEW.md](tests/results/job8/REVIEW.md). These checks do not certify a paid launch or its eventual contract.
 
 ## Install, preview and rebuild
 
@@ -33,7 +35,7 @@ The **Connect** control reuses the wallet layer from [the requested upstream com
 
 Wallet review, receipt wait, confirmation and errors are separate states. Submitted hashes survive reload under a body/account/payment-chain-specific key. **Check confirmation** rereads the receipt without sending another transaction. A rejected signature unlocks retry; an uncertain submitted transaction keeps the next step locked. Changing wallets or payment chains invalidates approval state. Storage failures retain the current flow in memory and tell the visitor to keep the page open and copy hashes.
 
-The owner has read job 5’s reviews. The committed **`inProgress: false`** removes the banner and enables the real Approve/Launch flow with the owner’s deployed relay. A request the swarm has to stop on still spends the fee; the fee table and Launch page explain that these checks exist to make that rare. This job performed one real free check and **no real approval, payment, launch or deployment**. Confirmed cancelled/replaced or reverted approvals and launches return to a failed, retryable step. Launch replacements first verify whether the exact Requested event exists, so an executed request is completed without paying twice; retry rechecks price and allowance. A repriced approval can still confirm; a genuinely unknown receipt stays pending with **Check confirmation**, preventing duplicate payment.
+The owner has read job 5’s reviews. The committed **`inProgress: false`** removes the banner and enables the real Approve/Launch flow with the owner’s deployed relay. A request the swarm has to stop on still spends the fee; the fee table and Launch page explain that these checks exist to make that rare. Job 8 performed four real free checks and **no real approval, payment, launch or deployment**. A successful free check does not test the deployer manifest or contract execution. Confirmed cancelled/replaced or reverted approvals and launches return to a failed, retryable step. Launch replacements first verify whether the exact Requested event exists, so an executed request is completed without paying twice; retry rechecks price and allowance. A repriced approval can still confirm; a genuinely unknown receipt stays pending with **Check confirmation**, preventing duplicate payment.
 
 ## Optional relay and free check
 
@@ -53,21 +55,21 @@ The scene keeps bank reeds, the distant boat and one or two birds over sparse ca
 
 ## Launch safety and corrected requests
 
-`src/lib/safety.ts` checks the actual composed output, including words and custom rules. Builder, the relay client, Launch review and the final signing guard use the same check. Red notices quote the offending sentence; inconsistent requests cannot be checked or paid for. Known question rules are loaded from `src/blocks/known-questions.json`, starting with launch 2’s missing IMD/ETH conversion-pool question.
+`src/lib/safety.ts` checks the actual composed output, including words and custom rules. Builder, the relay client, Launch review and the final signing guard use the same check. Red notices quote the offending sentence; inconsistent requests cannot be checked or paid for. Known question records in `src/blocks/known-questions.json` include the conversion question and launches 3/4’s direct-hook deployment failures. The signing guard checks the final body owner, references, deployer/factory requirements and actual composed sentences.
 
-Every fee template uses IMD for an IMD-paired type A launch and ETH otherwise. IMD requests explicitly say **do not convert the fee to ETH and do not use any other pool**. “My wallet” resolves to the connected paying address; the treasury option names **IMD’s treasury**, `0x3f252e859a277a86A3967c11D4E054B2f07a1F22`, on both chains. A missing recipient requires connecting the wallet or entering an explicit recipient before the free check. Jar and pot readings also use the pair currency.
+Every fee template uses IMD for an IMD-paired type A launch and ETH otherwise. IMD requests explicitly say **do not convert the fee to ETH and do not use any other pool**. “My wallet” resolves to the connected paying address; the treasury option names **IMD’s treasury**, `0x3f252e859a277a86A3967c11D4E054B2f07a1F22`, on both chains. A missing recipient requires connecting the paying wallet or choosing IMD’s treasury before the free check. Jar and pot readings also use the pair currency. Fees use actual traded amounts and reject partial fills specified in pair currency. Fade and volatility replace one base rate; Whale shares its destination. LP share runs before Split, and neither redistributes jar or pot funds.
 
-Yield blocks have no verified Aave/Morpho deployment in this project, so they are refused on both deploy chains. Other checks cover fee-side/settlement mismatches, missing external addresses, fee-rule exclusions, fixed/dynamic LP fee conflicts, LP donations forbidden by another rule, incompatible opening/sunset dates, owner-power conflicts and contradictory swap restrictions. Arbitrary natural language is not formally proven by these deterministic rules; the free check and audit remain necessary safeguards. No check guarantees that a paid build can finish.
+Yield blocks have no verified Aave/Morpho deployment in this project, so they are refused on both deploy chains. Batch auctions is dimmed as not in this version. Other checks cover fee-side/settlement mismatches, missing external addresses, every declared exclusion, base-fee dependencies, fixed/dynamic LP fee conflicts, incompatible opening/sunset dates, owner-power conflicts, unconditional liquidity promises and contradictory swap restrictions. Hook donations are explicitly exempt from Donation rules. Percentage inputs must follow their configured step so displayed rounding cannot evade the fee cap. Arbitrary natural language is not formally proven by these deterministic rules; the free check and audit remain necessary safeguards. No check guarantees that a paid build can finish.
 
 Fixed facts are compared with the request. Conflicts remain visible under **What the swarm understood** and lock both continuation and payment, even after navigation/reload. IMD’s conversion default is resolved by the composer’s explicit opt-out. Other supported conflicts show the exact request opt-out to add and require a fresh check. A check for different bytes never unlocks the changed request.
 
-The job 7 revision also checks the fixed `token_split` pool allocation and remainder address, resolving “your wallet” from the connected payer. It catches the liquidity-lock/trading-hours and unrestricted-sells/swap-limit conflicts, ordinary “paid in” settlement wording, plural fee recipients, and named service/pool dependencies whose own address is missing. An unrelated payout address cannot identify a service. Fee prohibitions retain their buy/sell scope, so the supplied **Buy back and burn** example remains usable. These are deterministic checks of request wording and explicit addresses, not certification of user-entered contracts.
+The job 7 revision also checks the fixed `token_split` pool allocation and remainder address, resolving “your wallet” from the connected payer. It catches the liquidity-lock/trading-hours and unrestricted-sells/swap-limit conflicts, ordinary “paid in” settlement wording, plural fee recipients, and named service/pool dependencies whose own address is missing. An unrelated payout address cannot identify a service. Fee prohibitions retain their buy/sell scope, while the written examples now state complete no-fee observer, pause and price-reading rules. These are deterministic checks of request wording and explicit addresses, not certification of user-entered contracts.
 
 After confirmation, the full draft and request are saved by payment chain and request id in this browser. A blocked Hook page reads `blockedReason` and failed nodes’ `failureReason` through relay `GET /jobs/:id`, displaying their text unchanged. **Fix in Builder** restores the submitted draft beside those questions and retains the old request in a disclosure. Older launches recover their token, blocks, words, pairing, pool share, recipient, owner and source from the on-chain request. Unknown rules remain editable and are never silently dropped; oversized custom text must be shortened before continuing. A corrected relaunch is a new paid request, not an answer sent to the stopped job. Stored drafts are local to this browser; the chain request remains available without local storage.
 
 ## Type C: open the pool
 
-A live type C Hook page shows **Open the pool**. It reads the token's decimals and verifies the hook's `poolManager()`, sorts native ETH and the existing token by address, selects the Pool rules fee tier (default 0.3%) and matching tick spacing (500/10, 3000/60, 10000/200), and accepts **1 token = x ETH**.
+A live type C Hook page shows **Open the pool**. It reads the token's decimals and verifies the hook's `poolManager()`, sorts native ETH and the existing token by address, selects the Pool rules fee tier (default 0.3%) or the dynamic-fee flag `0x800000`, and matching tick spacing (500/10, 3000/60, 10000/200), and accepts **1 token = x ETH**.
 
 `web/src/chain/pool.ts` uses integer rational arithmetic and integer square root, including token decimals and the inversion required by sorted ETH/token currencies. It floors the Q64.96 value and rejects zero, malformed and out-of-range prices. The panel copies the full `PoolManager.initialize` parameters and encoded calldata. **It does not send a transaction.** Visitors send it from a v4 interface and add liquidity there; sending here is phase 2b. No pool or token is created by the type C launch itself.
 
@@ -94,7 +96,7 @@ Only `univ4_hook` / `evm_contracts` bodies ending in this store's fixed composer
 | `hooks-store:launch-tx:<digest>` | Submitted hashes and price, scoped to account, payment chain and exact body; receipts are reverified after reload |
 | `hooks-store:pending` | `{requestId, chainId, payer, txHash, createdAt}` array; `chainId` is the payment chain |
 
-Hook management and My hooks retain job 3's behavior: owner reads gate privileged functions, public functions and views derive from matched catalog rules, unknown addresses stay unknown, and query-param wallet viewing never authorizes writes. Featured placements remain phase 2.
+Hook management and My hooks retain the delivered ownership gates: owner reads gate privileged functions, public functions and views derive from matched catalog rules, unknown addresses stay unknown, and query-param wallet viewing never authorizes writes. Current pool-dependent controls pass a selected PoolId. Earlier requests use the retained legacy catalog signatures; they are not silently changed. Featured placements remain phase 2.
 
 ## Validation
 
@@ -104,9 +106,12 @@ npm --prefix web run typecheck
 npm --prefix web run build
 web/node_modules/.bin/playwright install chromium
 npm --prefix web run test:e2e
-cp artifacts/playwright-results.json tests/results/job7/playwright-results.json
+cp artifacts/playwright-results.json tests/results/job8/playwright-results.json
 node --test relay/worker.test.mjs
 node scripts/check-delivery.mjs
+# Job 8 composer corpus and focused browser checks:
+node tests/generate-job8-corpus.mjs
+npm --prefix web run test:e2e -- tests/job8.spec.ts tests/builder.spec.ts
 # Launch-safety cases and retained regressions:
 npm --prefix web run test:e2e -- tests/job5.spec.ts tests/job6.spec.ts tests/job7.spec.ts
 # Review regressions, including corrected requests at all three widths:
@@ -126,8 +131,12 @@ node web/scripts/run-launch-checks.mjs --all --live
 
 The fork runner uses a public fixture payer, impersonated only inside loopback Anvil. It mocks that account's IMD balance with `anvil_setStorageAt`, verifies `balanceOf`, and runs type A and B approvals/requests against the forked real contracts. It asserts exact preview bytes, cross-chain deployment selection and parsed request ids. Browser tests cover receipt gating, wrong chain, signature rejection, zero price, refresh recovery, copy, pool conversion and responsive layouts. The default browser suite skips network-dependent cases unless enabled. Two older Ethereum-management fork checks remain separately optional; their setup is in `web/scripts/fork-setup.mjs` and `check-fork.mjs`.
 
-Actual job 7 results, the live free-check request/response, real RPC timing, screenshots for all seven routes at 320/390/1440, six-domain review and limitations are in [VALIDATION.md](VALIDATION.md) and [tests/results/job7](tests/results/job7/). [DESIGN.md](DESIGN.md) documents the final implementation. Earlier evidence remains under `tests/results/job6/`, `job5/`, `job4/` and prior directories. Results are worker observations, not independent certification.
+Historical job 7 results, free checks, RPC timing and route screenshots remain in [VALIDATION.md](VALIDATION.md) and [tests/results/job7](tests/results/job7/). [DESIGN.md](DESIGN.md) documents the final implementation. Earlier evidence remains under `tests/results/job6/`, `job5/`, `job4/` and prior directories. Results are worker observations, not independent certification.
 
-Revision findings and decisions are recorded in [.imd-responses.json](.imd-responses.json). Current revision evidence uses the `revision-` prefix under `tests/results/job7/`; [REVISION.md](tests/results/job7/REVISION.md) distinguishes those runs from the original delivery.
+Historical job 7 revision findings and corrections are recorded in [REVISION.md](tests/results/job7/REVISION.md). That evidence uses the `revision-` prefix under `tests/results/job7/` and is distinct from the original delivery.
 
 The final export must stay with source and `web/package-lock.json`. No private keys, contracts deployed by this job, live payments, vendored registry, dependency caches or submodules are required.
+
+Job 8 verifies `poolBps` against successful deployment receipts on both chains: it is basis points of **total supply**, not a share of the creator’s 90%. Evidence is in [pool-allocation-research.md](tests/results/job8/pool-allocation-research.md). The fixed 10% swarm share and selected parameter are unchanged. Standard-token buybacks retain bought tokens forever; own tokens expose public `burn(uint256)`; an existing-token burn that is absent or reverts retains the tokens. Buybacks run only in the explicit function, with the specified 3% spot-relative bound.
+
+The checked 420-case request corpus is [composed-requests.jsonl](tests/results/job8/composed-requests.jsonl). It includes disabled and inapplicable cases explicitly and sends nothing to the network. The separate review records remaining specification-level risks for the next job; no safety guarantee or on-chain launch proof is claimed.

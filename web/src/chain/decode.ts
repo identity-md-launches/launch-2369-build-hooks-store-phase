@@ -1,7 +1,10 @@
 import { decodeEventLog, hexToString, isAddress, type Hex, type Abi } from 'viem';
 import intakeJson from '../../../src/abi/intake.json' with { type: 'json' };
-import { BLOCKS, BY_ID, IMD_TREASURY, TOKEN_IDS, defaults, shortOf, type BlockEntry, type Context } from '../../../src/lib/compose.ts';
+import { BLOCKS, BY_ID, IMD_TREASURY, TOKEN_IDS, defaults, fill, shortOf, type BlockDef, type BlockEntry, type Context } from '../../../src/lib/compose.ts';
 import { CHAINS, type Launch } from '../types.ts';
+import legacyCatalog from '../../../src/blocks/legacy-catalog.json' with { type: 'json' };
+const LEGACY_BLOCKS = legacyCatalog.blocks as unknown as BlockDef[];
+const LEGACY_BY_ID = Object.fromEntries(LEGACY_BLOCKS.map(block => [block.id, block]));
 
 export const intakeAbi = intakeJson as Abi;
 export const REQUESTED = intakeAbi.find(a => a.type === 'event' && a.name === 'Requested')!;
@@ -20,72 +23,106 @@ export function isStoreBody(body: Record<string, unknown> | null): body is Recor
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Full sentence matching, including function signatures. Substring mentions never grant controls. */
 export function matchRule(rule: string, ctx: Context): BlockEntry | null {
-  for (const def of BLOCKS.filter(b => !TOKEN_IDS.includes(b.id) && b.id !== 'custom')) {
-    for (const template of [def.sentence, ...(def.legacySentences ?? [])]) {
-    const keys: { key: string; fmt?: string; at: boolean }[] = [];
-    let pattern = '', from = 0;
-    for (const m of template.matchAll(/\{(@?)(\w+)(?::(\w+))?\}/g)) {
-      pattern += escape(template.slice(from, m.index));
-      keys.push({ key: m[2], fmt: m[3], at: !!m[1] });
-      pattern += '(.+?)'; from = m.index! + m[0].length;
-    }
-    pattern += escape(template.slice(from));
-    const matched = new RegExp('^' + pattern + '$').exec(rule.trim());
-    if (!matched) continue;
-    const p = defaults(def); let valid = true;
-    keys.forEach((key, i) => {
-      const value = matched[i + 1];
-      if (key.at) {
-        if (key.key === 'destination') {
-          if (/^send it to 0x[\da-fA-F]{40}$/.test(value)) {
-            const recipient = value.slice('send it to '.length);
-            p.to = recipient.toLowerCase() === IMD_TREASURY.toLowerCase() ? "IMD's treasury" : recipient.toLowerCase() === ctx.wallet?.toLowerCase() ? 'my wallet' : recipient;
-          }
-          else if (value === `use it to buy ${ctx.symbol} from this pool and burn the bought tokens`) p.to = 'burn (buy and burn)';
-          else valid = false;
-        } else if (key.key === 'wallet') { if (!/^0x[\da-fA-F]{40}$/.test(value)) valid = false; }
-        else if (key.key === 'jarAction') {
-          if (value === 'burn the bought tokens') p.act = value;
-          else if (value === `send the bought tokens to ${IMD_TREASURY}`) p.act = "send them to the IMD's treasury";
-          else valid = false;
-        } else if (value !== (ctx[key.key as keyof Context] ?? (key.key === 'pair' ? 'ETH' : ''))) valid = false;
-        return;
+  const candidates = [
+    ...BLOCKS.map(def => ({ def, legacy: false })),
+    ...LEGACY_BLOCKS.map(def => ({ def, legacy: true })),
+  ];
+  for (const { def, legacy } of candidates.filter(({ def }) => !TOKEN_IDS.includes(def.id) && def.id !== 'custom')) {
+    const templates = [
+      { template: def.sentence, option: undefined as string | undefined },
+      ...(def.legacySentences ?? []).map(template => ({ template, option: undefined as string | undefined })),
+      ...Object.entries(def.optionSentences ?? {}).map(([option, template]) => ({ template, option })),
+    ];
+    for (const { template, option } of templates) {
+      const keys: { key: string; fmt?: string; at: boolean }[] = [];
+      let pattern = '', from = 0;
+      for (const m of template.matchAll(/\{(@?)(\w+)(?::(\w+))?\}/g)) {
+        pattern += escape(template.slice(from, m.index));
+        keys.push({ key: m[2], fmt: m[3], at: !!m[1] });
+        const known = m[1] && !['destination', 'wallet'].includes(m[2]) && !(legacy && m[2] === 'jarAction');
+        const expected = ctx[m[2] as keyof Context] ?? (m[2] === 'pair' ? 'ETH' : '');
+        // Adjacent context sentences (wallet limit, fee basis) must match their
+        // complete known text rather than split at an arbitrary first space.
+        pattern += known ? `(${escape(String(expected))})` : '(.*?)'; from = m.index! + m[0].length;
       }
-      if (key.fmt === 'rest') { if (Number(value) !== 100 - Number(p[key.key])) valid = false; return; }
-      const param = def.params.find(x => x.k === key.key);
-      let parsed = param?.type === 'number' ? Number(value.replaceAll(',', '')) : value.replace('treasury address', "IMD's treasury");
-      if (param?.options?.includes("IMD's treasury") && typeof parsed === 'string' && /treasury/.test(parsed)) parsed = "IMD's treasury";
-      if (typeof parsed === 'number' && !Number.isFinite(parsed)) valid = false;
-      if (param?.options && !param.options.includes(String(parsed))) valid = false;
-      // Repeated parameters must agree (e.g. the end rate of a fading fee).
-      const earlier = keys.slice(0, i).findIndex(k => k.key === key.key && k.fmt !== 'rest');
-      if (earlier !== -1 && matched[earlier + 1] !== value) valid = false;
-      p[key.key] = parsed;
-    });
-    if (valid) return { id: def.id, p };
+      pattern += escape(template.slice(from));
+      const matched = new RegExp('^' + pattern + '$').exec(rule.trim());
+      if (!matched) continue;
+      const p = defaults(def); let valid = true;
+      if (option) p.who = option;
+      keys.forEach((key, i) => {
+        const value = matched[i + 1];
+        if (key.at) {
+          if (key.key === 'destination') {
+            if (/^send it to 0x[\da-fA-F]{40}$/.test(value)) {
+              const recipient = value.slice('send it to '.length);
+              p.to = recipient.toLowerCase() === IMD_TREASURY.toLowerCase() ? "IMD's treasury" : recipient.toLowerCase() === ctx.wallet?.toLowerCase() ? 'my wallet' : recipient;
+            } else if (!legacy && value === 'distribute it as specified by Split the fee' && value === ctx.destination) p.to = 'my wallet';
+            else if (legacy && value === `use it to buy ${ctx.symbol} from this pool and burn the bought tokens`) p.to = 'burn (buy and burn)';
+            else valid = false;
+          } else if (key.key === 'wallet') { if (!/^0x[\da-fA-F]{40}$/.test(value)) valid = false; }
+          else if (key.key === 'jarAction' && legacy) {
+            if (value === 'burn the bought tokens') p.act = value;
+            else if (value === `send the bought tokens to ${IMD_TREASURY}`) p.act = "send them to the IMD's treasury";
+            else valid = false;
+          } else if (value !== (ctx[key.key as keyof Context] ?? (key.key === 'pair' ? 'ETH' : ''))) valid = false;
+          return;
+        }
+        if (key.fmt === 'rest') { if (Number(value) !== 100 - Number(p[key.key])) valid = false; return; }
+        const param = def.params.find(x => x.k === key.key);
+        let parsed = param?.type === 'number' ? Number(value.replaceAll(',', '')) : value.replace('treasury address', "IMD's treasury");
+        if (param?.options?.includes("IMD's treasury") && typeof parsed === 'string' && /treasury/.test(parsed)) parsed = "IMD's treasury";
+        if (typeof parsed === 'number' && !Number.isFinite(parsed)) valid = false;
+        if (param?.options && !param.options.includes(String(parsed))) valid = false;
+        const earlier = keys.slice(0, i).findIndex(k => k.key === key.key && k.fmt !== 'rest');
+        if (earlier !== -1 && matched[earlier + 1] !== value) valid = false;
+        p[key.key] = parsed;
+      });
+      if (valid) return { id: def.id, p, ...(legacy ? { legacy: true } : {}) };
     }
   }
   return null;
 }
-export function parseObjective(objective: string, payer?: string) {
+export function requestContext(objective: string, payer?: string): Context {
   const first = objective.split('\n')[0];
   const a = /^Launch (.+?) \(([^)]+)\) with a Uniswap v4 hook on /.exec(first);
-  const b = /^Deploy one contract: (.+?), a standalone Uniswap v4 hook/.exec(first);
-  const c = /^Deploy one contract on .+?: (.+?), a Uniswap v4 hook for the existing token (0x[\da-fA-F]{40})(?: \(([^)]+)\))?/.exec(first);
-  const name = a?.[1] ?? b?.[1] ?? c?.[1] ?? 'Untitled hook';
-  const symbol = a?.[2] ?? c?.[3] ?? null;
-  const ctx = { name, symbol: symbol ?? (c ? 'the token' : 'the pool’s token'), pair: a && /paired with IMD\./.test(first) ? 'IMD' : 'ETH', wallet: payer };
+  const oldB = /^Deploy one contract: (.+?), a standalone Uniswap v4 hook/.exec(first);
+  const oldC = /^Deploy one contract on .+?: (.+?), a Uniswap v4 hook for the existing token (0x[\da-fA-F]{40})(?: \(([^)]+)\))?/.exec(first);
+  const deployer = /^Deploy one contract, (.+?)Deployer, on [^:]+:/.exec(first);
+  const newC = /^(.+?) is a Uniswap v4 hook for the existing token (0x[\da-fA-F]{40})(?: \(([^)]+)\))?/m.exec(objective);
+  const c = oldC ?? newC, type = a ? 'A' : c ? 'C' : 'B';
+  const name = a?.[1] ?? oldB?.[1] ?? c?.[1] ?? deployer?.[1] ?? 'Untitled hook';
+  const symbol = a?.[2] ?? c?.[3] ?? (type === 'C' ? 'the token' : 'the pool’s token');
+  const pair = a && /paired with IMD\./.test(first) ? 'IMD' : 'ETH';
+  const baseFee = /^\d+\. Take ([\d.]+)% of the (?:IMD|ETH) side of every (buy and sell|buy|sell) as a hook fee/m.exec(objective);
+  return { name, symbol, type, pair, wallet: payer,
+    destination: /^\d+\. Replace the Swap fee's destination: split/m.test(objective) ? 'distribute it as specified by Split the fee' : `send it to ${payer ?? ''}`,
+    feeBasis: `Fees are computed on the amount actually traded; when the swap specifies its ${pair} amount and the pool fills only part of it, the swap reverts rather than overpaying.`,
+    walletLimit: 'A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.',
+    baseRate: Number(baseFee?.[1] ?? 0).toFixed(1), feeApplies: baseFee?.[2] ?? 'buy and sell',
+    jarAction: type === 'A' ? /^Token: my own token /m.test(objective) ? "burn the bought tokens with the token's burn(uint256)" : 'keep the bought tokens in the hook forever; no function can move them'
+      : "attempt to burn with the token's burn(uint256); if it has none, or the burn call reverts, keep them in the hook forever; no function can move retained tokens",
+  };
+}
+export function blockShortOf(block: BlockEntry, ctx: Context) {
+  const legacy = block.legacy && LEGACY_BY_ID[block.id];
+  return legacy ? fill(legacy.short, legacy, block.p, ctx) : shortOf(block, ctx);
+}
+export function parseObjective(objective: string, payer?: string) {
+  const first = objective.split('\n')[0], ctx = requestContext(objective, payer);
   const rules = Array.from(objective.matchAll(/^\d+\. (.+)$/gm), m => m[1]);
   const matchedBlocks: BlockEntry[] = [], blocks: string[] = [], groups = new Set<string>();
   for (const rule of rules) {
     const match = matchRule(rule, ctx);
-    if (match) { matchedBlocks.push(match); blocks.push(shortOf(match, ctx)); groups.add(BY_ID[match.id].group === 'games' ? 'treasury' : BY_ID[match.id].group); }
+    if (match) { matchedBlocks.push(match); blocks.push(blockShortOf(match, ctx)); groups.add(BY_ID[match.id].group === 'games' ? 'treasury' : BY_ID[match.id].group); }
     else { blocks.push('Custom'); groups.add('custom'); }
   }
+  if (/<custom>[\s\S]*?<\/custom>/.test(objective)) { blocks.push('Custom'); groups.add('custom'); }
   if (!groups.size || objective.includes('own source at ')) groups.add('custom');
   const words = /<description>([\s\S]*?)<\/description>/.exec(objective)?.[1];
-  return { type: a ? 'A' as const : c ? 'C' as const : 'B' as const, name, symbol, blocks, matchedBlocks, groups: [...groups],
-    tokenAddress: c?.[2] ?? null, summary: words?.slice(0, 240) || rules[0]?.split('. Expose')[0] || first };
+  const tokenAddress = /(?:hook for the existing token) (0x[\da-fA-F]{40})/.exec(objective)?.[1] ?? null;
+  return { type: ctx.type!, name: ctx.name, symbol: ctx.type === 'A' || ctx.type === 'C' && ctx.symbol !== 'the token' ? ctx.symbol : null, blocks, matchedBlocks, groups: [...groups],
+    tokenAddress, summary: words?.slice(0, 240) || rules[0]?.split('. Expose')[0] || first };
 }
 export function launchFromRequested(log: RawLog, intakeChainId: number, action: string, timestamp?: number): Launch | null {
   if (log.removed) return null;
@@ -140,7 +177,10 @@ export function applyResult(launch: Launch, input: unknown): Launch {
   const artifact = (role: string) => contracts.find((c: any) => c.role === role);
   if (data.chainId != null && Number(data.chainId) !== launch.chainId) return { ...launch, resultError: 'Result chain differs from the requested chain. Controls remain locked.', resultLoaded: true };
   const hook = address(data.hookAddress, data.hook, addresses.hook, addresses.hookAddress, root.hookAddress,
-    artifact('hook')?.address, contracts.find((c: any) => /hook/i.test(String(c.name ?? c.contractName)))?.address);
+    artifact('hook')?.address, contracts.find((c: any) => /hook/i.test(String(c.name ?? c.contractName)) && !/deployer/i.test(String(c.name ?? c.contractName)))?.address);
+  const deployer = launch.type === 'A' ? null : address(data.deployerAddress, data.deployer, addresses.deployer, root.deployerAddress, artifact('deployer')?.address,
+    contracts.find((c: any) => /deployer$/i.test(String(c.name ?? c.contractName)))?.address)
+    ?? (/^Deploy one contract, .+?Deployer, on /.test(launch.request) ? hook : null);
   const token = address(data.tokenAddress, data.token, addresses.token, addresses.tokenAddress, root.tokenAddress, artifact('token')?.address) ?? launch.tokenAddress;
   const distributor = address(data.distributorAddress, data.distributor, addresses.distributor, root.distributorAddress, artifact('distributor')?.address);
   const number = Number(data.launchNumber ?? root.launchNumber ?? data.id ?? data.launchId ?? root.launchId);
@@ -148,8 +188,8 @@ export function applyResult(launch: Launch, input: unknown): Launch {
   const launchId = typeof rawId === 'string' && /^(?:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}|[1-9]\d*)$/i.test(rawId) ? rawId : Number.isSafeInteger(rawId) && rawId > 0 ? String(rawId) : null;
   const jobId = typeof root.jobId === 'string' ? root.jobId : null;
   const poolId = [data.poolId, pool.id, root.poolId].find(v => typeof v === 'string' && /^0x[\da-fA-F]{64}$/.test(v)) ?? null;
-  return { ...launch, hookAddress: hook, tokenAddress: token, distributorAddress: distributor, poolId,
-    status: hook ? 'live' : 'in-progress', resultLoaded: true, resultError: undefined,
+  return { ...launch, hookAddress: deployer ? null : hook, deployerAddress: deployer, hookPending: false, tokenAddress: token, distributorAddress: distributor, poolId,
+    status: hook && !deployer ? 'live' : 'in-progress', resultLoaded: true, resultError: undefined,
     launchId, launchNumber: Number.isSafeInteger(number) && number > 0 ? number : null,
     currencies: [pool.currency0, pool.currency1, data.currency0, data.currency1].filter((v): v is string => !!address(v)),
     sourceRepoUrl: safeUrl(object(root.delivery).repoUrl) ?? safeUrl(data.repoUrl) ?? launch.sourceRepoUrl,
@@ -159,7 +199,7 @@ export function applyResult(launch: Launch, input: unknown): Launch {
 }
 export function matchesQuery(launch: Launch, query: string) {
   const q = query.trim().toLowerCase().replace(/^(?=[a-f\d]{40}$|[a-f\d]{64}$)/, '0x');
-  if (/^0x[\da-f]{40}$/.test(q)) return [launch.hookAddress, launch.tokenAddress, launch.distributorAddress, ...launch.currencies].some(a => a?.toLowerCase() === q);
+  if (/^0x[\da-f]{40}$/.test(q)) return [launch.hookAddress, launch.deployerAddress, launch.tokenAddress, launch.distributorAddress, ...launch.currencies].some(a => a?.toLowerCase() === q);
   if (/^0x[\da-f]{64}$/.test(q)) return [launch.requestId, ...launch.txHashes].some(h => h.toLowerCase() === q);
   const hay = [launch.name, launch.symbol, CHAINS[launch.chainId], launch.summary, ...launch.blocks, ...launch.matchedBlocks.map(b => BY_ID[b.id]?.title), launch.request].join(' ').toLowerCase();
   return q.split(/\s+/).filter(Boolean).every(word => hay.includes(word));

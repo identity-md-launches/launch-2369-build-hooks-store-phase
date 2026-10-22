@@ -37,19 +37,21 @@ for (const width of [320, 390, 1440]) {
     await expect(page.locator('.chooser .choice')).toHaveCount(2);
     await page.getByRole('button', { name: /^B: Hook only/ }).click();
     await expect(page.getByRole('button', { name: /^B: Hook only/ })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.pal-item[data-block="async"] button')).toHaveText('Add');
+    await expect(page.locator('.pal-item[data-block="async"] .pill.state')).toHaveText('not in this version');
+    await expect(page.locator('.pal-item[data-block="async"] button')).toHaveCount(0);
     await page.getByRole('button', { name: /^A: Hook \+ new token/ }).click();
-    await expect(page.locator('.pal-item[data-block="async"] .pill.state')).toHaveText('OWN POOLS ONLY');
-    // 2. Describe mode: words plus blocks from the palette as chips.
+    await expect(page.locator('.pal-item[data-block="async"] .pill.state')).toHaveText('not in this version');
+    await expect(page.locator('.pal-item[data-block="lp-fee"] .pill.state')).toHaveText('OWN POOLS ONLY');
+    // 2. Describe mode: a palette addition reveals the editable stack.
     await page.getByRole('button', { name: 'Describe it in words' }).click();
     await expect(page.locator('.chooser')).toHaveCount(0);
-    const words = 'Every buy sends 1% to a prize pot drawn hourly.';
+    const words = 'Observe swaps without changing their accounting.';
     await page.getByRole('textbox', { name: /What should it do/ }).fill(words);
     await page.getByRole('button', { name: 'Add Cooldown' }).click();
-    await expect(page.locator('.added .chip[data-block="cooldown"]')).toContainText('30s between swaps per wallet');
-    await expect(page.locator('.rule-line')).toHaveText('Blocks become numbered rules under your words; if your words and a rule disagree, the rule wins.');
-    // Switch to blocks: the words stay, the block is in the stack, no default stack is forced on top of it.
-    await page.getByRole('button', { name: 'Stack blocks', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Stack blocks', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#stack .blk[data-block="cooldown"]')).toBeVisible();
+    await expect(page.locator('#stack .blk[data-block="cooldown"]')).toContainText('30s between swaps per wallet');
+    // The words stay, and adding a block does not force the default stack on top of it.
     expect(await stackIds(page)).toEqual(['cooldown']);
     await page.getByRole('button', { name: 'Add Swap fee' }).click();
     await page.getByRole('button', { name: 'Add Anti-sandwich' }).click();
@@ -67,14 +69,19 @@ for (const width of [320, 390, 1440]) {
     expect(text).toContain(`<description>${words}</description>`);
     expect(text).toContain('If the description and a numbered rule disagree, the numbered rule wins.');
     expect(text).toContain('2. Take 1.5% of the IMD side of every buy and sell');
-    // Back to Describe: nothing lost.
+    // Back to Describe: saved rules remain editable but are omitted from the request.
     await page.getByRole('button', { name: 'Describe it', exact: true }).click();
     await expect(page.getByRole('textbox', { name: /What should it do/ })).toHaveValue(words);
     await expect(page.locator('.added .chip')).toHaveCount(2);
+    await expect(page.locator('.rule-line')).toHaveText('Describe it sends only your words and token choice. Switch to Stack blocks to include and edit these saved rules.');
+    expect(await exact(page)).not.toContain('Take 1.5%');
+    expect(await exact(page)).not.toContain('Within one block');
+    expect(await exact(page)).toContain('Hook fee rate: 0%.');
+    await expect(page.locator('.sum')).toContainText('no block rules are included');
     await page.getByRole('button', { name: 'Remove Anti-sandwich' }).click();
     await expect(page.locator('.added .chip')).toHaveCount(1);
     await page.locator('#s-pool').fill('45');
-    await expect(page.locator('.sum')).toContainText('45% of your share');
+    await expect(page.locator('.sum')).toContainText('45% of total supply in the pool; 10% swarm; 45% remainder');
     await noOverflow(page);
     await page.screenshot({ path: `../artifacts/builder-${width}.png`, fullPage: false });
     // Reload: the draft reopens exactly.
@@ -109,7 +116,7 @@ test('first visit to the stack starts from the default stack; preview, cost box 
   await expect(page.locator('.blk.token')).toContainText('standard token');
 });
 
-test('pool share has no default; Continue stays disabled until 10 to 90 in steps of 5', async ({ page }) => {
+test('pool share is of total supply with no default; Continue stays disabled until 10 to 90 in steps of 5', async ({ page }) => {
   await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, { id: 'swap-fee' }] });
   await expect(page.locator('#s-chain')).toHaveValue('');
   await expect(page.locator('#s-chain option')).toHaveText(['Choose a chain', 'Robinhood Chain', 'Ethereum']);
@@ -125,7 +132,7 @@ test('pool share has no default; Continue stays disabled until 10 to 90 in steps
   }
   await page.locator('#s-pool').fill('50');
   await expect(continueButton(page)).toBeEnabled();
-  expect(await exact(page)).toContain(`Pool: 50% of my 90% share seeds the pool; the remainder goes to ${getAddress(owner)}.`);
+  expect(await exact(page)).toContain(`Pool: 50% of the total supply seeds the pool; 10% goes to the swarm; the remaining 40% goes to ${getAddress(owner)}.`);
   await continueButton(page).click(); await expect(page).toHaveURL(/#launch$/);
 });
 
@@ -151,13 +158,21 @@ test('4.10 rules in the interface: 5% cap, swap-fee dependencies, buy/sell exclu
   for (const id of ['fee-fade', 'fee-split', 'lp-share']) await expect(page.locator(`.pal-item[data-block="${id}"] .pill.state`)).toHaveText('NEEDS SWAP FEE');
   await page.getByRole('button', { name: 'Add Different buy and sell fees' }).click();
   await expect(page.locator('.pal-item[data-block="swap-fee"] .pill.state')).toHaveText('REMOVE DIFFERENT BUY AND SELL FEES FIRST');
-  // A block from type B stays in the stack, dimmed and left out of the request, under type A.
+  // Batch auctions and Yield stay unavailable; an eligible B-only block is
+  // preserved but left out of the request when changing to type A.
   await page.getByRole('button', { name: /^B: Hook only/ }).click();
   await page.locator('.palette summary', { hasText: 'Advanced' }).click();
-  await page.getByRole('button', { name: 'Add Batch auctions' }).click();
+  await expect(page.locator('.pal-item[data-block="async"] .pill.state')).toHaveText('not in this version');
+  await expect(page.locator('.pal-item[data-block="yield"] .pill.state')).toHaveText('no verified deployment');
+  await expect(page.getByRole('button', { name: 'Add Batch auctions' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Add Yield on idle liquidity' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Add Pool rules' }).click();
+  await expect(page.locator('.blk[data-block="pool-rules"]')).toBeVisible();
+  expect(await exact(page)).toContain('fee tier is 0.3%');
   await page.getByRole('button', { name: /^A: Hook \+ new token/ }).click();
-  await expect(page.locator('.blk[data-block="async"]')).toHaveClass(/off/);
-  await expect(page.locator('.blk[data-block="async"] .pill.state')).toHaveText('Not for this launch type');
+  await expect(page.locator('.blk[data-block="pool-rules"]')).toHaveClass(/off/);
+  await expect(page.locator('.blk[data-block="pool-rules"] .pill.state')).toHaveText('Not for this launch type');
+  expect(await exact(page)).not.toContain('fee tier is 0.3%');
   expect(await exact(page)).not.toContain('BaseAsyncSwap');
   // State pills stay within 96 px and never squeeze the palette text column.
   for (const box of await page.locator('.pal-item .pill.state').evaluateAll(els => els.map(el => el.getBoundingClientRect().width))) expect(box).toBeLessThanOrEqual(96);
@@ -169,8 +184,8 @@ for (const width of [320, 390, 1440]) {
 test(`risk tooltips at ${width}px: every sign stays readable on hover and keyboard focus`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 });
   const risky = catalog.blocks.filter(b => 'risk' in b && b.risk);
-  expect(risky.map(b => b.id).sort()).toEqual(['anti-sniper', 'breaker', 'cooldown', 'max-buy', 'max-swap', 'pot']);
-  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, ...risky.map(b => ({ id: b.id }))], settings: { chain: 4663, pool: 50 } });
+  expect(risky.map(b => b.id).sort()).toEqual(['anti-sniper', 'breaker', 'cooldown', 'custom', 'max-buy', 'max-swap', 'pot']);
+  await open(page, 'fail', { type: 'A', mode: 'blocks', seeded: true, blocks: [{ id: 'token' }, ...risky.map(b => ({ id: b.id, ...(b.id === 'custom' ? { p: { text: 'Observe swaps without changing them.' } } : {}) }))], settings: { chain: 4663, pool: 50 } });
   await expect(page.locator('details', { hasText: 'Games and lotteries' }).locator('.pal-item[data-block="pot"]')).toHaveCount(1);
   for (const b of risky) {
     const tip = `${HEADS_UP} ${(b as { risk: string }).risk} not yet proven in a live launch`;
