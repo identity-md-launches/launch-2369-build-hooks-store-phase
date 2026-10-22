@@ -3,8 +3,10 @@ import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
 import type { Address } from 'viem';
 import { type Launch, CHAINS } from './types';
 import type { ReadClient } from './chain/clients';
-import { argumentValues, contractError, formatReading, managementFunctions, ownerAbi, type ManagementFn } from './chain/manage';
+import { argumentValues, contractError, formatReading, functionsFromAbi, sourceAbi, managementError, ownerAbi, type ManagementFn } from './chain/manage';
 import { Text } from './Text';
+import { poolsForHook } from './chain/pool';
+import type { SiteConfig } from './config';
 import { AddressValue } from './AddressValue';
 
 function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revision, explorer, poolId }: {
@@ -16,6 +18,7 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
   const [open, setOpen] = useState(view && fn.abi.inputs.some(p => p.name !== 'poolId'));
   const [values, setValues] = useState<string[]>(fn.abi.inputs.map(p => p.name === 'poolId' ? poolId : p.type === 'address' ? address ?? '' : p.type === 'bool' ? '' : fn.abi.name === 'twap' ? '300' : ''));
   const [reading, setReading] = useState<string | null>(null), [error, setError] = useState(''), [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [hash, setHash] = useState<string | null>(null);
+  const missingPool = fn.abi.inputs.some(p => p.name === 'poolId') && !/^0x[\da-fA-F]{64}$/.test(poolId);
   const live = launch.status === 'live' && !!launch.hookAddress;
   let inputError = '';
   try { argumentValues(fn.abi, values); } catch (e) { inputError = (e as Error).message; }
@@ -23,7 +26,7 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
   useEffect(() => { if (address) setValues(old => old.map((v, i) => !v && fn.abi.inputs[i].type === 'address' ? address : v)); }, [address]);
   useEffect(() => { setValues(old => old.map((v, i) => fn.abi.inputs[i].name === 'poolId' ? poolId : v)); }, [poolId, fn.sig]);
   useEffect(() => {
-    if (!view || !live || inputError) { setReading(null); return; }
+    if (!view || !live || missingPool || inputError) { setReading(null); return; }
     let active = true, running = false;
     const read = async () => {
       if (running) return; running = true;
@@ -39,7 +42,7 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
   const allowed = fn.access !== 'owner' || ownerAllowed;
   const needsSwitch = isConnected && chainId !== launch.chainId;
   const send = async () => {
-    if (busy || !live || !allowed || !wallet || !address || inputError) return;
+    if (busy || !live || !allowed || !wallet || !address || missingPool || inputError) return;
     setBusy(true); setError(''); setMessage('Check your wallet…'); setHash(null);
     try {
       if (fn.access === 'owner') {
@@ -52,26 +55,27 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
       const receipt = await client.waitForTransactionReceipt({ hash: tx });
       if (receipt.status !== 'success') throw new Error('Transaction reverted');
       setMessage('Confirmed on chain.'); refresh();
-    } catch (e) { setError(/Owner changed/.test(String(e)) ? 'The owner has changed. Reconnect the current owner wallet.' : contractError(e)); setMessage(''); }
+    } catch (e) { setError(/Owner changed/.test(String(e)) ? 'The owner has changed. Reconnect the current owner wallet.' : managementError(e, fn.abi.name, fn.revertReason)); setMessage(''); }
     finally { setBusy(false); }
   };
   return <div className="function-row" data-function={fn.abi.name}>
     <div className="function-head"><div><strong>{fn.label}</strong><code>{fn.sig}</code></div>
-      {view ? <output className="reading" aria-live="polite">{reading ?? (live ? inputError ? 'Enter arguments' : error ? 'Unavailable' : 'Reading…' : 'Unknown until live')}</output>
-        : <button className="btn tiny" disabled={!live || !allowed || busy || switching || (!isConnected && fn.access === 'owner')} onClick={async () => {
+      {view ? <output className="reading" aria-live="polite">{missingPool ? 'No pool selected' : reading ?? (live ? inputError ? 'Enter arguments' : error ? 'Unavailable' : 'Reading…' : 'Unknown until live')}</output>
+        : <button className="btn tiny" disabled={missingPool || !live || !allowed || busy || switching || (!isConnected && fn.access === 'owner')} onClick={async () => {
           if (!isConnected) { document.getElementById('connect')?.click(); return; }
           if (needsSwitch) { try { await switchChain({ chainId: launch.chainId }); } catch (e) { setError(contractError(e)); } return; }
           if (fn.abi.inputs.length) setOpen(!open); else void send();
         }}>{busy ? 'Sending…' : !isConnected && allowed ? 'Connect wallet' : needsSwitch && allowed ? `Switch to ${CHAINS[launch.chainId]}` : fn.abi.inputs.length ? open ? 'Close form' : 'Open form' : 'Send'}</button>}
     </div>
-    {open && <form className="function-form" onSubmit={event => { event.preventDefault(); if (view) refresh(); else void send(); }}>
+    {missingPool && <p className="small muted">No pool uses this hook yet. Open a pool with it, or enter its pool id above.</p>}
+    {open && !missingPool && <form className="function-form" onSubmit={event => { event.preventDefault(); if (view) refresh(); else void send(); }}>
       {fn.abi.inputs.map((input, index) => input.name === 'poolId' ? <p key={index} className="small muted">Pool id comes from the pool selection above.</p> : <div key={index}><label htmlFor={`${id}-${index}`}>{input.name || (input.type === 'address' ? 'Wallet address' : /bytes\d+/.test(input.type) ? 'Position key' : `Argument ${index + 1}`)} <code>({input.type})</code></label>
         {input.type === 'bool' ? <select id={`${id}-${index}`} value={values[index]} onChange={e => setValues(old => old.map((v, i) => i === index ? e.target.value : v))}><option value="">Choose a value</option><option value="true">true · allow</option><option value="false">false · disallow</option></select>
           : <input id={`${id}-${index}`} className="mono-input" spellCheck={false} value={values[index]} placeholder={input.type === 'address[]' ? '0x… , 0x…' : input.type === 'address' || /bytes\d+/.test(input.type) ? '0x…' : 'Whole number'} aria-invalid={values[index] !== '' && !!inputError || undefined} aria-describedby={inputError ? `${id}-error` : undefined} onChange={e => setValues(old => old.map((v, i) => i === index ? e.target.value : v))} />}
       </div>)}
       {inputError && <p id={`${id}-error`} className={values.some(value => value.trim()) ? "field-error" : "small muted"}>{values.some(value => value.trim()) ? inputError : "Fill in each argument to continue."}</p>}
       {fn.abi.inputs.some(i => /int/.test(i.type)) && <p className="small muted">Whole numbers in the contract’s units.{fn.abi.name === 'placeOrder' ? ' Amount is in token base units; tick is the pool price tick.' : ''}</p>}
-      <button className="btn tiny" type="submit" disabled={!!inputError || !live || busy || (!view && (!isConnected || needsSwitch || !allowed))}>{view ? 'Read now' : busy ? 'Sending…' : 'Send'}</button>
+      <button className="btn tiny" type="submit" disabled={missingPool || !!inputError || !live || busy || (!view && (!isConnected || needsSwitch || !allowed))}>{view ? 'Read now' : busy ? 'Sending…' : 'Send'}</button>
     </form>}
     {view && error && !open && <button className="link-button" onClick={refresh}>Retry reading</button>}
     <p className="function-feedback" role="status">{message}</p>
@@ -79,12 +83,24 @@ function FunctionRow({ fn, launch, client, ownerAllowed, owner, refresh, revisio
     {hash && <AddressValue label={`${fn.abi.name} transaction`} value={hash} explorer={explorer} kind="tx" />}
   </div>;
 }
-export function Management({ launch, client, explorer }: { launch: Launch; client: ReadClient; explorer: string }) {
+export function Management({ launch, client, explorer, config }: { launch: Launch; client: ReadClient; explorer: string; config: SiteConfig }) {
   const { address, isConnected } = useAccount();
   const [owner, setOwner] = useState<string | null>(null), [ownerError, setOwnerError] = useState(''), [revision, setRevision] = useState(0);
   const [poolId, setPoolId] = useState(launch.poolId ?? '');
   const poolInput = useId();
-  const functions = useMemo(() => managementFunctions(launch.matchedBlocks), [launch.request]);
+  const [abi, setAbi] = useState<readonly unknown[] | undefined>(), [pools, setPools] = useState<string[]>([]), [poolError, setPoolError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController(); setAbi(undefined);
+    void sourceAbi(launch.sourceRepoUrl, launch.sourceCommit, launch.contractName ?? launch.name.replace(/[^\w$]/g, ''), controller.signal).then(value => { if (!controller.signal.aborted) setAbi(value); }).catch(() => {});
+    return () => controller.abort();
+  }, [launch.sourceRepoUrl, launch.sourceCommit, launch.contractName, launch.name]);
+  const functions = useMemo(() => functionsFromAbi(launch.matchedBlocks, abi), [launch.request, abi]);
+  useEffect(() => {
+    let active = true; setPools([]); setPoolError('');
+    if (!launch.hookAddress || launch.status !== 'live') return;
+    void poolsForHook(client, launch.chainId, launch.hookAddress as Address, BigInt(config.chains.find(c => c.id === launch.chainId)!.intakeFromBlock)).then(ids => { if (active) setPools(ids); }).catch(() => { if (active) setPoolError('Pool history is unavailable. Enter a pool id or retry the chain reads.'); });
+    return () => { active = false; };
+  }, [client, launch.chainId, launch.hookAddress, launch.status, config, revision]);
   const needsPool = functions.some(fn => fn.abi.inputs.some(input => input.name === 'poolId'));
   const poolValid = /^0x[\da-fA-F]{64}$/.test(poolId);
   useEffect(() => { setPoolId(launch.poolId ?? ''); }, [launch.id, launch.poolId]);
@@ -99,10 +115,10 @@ export function Management({ launch, client, explorer }: { launch: Launch; clien
       if (active) { setOwner(String(value)); setOwnerError(''); }
     } catch { if (active) { setOwner(null); setOwnerError('Owner could not be read. Controls stay locked; retry the reading.'); } } finally { running = false; } };
     void read(); const timer = setInterval(read, 20000); return () => { active = false; clearInterval(timer); };
-  }, [client, launch.hookAddress, launch.status, launch.request, revision]);
+  }, [client, launch.hookAddress, launch.status, launch.request, owners.length, revision]);
   const rows = (list: ManagementFn[]) => list.map(fn => <FunctionRow key={fn.sig} fn={fn} launch={launch} client={client} ownerAllowed={ownerAllowed} owner={owner} refresh={() => setRevision(v => v + 1)} revision={revision} explorer={explorer} poolId={poolId} />);
   return <div id="manage">
-    {needsPool && <div className="box management-pool"><label htmlFor={poolInput}>Pool id for these controls</label><input id={poolInput} className="mono-input" spellCheck={false} value={poolId} placeholder="0x… (32 bytes)" aria-describedby={`${poolInput}-help`} aria-invalid={!!poolId && !poolValid || undefined} onChange={event => setPoolId(event.target.value.trim())} /><p id={`${poolInput}-help`} className={poolId && !poolValid ? 'field-error' : 'small muted'}>{poolId && !poolValid ? 'Enter a full 32-byte pool id.' : 'Every pool-dependent reading and action below uses this pool id. Select the pool you intend to manage.'}</p></div>}
+    {needsPool && <div className="box management-pool"><label htmlFor={poolInput}>Pool id for these controls</label>{pools.length > 0 && <><label htmlFor={`${poolInput}-select`}>Pools using this hook</label><select id={`${poolInput}-select`} value={pools.includes(poolId) ? poolId : ''} onChange={event => setPoolId(event.target.value)}><option value="">Enter a pool id below</option>{pools.map(id => <option key={id} value={id}>{id}</option>)}</select></>}{poolError && <p role="status" className="small">{poolError}</p>}<input id={poolInput} className="mono-input" spellCheck={false} value={poolId} placeholder="0x… (32 bytes)" aria-describedby={`${poolInput}-help`} aria-invalid={!!poolId && !poolValid || undefined} onChange={event => setPoolId(event.target.value.trim())} /><p id={`${poolInput}-help`} className={poolId && !poolValid ? 'field-error' : 'small muted'}>{poolId && !poolValid ? 'Enter a full 32-byte pool id.' : 'Every pool-dependent reading and action below uses this pool id. Select the pool you intend to manage.'}</p></div>}
     <div className="management-grid">
     <section className="box management-panel" aria-labelledby="owner-h"><h2 id="owner-h">Owner controls</h2>
       {owners.length ? <><p className="small">{ownerAllowed ? 'Connected as the owner. Changes require a wallet transaction.' : 'Connect the owner wallet to use these'}</p>{!isConnected && <button className="link-button" onClick={() => document.getElementById('connect')?.click()}>Connect owner wallet</button>}

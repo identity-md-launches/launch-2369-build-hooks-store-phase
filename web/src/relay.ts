@@ -49,13 +49,15 @@ export async function importSource(relay: string, draft: Draft, signal?: AbortSi
   return { repoUrl: source.repoUrl, baseCommit: source.baseCommit };
 }
 
+const normalizeRepo = (url: unknown) => typeof url === 'string' ? url.replace(/\/+$/, '').replace(/\.git$/i, '').toLowerCase() : '';
+
 /** Automatic reuse is best effort. Explicit own-code imports keep their existing error flow. */
 export async function importProvenSource(relay: string | null, entry: ProvenLaunch, signal?: AbortSignal): Promise<ProvenLaunch | null> {
   if (!relay) return null;
   try {
     const data = object(await relayFetch(relay, '/import', { url: entry.repoUrl, ref: entry.commit, kind: 'contracts' }, signal));
     const source = object(data.source);
-    if (data.ok !== true || source.repoUrl !== entry.repoUrl || String(source.baseCommit).toLowerCase() !== entry.commit) return null;
+    if (data.ok !== true || normalizeRepo(source.repoUrl) !== normalizeRepo(entry.repoUrl) || String(source.baseCommit).toLowerCase() !== entry.commit) return null;
     return entry;
   } catch { return null; }
 }

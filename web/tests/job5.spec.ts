@@ -131,7 +131,7 @@ test('relay timeline discovers the current job through matching intake and rende
   await page.route(`${relay}/intake/**`, r => { intake.push(r.request().url()); return r.fulfill({ json: { entries: [{ requestId, action: 'launch.open', admission: { result: { jobId } } }] } }); });
   await page.route(`${relay}/jobs/${jobId}`, r => { jobs.push(r.request().url()); return r.fulfill({ json: { id: jobId, nodes: [{ key: 'build_contract_project', state: auditing ? 'accepted' : 'working' }, { key: 'audit_math', role: 'review', state: deploying ? 'accepted' : auditing ? 'working' : 'waiting' }], launch: { status: deploying ? 'deploying' : 'pending' } } }); });
   await page.goto(route); await expect(page.locator('.timeline li').nth(1)).toContainText('In progress');
-  expect(intake[0]).toContain('/intake/1/'); expect(jobs).toHaveLength(1);
+  expect(intake[0]).toContain('/intake/1/'); expect(jobs.length).toBeGreaterThanOrEqual(1); expect([...new Set(jobs)]).toEqual([`${relay}/jobs/${jobId}`]); // Timeline, notice and launch-record enrichment share the same discovered job.
   auditing = true; await page.clock.fastForward(20001); await expect(page.locator('.timeline li').nth(2)).toContainText('In progress');
   await expect(page.locator('.timeline li').nth(1)).toHaveClass('confirmed');
   deploying = true; await page.clock.fastForward(20001); await expect(page.locator('.timeline li').nth(3)).toContainText('Deployment: deploying');

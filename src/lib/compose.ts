@@ -7,7 +7,7 @@ import { matchProvenLaunch, type ProvenLaunch } from './proven.ts';
 export type LaunchType = 'A' | 'B' | 'C';
 export type Mode = 'prompt' | 'blocks';
 export type ParamValue = string | number;
-export type Fn = { sig: string; label: string };
+export type Fn = { sig: string; label: string; revertReason?: string };
 export type Param = {
   k: string; label: string; type: 'number' | 'text' | 'select' | 'address' | 'datetime' | 'textarea'; default: ParamValue;
   min?: number; max?: number; step?: number; unit?: string; options?: string[]; minLength?: number; maxLength?: number;
@@ -65,7 +65,7 @@ export const IMD_TREASURY = '0x3f252e859a277a86a3967c11d4e054b2f07a1f22';
 export const lowercaseAddresses = (text: string) => text.replace(/\b0x[\da-fA-F]{40}\b/g, address => address.toLowerCase());
 export const IMD_FEE_OPT_OUT = 'do not convert the fee to ETH and do not use any other pool';
 export const pairCurrency = (d: Draft) => d.type === 'A' && d.settings.pair === 'imd' ? 'IMD' : 'ETH';
-export type Context = { symbol: string; name: string; pair?: string; wallet?: string; destination?: string; jarAction?: string; feeBasis?: string; walletLimit?: string; baseRate?: string; feeApplies?: string; type?: LaunchType };
+export type Context = { symbol: string; name: string; pair?: string; wallet?: string; destination?: string; jarAction?: string; feeBasis?: string; walletLimit?: string; baseRate?: string; feeApplies?: string; type?: LaunchType; liquidityAccess?: string };
 export function tokenEntry(d: Draft) { return d.blocks.find(b => TOKEN_IDS.includes(b.id)); }
 export function context(d: Draft, wallet?: string): Context {
   const t = tokenEntry(d), s = d.settings;
@@ -76,7 +76,7 @@ export function context(d: Draft, wallet?: string): Context {
   const fee = activeBlocks(d).find(b => b.id === 'swap-fee' || b.id === 'fee-dir');
   const to = String(fee?.p.to ?? 'my wallet');
   const pair = pairCurrency(d);
-  return { ...c, type: d.type, pair, wallet: payingWallet,
+  return { ...c, type: d.type, pair, wallet: payingWallet, liquidityAccess: d.type === 'A' ? 'the factory and the owner' : 'the owner',
     destination: activeBlocks(d).some(b => b.id === 'fee-split') ? 'distribute it as specified by Split the fee'
       : `send it to ${to === "IMD's treasury" || to === 'treasury address' ? IMD_TREASURY : to === 'my wallet' ? payingWallet : to}`,
     feeBasis: `Fees are computed on the amount actually traded; when the swap specifies its ${pair} amount and the pool fills only part of it, the swap reverts rather than overpaying.`,
@@ -236,10 +236,11 @@ export function compose(d: Draft, wallet?: string): string {
     lines.push(`Keep every hook fee in IMD: ${IMD_FEE_OPT_OUT}.`);
     lines.push('The launch token may be currency0 or currency1; handle both orders.');
   }
+  if (!blocks.some(b => b.id === 'lp-fee')) lines.push('A pool initialized with the dynamic-fee flag (0x800000) is rejected at initialization.');
   if (!blocks.some(b => b.id === 'yield')) lines.push('The hook uses no outside pool, token, price feed or service; every price it needs comes from its own pool.');
   lines.push('Use mulDiv for every percentage calculation, including fees, shares, limits and price moves, to avoid intermediate multiplication overflow.');
   if (d.type === 'A') {
-    lines.push('The launch factory ($factory) may always add liquidity and collect fees with a zero-change modify. Enable beforeInitialize and only the callbacks the behavior above needs.');
+    lines.push(`The launch factory ($factory) may always add liquidity and collect fees with a zero-change modify. Enable beforeInitialize${blocks.some(b => ['allowlist','open-at','hours','anti-sniper'].includes(b.id)) ? ' and beforeAddLiquidity' : ''} and only the callbacks the behavior above needs.`);
     if (s.pool !== null) lines.push(`Pool: ${s.pool}% of the total supply seeds the pool; 10% goes to the swarm; the remaining ${90 - s.pool}% goes to ${walletOr(s.rem, wallet)}. economics.poolBps=${s.pool * 100}, in basis points of the total supply.`);
   }
   if (s.repo.trim()) lines.push(`Start from the creator’s own source at ${s.repo.trim()}${s.commit.trim() ? ` commit ${s.commit.trim()}` : ''}: audit it as imported code, adapt it to this launch, and keep its behavior.`);

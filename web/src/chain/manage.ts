@@ -1,5 +1,6 @@
 import { parseAbiItem, isAddress, getAddress, formatEther, type AbiFunction } from 'viem';
 import { BY_ID, type BlockEntry, type Fn } from '../../../src/lib/compose.ts';
+import pondside2424 from '../../../src/abi/PondsideGuard-2424-controls.json' with { type: 'json' };
 import legacyCatalog from '../../../src/blocks/legacy-catalog.json' with { type: 'json' };
 const LEGACY_BY_ID = Object.fromEntries(legacyCatalog.blocks.map(block => [block.id, block])) as typeof BY_ID;
 export type ManagementFn = Fn & { access: 'owner' | 'anyone' | 'user' | 'view'; abi: AbiFunction };
@@ -69,4 +70,35 @@ export function contractError(error: unknown) {
   if (/insufficient funds/i.test(text)) return 'Not enough ETH for gas. Add ETH on this chain and try again.';
   if (/revert/i.test(text)) return 'The contract refused this call. Check its current readings, permissions and arguments before retrying.';
   return 'Could not complete the call. Check the network connection and try again.';
+}
+
+/** Prefer the verified source ABI, retaining the catalog's labels and access rules. */
+export function functionsFromAbi(blocks: BlockEntry[], abi?: readonly unknown[]): ManagementFn[] {
+  const fallback = managementFunctions(blocks);
+  if (!abi) return fallback;
+  return fallback.flatMap(row => {
+    const matches = abi.filter((item: any): item is AbiFunction => item?.type === 'function' && item.name === row.abi.name) as AbiFunction[];
+    return matches.map(fn => ({ ...row, abi: { ...fn, inputs: fn.inputs.map(input => input.internalType?.includes('PoolId') ? { ...input, name: 'poolId' } : input) }, sig: `${fn.name}(${fn.inputs.map(i => `${i.type}${i.name ? ` ${i.name}` : ''}`).join(',')})` }));
+  });
+}
+export async function sourceAbi(repo: string | null, commit?: string, name?: string, signal?: AbortSignal) {
+  const match = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(repo ?? '');
+  if (!match || !/^[a-f\d]{40}$/i.test(commit ?? '') || !/^[A-Za-z_$][\w$]*$/.test(name ?? '')) return undefined;
+  try {
+    const response = await fetch(`https://raw.githubusercontent.com/${match[1]}/${match[2]}/${commit}/out/${name}.sol/${name}.json`, { signal: AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(10000)]) });
+    if (response.ok) { const artifact = await response.json(); if (Array.isArray(artifact.abi)) return artifact.abi as readonly unknown[]; }
+  } catch { if (signal?.aborted) return undefined; }
+  // This first launch did not publish out/. Its checked control ABI is retained
+  // from the exact source commit; newer contracts still fall back to catalog rows.
+  if (match[1].toLowerCase() === 'identity-md-launches' && match[2].toLowerCase() === 'launch-2424-deploy-one-contract-pondsideguard' && commit?.toLowerCase() === '5a9f6a36d659084e084a8abc08a55213c9516f07' && name === 'PondsideGuard') return pondside2424;
+  return undefined;
+}
+const REVERT_REASONS: Record<string, string> = {
+  claimFees: 'Nothing to claim yet', buyback: 'The jar is below its threshold', draw: 'The draw is not ready yet',
+  pause: 'Swaps are already paused', unpause: 'Swaps are not paused', settle: 'Nothing to settle yet',
+  claimPrize: 'Nothing to claim yet', placeOrder: 'This order cannot be placed with these values', cancelOrder: 'This order cannot be cancelled by this wallet',
+};
+export function managementError(error: unknown, name: string, reason?: string) {
+  if (/\bPaused\b|SwapsPaused/.test(String(error))) return 'Swaps are paused';
+  return /revert/i.test(String(error)) ? reason ?? REVERT_REASONS[name] ?? 'Check this action’s current readings and arguments.' : contractError(error);
 }

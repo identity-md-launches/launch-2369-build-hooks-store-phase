@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
+import { AdsProvider } from './Ads';
 import { Landing } from './Landing';
 import { Catalog, Featured } from './Catalog';
 import { Learn } from './Learn';
@@ -31,12 +32,13 @@ export function App({ config }: { config: SiteConfig }) {
   }, []);
   useEffect(() => {
     if (route === 'catalog') document.getElementById('catalog')?.scrollIntoView({ block: 'start' });
+    else if (route === 'store' && new URLSearchParams(hash.split('?')[1] ?? '').get('featured') === '1') document.getElementById('featured')?.scrollIntoView({ block: 'start' });
     else window.scrollTo(0, 0);
     document.title = `${route === 'store' || route === 'catalog' ? '' : `${route === 'mine' ? 'My hooks' : route[0].toUpperCase() + route.slice(1)} · `}The Hooks Store`;
-  }, [route]);
+  }, [route, hash]);
   const isStore = route === 'store' || route === 'catalog';
   const active = route === 'catalog' || route === 'hook' ? 'store' : route === 'launch' ? 'builder' : route;
-  return <ProvenLaunches>
+  return <ProvenLaunches><AdsProvider store={data.store} launches={data.launches}>
     <LaunchNotificationDelivery launches={data.launches} />
     <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
     <header className="top"><div className="wrap top-in">
@@ -50,8 +52,8 @@ export function App({ config }: { config: SiteConfig }) {
     </div></header>
     {config.inProgress && <div className="progress-banner">This site is being built; launches open when the banner goes away</div>}
     <main id="main" tabIndex={-1}>
-      {isStore ? <><Landing config={config} launches={data.launches} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
+      {isStore ? <><Landing config={config} launches={data.launches.filter(l => l.isHook !== false)} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
 
     </main>
-  </ProvenLaunches>;
+  </AdsProvider></ProvenLaunches>;
 }

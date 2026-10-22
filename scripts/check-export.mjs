@@ -1,0 +1,15 @@
+import {readFileSync,readdirSync,statSync,mkdirSync,writeFileSync} from 'node:fs';
+import {resolve,dirname,extname} from 'node:path';
+import {createHash} from 'node:crypto';
+const walk=p=>readdirSync(p).flatMap(n=>{const f=`${p}/${n}`;return statSync(f).isDirectory()?walk(f):[f];});
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const html=readFileSync('dist/index.html','utf8');const missing=[],absolute=[];
+const check=(base,url)=>{if(/^(https?:|data:|#)/.test(url))return;if(url.startsWith('/'))absolute.push(url);try{statSync(resolve(base,url));}catch{missing.push(url);}};
+for(const m of html.matchAll(/(?:src|href)="([^"]+)"/g))check('dist',m[1]);
+for(const f of walk('dist').filter(f=>f.endsWith('.css')))for(const m of readFileSync(f,'utf8').matchAll(/url\(["']?([^)'"\s]+)["']?\)/g))check(dirname(f),m[1]);
+const metadata={title:/<title>.+<\/title>/.test(html),favicon:/rel="icon"/.test(html),description:/name="description"/.test(html),ogTitle:/property="og:title"/.test(html),ogImage:/property="og:image"/.test(html)};
+const mismatches=walk('public').filter(f=>{try{return hash(f)!==hash(f.replace(/^public\//,'dist/'));}catch{return true;}});
+const scripts=walk('dist').filter(f=>f.endsWith('.js')).map(f=>readFileSync(f,'utf8')).join('\n');
+const result={metadata,missingReferences:missing,absoluteRuntimeReferences:absolute,publicMismatches:mismatches,testRelayAbsent:!scripts.includes('relay.hooks.test'),runtimeFiles:walk('dist').map(f=>({path:f,bytes:statSync(f).size,sha256:hash(f)}))};
+result.passed=Object.values(metadata).every(Boolean)&&!missing.length&&!absolute.length&&!mismatches.length&&result.testRelayAbsent;
+mkdirSync('artifacts',{recursive:true});writeFileSync('artifacts/export-integrity.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({passed:result.passed,runtimeFiles:result.runtimeFiles.length,missing:missing.length,absolute:absolute.length,publicMismatches:mismatches.length}));if(!result.passed)process.exitCode=1;

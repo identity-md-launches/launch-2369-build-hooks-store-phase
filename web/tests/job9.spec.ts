@@ -1,3 +1,4 @@
+import { expectFinding, expectReflow } from './v2-assertions';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import { encodeAbiParameters, parseAbiParameters, stringToHex, toHex, getAddress, zeroAddress } from 'viem';
@@ -26,28 +27,25 @@ async function setup(page: Page, d: Draft, mode: 'success' | 'failed-import' | '
   await page.route(`${site.relayUrl}/**`, r => r.fulfill({ json: { entries: [] } }));
   await page.route(`${site.relayUrl}/import`, r => {
     imports.push(r.request().postDataJSON());
-    return mode === 'failed-import' ? r.fulfill({ status: 502, body: '<html>proxy</html>' }) : r.fulfill({ json: { ok: true, source: { repoUrl: imports.at(-1).url, baseCommit: mode === 'wrong-pin' ? 'main' : imports.at(-1).ref } } });
+    return mode === 'failed-import' ? r.fulfill({ status: 502, body: '<html>proxy</html>' }) : r.fulfill({ json: { ok: true, source: { repoUrl: imports.at(-1).url + '.git', baseCommit: mode === 'wrong-pin' ? 'main' : imports.at(-1).ref } } });
   });
   await page.route(`${site.relayUrl}/check`, r => { checked.push(r.request().postDataJSON()); return r.fulfill({ json: { facts: [], plan: [], blockers: [], suggestions: [] } }); });
   await page.addInitScript(d => localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)), d);
-  await page.goto('#builder');
+  await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
   await page.locator('#connect').click(); await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
   return { imports, checked, indexReads: () => indexReads };
 }
-async function fits(page: Page, width: number) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  expect(await page.locator('button, input, select, textarea').evaluateAll(nodes => nodes.filter(n => { const r = n.getBoundingClientRect(); return r.width > 0 && (r.left < -1 || r.right > innerWidth + 1); }).map(n => n.outerHTML.slice(0, 120)))).toEqual([]);
-}
+async function fits(page: Page, width: number) { await expectReflow(page, width); }
 for (const width of [320, 390, 1440]) {
   test(`job9 automatic proven summary and exact request at ${width}`, async ({ page }) => {
     fs.mkdirSync(out, { recursive: true }); await page.setViewportSize({ width, height: 844 });
     const errors: string[] = [], failures: string[] = []; page.on('pageerror', e => errors.push(e.message)); page.on('response', r => { if (r.url().startsWith('http://127.0.0.1') && r.status() >= 400) failures.push(r.url()); });
     const d = draft(); d.prompt = 'Observe swaps.'; d.blocks.find(b => b.id === 'swap-fee')!.p.rate = 0.5;
     const calls = await setup(page, d);
-    await expect(page.locator('.preview .proven-line')).toHaveText(provenLine(proven));
-    await expect(page.locator('.preview')).toContainText(LAUNCH_WAIT);
+    await expect(page.locator('.hookcard .proven-line')).toHaveText(provenLine(proven));
+    await expect(page.locator('.hookcard')).toContainText(LAUNCH_WAIT);
     await expect(page.locator('#composed')).toContainText(`Start from the audited source at ${proven.repoUrl} commit ${proven.commit}`);
-    await expect(page.locator('.safety-notice')).toHaveCount(0);
+    await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0);
     expect(calls.imports).toEqual([{ url: proven.repoUrl, ref: proven.commit, kind: 'contracts' }]); expect(calls.indexReads()).toBe(1);
     await page.locator('.proven-line').scrollIntoViewIfNeeded(); await fits(page, width);
     await page.screenshot({ path: `${out}/summary-proven-${width}.jpg`, type: 'jpeg', quality: 72 });
@@ -59,7 +57,7 @@ for (const width of [320, 390, 1440]) {
     await expect(page.getByRole('row').filter({ hasText: 'Description length' })).toContainText(`${launchInput.objective.length} / 7,500 characters`);
     // Connecting a checksummed account is the real regression trigger; the body stays lowercase.
     const exact = page.getByTestId('launch-json'); await expect(exact).toContainText('"owner":"' + owner + '"');
-    await expect(page.locator('.safety-notice')).toHaveCount(0); await fits(page, width);
+    await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0); await fits(page, width);
     expect(errors).toEqual([]); expect(failures).toEqual([]);
   });
   for (const mode of ['failed-import', 'no-relay', 'index-failed', 'wrong-pin'] as const) test(`job9 silent ${mode} fallback at ${width}`, async ({ page }) => {
@@ -67,9 +65,9 @@ for (const width of [320, 390, 1440]) {
     const calls = await setup(page, draft(), mode);
     await expect(page.getByRole('button', { name: 'Continue to launch', exact: true })).toBeEnabled();
     await expect(page.locator('.proven-line')).toHaveCount(0); await expect(page.locator('#composed')).not.toContainText('Start from the audited source');
-    await expect(page.locator('.preview')).toContainText(LAUNCH_WAIT); await expect(page.locator('[role="alert"]')).toHaveCount(0);
+    await expect(page.locator('.hookcard')).toContainText(LAUNCH_WAIT); await expect(page.locator('[role="alert"]')).toHaveCount(0);
     expect(calls.imports.length).toBe(['failed-import', 'wrong-pin'].includes(mode) ? 1 : 0);
-    await page.locator('.preview h2').scrollIntoViewIfNeeded(); await fits(page, width);
+    await page.locator('.hookcard h2').scrollIntoViewIfNeeded(); await fits(page, width);
     if (mode === 'failed-import') await page.screenshot({ path: `${out}/summary-fallback-${width}.jpg`, type: 'jpeg', quality: 72 });
     await page.getByRole('button', { name: 'Continue to launch', exact: true }).click();
     const exact = JSON.parse(await page.getByTestId('launch-json').textContent() ?? '{}');
@@ -104,7 +102,8 @@ for (const width of [320, 390, 1440]) {
     };
     await page.route('https://rpc.mevblocker.io', rpc); await page.route('https://rpc.mainnet.chain.robinhood.com', rpc);
     await page.route('**/site-config.json', r => r.fulfill({ json: { ...site, chains: site.chains.map(c => ({ ...c, intakeFromBlock: head - 20 })) } }));
-    await page.addInitScript(() => {
+    await page.addInitScript(({requestId, owner}) => {
+      localStorage.setItem('hooks-store:pending', JSON.stringify([{chainId:1, requestId, payer:owner}]));
       const state = { asked: 0, delivered: [] as string[], permission: 'default' };
       (window as any).notificationTest = state;
       (window as any).Notification = class {
@@ -112,7 +111,7 @@ for (const width of [320, 390, 1440]) {
         static async requestPermission() { state.asked++; state.permission = 'granted'; return 'granted'; }
         constructor(title: string) { state.delivered.push(title); } close() {}
       };
-    });
+    }, {requestId, owner});
     await page.reload(); await page.goto(`#hook/1/${requestId}`);
     await expect(page.locator('.hook-page .proven-line')).toHaveText(provenLine(proven));
     await expect(page.locator('.addresses')).toContainText('Deployer'); await expect(page.locator('.addresses')).toContainText('hook not deployed yet');
@@ -139,12 +138,12 @@ test('job9 changing chain or block set invalidates a match; Advanced own source 
   const calls = await setup(page, draft()); await expect(page.locator('.proven-line')).toHaveCount(1);
   await page.locator('#s-chain').selectOption('1'); await expect(page.locator('.proven-line')).toHaveCount(0); await expect(page.locator('#composed')).not.toContainText('Start from the audited source');
   await page.locator('#s-chain').selectOption('4663'); await expect(page.locator('.proven-line')).toHaveCount(1);
-  await page.locator('.palette summary').filter({ hasText: /^Custom/ }).click();
-  await page.getByRole('button', { name: 'Add Custom rule', exact: true }).click(); await page.locator('.blk[data-block="custom"] textarea').fill('Observe swaps.'); await expect(page.locator('.proven-line')).toHaveCount(1);
-  await page.locator('.palette summary').filter({ hasText: /^Advanced/ }).click();
+  await page.locator('.shelf-tabs button').filter({ hasText: /^Custom/ }).click();
+  await page.getByRole('button', { name: 'Add Custom rule', exact: true }).click(); await page.locator('.rule[data-block="custom"] textarea').fill('Observe swaps.'); await expect(page.locator('.proven-line')).toHaveCount(1);
+  await page.locator('.shelf-tabs button').filter({ hasText: /^Advanced/ }).click();
   await page.getByRole('button', { name: 'Add Price oracle', exact: true }).click(); await expect(page.locator('.proven-line')).toHaveCount(0);
   await page.getByRole('button', { name: 'Remove Price oracle', exact: true }).click(); await expect(page.locator('.proven-line')).toHaveCount(1);
-  await page.getByText('Advanced: start from my own code', { exact: true }).click();
+  await page.getByRole('button', { name: /^From my own code/ }).click();
   const repo = 'https://github.com/the-hook-store/hooks-store-spec'; await page.locator('#s-repo').fill(repo); await page.locator('#s-commit').fill(proven.commit);
   await expect(page.locator('.proven-line')).toHaveCount(0); await page.getByRole('button', { name: 'Resolve repository', exact: true }).click();
   await expect(page.locator('#composed')).toContainText(`Start from the creator’s own source at ${repo}`);

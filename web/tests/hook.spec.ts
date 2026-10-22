@@ -7,7 +7,7 @@ for(const width of [320,390,1440])test(`Hook page fits ${width}px, exposes readi
   await interceptChains(page);await page.goto(route);
   await expect(page.getByRole('heading',{name:'PondGuard',exact:true})).toBeVisible();
   await expect(page.locator('.status-live')).toHaveText('Live');
-  await expect(page.getByRole('link',{name:'Launch page',exact:true})).toHaveAttribute('href','https://explorer.imd.fun/launches/702e6c9d-37ee-41ef-afcb-5d5e1af9f31b');
+  await expect(page.getByRole('link',{name:'Build page',exact:true})).toHaveAttribute('href','https://explorer.imd.fun/jobs/ba9d232e-9213-459b-963d-811773f73376');
   await expect(page.getByRole('heading',{name:'Owner controls'})).toBeVisible();
   await expect(page.locator('[data-function="pause"] button')).toBeDisabled();
   await expect(page.locator('[data-function="paused"] output')).toHaveText('No');

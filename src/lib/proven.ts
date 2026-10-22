@@ -1,7 +1,7 @@
 import type { Draft } from './compose.ts';
 
 export const PROVEN_LAUNCHES_URL = 'https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/proven-launches.json';
-export const LAUNCH_WAIT = 'Typically 1 to 3 hours: the swarm writes, tests, audits with four auditors and a judge, then deploys. From a proven launch, usually less.';
+export const LAUNCH_WAIT = 'Usually 30 to 90 minutes, sometimes up to 3 hours: the swarm writes, tests, audits with four auditors and a judge, then deploys. From a proven launch, usually less.';
 export type ProvenLaunch = {
   launchId: string; launchNumber: number; chainId: number; type: 'A' | 'B' | 'C'; blocks: string[];
   repoUrl: string; commit: string; name: string; verifiedAt: string;

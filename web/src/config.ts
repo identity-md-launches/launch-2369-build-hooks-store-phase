@@ -1,5 +1,5 @@
 import defaults from '../../public/site-config.json';
-export type SiteConfig = Omit<typeof defaults, 'relayUrl'> & { relayUrl: string | null };
+export type SiteConfig = Omit<typeof defaults, 'relayUrl' | 'ads'> & { relayUrl: string | null; ads?: Record<string, { registry: string; placements: string; launchNumber: number; commit: string }> };
 export const defaultConfig: SiteConfig = defaults;
 export const assetUrl = (file: string) => new URL(`${import.meta.env.BASE_URL}${file}`, document.baseURI).href;
 export async function loadConfig(): Promise<SiteConfig> {
@@ -9,6 +9,6 @@ export async function loadConfig(): Promise<SiteConfig> {
     const data = await response.json();
     if (data.schemaVersion !== 1 || typeof data.inProgress !== 'boolean' || !Array.isArray(data.chains) || data.chains.length !== 2 || !data.chains.every((c: { id: number }) => c.id === 1 || c.id === 4663)) throw new Error('Invalid configuration');
     if (data.relayUrl != null && (typeof data.relayUrl !== 'string' || !/^https:\/\//.test(data.relayUrl) || new URL(data.relayUrl).username || new URL(data.relayUrl).password || new URL(data.relayUrl).search || new URL(data.relayUrl).hash)) throw new Error('Invalid relay URL');
-    return { ...defaults, ...data };
+    return { ...defaults, ...data, ads: data.ads ?? {} };
   } catch { return defaults; } // Use the same reviewed configuration bundled in this export.
 }

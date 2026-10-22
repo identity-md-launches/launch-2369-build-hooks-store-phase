@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
+import { pendingRequests } from './MyHooks';
+import { submittedDraft } from './draft';
 import { hookHref, type Launch } from './types';
 
 const CHOICE = 'hooks-store:notification-choice:v1', WATCH = 'hooks-store:notification-watch:v1';
@@ -10,12 +13,14 @@ function saveWatch() { try { localStorage.setItem(WATCH, JSON.stringify([...watc
 function watch(launch: Launch) { watching.set(launch.id, hookHref(launch)); saveWatch(); }
 
 export function LaunchNotifications({ launch }: { launch: Launch }) {
+  const { address } = useAccount();
+  const own = address?.toLowerCase() === launch.payer.toLowerCase() || !!submittedDraft(launch.intakeChainId, launch.requestId, launch.request) || pendingRequests().some(p => p.chainId === launch.intakeChainId && p.requestId.toLowerCase() === launch.requestId.toLowerCase());
   const supported = typeof Notification !== 'undefined' && window.isSecureContext;
   const [asked, setAsked] = useState(hasChoice), [note, setNote] = useState('');
   useEffect(() => {
-    if (supported && Notification.permission === 'granted' && launch.status !== 'live' && launch.status !== 'failed') watch(launch);
-  }, [supported, launch.id, launch.status]);
-  if (!supported || asked || Notification.permission !== 'default' || launch.status === 'live' || launch.status === 'failed') return note ? <p role="status">{note}</p> : null;
+    if (own && supported && Notification.permission === 'granted' && launch.status !== 'live' && launch.status !== 'failed') watch(launch);
+  }, [own, supported, launch.id, launch.status]);
+  if (!own || !supported || asked || Notification.permission !== 'default' || launch.status === 'live' || launch.status === 'failed') return note ? <p role="status">{note}</p> : null;
   return <div className="notice notification-prompt"><p>Let this browser notify you when your launch goes live? Keep the site open to receive it.</p><div className="actions">
     <button className="btn" onClick={async () => {
       rememberChoice(); setAsked(true);
@@ -28,6 +33,7 @@ export function LaunchNotifications({ launch }: { launch: Launch }) {
 
 /** Runs throughout hash navigation. No service worker or closed-tab delivery is promised. */
 export function LaunchNotificationDelivery({ launches }: { launches: Launch[] }) {
+  const { address } = useAccount();
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(WATCH) ?? '[]');
@@ -36,7 +42,7 @@ export function LaunchNotificationDelivery({ launches }: { launches: Launch[] })
   }, []);
   useEffect(() => {
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-    for (const launch of launches) if (watching.has(launch.id) && ['live', 'failed'].includes(launch.status)) {
+    for (const launch of launches) if (watching.has(launch.id) && (launch.payer.toLowerCase() === address?.toLowerCase() || !!submittedDraft(launch.intakeChainId, launch.requestId, launch.request) || pendingRequests().some(p => p.chainId === launch.intakeChainId && p.requestId.toLowerCase() === launch.requestId.toLowerCase())) && ['live', 'failed'].includes(launch.status)) {
       const route = watching.get(launch.id)!; watching.delete(launch.id); saveWatch();
       if (launch.status === 'live') {
         try {
@@ -45,6 +51,6 @@ export function LaunchNotificationDelivery({ launches }: { launches: Launch[] })
         } catch { /* Some mobile browsers require a service worker; the hook page still updates. */ }
       }
     }
-  }, [launches]);
+  }, [launches, address]);
   return null;
 }

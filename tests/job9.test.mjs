@@ -74,12 +74,12 @@ test('runtime proven index has no bundled fallback and validates source pins', a
 
 test('proven source resolves through the relay import first; absent/failed/mismatched imports compose from scratch', async t => {
   const calls = [];
-  t.mock.method(globalThis, 'fetch', async (url, options) => { calls.push([url, JSON.parse(options.body)]); return Response.json({ ok: true, source: { repoUrl: proven.repoUrl, baseCommit: proven.commit } }); });
+  t.mock.method(globalThis, 'fetch', async (url, options) => { calls.push([url, JSON.parse(options.body)]); return Response.json({ ok: true, source: { repoUrl: proven.repoUrl + '.git', baseCommit: proven.commit } }); });
   const source = await importProvenSource('https://relay.test', proven);
   assert.equal(source, proven); assert.deepEqual(calls, [['https://relay.test/import', { url: proven.repoUrl, ref: proven.commit, kind: 'contracts' }]]);
   assert.equal(C.body({ ...draft(), proven: source }, payer).baseCommit, proven.commit);
   assert.equal(await importProvenSource(null, proven), null); assert.equal(calls.length, 1);
-  for (const answer of [Response.json({ ok: false }), new Response('<html>proxy</html>', { status: 502 }), Response.json({ ok: true, source: { repoUrl: proven.repoUrl, baseCommit: 'main' } })]) {
+  for (const answer of [Response.json({ ok: false }), new Response('<html>proxy</html>', { status: 502 }), Response.json({ ok: true, source: { repoUrl: proven.repoUrl + '.git', baseCommit: 'main' } })]) {
     t.mock.method(globalThis, 'fetch', async () => answer);
     const source = await importProvenSource('https://relay.test', proven);
     assert.equal(source, null); assert.equal(C.body({ ...draft(), proven: source ?? undefined }, payer).repoUrl, undefined);

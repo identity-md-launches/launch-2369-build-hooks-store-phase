@@ -316,21 +316,31 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   // SPEC 3.2: the card never exceeds the viewport. Its details scroll inside it, sized so that at load the whole card,
   // actions included, fits below the page head; it never shrinks the details below a few lines.
   const cardRef = useRef<HTMLDivElement>(null);
+  const loadDetails = useRef({ viewport: '', height: 0 });
   useLayoutEffect(() => {
+    let frame = 0;
     const fit = () => {
       const card = cardRef.current, scroller = card?.querySelector<HTMLElement>('.hc-scroll');
       if (!card || !scroller) return;
       const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 0;
       const fixed = card.offsetHeight - scroller.offsetHeight;
-      const top = card.getBoundingClientRect().top + window.scrollY;
-      const room = Math.min(innerHeight - top - 16, innerHeight - header - 32) - fixed;
-      // The floor gives way on very short screens so the card itself still fits the viewport.
-      const floor = Math.max(24, Math.min(innerWidth >= 1100 ? 140 : 64, innerHeight - 16 - fixed));
-      card.style.setProperty('--scroll-room', `${Math.max(floor, Math.floor(room))}px`);
+      const top = card.getBoundingClientRect().top;
+      const desktop = innerWidth >= 1100;
+      const viewport = `${innerWidth}:${innerHeight}`;
+      const available = innerHeight - header - 32 - fixed;
+      const room = innerHeight - Math.max(desktop ? header + 16 : 0, top) - 16 - fixed;
+      const floor = innerWidth < 720 ? innerHeight * .4 : desktop ? Math.min(140, available) : 140;
+      let size = Math.max(24, floor, Math.floor(room));
+      if (desktop && top <= header + 17 && loadDetails.current.viewport === viewport) {
+        size = Math.max(size, Math.min(loadDetails.current.height, available));
+      }
+      card.style.setProperty('--scroll-room', `${size}px`);
+      if (loadDetails.current.viewport !== viewport) loadDetails.current = { viewport, height: scroller.clientHeight };
     };
+    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(fit); };
     fit();
-    addEventListener('resize', fit);
-    return () => removeEventListener('resize', fit);
+    addEventListener('scroll', schedule, { passive: true }); addEventListener('resize', schedule);
+    return () => { cancelAnimationFrame(frame); removeEventListener('scroll', schedule); removeEventListener('resize', schedule); };
   });
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setCopied('Copied.'); } catch { setCopied('Copy failed. Select the text and copy it by hand.'); }
@@ -347,11 +357,11 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   for (const issue of issues) {
     const key = `${issue.field}:${issue.message}`; if (seen.has(key)) continue; seen.add(key);
     const placeholder = issue.field === 'settings.chain' ? placeholders.find(p => /chain/.test(p)) : issue.field === 'settings.token' ? placeholders.find(p => /token/.test(p)) : undefined;
-    findings.push({ key, title: issue.message, quote: placeholder, tail: placeholder ? 'in the request.' : undefined, jump: () => jump(issue.field) });
+    findings.push({ key, title: issue.message, quote: placeholder, tail: undefined, jump: () => jump(issue.field) });
   }
   textFindings.forEach((finding, i) => {
     const words = quotes[i], field = words ? null : findingField(finding, draft.mode);
-    findings.push({ key: `text:${finding.code}:${i}`, title: finding.message, quote: words || undefined, tail: words ? 'in the request.' : undefined,
+    findings.push({ key: `text:${finding.code}:${i}`, title: finding.message, quote: words || undefined, tail: undefined,
       jump: () => field ? jump(field) : openSheet(words ? phrases.indexOf(words) : null) });
   });
 
@@ -585,7 +595,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       ? <><p className="small muted">Launch is locked until these are fixed. One line each.</p>
         <div className="list" tabIndex={0} aria-label="Findings">{findings.map(f => <div className="finding" key={f.key}>
           <strong>{f.title}</strong><button className="btn tiny" type="button" onClick={f.jump}>Jump to it<span className="sr">: {f.title}</span></button>
-          {f.quote && <em>The request says <q>{f.quote}</q> {f.tail}</em>}
+          {f.quote && <em>The request says <q>{f.quote}</q>.</em>}
         </div>)}</div></>
       : <p className="small">Nothing to fix. The request is consistent.</p>}
   </section>;

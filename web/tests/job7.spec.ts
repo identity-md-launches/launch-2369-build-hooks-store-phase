@@ -1,3 +1,4 @@
+import { expectFinding, expectReflow } from './v2-assertions';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import { encodeAbiParameters, encodeEventTopics, erc20Abi, getAddress, keccak256, parseAbiParameters, stringToHex, toFunctionSelector, toHex } from 'viem';
@@ -29,29 +30,29 @@ test('mismatched currency names the sentence and blocks the free check and direc
   const d = validDraft(); d.prompt = `Take 1% of the ETH side of every swap as a hook fee, settled in ETH, and send it to ${owner}.`;
   await setup(page, d); let calls = 0;
   await page.route(`${relay}/check`, r => { calls++; return r.fulfill({ json: checked }); });
-  await page.goto('#builder');
-  await expect(page.getByRole('region', { name: 'Request needs correction' }).or(page.locator('.safety-notice'))).toContainText('fee side must be IMD');
-  await expect(page.locator('.safety-notice')).toContainText(d.prompt);
+  await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
+  await expectFinding(page, 'fee side must be IMD');
+  await expectFinding(page, d.prompt);
   await expect(page.getByRole('button', { name: 'Check with the swarm (free)', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
-  await page.goto('#launch'); await expect(page.locator('.safety-notice')).toContainText('Settle the fee in IMD');
+  await page.goto('#launch'); await expectFinding(page, 'Settle the fee in IMD');
   await expect(page.getByRole('button', { name: 'Launch hook', exact: true })).toBeDisabled();
-  await page.getByRole('link', { name: 'Edit in Builder' }).first().click();
+  await page.getByRole('link', { name: 'Edit in Builder' }).first().click(); await page.getByRole('button', { name: 'Open all', exact: true }).click();
   await page.locator('#p-text').fill(d.prompt.replaceAll('ETH', 'IMD'));
-  await expect(page.locator('.safety-notice')).toHaveCount(0);
+  await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0);
   await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
   await expect(page.locator('.swarm-panel')).toContainText('No blockers reported'); expect(calls).toBe(1);
 });
 
 test('my wallet is resolved from the connected payer and treasury choices use the pinned address', async ({ page }) => {
   let d = validDraft(); d.mode = 'blocks'; d.prompt = ''; d = addBlock(d, 'swap-fee');
-  await setup(page, d); await injectedOwner(page); await page.goto('#builder');
-  await expect(page.locator('.safety-notice')).toContainText('Connect the paying wallet');
+  await setup(page, d); await injectedOwner(page); await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
+  await expectFinding(page, 'Connect the paying wallet');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   await page.locator('#connect').click(); await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
   await expect(page.locator('#composed')).toContainText(`send it to ${owner.toLowerCase()}`);
-  await expect(page.locator('.safety-notice')).toHaveCount(0);
-  await page.locator('.blk[data-block="swap-fee"] select').last().selectOption("IMD's treasury");
+  await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0);
+  await page.locator('.rule[data-block="swap-fee"] select').last().selectOption("IMD's treasury");
   await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86a3967c11d4e054b2f07a1f22');
   await expect(page.locator('#composed')).toContainText('settled in IMD');
   await expect(page.locator('#composed')).toContainText('do not convert the fee to ETH and do not use any other pool');
@@ -62,24 +63,24 @@ test('my wallet is resolved from the connected payer and treasury choices use th
 test('an explicit recipient recovered from an older request stays visible and is not rerouted to my wallet', async ({ page }) => {
   const d = addBlock(validDraft(), 'swap-fee'), recipient = '0x9a50fd22bcefd3774d796e775a467a7f743e0ab0';
   d.mode = 'blocks'; d.prompt = ''; d.blocks.at(-1)!.p.to = recipient;
-  await setup(page, d); await page.setViewportSize({ width: 320, height: 844 }); await page.goto('#builder');
-  await expect(page.locator('.blk[data-block="swap-fee"]')).toContainText(`Recipient from the previous request: ${recipient}`);
+  await setup(page, d); await page.setViewportSize({ width: 320, height: 844 }); await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
+  await expect(page.locator('.rule[data-block="swap-fee"]')).toContainText(`Recipient from the previous request: ${recipient}`);
   await expect(page.locator('#composed')).toContainText(`send it to ${recipient}`);
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
-  await expect(page.locator('.blk[data-block="swap-fee"] .field-error')).toContainText('choose one of the available options');
-  await page.locator('.blk[data-block="swap-fee"]').getByLabel('Send to').selectOption("IMD's treasury");
+  await expect(page.locator('.rule[data-block="swap-fee"] .field-error')).toContainText('choose one of the available options');
+  await page.locator('.rule[data-block="swap-fee"]').getByLabel('Send to').selectOption("IMD's treasury");
   await expect(page.locator('#composed')).toContainText('send it to 0x3f252e859a277a86a3967c11d4e054b2f07a1f22');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled(); await fits(page, 320);
 });
 
 test('unavailable lending deployments and contradictory rules lock the composed request', async ({ page }) => {
   const d = validDraft(); d.mode = 'blocks'; d.type = 'B'; d.settings.hname = 'SafetyHook'; d.blocks.push({ id: 'yield', p: { proto: 'Aave' } });
-  await setup(page, d); await page.goto('#builder');
-  await expect(page.locator('.safety-notice')).toContainText('Yield on idle liquidity: no verified deployment.');
+  await setup(page, d); await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
+  await expectFinding(page, 'Yield on idle liquidity: no verified deployment.');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   d.blocks = [{ id: 'token', p: { name: 'Pondside', symbol: 'POND' } }, { id: 'lp-fee', p: { lo: .3, hi: 1 } }, { id: 'pool-rules', p: { tier: '0.3' } }];
-  await page.goto('#store'); await page.evaluate(d => localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)), d); await page.goto('#builder');
-  await expect(page.locator('.safety-notice')).toContainText('Dynamic LP fee cannot be combined with Pool rules');
+  await page.goto('#store'); await page.evaluate(d => localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)), d); await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
+  await expectFinding(page, 'Dynamic LP fee cannot be combined with Pool rules');
   await expect(page.getByRole('button', { name: 'Check with the swarm (free)', exact: true })).toBeDisabled();
 });
 
@@ -89,12 +90,12 @@ test('fixed fact conflict is visible and persists on Launch until an explicit re
   await setup(page, d);
   const fact = { id: 'admin', label: 'No owner functions are permitted by default.', state: 'fixed' };
   await page.route(`${relay}/check`, r => r.fulfill({ json: { facts: [fact], plan: [], blockers: [], suggestions: [] } }));
-  await page.goto('#builder'); await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
+  await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click(); await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
   await expect(page.locator('.swarm-panel')).toContainText('Fixed facts conflict with your request. Launch is locked.');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   await page.goto('#launch'); await expect(page.locator('.swarm-panel')).toContainText(fact.label);
   await expect(page.getByRole('button', { name: 'Launch hook', exact: true })).toBeDisabled();
-  await page.getByRole('link', { name: 'Edit in Builder' }).click();
+  await page.getByRole('link', { name: 'Edit in Builder' }).click(); await page.getByRole('button', { name: 'Open all', exact: true }).click();
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await page.locator('#p-text').fill('Observe swaps. Opt out of fixed fact admin. The owner may pause swaps.');
   await page.getByRole('button', { name: 'Stack blocks', exact: true }).click();
@@ -108,7 +109,7 @@ test('the IMD fee opt-out resolves the fixed ETH conversion default in the under
   const d = addBlock(validDraft(), 'swap-fee'); d.mode = 'blocks'; d.blocks.at(-1)!.p.to = "IMD's treasury"; d.prompt = '';
   await setup(page, d);
   await page.route(`${relay}/check`, r => r.fulfill({ json: { facts: [{ id: 'hook_fee', label: 'The IMD-side fee is sold for ETH unless told otherwise.', state: 'fixed' }], plan: [], blockers: [], suggestions: [] } }));
-  await page.goto('#builder'); await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
+  await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click(); await page.getByRole('button', { name: 'Check with the swarm (free)', exact: true }).click();
   await expect(page.locator('.swarm-panel')).toContainText('Your request explicitly opts out');
   await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeEnabled();
 });
@@ -151,7 +152,7 @@ for (const width of [320, 390, 1440]) for (const saved of [true, false]) test(`b
   await page.getByRole('button', { name: 'Fix in Builder', exact: true }).click();
   await expect(page).toHaveURL(/#builder$/); await expect(page.locator('.correction')).toContainText(blockedReason);
   await expect(page.locator('#s-pool')).toHaveValue('65'); await expect(page.locator('#s-pair')).toHaveValue(d.settings.pair);
-  await expect(page.locator('.sum')).toContainText(d.prompt);
+  await expect(page.locator('#composed')).toContainText(d.prompt);
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await expect(page.locator('#p-text')).toHaveValue(d.prompt);
   await expect(page.locator('.correction pre')).toHaveText(request);
@@ -170,12 +171,7 @@ for (const width of [320, 390, 1440]) for (const saved of [true, false]) test(`b
   await expect(page.getByTestId('launch-json')).toContainText('30-second cooldown');
   expect(parsed.type).toBe('A'); expect(intakeAbi.length).toBeGreaterThan(0);
 });
-async function fits(page: Page, width: number) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  expect(await page.locator('button, input, select, textarea').evaluateAll(els => els.filter(el => {
-    const r = el.getBoundingClientRect(); return r.width && r.height && (r.left < -1 || r.right > innerWidth + 1);
-  }).map(el => el.outerHTML.slice(0, 120)))).toEqual([]);
-}
+async function fits(page: Page, width: number) { await expectReflow(page, width); }
 
 test('a reorg retracts the pond announcement and its age, including after another minute', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-21T20:00:00Z') }); await setup(page);

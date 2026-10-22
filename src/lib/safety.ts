@@ -164,7 +164,7 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   conflict(findRule(/^Take [\d.]+% of .* every buy and sell/), findRule(/^Take [\d.]+% of .* every buy and [\d.]+%/), 'Choose Swap fee or Different buy and sell fees.');
   conflict(findRule(/pool uses a dynamic LP fee/), findRule(/fee tier is [\d.]+%/), 'Dynamic LP fees conflict with a fixed Pool rules fee tier.');
   conflict(findRule(/PoolManager[’']s donate/), findRule(/Donations to the pool are allowed from (?:nobody|only the owner|only allowlisted addresses)/), 'LP fee sharing donates from the hook. The donation restriction must explicitly permit that, or be removed.');
-  conflict(findRule(/Liquidity added to (?:the pool|a position) is locked/), findRule(/Liquidity can always be removed while paused|Liquidity can still be removed during the pause|Liquidity changes are always allowed/), 'A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception.');
+  conflict(findRule(/Liquidity added to (?:the pool|a position) is locked/), findRule(/Liquidity can always be removed while paused|Liquidity can still be removed during the pause|Liquidity changes are always allowed|removing liquidity is never restricted/), 'A liquidity lock conflicts with the other rule’s promise that liquidity can always be changed or removed. Remove one rule or compose an explicit compatible exception.');
   const open = /Reject every swap before ([\d-]+ [\d:]+) UTC/.exec(text), sunset = /After ([\d-]+ [\d:]+) UTC every (?:other )?rule/.exec(text);
   if (open && sunset && Date.parse(sunset[1] + 'Z') <= Date.parse(open[1] + 'Z')) add('contradiction', `${open[0]}\nConflicts with: ${sunset[0]}`, 'Sunset must be after the scheduled opening.');
   const description = /<description>([\s\S]*?)<\/description>/.exec(text)?.[1] ?? '';
@@ -209,7 +209,9 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   const hookFeeIds = ['swap-fee', 'fee-dir', 'fee-size', 'fee-fade', 'fee-vol', 'jar', 'pot'];
   // LP fees, pool fee tiers and distribution percentages are not hook charges.
   const nonChargingRules = new Set(['lp-fee', 'pool-rules', 'fee-split', 'lp-share'].map(id => catalogRules.get(id)).filter(Boolean));
-  const feeClauses = [...rules.filter(rule => !nonChargingRules.has(rule)), ...written].flatMap(splitFeeClauses);
+  // A liquidity-position exemption says nothing about the fee on swaps. Match
+  // this complete catalog clause so arbitrary written swap prohibitions still count.
+  const feeClauses = [...rules.filter(rule => !nonChargingRules.has(rule)), ...written].flatMap(splitFeeClauses).filter(clause => clause !== 'A one-sided liquidity position is not a swap: it is not limited by this rule and pays no hook fee.');
   const zeroFee = lines.find(line => /^Hook fee rate: 0%\.$/.test(line));
   const hookFeeClauses = [...written.flatMap(splitFeeClauses), ...hookFeeIds.map(id => catalogRules.get(id)).filter((rule): rule is string => !!rule)];
   if (zeroFee) conflict(zeroFee, hookFeeClauses.find(s => chargedScopes(s).size > 0 || writtenFeeClauses(s).some(clause => !/\b0+(?:\.0+)?%/.test(normalizeFeeAmounts(clause)))), 'The generated zero-fee rule conflicts with a charging rule. Resolve the written fee before checking or paying.');

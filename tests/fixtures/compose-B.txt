@@ -4,10 +4,11 @@ Only pools whose currency0 is native ETH may be initialized with this hook; any 
 In this hook, the token is the pool's non-ETH currency and its total supply is that token's totalSupply().
 Every pool-dependent view, state, window and limit is keyed by PoolId and isolated per pool; pass the pool id to each pool-dependent function.
 The hook does exactly the following, and nothing else:
-1. For the first 10 minutes of block timestamp after the pool's first swap, each wallet may buy at most 1.0% of the token's total supply in total; larger buys revert. Track the window and each wallet's bought total separately by PoolId. Expose windowEndsAt(PoolId poolId) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.
-2. A wallet must wait at least 30 seconds of block timestamp between its swaps in this pool. Track each wallet's next swap time separately by PoolId. Expose nextSwapAt(PoolId poolId, address wallet) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.
+1. For the first 10 minutes of block timestamp after the pool's first swap, each wallet may buy at most 1.0% of the token's total supply in total; larger buys revert. Track the window and each wallet's bought total separately by PoolId. Expose windowEndsAt(PoolId poolId) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit. While this rule is active, adding liquidity is allowed only to the owner; removing liquidity is never restricted. Enable beforeAddLiquidity.
+2. A wallet must wait at least 30 seconds of block timestamp between its swaps in this pool. Track each wallet's next swap time separately by PoolId. Expose nextSwapAt(PoolId poolId, address wallet) as a view. A wallet means tx.origin; several wallets or a shared relayer can defeat the limit. A one-sided liquidity position is not a swap: it is not limited by this rule and pays no hook fee.
 Owner 0x6cba4751742f6989fa224b2dc5d5d52fcef98a34 is $owner. No owner functions, no backend signer, no upgrade path.
 Hook fee rate: 0%.
+A pool initialized with the dynamic-fee flag (0x800000) is rejected at initialization.
 The hook uses no outside pool, token, price feed or service; every price it needs comes from its own pool.
 Use mulDiv for every percentage calculation, including fees, shares, limits and price moves, to avoid intermediate multiplication overflow.
 Keep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.

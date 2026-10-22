@@ -21,7 +21,7 @@ function cardinal(text: string): number | null {
     }
   }
   const tokens = text.split(' ');
-  if (tokens.length === 1) return small[tokens[0]] ?? null;
+  if (tokens.length === 1) return small[tokens[0]] ?? ({ hundred: 100, thousand: 1000 }[tokens[0]] ?? null);
   if (tokens.length === 2 && small[tokens[0]] >= 20 && small[tokens[0]] % 10 === 0 && small[tokens[1]] > 0 && small[tokens[1]] < 10) return small[tokens[0]] + small[tokens[1]];
   return null;
 }
@@ -52,7 +52,12 @@ const amountAtom = `(?:\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?|\\.\\d+
 /** Parse a whole amount phrase. Never turn the suffix of a mixed number into its rate. */
 export function normalizeFeeAmounts(text: string): string {
   return text.toLowerCase()
-    .replace(new RegExp(`(?<![\\w.,])(${amountAtom}(?:[ -]+${amountAtom})*)\\s*(percent|per cent|basis points?|bps|%)(?![a-z])`, 'g'), (_m, phrase: string, unit: string) => {
+    .replace(/\b(\d+)\s*\/\s*(\d+)\b/g, (_m, a, b) => Number(b) > 0 ? `${Number(a) / Number(b) * 100}%` : 'unresolved-amount')
+    .replace(new RegExp(`\\b(${amountAtom})\\s+(?:in(?: every)?|out of)\\s+(?:a |an |every )?(${amountAtom})\\b`, 'g'), (_m, a, b) => {
+      const n = spelledAmount(a), d = spelledAmount(b);
+      return n !== null && d !== null && d > 0 ? `${n / d * 100}%` : 'unresolved-amount';
+    })
+    .replace(new RegExp(`(?<![\\w.,])(${amountAtom}(?:[ -]+${amountAtom})*)\\s*(percent|per cent|pct\.?|basis points?|bps|%)(?![a-z])`, 'g'), (_m, phrase: string, unit: string) => {
       const value = spelledAmount(phrase);
       return value === null ? 'unresolved-amount' : `${/basis|bps/.test(unit) ? value / 100 : value}%`;
     })
@@ -65,7 +70,7 @@ export const isFeeProhibition = (text: string) => /\b(?:(?:no|without(?: chargin
 const amountPattern = /(?<![\w.,])(\d+(?:\.\d+)?|\.\d+)\s*(%|IMD\b|ETH\b)/gi;
 const tradePattern = /\b(?:swaps?|swapp(?:ed|ing|ers?)|trades?|trad(?:ed|ing|ers?)|buys?|buy(?:ing|ers?)|bought|sells?|sell(?:ing|ers?)|sold|volume)\b/i;
 const feePattern = /\b(?:fees?|tax(?:es)?|levy|levies|skim|jar|pot|commission|toll)\b/i;
-const chargePattern = /\b(?:take|takes|taking|charge|charges|charging|collect|collects|collecting|deduct|deducts|withhold|withholds|levy|levies|skim|skims|skimming|keep|keeps|keeping|retain|retains|retaining|route|routes|routing|divert|diverts|diverting|accrues?|receives?|pay|pays|paid|paying)\b/i;
+const chargePattern = /\b(?:take|takes|taking|charge|charges|charging|collect|collects|collecting|deduct|deducts|withhold|withholds|levy|levies|skim|skims|skimming|keep|keeps|keeping|retain|retains|retaining|route|routes|routing|divert|diverts|diverting|accrues?|receives?|gets?|earns?|pay|pays|paid|paying)\b/i;
 // Trigger/limit amounts are not charges. A separate fee in the same clause still needs a rate.
 const nonChargeBefore = /\b(?:at most|at least|up to|limit(?:ed)?(?: to)?|maximum|minimum|larger than|smaller than|above|below|exceeds?|moves?(?: by)?|drops?(?: by)?|rises?(?: by)?)\s*$/i;
 const nonChargeAfter = /^\s*(?:of (?:the |its )?(?:total )?supply|(?:price )?(?:move|drop|rise|threshold|limit)\b)/i;
@@ -80,7 +85,7 @@ export function writtenFeeClauses(text: string): string[] {
     if (isFeeProhibition(clause)) return false;
     const amounts = amountMatches(clause), fee = feePattern.test(clause), charge = chargePattern.test(clause), trade = tradePattern.test(clause);
     if (fee) return true;
-    const writtenAmount = amounts.length > 0 || /%|unresolved-amount|\b(?:percent(?:age)?|per cent|basis points?|bps|(?:half|quarter|third|[a-z]+ths?) of)\b/i.test(normalizeFeeAmounts(clause));
+    const writtenAmount = amounts.length > 0 || /%|unresolved-amount|\b(?:percent(?:age)?|per cent|pct|basis points?|bps|(?:half|quarter|third|[a-z]+ths?) of)\b/i.test(normalizeFeeAmounts(clause));
     if (writtenAmount && (charge || trade) && !thresholdOnly(clause)) return true;
     return charge && trade && !/\b(?:record|records|logs?|statistics|counts?|events?|information|data)\b/i.test(clause);
   });
@@ -135,7 +140,7 @@ export function writtenFeeTargets(text: string): string[] {
   const ownerReceives = /\b((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-fA-F]{40})\s+(?:(?:(?:is|are|will be|shall be|gets?)\s+)?(?:paid|credited|owed|given|sent)(?!\s+(?:to|by|in|as|out)\b)|receives?|accrues?|gets?|earns?|takes?|keeps?|collects?)\b/gi;
   // A passive payee at the head of a clause ('Alice is paid 1% of every swap') names a destination,
   // known or not; an unknown one stays unresolved so the request asks for its address.
-  const passivePayee = /^(?:then\s+)?((?:(?:the|my|our)\s+)?[a-z][\w'’-]*(?:\s+[a-z][\w'’-]*){0,2}|0x[\da-fA-F]{40})\s+(?:is|are|will be|shall be|gets?)\s+(?:paid|credited|owed|given|sent)\b(?!\s+(?:to|by|in|as|out)\b)/gi;
+  const passivePayee = /^(?:then\s+)?((?:(?:the|my|our)\s+)?[a-z][\w'’-]*(?:\s+[a-z][\w'’-]*){0,2}|0x[\da-fA-F]{40})\s+(?:(?:is|are|will be|shall be|gets?)\s+(?:paid|credited|owed|given|sent)|receives?|accrues?|gets?|earns?|keeps?|collects?)\b(?!\s+(?:to|by|in|as|out)\b)/gi;
   const notPayee = /\b(?:fees?|tax(?:es)?|levy|levies|commission|toll|amount|rate|it|they|them|this|that|swappers?|traders?|buyers?|sellers?|swaps?|trades?|hook|pool|pot|jar|remainder|rest|revenue|proceeds)\b|%/i;
   const explicitTarget = /\b(?:to|for)\s+((?:the )?owner|my wallet|(?:(?:the|IMD['’]s) )?treasury|0x[\da-fA-F]{40})\b/gi;
   const payTarget = /\b(?:pay|paying|credit|reward)\s+(0x[\da-f]{40}|[^\d%;,.!?]+?)\s+(?=\d+(?:\.\d+)?\s*(?:%|imd\b|eth\b))/gi;

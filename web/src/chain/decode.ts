@@ -1,4 +1,4 @@
-import { decodeEventLog, hexToString, isAddress, type Hex, type Abi } from 'viem';
+import { decodeEventLog, hexToString, isAddress, encodeAbiParameters, keccak256, type Hex, type Abi } from 'viem';
 import intakeJson from '../../../src/abi/intake.json' with { type: 'json' };
 import { BLOCKS, BY_ID, IMD_TREASURY, TOKEN_IDS, defaults, fill, shortOf, type BlockDef, type BlockEntry, type Context } from '../../../src/lib/compose.ts';
 import { CHAINS, type Launch } from '../types.ts';
@@ -95,7 +95,7 @@ export function requestContext(objective: string, payer?: string): Context {
   const symbol = a?.[2] ?? c?.[3] ?? (type === 'C' ? 'the token' : 'the pool’s token');
   const pair = a && /paired with IMD\./.test(first) ? 'IMD' : 'ETH';
   const baseFee = /^\d+\. Take ([\d.]+)% of the (?:IMD|ETH) side of every (buy and sell|buy|sell) as a hook fee/m.exec(objective);
-  return { name, symbol, type, pair, wallet: payer,
+  return { name, symbol, type, pair, wallet: payer, liquidityAccess: type === 'A' ? 'the factory and the owner' : 'the owner',
     destination: /^\d+\. Replace the Swap fee's destination: split/m.test(objective) ? 'distribute it as specified by Split the fee' : `send it to ${payer ?? ''}`,
     feeBasis: `Fees are computed on the amount actually traded; when the swap specifies its ${pair} amount and the pool fills only part of it, the swap reverts rather than overpaying.`,
     walletLimit: 'A wallet means tx.origin; several wallets or a shared relayer can defeat the limit.',
@@ -132,12 +132,14 @@ export function launchFromRequested(log: RawLog, intakeChainId: number, action: 
     const args = event.args as unknown as { requestId: Hex; payer: string; action: Hex; body: Hex };
     if (args.action.toLowerCase() !== action.toLowerCase()) return null;
     const body = parseBody(args.body);
-    if (!isStoreBody(body)) return null;
+    if (!body || !['univ4_hook', 'evm_contracts'].includes(String(body.onchain)) || typeof body.objective !== 'string') return null;
+    const hookLaunch = isStoreBody(body);
+    if (!hookLaunch && !(String(body.onchain) === 'evm_contracts' && /HookListingRegistry/.test(body.objective) && /FeaturedPlacementsV2/.test(body.objective))) return null;
     const parsed = parseObjective(body.objective, args.payer), chainId = Number(body.chainId);
     if (!CHAINS[chainId]) return null;
     const time = timestamp ?? (log.blockTimestamp ? Number(BigInt(log.blockTimestamp)) : undefined);
     return { ...parsed, id: `${intakeChainId}:${args.requestId}`, requestId: args.requestId, intakeChainId, chainId,
-      kind: String(body.onchain), status: 'requested', launchNumber: null, request: body.objective,
+      kind: String(body.onchain), isHook: hookLaunch, status: 'requested', launchNumber: null, request: body.objective,
       createdAt: time ? new Date(time * 1000).toISOString() : null, blockNumber: String(BigInt(log.blockNumber)),
       payer: args.payer, hookAddress: null, distributorAddress: null, poolId: null, currencies: [], txHashes: [log.transactionHash],
       sourceRepoUrl: safeUrl(body.repoUrl), jobIds: [],
@@ -201,7 +203,6 @@ export function applyResult(launch: Launch, input: unknown): Launch {
  * The relay record supplements a matching on-chain request; it cannot confirm it. */
 export function applyLaunchRecord(launch: Launch, value: unknown): Launch {
   const root = object(value), data = Object.keys(object(root.launch)).length ? object(root.launch) : root;
-  if (launch.type === 'A') return launch;
   if (String(data.id) !== launch.launchId || Number(data.chainId) !== launch.chainId) return { ...launch, resultError: 'Launch record does not match this request and deploy chain. Retry the reading.' };
   const artifacts: Record<string, any>[] = Array.isArray(data.artifacts) ? data.artifacts.map(object) : [];
   const attestation = object(data.attestation ?? root.attestation);
@@ -217,11 +218,24 @@ export function applyLaunchRecord(launch: Launch, value: unknown): Launch {
   const hook = named.find(a => a.role === 'hook' && !/deployer$/i.test(String(a.name ?? '')))
     ?? named.find(a => /hook/i.test(String(a.name ?? '')) && !/deployer$/i.test(String(a.name ?? '')))
     ?? (named.length === 1 && !deployer ? named[0] : undefined);
+  const seeded = object(data.seeded), pools = Array.isArray(seeded.pools) ? seeded.pools.map(object) : [];
+  const key = pools.find((p: any) => String(p.hooks).toLowerCase() === String(hook?.address).toLowerCase());
+  let poolId = launch.poolId;
+  if (key && address(key.currency0) && address(key.currency1) && Number.isInteger(key.fee) && Number.isInteger(key.tickSpacing)) {
+    poolId = keccak256(encodeAbiParameters([{type:'address'}, {type:'address'}, {type:'uint24'}, {type:'int24'}, {type:'address'}],
+      [key.currency0, key.currency1, key.fee, key.tickSpacing, key.hooks]));
+  }
   const number = Number(data.launchNumber);
   return { ...launch, launchRecordStatus: typeof data.status === 'string' ? data.status : undefined,
     status: launch.completion?.status === 0 && data.status === 'live' ? 'live' : launch.status === 'failed' ? 'failed' : 'in-progress',
     deployerAddress: address(deployer?.address), hookAddress: deployer ? null : address(hook?.address), hookPending: false,
     launchNumber: Number.isSafeInteger(number) && number > 0 ? number : launch.launchNumber,
+    tokenAddress: launch.type === 'A' ? address(named.find(a => a.role === 'token')?.address) ?? launch.tokenAddress : launch.tokenAddress,
+    distributorAddress: launch.type === 'A' ? address(named.find(a => a.role === 'distributor')?.address) ?? launch.distributorAddress : null,
+    poolId: launch.type === 'A' ? poolId : null,
+    currencies: key ? [key.currency0, key.currency1] : launch.currencies,
+    sourceCommit: typeof data.sourceCommit === 'string' && /^[a-f\d]{40}$/i.test(data.sourceCommit) ? data.sourceCommit : launch.sourceCommit,
+    contractName: hook?.name ?? launch.contractName,
     sourceRepoUrl: safeUrl(data.sourceRepoUrl) ?? launch.sourceRepoUrl,
     jobIds: [...new Set([...launch.jobIds, ...(Array.isArray(data.jobs) ? data.jobs.map(object).map(j => j.id).filter((id: unknown): id is string => typeof id === 'string' && /^[\w-]+$/.test(id)) : [])])],
     resultError: undefined,

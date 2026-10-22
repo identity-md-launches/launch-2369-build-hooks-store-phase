@@ -4,6 +4,7 @@ export type Launch = {
   /** chainId is the deployment chain. intakeChainId locates the payment event and hash route. */
   chainId: number; intakeChainId: number; status: 'live' | 'requested' | 'in-progress' | 'failed';
   launchNumber: number | null;
+  isHook?: boolean; sourceCommit?: string; contractName?: string; hookCodeVerified?: boolean;
   launchId?: string | null; createdAt: string | null; blockNumber: string;
   summary: string; request: string; blocks: string[]; matchedBlocks: BlockEntry[]; groups: string[];
   hookAddress: string | null; tokenAddress: string | null; distributorAddress: string | null; poolId: string | null;

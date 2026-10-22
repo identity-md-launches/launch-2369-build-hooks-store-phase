@@ -44,7 +44,7 @@ test('old fee templates remain readable and current IMD fees decode into the sam
  const payer='0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
  for(const pair of ['imd','eth'])for(const def of C.BLOCKS.filter(b=>b.legacySentences?.length)){
   let d=C.newDraft();d.settings={...d.settings,chain:1,pair,pool:50};
-  if(def.requires)d=C.addBlock(d,def.requires);d=C.addBlock(d,def.id);
+  if(def.requires)d=C.addBlock(d,def.requires);if(def.requiresAny)d=C.addBlock(d,def.requiresAny[0]);d=C.addBlock(d,def.id);
   const block=d.blocks.find(b=>b.id===def.id),ctx=C.context(d,payer);
   if(def.id==='fee-split')block.p.b=C.IMD_TREASURY;
   assert.equal(D.matchRule(C.sentenceOf(block,ctx),ctx)?.id,def.id);

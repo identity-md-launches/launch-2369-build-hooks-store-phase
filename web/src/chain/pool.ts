@@ -37,3 +37,18 @@ export function poolCall(chainId: number, token: string, hook: string, blocks: B
   const poolKey = { currency0, currency1, ...terms, hooks: getAddress(hook) }, sqrt = sqrtPriceX96(price, decimals);
   return { chainId, to: getAddress(POOL_MANAGERS[chainId]), function: 'PoolManager.initialize', poolKey, sqrtPriceX96: sqrt.toString(), data: encodeFunctionData({ abi: initializeAbi, functionName: 'initialize', args: [poolKey, sqrt] }), value: '0', tier };
 }
+
+export const initializeEvent = 'event Initialize(bytes32 indexed id,address indexed currency0,address indexed currency1,uint24 fee,int24 tickSpacing,address hooks,uint160 sqrtPriceX96,int24 tick)';
+export async function poolsForHook(client: import('./clients').ReadClient, chainId: number, hook: Address, fromBlock: bigint) {
+  const { parseAbiItem } = await import('viem');
+  const { readLogs } = await import('./store');
+  const { decodeEventLog, toEventSelector } = await import('viem');
+  const head = await client.getBlockNumber();
+  const logs = await readLogs(client, POOL_MANAGERS[chainId], [toEventSelector(initializeEvent)], fromBlock, head);
+  const event = parseAbiItem(initializeEvent);
+  return [...new Set(logs.flatMap(log => {
+    try { const args = decodeEventLog({ abi: [event], data: log.data, topics: log.topics }).args;
+      return args.hooks.toLowerCase() === hook.toLowerCase() ? [args.id] : [];
+    } catch { return []; }
+  }))];
+}

@@ -1,3 +1,4 @@
+import { expectFinding, expectReflow } from './v2-assertions';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import site from '../../public/site-config.json' with { type: 'json' };
@@ -26,19 +27,14 @@ async function open(page: Page, d: Draft) {
     return r.fulfill({ json: { facts: [], plan: [], blockers: [], suggestions: [] } });
   });
   await page.addInitScript(d => localStorage.setItem('hooks-store:draft:v2', JSON.stringify(d)), d);
-  await page.goto('#builder');
+  await page.goto('#builder'); await page.getByRole('button', { name: 'Open all', exact: true }).click();
   await page.locator('#connect').click(); await page.getByRole('button', { name: 'Fork Wallet', exact: true }).click();
   await expect(page.locator('#connect')).toHaveClass(/address/);
   return checked;
 }
 const check = (page: Page) => page.getByRole('button', { name: 'Check with the swarm (free)', exact: true });
 const next = (page: Page) => page.getByRole('button', { name: 'Continue to launch', exact: true });
-async function fits(page: Page, width: number) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-  expect(await page.locator('.builder input, .builder textarea, .builder select, .builder button').evaluateAll(nodes => nodes.filter(node => {
-    const r = node.getBoundingClientRect(); return r.width && (r.left < -1 || r.right > innerWidth + 1);
-  }).map(node => node.outerHTML.slice(0, 140)))).toEqual([]);
-}
+async function fits(page: Page, width: number) { await expectReflow(page, width); }
 
 for (const width of [320, 390, 1440]) for (const mode of ['prompt', 'custom'] as const) {
   test(`job8 revision written fees and PoolId correction in ${mode} at ${width}px`, async ({ page }) => {
@@ -46,23 +42,23 @@ for (const width of [320, 390, 1440]) for (const mode of ['prompt', 'custom'] as
     const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
     const localFailures: string[] = []; page.on('response', r => { if (r.url().startsWith('http://127.0.0.1') && r.status() >= 400) localFailures.push(r.url()); });
     const checked = await open(page, draft(mode));
-    const editor = page.locator(mode === 'prompt' ? '#p-text' : '.blk[data-block="custom"] textarea');
+    const editor = page.locator(mode === 'prompt' ? '#p-text' : '.rule[data-block="custom"] textarea');
     await editor.fill('Take a reasonable hook fee on every swap.');
-    await expect(page.locator('.safety-notice')).toContainText('Name an exact fee amount');
+    await expectFinding(page, 'Name an exact fee amount');
     await expect(page.locator('#composed')).not.toContainText('Hook fee rate: 0%.');
     await expect(check(page)).toBeDisabled(); await expect(next(page)).toBeDisabled();
     await fits(page, width);
     if (width === 390 && mode === 'prompt') {
-      await page.locator('.safety-notice').scrollIntoViewIfNeeded();
+      await page.locator('#findings:not(.ok), .safety-notice').scrollIntoViewIfNeeded();
       await page.screenshot({ path: `${output}/uncertain-fee-390.jpg`, type: 'jpeg', quality: 80 });
       await page.goto('#launch');
-      await expect(page.locator('.safety-notice')).toContainText('Name an exact fee amount');
+      await expectFinding(page, 'Name an exact fee amount');
       await expect(page.getByRole('button', { name: 'Launch hook', exact: true })).toBeDisabled();
-      await page.getByRole('link', { name: 'Edit in Builder' }).first().click();
+      await page.getByRole('link', { name: 'Edit in Builder' }).first().click(); await page.getByRole('button', { name: 'Open all', exact: true }).click();
     }
     for (const amount of ['30 basis points', '1 percent', 'half a percent']) {
       await editor.fill(`Charge a fee of ${amount} on every swap and send it to ${IMD_TREASURY}. No owner functions.`);
-      await expect(page.locator('.safety-notice')).toHaveCount(0);
+      await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0);
       await expect(page.locator('#composed')).not.toContainText('Hook fee rate: 0%.');
       await expect(page.locator('#composed')).toContainText(`fee recipient ${IMD_TREASURY}, takes no salt argument`);
       await expect(page.locator('#composed')).toContainText(`Fee recipient: ${IMD_TREASURY}.`);
@@ -80,19 +76,19 @@ for (const width of [320, 390, 1440]) for (const mode of ['prompt', 'custom'] as
     await expect(page.locator('#composed')).toContainText('only pools of native ETH and 0x2222222222222222222222222222222222222222');
     await expect(page.locator('#composed')).toContainText(`fee recipient ${IMD_TREASURY}, takes no salt argument`);
     await editor.fill('Publish a price through twap(uint32 secondsAgo). No owner functions.');
-    await expect(page.locator('.safety-notice')).toContainText('twap is pool-dependent');
+    await expectFinding(page, 'twap is pool-dependent');
     await expect(check(page)).toBeDisabled(); await expect(next(page)).toBeDisabled();
     await editor.fill('Only the owner may pause swaps through pause() and unpause(); paused() reports the state.');
-    await expect(page.locator('.safety-notice')).toContainText('pause is pool-dependent');
+    await expectFinding(page, 'pause is pool-dependent');
     await fits(page, width);
     if (mode === 'prompt') {
       await page.getByRole('button', { name: 'Owner pause controls', exact: true }).click();
       for (const name of ['pause', 'unpause', 'paused']) await expect(editor).toHaveValue(new RegExp(`${name}\\(PoolId poolId\\)`));
-      await expect(page.locator('.safety-notice')).toHaveCount(0);
+      await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0);
       await page.getByRole('button', { name: 'Price reading', exact: true }).click();
       await expect(editor).toHaveValue(/twap\(PoolId poolId, uint32 secondsAgo\)/);
     } else await editor.fill('Publish a price through twap(PoolId poolId, uint32 secondsAgo). No owner functions.');
-    await expect(page.locator('.safety-notice')).toHaveCount(0); await expect(check(page)).toBeEnabled();
+    await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0); await expect(check(page)).toBeEnabled();
     await fits(page, width);
     await page.evaluate(() => scrollTo(0, 0)); await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: `${output}/builder-${mode}-${width}.jpg`, type: 'jpeg', quality: 80 });
@@ -108,18 +104,18 @@ test('job8 revision palette explains conflicting pairs and the peak-fee cap lock
   d.blocks.find(b => b.id === 'fee-fade')!.p.start = 30;
   await open(page, d);
   await expect(page.locator('#rule-notice')).toContainText('Fees total 34.9%');
-  await expect(page.locator('.safety-notice')).toContainText('highest simultaneous ETH-side hook fees total 34.9%');
+  await expectFinding(page, 'highest simultaneous ETH-side hook fees total 34.9%');
   await expect(check(page)).toBeDisabled(); await expect(next(page)).toBeDisabled();
-  await page.locator('.blk[data-block="fee-fade"]').getByLabel('Start (%)').fill('1');
+  await page.locator('.rule[data-block="fee-fade"]').getByLabel('Start (%)').fill('1');
   await expect(page.locator('#rule-notice')).toContainText('Fees total 7.9%');
-  await page.locator('.blk[data-block="jar"]').getByLabel('Jar rate (% of ETH side)').fill('2');
-  await expect(page.locator('.safety-notice')).toHaveCount(0); await expect(check(page)).toBeEnabled();
+  await page.locator('.rule[data-block="jar"]').getByLabel('Jar rate (% of ETH side)').fill('2');
+  await expect(page.locator('#findings:not(.ok), .safety-notice')).toHaveCount(0); await expect(check(page)).toBeEnabled();
+  await page.getByRole('tab', { name: /^Protection/ }).click();
   await page.getByRole('button', { name: 'Add Max buy per wallet', exact: true }).click();
-  for (const id of ['pause', 'hours', 'breaker']) await expect(page.locator(`.pal-item[data-block="${id}"] .pill.state`)).toHaveText('REMOVE MAX BUY PER WALLET FIRST');
+  for (const [id,tab] of [['pause','Timing'], ['hours','Timing'], ['breaker','Protection']]) { await page.getByRole('tab', {name: new RegExp('^'+tab)}).click(); await expect(page.locator(`.bcard[data-block="${id}"] .pill.state`)).toHaveText('REMOVE MAX BUY PER WALLET FIRST'); }
   await page.getByRole('button', { name: 'Remove Max buy per wallet', exact: true }).click();
-  const liquidity = page.locator('.palette details').filter({ has: page.locator('[data-block="lp-lock"]') });
-  if (!await liquidity.getAttribute('open').then(v => v !== null)) await liquidity.locator('summary').click();
+  await page.getByRole('tab', {name:/^Liquidity/}).click();
   await page.getByRole('button', { name: 'Add Liquidity lock', exact: true }).click();
-  for (const id of ['pause', 'breaker', 'hours']) await expect(page.locator(`.pal-item[data-block="${id}"] .pill.state`)).toHaveText('REMOVE LIQUIDITY LOCK FIRST');
+  for (const [id,tab] of [['pause','Timing'], ['hours','Timing'], ['breaker','Protection']]) { await page.getByRole('tab', {name: new RegExp('^'+tab)}).click(); await expect(page.locator(`.bcard[data-block="${id}"] .pill.state`)).toHaveText('REMOVE LIQUIDITY LOCK FIRST'); }
   await fits(page, 390);
 });

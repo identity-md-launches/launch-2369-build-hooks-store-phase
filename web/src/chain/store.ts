@@ -11,7 +11,7 @@ export const REQUEST_TOPIC = '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41
 export const COMPLETE_TOPIC = '0xd4ad2d2ef4e8ea9995103f34e322dbefb2534f3a52984a308f7db8e257b76fa1';
 const CACHE_VERSION = 2;
 export const cacheKey = (chainId: number) => `hooks-store:intake:v${CACHE_VERSION}:${chainId}`;
-type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; relayLaunchId?: string; launchRecord?: unknown; hookRead?: { deployer: string; address: string } };
+type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; relayLaunchId?: string; launchRecord?: unknown; hookCodeVerified?: string; hookRead?: { deployer: string; address: string } };
 export const deployerAbi = parseAbi(['function hook() view returns (address)']);
 type ChainCache = { version: number; head: string; cursor: string; records: Record<string, RecordEntry>; completions: Record<string, RawLog> };
 const sameLog = (a: RawLog, b: RawLog) => !b.removed && BigInt(a.blockNumber) === BigInt(b.blockNumber)
@@ -89,6 +89,7 @@ export class LaunchStore {
       const pending = entry.hookRead.address.toLowerCase() === zeroAddress;
       row = { ...row, hookAddress: pending ? null : entry.hookRead.address, hookPending: pending };
     }
+    if (row.type === 'A' && row.launchRecordStatus === 'live') { row.hookCodeVerified = entry.hookCodeVerified?.toLowerCase() === row.hookAddress?.toLowerCase(); if (!row.hookCodeVerified) row.status = 'in-progress'; }
     if (row.completion) row.resultUrl = resultUrl(row.completion.uri, this.config.intake.ipfsGateway);
     return row;
   }
@@ -275,7 +276,7 @@ export class LaunchStore {
         } else row.resultError = 'Intake completed this request without a supported IPFS result URI.';
       }
       if (!current()) return;
-      if (row.type !== 'A' && row.status !== 'failed' && this.config.relayUrl && (this.recordDue.get(row.id) ?? 0) <= Date.now()) {
+      if (row.status !== 'failed' && this.config.relayUrl && (this.recordDue.get(row.id) ?? 0) <= Date.now()) {
         this.recordDue.set(row.id, Date.now() + 20000);
         try {
           let launchId = row.launchId;
@@ -303,6 +304,15 @@ export class LaunchStore {
           entry.hookRead = { deployer: row.deployerAddress, address: hook };
           row = this.hydrate(entry, chainId)!;
         } catch { row.resultError = 'Could not read hook() from the deployer. Hook controls remain locked. Retry the reading.'; }
+      }
+      if (!current()) return;
+      if (row.type === 'A' && row.hookAddress && row.launchRecordStatus === 'live') {
+        try {
+          const code = await this.clients[row.chainId].getCode({ address: row.hookAddress as Address });
+          if (!current()) return;
+          entry.hookCodeVerified = code && code !== '0x' ? row.hookAddress : undefined;
+          row = this.hydrate(entry, chainId)!;
+        } catch { row.status = 'in-progress'; row.resultError = 'Could not verify hook code. Retry the reading.'; }
       }
       if (!current()) return;
       const old = this.rows.get(row.id); row.creatorName = old?.creatorName;

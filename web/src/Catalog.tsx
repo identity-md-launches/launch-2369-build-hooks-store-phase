@@ -8,11 +8,12 @@ import { AddressValue } from './AddressValue';
 import { newDraft, shortAddress } from '../../src/lib/compose';
 import { storeDraft } from './draft';
 export { matchesQuery } from './chain/decode';
+import { useAds } from './Ads';
 import { Text } from './Text';
 
 const ALL_GROUPS: string[] = GROUPS.map(([id]) => id), ALL_CHAINS = [4663, 1];
 export function Catalog({ query, clearQuery, data, store }: { query: string; clearQuery: () => void; data: StoreState; store: LaunchStore }) {
-  const launches = data.launches;
+  const launches = data.launches.filter(l => l.isHook !== false);
   const address = searchAddress(query), known = address ? launches.some(l => matchesQuery(l, address)) : false;
   const [resolution, setResolution] = useState<{ found: ResolvedAddress[]; unavailable: number[] } | null>(null), [resolving, setResolving] = useState(false), [attempt, setAttempt] = useState(0), [error, setError] = useState('');
   useEffect(() => {
@@ -68,15 +69,17 @@ export function Catalog({ query, clearQuery, data, store }: { query: string; cle
     </div>
   </section>;
 }
-export type Placement = { launch: Launch; totalPaid: bigint; purchasedAt: number; expiresAt: number };
-export function Featured({ placements = [] }: { placements?: Placement[] }) {
-  const active = placements.filter(p => p.expiresAt > Date.now()).sort((a,b) => a.totalPaid === b.totalPaid ? a.purchasedAt - b.purchasedAt : a.totalPaid > b.totalPaid ? -1 : 1);
+export function Featured() {
+  const { ads, errors, enabled, refresh } = useAds();
+  if (!enabled) return null;
+  const active = ads.filter(p => p.launch);
   const scrolling = active.length > 0;
-  return <section className="ads" aria-labelledby="featured-h">
+  return <section className="ads" id="featured" aria-labelledby="featured-h">
     <div className="ads-head"><h2 id="featured-h">Featured <span className="pill ad">#AD</span></h2><p className="muted">Paid placements, <span className="num">0.1 IMD</span> for <span className="num">24</span> hours, ranked by total paid. Managed from My hooks. Not a review or endorsement.</p></div>
+    {!!errors.length && <p className="small muted" role="status">{errors.join(' ')} <button className="link-button" onClick={refresh}>Retry placements</button></p>}
     <div className={`marquee ${scrolling ? 'has-placements' : 'slot-only'}`} aria-label="Featured placement slots"><div className="marquee-track">
       {(scrolling ? [false, true] : [false]).map(duplicate => <div key={String(duplicate)} className="marquee-group" aria-hidden={duplicate || undefined}>
-        {active.map(p => <a className="adcard" href={hookHref(p.launch)} key={p.launch.id} tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><Text>{p.launch.name}</Text>{p.launch.symbol && <span className="num">${p.launch.symbol}</span>}<span>by {p.launch.creatorName || shortAddress(p.launch.payer)}</span><span className="num">{Math.ceil((p.expiresAt - Date.now()) / 3600000)}h left</span></a>)}
+        {active.map(p => <a className="adcard" href={hookHref(p.launch!)} key={`${p.chainId}:${p.placement.id}`} tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><Text>{p.metadata.name}</Text>{p.launch!.symbol && <span className="num">${p.launch!.symbol}</span>}<span>by {p.launch!.creatorName || shortAddress(p.launch!.payer)}</span><span className="num">{Math.ceil((Number(p.placement.endsAt) * 1000 - Date.now()) / 3600000)}h left</span></a>)}
         <a className="adcard slot" href="#mine" tabIndex={duplicate ? -1 : 0}><span className="pill ad">#AD</span><span className="slot-title">Open slot</span><span className="num">0.1 IMD / 24h</span><span>· promote from My hooks</span></a>
       </div>)}
     </div></div>

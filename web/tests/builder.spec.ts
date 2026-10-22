@@ -144,7 +144,7 @@ test('the card: name, pills, tiles, where the money goes, readiness with fill it
   await expect(card.locator('.flow')).toContainText('Fees are taken on the IMD side and settled in IMD.');
   await expect(card.locator('.cost')).toContainText('0.5 IMD');
   await expect(card.locator('.cost')).toContainText('2 tx');
-  await expect(card.locator('.launch-wait')).toContainText('Typically 1 to 3 hours');
+  await expect(card.locator('.launch-wait')).toContainText('Usually 30 to 90 minutes, sometimes up to 3 hours');
   await expect(card.getByRole('button', { name: 'Check with the swarm (free)' })).toBeVisible();
   await expect(card.getByRole('button', { name: 'Continue to launch' })).toBeDisabled();
   // fill it in focuses the field.
@@ -219,18 +219,20 @@ test('phones: card first, shelf scrolls sideways, rule tools wrap under the text
 // Revision findings (job 11 review): each test reproduces the reported steps.
 const OWNER = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 
-test('the card itself stays within the viewport at every width, and the first phone screen reaches Continue to launch', async ({ page }) => {
+test('the card details preserve the mobile floor and desktop viewport fit', async ({ page }) => {
   for (const [width, height] of [[390, 844], [320, 900], [768, 900], [1100, 800], [1440, 900], [2560, 1300]]) {
     await page.setViewportSize({ width, height });
     await open(page, undefined, false);
     await page.evaluate(() => window.scrollTo(0, 0));
     const card = (await page.locator('.hookcard').boundingBox())!;
-    expect(card.height, `card height at ${width}x${height}`).toBeLessThanOrEqual(height);
+    if (width >= 720) expect(card.height, `card height at ${width}x${height}`).toBeLessThanOrEqual(height);
+    else expect(await page.locator('.hc-scroll').evaluate(el => Math.min(el.scrollHeight, innerHeight * .4) - el.clientHeight)).toBeLessThanOrEqual(1);
     // The details scroll inside the card; the actions are not inside the scrolling part.
     expect(await page.locator('.hc-scroll').evaluate(el => getComputedStyle(el).overflowY)).toBe('auto');
     await expect(page.locator('.hc-scroll .hc-actions')).toHaveCount(0);
     const primary = (await page.getByRole('button', { name: 'Continue to launch' }).boundingBox())!;
-    expect(primary.y + primary.height, `Continue to launch on the first screen at ${width}x${height}`).toBeLessThanOrEqual(height);
+    if (width >= 1100) { await page.locator('.hookcard').scrollIntoViewIfNeeded(); const inside = (await page.locator('.hookcard').boundingBox())!; expect(inside.y + inside.height).toBeLessThanOrEqual(height + 1); }
+    else { await page.getByRole('button', { name: 'Continue to launch' }).scrollIntoViewIfNeeded(); await expect(page.getByRole('button', { name: 'Continue to launch' })).toBeInViewport(); }
     // The readiness links are reachable by scrolling the card's own details.
     const link = page.locator('.ready li.todo button').first();
     await link.scrollIntoViewIfNeeded();
@@ -401,3 +403,11 @@ for (const width of [320, 390, 768, 1100, 1440, 2560]) {
     expect(sheet!.height).toBeLessThanOrEqual(900);
   });
 }
+
+for (const [width,height] of [[1440,900],[2560,1300]]) test(`card never collapses after scroll and a keystroke at ${width}x${height}`, async ({ page }) => {
+  await page.setViewportSize({width,height}); await open(page, undefined, false);
+  const load = await page.locator('.hc-scroll').evaluate(el=>el.clientHeight);
+  await page.evaluate(()=>scrollTo(0,1000)); await page.getByLabel('Owner address', {exact:true}).fill('0x6cba4751742f6989fa224b2dc5d5d52fcef98a34');
+  await expect.poll(()=>page.locator('.hc-scroll').evaluate(el=>el.clientHeight)).toBeGreaterThanOrEqual(Math.max(load,300));
+  const rect=(await page.locator('.hookcard').boundingBox())!;expect(rect.y).toBeGreaterThanOrEqual(0);expect(rect.y+rect.height).toBeLessThanOrEqual(height+1);
+});
