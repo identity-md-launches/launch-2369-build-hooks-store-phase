@@ -219,6 +219,24 @@ test('phones: card first, shelf scrolls sideways, rule tools wrap under the text
 // Revision findings (job 11 review): each test reproduces the reported steps.
 const OWNER = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
 
+test('hidden scroll labels do not extend the desktop hook column past its panels', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route('https://api.imd.fun/swarm', r => r.fulfill({ status: 503 }));
+  await page.route('https://raw.githubusercontent.com/**', r => r.abort());
+  await page.goto('#builder');
+  await expect(page.locator('.findings .list')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const column = page.locator('.hookcol');
+  await column.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  const geometry = await column.evaluate(el => ({
+    height: el.scrollHeight,
+    expected: Math.max(el.clientHeight, Math.ceil(Math.max(...Array.from(el.children, child => child.getBoundingClientRect().bottom - el.getBoundingClientRect().top + el.scrollTop)) + parseFloat(getComputedStyle(el).paddingBottom))),
+  }));
+  expect(geometry.height).toBeLessThanOrEqual(geometry.expected + 2);
+  // The scroll regions retain their names and keyboard focusability.
+  await expect(page.getByRole('region', { name: 'Rules, money and readiness' })).toHaveAttribute('tabindex', '0');
+});
+
 test('the card details preserve the mobile floor and desktop viewport fit', async ({ page }) => {
   for (const [width, height] of [[390, 844], [320, 900], [768, 900], [1100, 800], [1440, 900], [2560, 1300]]) {
     await page.setViewportSize({ width, height });

@@ -45,6 +45,8 @@ Builder caps at 1,240px. At 1,100px and wider its grid is `minmax(0,1fr) 420px` 
 
 Below 1,100px the card comes first. Below 720px the details show at least 40vh, or all content when shorter; the card can run beyond the first screen. The shelf is a sideways scroll-snap row of 210px cards. Type/starting-point/settings controls stack; rule tools wrap below the text. Grid children have min-width:0. Page overflow checks cover 320 through 2560px.
 
+The nested scroll containers `.hc-scroll`, `.findings .list`, `.understood` and `.marquee` are positioned relatively. This contains their absolutely positioned screen-reader labels without adding empty scroll space to `.hookcol`; their overflow rules and panel dimensions are retained.
+
 Catalog uses a 224px filter rail and flexible card grid; mobile filters sit above it. Featured cards form a compact one-line marquee; a stationary open slot is the empty state. Promotions use four step columns, changing to two below 720px, full-width selects and wrapping actions. Confirmation insets are 16px, 12px on phones. Every promotion action has a minimum 44px height.
 
 ## Elevation & Depth
@@ -72,6 +74,8 @@ Rectangular panels, fields, pills and buttons. The open slot has a dashed border
 | `.btn`, `.pill`, `.notice`, `.field-error` | Existing primary/secondary/disabled states, textual statuses, inline recovery and live-region feedback. |
 
 The 42-second featured loop pauses for hover and keyboard focus. Reduced motion produces a scrollable row and hides its duplicate. Missing ads addresses hide both ads surfaces. Expired/cancelled placements are removed even if an RPC page still lists them.
+
+Closing and reopening an unfinished promotion preserves its current step. Starting again after Done opens step 1 with an empty, enabled hook selector and clears the previous listing, revision, recipient, reviewed metadata and transaction hash.
 
 ## Do's and Don'ts
 

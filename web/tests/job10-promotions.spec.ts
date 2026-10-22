@@ -50,6 +50,33 @@ async function setup(page: Page) {
   await page.goto('#mine');await page.locator('#connect').click();await page.getByRole('button',{name:'Fork Wallet',exact:true}).click();
   await expect(page.locator('.mine-list')).toContainText('Pondside');
 }
+
+test('a completed promotion can start a fresh checkout without reloading My hooks', async ({ page }) => {
+  test.setTimeout(90000);
+  await page.setViewportSize({ width: 390, height: 900 });
+  await setup(page);
+  const panel = page.locator('#promotions');
+  const toggle = panel.getByRole('button', { name: 'Promote a hook', exact: true });
+  await toggle.click();
+  await panel.getByLabel(/Your live hook on/).selectOption({ label: 'Pondside (POND)' });
+  await panel.getByRole('button', { name: '1. Create or use free listing', exact: true }).click();
+  await panel.getByRole('button', { name: '2. Approve & deposit 0.1 IMD', exact: true }).click();
+  await panel.getByRole('button', { name: '3. Purchase 24 hours · 0.1 IMD', exact: true }).click();
+  await expect(panel).toContainText('Your #ad placement is active.', { timeout: 15000 });
+  await expect(toggle).toBeEnabled();
+  await toggle.click();
+  await toggle.click();
+  await expect(panel.getByLabel(/Your live hook on/)).toBeEnabled();
+  await expect(panel.getByLabel(/Your live hook on/)).toHaveValue('');
+  await expect(panel.locator('.promotion-steps [aria-current="step"]')).toContainText('Free listing');
+  await expect(panel.locator('.listing-review')).toHaveCount(0);
+  await expect(panel.getByText('Your #ad placement is active.', { exact: false })).toHaveCount(0);
+  await expect(panel.getByText('Pinned proceeds recipient:', { exact: true })).toHaveCount(0);
+  await panel.getByLabel(/Your live hook on/).selectOption({ label: 'Pondside (POND)' });
+  await expect(panel.getByRole('button', { name: '1. Create or use free listing', exact: true })).toBeEnabled();
+  await panel.getByRole('button', { name: '1. Create or use free listing', exact: true }).click();
+  await expect(panel.getByRole('button', { name: '2. Approve & deposit 0.1 IMD', exact: true })).toBeEnabled();
+});
 for(const width of [320,390,1440])test(`real promotion wallet flow at ${width}px`,async({page})=>{
   test.setTimeout(90000);await page.setViewportSize({width,height:900});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await setup(page);const panel=page.locator('#promotions');await panel.getByRole('button',{name:'Promote a hook',exact:true}).click();

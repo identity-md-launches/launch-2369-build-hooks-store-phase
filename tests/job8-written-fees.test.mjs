@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as C from '../src/lib/compose.ts';
 import { checkConsistency } from '../src/lib/safety.ts';
+import { writtenFeeRates, writtenFeeTargets } from '../src/lib/writtenFees.ts';
 
 // Offline fixtures: deliberately distinct payer and owner, never live accounts/signatures.
 const payer = '0x1111111111111111111111111111111111111111';
@@ -16,6 +17,29 @@ function draft({ type = 'B', pair = 'eth', chain = 4663, mode = 'prompt' } = {},
 function replaceWritten(input, original, replacement) {
   return { ...input, objective: input.objective.replace(original, replacement) };
 }
+
+test('trade introductions and commas keep unknown receiving payees unresolved', () => {
+  for (const context of contexts) for (const prefix of ['On every swap, ', 'For every swap, ', 'From each trade, ', 'After each buy, ', 'On every swap ', 'Observe swaps, then ']) {
+    for (const verb of ['receives', 'accrues', 'gets', 'earns', 'keeps', 'collects', 'is paid']) {
+      const currency = context.type === 'A' && context.pair === 'imd' ? 'IMD' : 'ETH';
+      const text = `${prefix}Alice ${verb} 1% of the ${currency} side.`;
+      assert.ok(writtenFeeTargets(text).includes('Alice'), text);
+      assert.deepEqual(writtenFeeRates(text), { buy: 1, sell: prefix.includes('buy') ? 0 : 1 }, text);
+      const d = draft(context, text), input = C.body(d, payer);
+      assert.equal(C.feeRecipient(d, payer), 'Alice', text);
+      assert.ok(input.objective.includes('Fee recipient: Alice.'), text);
+      assert.ok(checkConsistency(input).some(f => f.code === 'recipient'), text);
+      assert.ok(!input.objective.includes(`Fee recipient: ${payer}.`), text);
+      const resolved = draft(context, text.replace('Alice', owner));
+      assert.equal(C.feeRecipient(resolved, payer), owner);
+      assert.deepEqual(checkConsistency(C.body(resolved, payer)), [], text);
+    }
+  }
+  for (const text of ['For every swap, Alice receives 1%.', 'From each trade, Alice collects 1%.']) {
+    assert.deepEqual(writtenFeeTargets(text), ['Alice'], text);
+    assert.ok(checkConsistency(C.body(draft({}, text), payer)).some(f => f.code === 'recipient'), text);
+  }
+});
 
 for (const context of contexts) test(`written fee regressions ${Object.values(context).join('/')}`, () => {
   const currency = context.type === 'A' && context.pair === 'imd' ? 'IMD' : 'ETH';

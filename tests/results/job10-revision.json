@@ -1,0 +1,115 @@
+{
+  "scope": "Job 10 reopened findings revision",
+  "findings": [
+    {
+      "id": "60b70d3ffbf0d992feaa2ea95c15ca6c86740882fd0e290ea6788e1d4b384097",
+      "verdict": "fixed"
+    },
+    {
+      "id": "9a6c1d4424751207e4d298484e331404c194e70f3e3f6903c6d7559ff20ec580",
+      "verdict": "fixed"
+    },
+    {
+      "id": "509fde6054070abf1fbd46e7aea6b4ebe891b42fa15425662b5a38ea85a19dfd",
+      "verdict": "fixed"
+    }
+  ],
+  "typecheck": {
+    "exitCode": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "limitation": "Existing >500 kB chunk advisory"
+  },
+  "unit": {
+    "passed": 1167,
+    "failed": 0,
+    "skipped": 0
+  },
+  "relay": {
+    "passed": 9,
+    "failed": 0
+  },
+  "chromium": {
+    "passed": 252,
+    "failed": 0,
+    "skipped": 7,
+    "flaky": 0,
+    "specFiles": 18,
+    "newRegressionCases": 3
+  },
+  "anvil": {
+    "localOnly": true,
+    "fork": "Robinhood Chain",
+    "contractsFromCommit": "952e62de284440144a24fc4ec4868461e4534612",
+    "checks": [
+      "createListing",
+      "approve and deposit real fork IMD",
+      "purchase",
+      "carousel retains purchased revision after edit",
+      "second wallet deposit and boost",
+      "cancel removes ad and refunds only pro-rata base; boosts forfeited",
+      "withdraw available balance"
+    ],
+    "passed": true
+  },
+  "designProbe": {
+    "passed": 12,
+    "total": 16,
+    "retainedExceptions": [
+      "casing",
+      "eyebrows",
+      "type-sizes",
+      "chrome"
+    ]
+  },
+  "scrollAt1440": {
+    "before": 1410,
+    "after": 1085,
+    "lastPanelBottom": 1079.1875,
+    "bottomPadding": 6
+  },
+  "phoneFirstScreen": {
+    "viewport": [
+      390,
+      844
+    ],
+    "mainActionBottom": 565.15625,
+    "scrollWidth": 390
+  },
+  "export": {
+    "passed": true,
+    "identicalToTestedExport": true,
+    "files": 29,
+    "bytes": 1358180,
+    "relativeRuntimeReferences": [
+      "./favicon.svg",
+      "./fonts/vt323-latin.woff2",
+      "./assets/index-1kh3mR2n.js",
+      "./assets/eventemitter3-ChfEjfXd.js",
+      "./assets/utils-DFnHSamt.js",
+      "./assets/ccip-B3mHK0vv.js",
+      "./assets/_esm-dvUg66Pw.js",
+      "./assets/sha2-BtPXGKXt.js",
+      "./assets/secp256k1-DMk4gNp3.js",
+      "./assets/sha256-DOEGnsfp.js",
+      "./assets/store-BQameU7x.js",
+      "./assets/index-Dou4JPRX.css"
+    ],
+    "metadata": [
+      "title",
+      "favicon",
+      "description",
+      "og:title",
+      "og:image"
+    ],
+    "noDependencyOrPackagingArtifacts": true
+  },
+  "limitations": [
+    "Seven pre-existing live-service/additional-fork cases remain opt-in.",
+    "WebKit unavailable: missing system libraries.",
+    "Supplied browser connector fails Chromium initialization; rendered inspection used Playwright Chromium.",
+    "No physical-device, native zoom or screen-reader sessions.",
+    "No public-chain transactions or publication."
+  ]
+}

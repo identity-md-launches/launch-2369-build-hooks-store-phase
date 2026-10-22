@@ -1,5 +1,11 @@
 # Job 10 validation
 
+Revision: all three reopened findings were reproduced and fixed. The rebuilt export passed a separate typecheck, production build, 1,167 unit tests, 9 relay tests and 252 Chromium cases; seven existing opt-in cases were skipped. The final design probe passed 12/16 checks with the established pixel-design exceptions retained. Reproductions, scoped six-domain review, actual commands and limitations are in [artifacts/validation.md](artifacts/validation.md); current logs and screenshots are in [artifacts/revision/](artifacts/revision/). The table below records the preceding accepted submission, not this revision's run.
+
+The committed result summary is [tests/results/job10-revision.json](tests/results/job10-revision.json). New regressions cover unresolved payees after trade prefixes (including recovery to a full address), the desktop column ending at its last panel plus padding, and a real local-wallet purchase followed by a fresh checkout. The column's measured blank range fell from 324.8125px to rounding only, with unchanged panel dimensions. All three existing promotion widths and the Anvil listing/deposit/purchase/second-wallet boost/cancel/withdraw checks passed.
+
+The six-domain revision review checked native labels, disabled states and retained scroll focus (accessibility); viewport/scroll geometry and screenshots (layout); address-correction and checkout copy (writing); retained fonts and wrapping (typography); sampled solid-background contrast (colors); and invalid, corrected, pending, completed and reopened flows (UI). The design probe's four exceptions are the established pixel capitals/labels, type scale, and ink border/shadow treatment. WebKit lacks required system libraries; the supplied browser connector could not initialize Chromium, so rendered checks used the working Playwright Chromium runner. Physical devices, screen readers, native zoom and slow-motion animation review were not performed. No public-chain write or publication was attempted.
+
 The final source and `dist/` implement SPEC 1.43: all carry-overs, free listings and paid #AD placement flows. The detailed review, requirement mapping, six Better Interface domains, findings/fixes and limitations are in [artifacts/validation.md](artifacts/validation.md).
 
 | Check | Actual result |

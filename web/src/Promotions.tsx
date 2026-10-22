@@ -65,6 +65,13 @@ export function Promotions({ launches, store }: { launches: Launch[]; store: Lau
     const snapshot = await ctx.client.readContract({ address: ctx.config.registry, abi: registryAbi, functionName: 'getMetadata', args: [id, listing.revision] }) as Metadata;
     setRevision(listing.revision); setRecipient(to); setMetadata(snapshot);
   };
+  const toggleFlow = () => {
+    if (!flow && step === 4) {
+      setStep(1); setSelected(''); setListingId(null); setRevision(null);
+      setRecipient(null); setMetadata(null); setHash(null);
+    }
+    setFlow(!flow); setError(''); setMessage('');
+  };
   if (!enabled) return null;
   return <section className="box promotions" id="promotions" aria-labelledby="promotions-h"><h2 id="promotions-h">Promotions <span className="pill ad">#AD</span></h2>
     <p>0.1 IMD for 24 hours, ranked by total paid. Top-ups are never refunded; cancelling refunds the unused base.</p>
@@ -92,7 +99,7 @@ export function Promotions({ launches, store }: { launches: Launch[]; store: Lau
           {cancelId === key && <div className="promotion-confirm"><p>Cancelling refunds the unused part of the 0.1 IMD base to your available balance, approximately <span className="num">{formatEther(refund)} IMD</span> now. All boosts are forfeited to the pinned proceeds recipient. Withdraw the available balance afterwards.</p><button className="btn" disabled={busy || wrongChain} onClick={() => void run('Cancel this placement: check your wallet…', async ctx => { await sendAdTransaction(ctx, ctx.config.placements, placementsAbi, 'cancel', [ad.placement.id]); setCancelId(''); })}>Confirm cancellation</button><button className="btn" disabled={busy} onClick={() => setCancelId('')}>Keep placement</button></div>}
         </article>;
       }) : <p className="muted">No active placements from this wallet on {CHAINS[selectedChain]}. Promote a live hook below.</p>}</div>
-      <button className="btn primary" disabled={busy} onClick={() => { setFlow(!flow); setError(''); setMessage(''); }}>Promote a hook</button>
+      <button className="btn primary" disabled={busy} onClick={toggleFlow}>Promote a hook</button>
       {flow && <div className="promotion-flow"><h3>Promote a hook · 0.1 IMD / 24h</h3><ol className="promotion-steps" aria-label="Promotion steps">{['Free listing', 'Approve & deposit', 'Purchase 24 hours', 'Done'].map((title, i) => <li key={title} aria-current={step === i + 1 ? 'step' : undefined} className={step > i + 1 ? 'confirmed' : ''}><span className="num">{i + 1}</span> {title}</li>)}</ol>
         <label htmlFor="promote-hook">Your live hook on {CHAINS[selectedChain]}</label><select id="promote-hook" value={selected} disabled={busy || step === 4} onChange={e => setSelected(e.target.value)}><option value="">Choose a hook you launched</option>{hooks.filter(l => l.chainId === selectedChain).map(l => <option key={l.id} value={l.id}>{l.name}{l.symbol ? ` (${l.symbol})` : ''}</option>)}</select>
         {!hooks.some(l => l.chainId === selectedChain) && <p>No live hooks launched by this wallet on this chain. <a href="#builder">Build a hook</a>.</p>}

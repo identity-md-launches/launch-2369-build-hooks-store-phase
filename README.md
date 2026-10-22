@@ -4,6 +4,8 @@ A static React/TypeScript storefront for describing, launching and managing Unis
 
 The existing pond, pixel design, Builder v2, launch/payment safety and wallet connectors are retained. Current verification is in [VALIDATION.md](VALIDATION.md), [artifacts/validation.md](artifacts/validation.md) and the test reports under `artifacts/`. Older results under `tests/results/` are historical.
 
+This revision reproduces and fixes all three reopened findings: named fee payees after trade introductions now require an address, hidden labels no longer extend the Builder column's scroll range, and a completed promotion can start a fresh checkout. `dist/` has been rebuilt. [Revision results](artifacts/validation.md) record **1,167 unit tests, 9 relay tests and 252 Chromium cases passed**, with seven existing opt-in browser cases skipped. The design probe passed 12/16 checks; retained pixel-design exceptions and unavailable WebKit/browser-tool checks are documented there. Per-finding responses are in `.imd-responses.json`.
+
 ## Install, preview and rebuild
 
 Use Node.js 24+ and npm:
@@ -80,6 +82,6 @@ npx playwright test --workers=3
 
 The new promotion suite automatically starts and stops an isolated Anvil fork and compiles the pinned contracts. It requires `forge`, `anvil`, solc 0.8.26 and access to the configured public Robinhood RPC. Compiler flags match both pinned repositories: Cancun, optimizer 200, no CBOR/bytecode hash metadata. Fork-only impersonation and balance overrides never reach a public RPC. To run just its contract checks, use `node web/scripts/check-ads-fork.mjs` from the repository root; add `--with-browser` for its three-width browser flow. Pin details are in [src/abi/PROVENANCE.md](src/abi/PROVENANCE.md).
 
-Actual results: typecheck/build passed; **1,166 unit tests**, **9 relay tests**, and **249 Chromium cases** passed. Seven older optional live RPC/relay or additional fork cases were skipped under their existing opt-in guards; every spec was collected. The new ad fork and its real wallet flows at 320, 390 and 1440 ran. The exhaustive pair sweep covers 1,221 enabled pairs: 1,156 accepted cleanly and 65 refused before payment. These are worker observations, not independent certification.
+Current revision results: typecheck/build passed; **1,167 unit tests**, **9 relay tests**, and **252 Chromium cases** passed. Seven older optional live RPC/relay or additional fork cases were skipped under their existing opt-in guards; every spec was collected. The ad fork and its real wallet flows at 320, 390 and 1440 ran. The exhaustive pair sweep covers 1,221 enabled pairs: 1,156 accepted cleanly and 65 refused before payment. These are worker observations, not independent certification.
 
 [DESIGN.md](DESIGN.md) describes the implemented tokens, typography, layout and components. `artifacts/packaging.json` records compaction of old Lighthouse diagnostic details and retirement of four redundant historical screenshots to meet the submission budget. Current source, runtime assets, pinned evidence and current test results remain complete. No ignore file was changed.

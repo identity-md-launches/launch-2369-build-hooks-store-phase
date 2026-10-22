@@ -36,6 +36,34 @@ const check = (page: Page) => page.getByRole('button', { name: 'Check with the s
 const next = (page: Page) => page.getByRole('button', { name: 'Continue to launch', exact: true });
 async function fits(page: Page, width: number) { await expectReflow(page, width); }
 
+test('prefixed unknown payees lock Check, Continue and direct Launch until given an address', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const checked = await open(page, draft('B', 'prompt'));
+  const editor = page.locator('#p-text');
+  for (const prefix of ['On every swap, ', 'For every swap, ', 'From each trade, ']) {
+    for (const verb of ['receives', 'accrues', 'gets', 'earns', 'keeps', 'collects']) {
+      await editor.fill(`${prefix}Alice ${verb} 1% of the ETH side.`);
+      await expect(page.locator('#findings')).toContainText('full');
+      await expect(page.locator('#composed')).toContainText('Fee recipient: Alice.');
+      await expect(check(page)).toBeDisabled();
+      await expect(next(page)).toBeDisabled();
+    }
+  }
+  expect(checked).toHaveLength(0);
+  await page.goto('#launch');
+  await expect(page.getByRole('button', { name: 'Launch hook', exact: true })).toBeDisabled();
+  await expectFinding(page, 'full');
+  await page.getByRole('link', { name: 'Edit in Builder' }).first().click();
+  await editor.fill(`On every swap, ${payer} receives 1% of the ETH side.`);
+  await expect(page.locator('#findings')).toContainText('Nothing to fix');
+  await expect(check(page)).toBeEnabled();
+  await check(page).click();
+  await expect(page.locator('.swarm-panel')).toContainText('No blockers reported');
+  await expect(next(page)).toBeEnabled();
+  expect(checked).toHaveLength(1);
+  await fits(page, 390);
+});
+
 for (const width of [320, 390, 1440]) for (const type of ['B', 'C'] as const) for (const mode of ['prompt', 'custom'] as const) {
   test(`job8 written fees ${type}/${mode}/${width}`, async ({ page }) => {
     fs.mkdirSync(out, { recursive: true }); await page.setViewportSize({ width, height: 844 });
