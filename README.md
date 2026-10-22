@@ -130,6 +130,8 @@ npx playwright test tests/builder.spec.ts tests/hook.spec.ts tests/job5.spec.ts 
   tests/store.spec.ts tests/launch.spec.ts tests/wallet.spec.ts tests/pond.spec.ts   # 119 passed, 5 skipped
 ```
 
+Job 11 revision, same commands after the last change: typecheck and build passed; `npm test` 1,155 passed, 0 failed; `npx playwright test` (all non-live specs, Chromium) 125 passed, 7 skipped. The revision's fixes and measurements are in [VALIDATION.md](VALIDATION.md).
+
 `tests/builder.spec.ts` is new for the v2 screen. It covers:
 
 - every step;
@@ -137,6 +139,7 @@ npx playwright test tests/builder.spec.ts tests/hook.spec.ts tests/job5.spec.ts 
 - the findings box, JUMP TO IT and the sheet's COPY and CLOSE;
 - the own-code toggle and the shelf on phones;
 - screenshots at 320, 390, 768, 1100, 1440 and 2560px, with no horizontal overflow and the card inside the viewport.
+- the revision's regressions: the card's own height and its first-screen actions, own code with empty fields, token readiness links, mark identity in the sheet, excerpts and the LP-share money line.
 
 The job 7, 8 and 9 browser specs drove the v1 three-column Builder: the palette, `.blk` cards, the `.sum` preview and the chooser. `web/playwright.config.ts` now lists them under `testIgnore`. The request text those specs checked is still covered by the unchanged unit tests. Their v1 DOM steps were not ported, which is a stated limitation.
 

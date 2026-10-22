@@ -1,5 +1,53 @@
 # Worker validation — job 11 (Builder v2)
 
+## Revision after review
+
+Five findings were reproduced against the reported steps and fixed in `web/src/Builder.tsx` and `web/src/styles.css`. Answers are in `.imd-responses.json`.
+
+| Finding | Fix |
+| --- | --- |
+| The card grew past the viewport (1,242px at 390×844) | `.hookcard` is a flex column: the header and the footer (cost row, wait line, CHECK, CONTINUE, SHOW EXACT TEXT) stay fixed; tiles, money line, readiness and the check note scroll inside `.hc-scroll`. A layout effect sizes `--scroll-room` from the card's own position, so at load the whole card fits below the page head; the floor gives way on very short screens. The phone page head is tighter and the progress links sit on one scrolling row. Tiles no longer scroll on their own. |
+| FROM MY OWN CODE with empty fields allowed a scratch launch | While own code is chosen the Builder adds Repository and Commit issues when they are empty, and "Resolve your repository in step 2" once both are typed but not resolved. They show in the readiness list and findings, and their links focus the field or the Resolve button. CHECK and CONTINUE stay disabled. `validate()` and the composer are unchanged. |
+| Token links left row 0 closed | A token-block target opens `token-row` and then focuses `p-0-<field>`. |
+| JUMP TO IT used a different mark index | Findings and `<mark data-mark>` share one deduplicated phrase list, so the index is the same in both. Longest-first matching still applies, and a phrase nested in a longer mark falls back to that mark. |
+| Excerpts quoted unrelated words or whole sentences | The five-word fallback and the generic placeholder fallback are gone. Patterns are per code, and an excerpt is kept only if it is at most 60 characters, appears in the composed text and is not the whole sentence. Body-path findings (`owner: ""`) and findings with no span jump to their field (owner, remainder, token, chain, or the Describe box) and show no quote. |
+| The money line sent the whole fee to the wallet when LPs got it | `moneyFlow()` builds the line from the effective distribution. Share fees with LPs comes off the Swap fee family and the Whale fee first, then the rest goes to the recipient or through Split the fee. The no-liquidity fallback is a separate clause. Jar, pot and LP fee stay separate. `compose()` and the economics are unchanged. |
+
+Results, run in `web/` after the last source change:
+
+| Command | Result |
+| --- | --- |
+| `npx tsc --noEmit` | passed |
+| `npm run build` | passed |
+| `npm test` | 1,155 passed, 0 failed (unit tests unchanged) |
+| `npx playwright test` (Chromium) | 125 passed, 7 skipped (live relay/RPC specs need network endpoints) |
+
+`tests/builder.spec.ts` has six new tests, one per finding plus card height. Each one follows the reported steps:
+
+- card height ≤ viewport and CONTINUE TO LAUNCH on the first screen at 390×844, 320×900, 768×900, 1100×800, 1440×900 and 2560×1300;
+- own code with empty fields;
+- the token links;
+- the ETH-side mark scrolled into the sheet;
+- excerpts that occur in the request;
+- the LP-share money line at 100% and 40%, with Split the fee.
+
+The six-width test now checks `.hookcard` itself as well as `.hookcol`.
+
+Card heights measured in Chromium at load:
+
+| Viewport | Card height | Continue to launch, bottom edge |
+| --- | --- | --- |
+| 390×844 | 540px | 794px |
+| 320×900 | 583px | 846px |
+| 768×900 | 505px | 815px |
+| 1440×900 | 653px | 783px |
+| 2560×1300 | 1,053px | 1,183px |
+
+The taste probe was rerun on the export with this project's Playwright (`IMD_PLAYWRIGHT=web/node_modules/playwright/index.mjs`). The results are the same as below: casing, eyebrows, type-sizes and chrome fail on the unchanged Store page.
+
+The new tests were written from the reported steps. They were not run against the previous build. WebKit could not start on this machine (missing system libraries), so the reviewer's WebKit measurement was not repeated.
+
+
 ## Scope
 
 This job rebuilds `web/src/Builder.tsx` and the Builder section of `web/src/styles.css` to SPEC 1.41 §3.2 (decision 34), following `mockup/builder-v2.html`. `SPEC.md` and the mockup were refreshed from the spec repository.

@@ -392,7 +392,12 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .btn.primary:disabled, .btn.primary:disabled:hover { background: var(--pine); color: var(--on-pine); border-color: var(--ink); }
 /* The hook card */
 .hookcol { position: sticky; top: calc(var(--header-height) + 16px); display: grid; gap: 18px; min-width: 0; max-height: calc(100vh - var(--header-height) - 32px); max-height: calc(100dvh - var(--header-height) - 32px); overflow: auto; overscroll-behavior: contain; align-content: start; padding: 0 6px 6px 0; scroll-margin-top: calc(var(--header-height) + 16px); }
-.hookcard { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); min-width: 0; }
+.hookcard { background: var(--paper-3); border: 3px solid var(--ink); box-shadow: var(--shadow); min-width: 0; display: flex; flex-direction: column; }
+.hookcard > .hc-top, .hookcard > .hc-foot { flex: none; }
+/* --scroll-room is set from the card's position (Builder.tsx); the fallback keeps the card bounded before it is measured. */
+.hc-scroll { flex: 0 1 auto; max-height: var(--scroll-room, 30vh); overflow: auto; overscroll-behavior: contain; min-width: 0; }
+.hc-scroll:focus-visible { outline: 3px solid var(--pine); outline-offset: -3px; }
+.hc-foot { min-width: 0; padding-bottom: 2px; }
 .hookcard .hc-top { background: var(--pine); color: var(--on-pine); padding: 16px 18px; display: grid; gap: 8px; }
 .hookcard .eyebrow { font: 400 var(--text-xs)/1.6 var(--display); text-transform: uppercase; color: var(--on-pine); margin: 0; letter-spacing: 0; }
 .hookcard .hc-top h2 { font-size: 15px; color: var(--on-pine); margin: 0; overflow-wrap: anywhere; }
@@ -400,7 +405,7 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .hookcard .hc-pills { display: flex; gap: 6px; flex-wrap: wrap; }
 .hookcard .hc-pills .pill { background: var(--paper); color: var(--ink); border-color: var(--ink); max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .hookcard .proven-line { margin: 12px 18px 0; font-size: var(--b-small); }
-.tiles { padding: 12px 18px 8px; display: grid; max-height: 480px; overflow: auto; min-width: 0; }
+.tiles { padding: 12px 18px 8px; display: grid; min-width: 0; }
 .tile { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; align-items: stretch; }
 .tile i { display: block; background: var(--swatch, var(--ink)); border: 2px solid var(--ink); }
 .tile .t { padding: 8px 0 10px; border-bottom: 2px dashed var(--ink-3); display: grid; gap: 2px; min-width: 0; }
@@ -423,10 +428,12 @@ button.chip:hover { border-color: var(--pine); color: var(--pine); }
 .hookcard .launch-wait { margin: 0; padding: 4px 18px 12px; font-size: var(--b-small); color: var(--ink-2); }
 .hc-actions { display: grid; gap: 10px; padding: 0 18px; }
 .hc-actions .btn { width: 100%; white-space: normal; text-align: center; }
-.hookcard .check-note { margin: 10px 18px 0; }
-.hookcard > .field-error { margin: 8px 18px 0; }
+.hookcard .check-note { margin: 0 18px 14px; }
+.hc-foot > .field-error { margin: 8px 18px 0; }
 .hookcard .exact { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 18px 16px; font-size: var(--b-small); color: var(--ink-2); }
 .hookcard .exact .num.over { color: var(--bad); }
+.hookcard .exact > span { flex: 1 1 150px; min-width: 0; }
+.hookcard .exact .btn { flex: none; }
 /* Findings: one line each, never the request text */
 .findings { background: var(--paper-3); border: 3px solid var(--ink); border-left: 10px solid var(--bad); padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
 .findings h3 { font-size: var(--b-label); color: var(--bad); margin: 0; }
@@ -456,7 +463,6 @@ dialog.sheet pre mark { background: #f6e3a1; color: inherit; outline: 2px solid 
 @media (max-width: 1099.98px) {
   .b2 { grid-template-columns: minmax(0, 1fr); gap: 28px; }
   .hookcol { position: static; order: -1; max-height: none; overflow: visible; padding: 0; }
-  .tiles { max-height: 360px; }
 }
 @media (max-width: 719.98px) {
   .types, .fields, .start { grid-template-columns: minmax(0, 1fr); }
@@ -468,6 +474,16 @@ dialog.sheet pre mark { background: #f6e3a1; color: inherit; outline: 2px solid 
   .shelf .bcard { flex: 0 0 210px; scroll-snap-align: start; }
   .builder-page .head { padding-top: 16px; }
   .hookcard .hc-top, .hc-actions, .ready, .tiles { padding-inline: 14px; }
+  /* The compact card: the first phone screen reaches CONTINUE TO LAUNCH; details scroll inside the card. */
+  .hookcard .hc-top { padding-block: 12px; gap: 6px; }
+  .hookcard .flow { margin-inline: 14px; }
+  .hookcard .check-note { margin-inline: 14px; }
+  .hookcard .cost { padding: 10px 14px 2px; }
+  .hookcard .launch-wait { padding: 2px 14px 10px; font-size: 14px; line-height: 1.35; }
+  .hookcard .exact { padding: 10px 14px 12px; }
+  .builder-page .head { padding: 12px 0 12px; margin-bottom: 16px; gap: 10px; }
+  .progress { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 2px; }
+  .progress a { flex: none; }
 }
 @media (forced-colors: active) {
   .warn, .type.on, .seg button.on, .progress a.now, .shelf-tabs button.on { forced-color-adjust: none; }

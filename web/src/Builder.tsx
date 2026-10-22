@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 import {
   BLOCKS, BY_ID, CATALOG, CHAIN_NAMES, DEFAULT_STACK, MAX_TEXT, TOKEN_IDS, activeBlocks, addBlock, available, behaviorBlocks, blockedReason,
@@ -103,36 +103,54 @@ function ParamField({ param, value, index, issues, onChange, disabled = false }:
   </div>;
 }
 
-/** The few words a consistency finding points at: a placeholder, a short address, a currency phrase. Never the whole sentence. */
+/**
+ * The few words a consistency finding points at: a placeholder, a short address, a currency phrase. Never the whole sentence.
+ * A pattern with a capture group quotes only the group. Codes without an exact faulty span get no excerpt.
+ */
 const FAULTS: Record<string, RegExp[]> = {
-  recipient: [/the paying wallet \(connect to resolve its address\)/i, /\bmy wallet\b/i, /\btreasury address\b/i, /\bthe second address\b/i, /0x…|0x\.\.\./, /\(connect[^)]*\)/i],
+  recipient: [/^Owner (.+?) (?:may only:|is \$owner\.)/, /the paying wallet \(connect to resolve its address\)/i, /\bmy wallet\b/i, /\btreasury address\b/i, /\bthe second address\b/i, /0x…|0x\.\.\./, /\(connect[^)]*\)/i],
   address: [/\b0x(?![\da-fA-F]{40}\b)[\da-z]*/i],
   'address-case': [/0x[\da-fA-F]*[A-F][\da-fA-F]*/],
-  'fee-side': [/\b(?:ETH|IMD)(?: \(pair currency\))? side\b/],
+  'fee-side': [/\b(?:ETH|IMD)(?: \(pair currency\))? side\b/, /% of (?:the )?(?:ETH|IMD)\b/],
   'fee-settlement': [/\b(?:settled|paid|sent|collected) (?:in|as) (?:ETH|IMD)\b/i, /\bin (?:ETH|IMD)\b/],
   'fee-conversion': [/\b(?:convert|sell|swap)\w* [^.;]{0,24}?\b(?:to|for|into) ETH\b/i],
   rates: [/\d+(?:\.\d+)?%/],
+  'fee-recipient': [/\b0x[\da-fA-F]{40}\b/],
+  'pool-signature': [/\b[A-Za-z_]\w*\([^()]*\)/],
+  pairing: [/\bpaired with (?:ETH|IMD)\b/],
+  dependency: [/\(choose a chain\)/i],
 };
 const PLACEHOLDER = /\((?:choose|enter|connect)[^)]{0,48}\)/g;
-export function faultWords(finding: SafetyFinding): string {
+const MAX_QUOTE = 60;
+/** The exact words at fault, or '' when the finding has no span in the composed request. */
+export function faultWords(finding: SafetyFinding, text?: string): string {
   const sentence = finding.sentence.split('\n')[0];
-  for (const pattern of [...(FAULTS[finding.code] ?? []), PLACEHOLDER]) {
-    const match = new RegExp(pattern.source, pattern.flags.replace('g', '')).exec(sentence);
-    if (match?.[0]) return match[0];
+  for (const pattern of FAULTS[finding.code] ?? []) {
+    const match = pattern.exec(sentence);
+    const words = match?.[1] ?? match?.[0];
+    if (words && words.length <= MAX_QUOTE && words !== sentence.trim() && (text === undefined || text.includes(words))) return words;
   }
-  // A short lead-in identifies the rule without quoting it.
-  const words = sentence.replace(/^\d+\.\s*/, '').split(/\s+/).slice(0, 5).join(' ');
-  return words.length > 40 ? words.slice(0, 40) : words;
+  return '';
 }
-/** Text split around every highlighted phrase, for the exact-text sheet. */
+/** Body findings name a JSON path; these point at the setting that writes it. */
+const BODY_FIELDS: [RegExp, string][] = [[/^owner\b/i, 'settings.owner'], [/^remainderTo\b/i, 'settings.rem'], [/^tokenAddress\b/i, 'settings.token'], [/^recipient\b/i, 'settings.owner']];
+function findingField(finding: SafetyFinding, mode: Mode | null): string | null {
+  const path = BODY_FIELDS.find(([pattern]) => finding.code === 'address-case' && pattern.test(finding.sentence));
+  if (path) return path[1];
+  if (finding.code === 'recipient' && /^Owner /.test(finding.sentence)) return 'settings.owner';
+  if (finding.code === 'dependency' && /deploy chain/.test(finding.message)) return 'settings.chain';
+  return mode === 'prompt' ? 'prompt' : null;
+}
+const escapeRe = (p: string) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Text split around every highlighted phrase, for the exact-text sheet. data-mark is the phrase's index in `phrases`, its stable identity. */
 function marked(text: string, phrases: string[]): ReactNode[] {
-  const unique = [...new Set(phrases.filter(p => p && text.includes(p)))].sort((a, b) => b.length - a.length);
-  if (!unique.length) return [text];
-  const pattern = new RegExp(unique.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+  if (!phrases.length) return [text];
+  // Longest first, so a phrase inside a longer one does not split it.
+  const pattern = new RegExp([...phrases].sort((a, b) => b.length - a.length).map(escapeRe).join('|'), 'g');
   const out: ReactNode[] = []; let from = 0, n = 0;
   for (const m of text.matchAll(pattern)) {
     out.push(text.slice(from, m.index));
-    out.push(<mark key={n} data-mark={unique.indexOf(m[0])}>{m[0]}</mark>);
+    out.push(<mark key={n} data-mark={phrases.indexOf(m[0])}>{m[0]}</mark>);
     from = m.index! + m[0].length; n++;
   }
   out.push(text.slice(from));
@@ -140,6 +158,39 @@ function marked(text: string, phrases: string[]): ReactNode[] {
 }
 
 type Finding = { key: string; title: string; quote?: string; tail?: string; jump: () => void };
+
+/** Fees that Share fees with LPs divides (the catalog: "the Swap fee and Whale fee only", with the swap fee's fade and volatility rates). */
+const LP_SHARED = ['swap-fee', 'fee-fade', 'fee-vol', 'fee-size'];
+/**
+ * The card's "where the money goes" line, from the final distribution the request describes:
+ * the LP share comes off the shared fees first, then the rest goes to the recipient or through Split the fee.
+ * Jar and pot money stays separate. Presentation only; compose() and the economics are untouched.
+ */
+export function moneyFlow(rules: BlockEntry[], ctx: ReturnType<typeof context>, type: LaunchType): string[] {
+  const rate = (b: BlockEntry) => ['swap-fee', 'fee-dir'].includes(b.id) ? shortOf(b, ctx).replace(/ → [^→]*$/, '') : shortOf(b, ctx);
+  const feeRule = rules.find(b => b.id === 'swap-fee' || b.id === 'fee-dir');
+  const to = String(feeRule?.p.to ?? 'my wallet');
+  const split = rules.find(b => b.id === 'fee-split'), share = rules.find(b => b.id === 'lp-share');
+  const recipient = split ? `the split (${shortOf(split, ctx)})` : to === "IMD's treasury" ? "IMD's treasury" : isAddress(to) ? `${to.slice(0, 6)}…${to.slice(-4)}` : 'my wallet';
+  const hook = rules.filter(b => ['swap-fee', 'fee-dir', 'fee-fade', 'fee-vol', 'fee-size'].includes(b.id));
+  const shared = share ? hook.filter(b => LP_SHARED.includes(b.id)) : [];
+  const own = hook.filter(b => !shared.includes(b));
+  const out: string[] = [];
+  if (shared.length) {
+    const pct = Math.min(100, Math.max(0, Number(share!.p.pct) || 0));
+    const where = pct >= 100 ? `all to in-range LPs, 0% left for ${recipient}` : pct <= 0 ? recipient : `${pct}% to in-range LPs, ${100 - pct}% to ${recipient}`;
+    out.push(`${shared.map(rate).join(' + ')} → ${where}`);
+  }
+  if (own.length) out.push(`${own.map(rate).join(' + ')} → ${recipient}`);
+  for (const b of rules) {
+    if (b.id === 'jar') out.push(`${shortOf(b, ctx)}, spent on ${ctx.symbol}`);
+    if (b.id === 'pot') out.push(shortOf(b, ctx));
+    if (b.id === 'lp-fee') out.push(shortOf(b, ctx));
+  }
+  if (shared.length && Number(share!.p.pct) > 0) out.push(`if no liquidity is in range, the whole fee goes to ${recipient}`);
+  out.push(type === 'A' ? 'pool fee 1.25% (1% to you, 0.25% network) → liquidity' : rules.some(b => b.id === 'lp-fee') ? '' : 'pool fee set by whoever opens the pool');
+  return out.filter(Boolean);
+}
 
 export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?: string } }) {
   // The first visit starts on Stack blocks with the reviewed default stack; the two-card chooser is gone (SPEC 3.2).
@@ -178,7 +229,18 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   const text = prepared ? compose(prepared, address) : 'Resolve your repository in step 2 to compose the request from its pinned source.';
   const requestJson = prepared && sourceReady ? JSON.stringify(body(prepared, address)) : null;
   const check = useSwarmCheck(config.relayUrl, requestJson, address);
-  const issues = useMemo(() => [...validate(prepared ?? draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])], [prepared, draft, address, config.enabledDeployChains]);
+  const issues = useMemo(() => {
+    const found: Issue[] = [...validate(prepared ?? draft, address), ...(draft.settings.chain && !config.enabledDeployChains.includes(draft.settings.chain) ? [{ field: 'settings.chain', message: 'This deploy chain is disabled. Choose an enabled chain.' }] : [])];
+    // FROM MY OWN CODE is a starting point of its own: it needs a repository, a full commit and a resolved source before launch.
+    // validate() only checks these once one is typed, so the empty case is added here; the composer is untouched.
+    if (ownCodeOn) {
+      const st = draft.settings;
+      if (!st.repo.trim() && !found.some(i => i.field === 'settings.repo')) found.push({ field: 'settings.repo', message: 'Repository: enter the public https://github.com/owner/name URL of your hook.' });
+      if (!st.commit.trim() && !found.some(i => i.field === 'settings.commit')) found.push({ field: 'settings.commit', message: 'Commit: enter the full 40-character commit id.' });
+      if (ownCode.needed && !ownCode.ready && !found.some(i => i.field === 'settings.repo' || i.field === 'settings.commit')) found.push({ field: 'settings.resolve', message: 'Resolve your repository in step 2.' });
+    }
+    return found;
+  }, [prepared, draft, address, config.enabledDeployChains, ownCodeOn, ownCode.needed, ownCode.ready]);
   const bytes = prepared ? bodyBytes(body(prepared, address)) : 0;
   const rules = activeBlocks(draft), words = cleanText(draft.prompt);
   const splitDestination = rules.some(block => block.id === 'fee-split');
@@ -226,9 +288,11 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     const block = /^block:(\d+)(?::(.+))?$/.exec(field);
     if (block) {
       const entry = draft.blocks[Number(block[1])];
-      if (entry) toggle(entry.id, true);
+      // Row 0 (the token) opens under its own key, whichever token block it holds.
+      const rowId = entry && TOKEN_IDS.includes(entry.id) ? 'token-row' : entry?.id;
+      if (rowId) toggle(rowId, true);
       if (entry && draft.mode !== 'blocks' && !TOKEN_IDS.includes(entry.id)) chooseMode('blocks');
-      pendingFocus.current = block[2] ? `p-${block[1]}-${block[2]}` : `rule-${entry?.id}`;
+      pendingFocus.current = block[2] ? `p-${block[1]}-${block[2]}` : `rule-${rowId}`;
     } else if (field.startsWith('settings.')) {
       const key = field.slice(9);
       if ((key === 'repo' || key === 'commit') && !ownCodeOn) setOwnCodeOn(true);
@@ -244,8 +308,30 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   };
   useEffect(() => {
     if (sheet === null || sheet < 0) return;
-    dialog.current?.querySelector(`mark[data-mark="${sheet}"]`)?.scrollIntoView({ block: 'center' });
-  }, [sheet]);
+    // A phrase inside a longer highlighted phrase has no mark of its own; the longer mark holds its words.
+    const marks = [...dialog.current?.querySelectorAll<HTMLElement>('mark') ?? []];
+    const target = marks.find(m => m.dataset.mark === String(sheet)) ?? marks.find(m => m.textContent?.includes(phrases[sheet]));
+    target?.scrollIntoView({ block: 'center' });
+  }, [sheet]); // eslint-disable-line react-hooks/exhaustive-deps
+  // SPEC 3.2: the card never exceeds the viewport. Its details scroll inside it, sized so that at load the whole card,
+  // actions included, fits below the page head; it never shrinks the details below a few lines.
+  const cardRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const card = cardRef.current, scroller = card?.querySelector<HTMLElement>('.hc-scroll');
+      if (!card || !scroller) return;
+      const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 0;
+      const fixed = card.offsetHeight - scroller.offsetHeight;
+      const top = card.getBoundingClientRect().top + window.scrollY;
+      const room = Math.min(innerHeight - top - 16, innerHeight - header - 32) - fixed;
+      // The floor gives way on very short screens so the card itself still fits the viewport.
+      const floor = Math.max(24, Math.min(innerWidth >= 1100 ? 140 : 64, innerHeight - 16 - fixed));
+      card.style.setProperty('--scroll-room', `${Math.max(floor, Math.floor(room))}px`);
+    };
+    fit();
+    addEventListener('resize', fit);
+    return () => removeEventListener('resize', fit);
+  });
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setCopied('Copied.'); } catch { setCopied('Copy failed. Select the text and copy it by hand.'); }
   };
@@ -253,7 +339,9 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   // Findings: one line each (SPEC 3.2). Validation findings jump to their field; text findings open the sheet at their words.
   const textFindings = [...check.consistency, ...check.conflicts];
   const placeholders = [...new Set(text.match(PLACEHOLDER) ?? [])];
-  const phrases = [...textFindings.map(faultWords), ...placeholders];
+  // One canonical list: a finding's index here is the data-mark of its words in the sheet.
+  const quotes = textFindings.map(finding => faultWords(finding, text));
+  const phrases = [...new Set([...quotes, ...placeholders].filter(Boolean))];
   const seen = new Set<string>();
   const findings: Finding[] = [];
   for (const issue of issues) {
@@ -262,20 +350,18 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     findings.push({ key, title: issue.message, quote: placeholder, tail: placeholder ? 'in the request.' : undefined, jump: () => jump(issue.field) });
   }
   textFindings.forEach((finding, i) => {
-    const words = faultWords(finding), at = phrases.indexOf(words);
-    findings.push({ key: `text:${finding.code}:${i}`, title: finding.message, quote: words, tail: 'in the request.', jump: () => openSheet(at) });
+    const words = quotes[i], field = words ? null : findingField(finding, draft.mode);
+    findings.push({ key: `text:${finding.code}:${i}`, title: finding.message, quote: words || undefined, tail: words ? 'in the request.' : undefined,
+      jump: () => field ? jump(field) : openSheet(words ? phrases.indexOf(words) : null) });
   });
 
   // The card's "where the money goes" line.
   const pair = pairCurrency(draft);
-  const money = [
-    ...rules.filter(b => FEE_IDS.includes(b.id)).map(b => b.id === 'jar' ? `${shortOf(b, ctx)}, spent on ${ctx.symbol}` : summaryOf(b)),
-    draft.type === 'A' ? 'pool fee 1.25% (1% to you, 0.25% network) → liquidity' : rules.some(b => b.id === 'lp-fee') ? '' : 'pool fee set by whoever opens the pool',
-  ].filter(Boolean);
+  const money = moneyFlow(rules, ctx, draft.type);
   const hasFees = rules.some(b => FEE_IDS.slice(0, 8).includes(b.id) && b.id !== 'fee-split');
 
   const ready = issues.length === 0 && sourceReady && !check.gate;
-  const done = [true, draft.mode !== null && (!ownCodeOn || ownCode.ready && !!s.repo), draft.mode === 'prompt' ? !!words : rules.length > 0 && ruleIssues.length === 0, settingsMissing === 0, ready];
+  const done = [true, draft.mode !== null && (!ownCodeOn || !issues.some(i => /^settings\.(?:repo|commit|resolve)$/.test(i.field))), draft.mode === 'prompt' ? !!words : rules.length > 0 && ruleIssues.length === 0, settingsMissing === 0, ready];
   const now = done.findIndex(d => !d);
 
   const step = (n: number, title: string, state: ReactNode, children: ReactNode, stateClass = '') =>
@@ -346,7 +432,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     {ownCodeOn && <div className="own" role="group" aria-label="Own code fields">
       <p className="small muted">The request pins this exact commit. Your blocks and words become the changes the swarm makes to it.</p>
       <div className="fields">{setting('repo', 'Repository URL', textInput('repo', 'https://github.com/you/your-hook'))}{setting('commit', 'Commit', textInput('commit', '40-character commit id', true))}</div>
-      {ownCode.needed && <div className="own-resolve"><button className="btn tiny" type="button" disabled={ownCode.busy || !s.repo.trim() || !s.commit.trim()} onClick={() => void ownCode.resolve()}>{ownCode.busy ? 'Resolving repository…' : ownCode.ready ? 'Resolve repository again' : 'Resolve repository'}</button><p className="small muted" role="status">{ownCode.ready ? <>Pinned source: <span className="mono">{ownCode.source?.repoUrl} · {ownCode.source?.baseCommit}</span></> : 'Resolve this public Foundry repository before composing or checking your request.'}</p></div>}
+      {ownCode.needed && <div className="own-resolve"><button className="btn tiny" type="button" id="s-resolve" disabled={ownCode.busy || !s.repo.trim() || !s.commit.trim()} onClick={() => void ownCode.resolve()}>{ownCode.busy ? 'Resolving repository…' : ownCode.ready ? 'Resolve repository again' : 'Resolve repository'}</button><p className="small muted" role="status">{ownCode.ready ? <>Pinned source: <span className="mono">{ownCode.source?.repoUrl} · {ownCode.source?.baseCommit}</span></> : 'Resolve this public Foundry repository before composing or checking your request.'}</p></div>}
       {ownCode.error && <p className="field-error" role="alert">{ownCode.error}</p>}
     </div>}
     <h3 className="sub">How you describe the rules</h3>
@@ -463,7 +549,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
     {draft.mode === 'prompt' && words && !issues.some(i => i.field === 'prompt') && <li><span>Your words are written</span></li>}
     {findings.filter(f => !f.key.startsWith('text:')).map(f => <li className="todo" key={f.key}><span>{f.title} · <button type="button" onClick={f.jump}>fill it in</button></span></li>)}
   </ul>;
-  const card = <div className="hookcard" aria-labelledby="hc-name">
+  const card = <div className="hookcard" ref={cardRef} aria-labelledby="hc-name">
     <div className="hc-top">
       <span className="eyebrow">Your hook, as it stands</span>
       <h2 id="hc-name">{ctx.name}{draft.type === 'A' && <> <span className="sym">${ctx.symbol}</span></>}</h2>
@@ -473,10 +559,15 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
         <span className="pill">{draft.type === 'A' ? `Paired with ${pair}` : draft.type === 'C' ? `${s.tsym.trim() || 'Your token'} / ETH` : 'Any pool'}</span>
       </div>
     </div>
-    <ProvenLine entry={automatic.proven} />
-    {tiles}
-    <div className="flow"><b>Where the money goes</b><span>{money.join(' · ')}</span>{hasFees && <span className="muted">Fees are taken on the {pair} side and settled in {pair}.</span>}</div>
-    {readyList}
+    {/* SPEC 3.2: the card never exceeds the viewport; its details scroll inside it and the actions stay in reach. */}
+    <div className="hc-scroll" tabIndex={0} role="region" aria-label="Rules, money and readiness">
+      <ProvenLine entry={automatic.proven} />
+      {tiles}
+      <div className="flow"><b>Where the money goes</b><span>{money.join(' · ')}</span>{hasFees && <span className="muted">Fees are taken on the {pair} side and settled in {pair}.</span>}</div>
+      {readyList}
+      <p className="small muted check-note" id="check-note" role="status">{!config.relayUrl ? 'The free check needs the relay, which is not set up yet.' : !ownCode.ready ? 'Resolve your repository in step 2 before continuing.' : check.gate || (issues.length ? 'Fill in what is missing above to unlock the launch.' : 'The free check sends this request to IMD. No wallet, payment or launch.')}</p>
+    </div>
+    <div className="hc-foot">
     <div className="cost"><span>Swarm fee <strong>0.5 IMD</strong></span><span>Gas <strong>2 tx</strong></span></div>
     <p className="launch-wait">{LAUNCH_WAIT}</p>
     <div className="hc-actions">
@@ -484,9 +575,9 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
       <button className="btn primary" type="button" disabled={!ready} aria-describedby="check-note"
         onClick={() => { if (ready) location.hash = '#launch'; }}>Continue to launch</button>
     </div>
-    <p className="small muted check-note" id="check-note" role="status">{!config.relayUrl ? 'The free check needs the relay, which is not set up yet.' : !ownCode.ready ? 'Resolve your repository in step 2 before continuing.' : check.gate || (issues.length ? 'Fill in what is missing above to unlock the launch.' : 'The free check sends this request to IMD. No wallet, payment or launch.')}</p>
     {check.error && <p className="field-error" role="alert">{check.error}</p>}
     <div className="exact"><span>The request the swarm receives, <span className={`num${text.length > MAX_TEXT ? ' over' : ''}`}>{text.length.toLocaleString('en-US')}</span> characters · <span className="num">{(bytes / 1024).toFixed(1)}</span> / 16 KiB</span><button className="btn tiny" type="button" onClick={() => openSheet(null)} aria-haspopup="dialog">Show exact text</button></div>
+    </div>
   </div>;
   const findingsBox = <section className={`findings${findings.length ? '' : ' ok'}`} aria-labelledby="fx" id="findings">
     <h3 id="fx">{findings.length ? <>Fix before paying · <span className="num">{findings.length}</span></> : 'Nothing to fix'}</h3>

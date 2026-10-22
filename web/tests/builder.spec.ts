@@ -216,6 +216,160 @@ test('phones: card first, shelf scrolls sideways, rule tools wrap under the text
   await noOverflow(page);
 });
 
+// Revision findings (job 11 review): each test reproduces the reported steps.
+const OWNER = '0x6cba4751742f6989fa224b2dc5d5d52fcef98a34';
+
+test('the card itself stays within the viewport at every width, and the first phone screen reaches Continue to launch', async ({ page }) => {
+  for (const [width, height] of [[390, 844], [320, 900], [768, 900], [1100, 800], [1440, 900], [2560, 1300]]) {
+    await page.setViewportSize({ width, height });
+    await open(page, undefined, false);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const card = (await page.locator('.hookcard').boundingBox())!;
+    expect(card.height, `card height at ${width}x${height}`).toBeLessThanOrEqual(height);
+    // The details scroll inside the card; the actions are not inside the scrolling part.
+    expect(await page.locator('.hc-scroll').evaluate(el => getComputedStyle(el).overflowY)).toBe('auto');
+    await expect(page.locator('.hc-scroll .hc-actions')).toHaveCount(0);
+    const primary = (await page.getByRole('button', { name: 'Continue to launch' }).boundingBox())!;
+    expect(primary.y + primary.height, `Continue to launch on the first screen at ${width}x${height}`).toBeLessThanOrEqual(height);
+    // The readiness links are reachable by scrolling the card's own details.
+    const link = page.locator('.ready li.todo button').first();
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport();
+  }
+});
+
+test('own code with empty source fields blocks the launch and points at the missing fields', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, undefined, false);
+  await page.getByRole('button', { name: /^B: Hook only/ }).click();
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
+  await page.getByRole('button', { name: 'Price reading' }).click();
+  await page.locator('#s-hname').fill('ObserveHook');
+  await page.locator('#s-chain').selectOption('1');
+  await page.locator('#s-owner').fill(OWNER);
+  await expect(page.locator('.findings')).toContainText('Nothing to fix');
+  const go = page.getByRole('button', { name: 'Continue to launch' });
+  await expect(go).toBeEnabled();
+  await page.getByRole('button', { name: /^From my own code/ }).click();
+  await expect(page.locator('#s-repo')).toHaveValue('');
+  await expect(go).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Check with the swarm (free)' })).toBeDisabled();
+  await expect(page.locator('.findings')).toContainText('Repository: enter the public');
+  await expect(page.locator('.findings')).toContainText('Commit: enter the full 40-character commit id.');
+  await expect(page.locator('.progress a').nth(1)).toHaveClass(/now/);
+  await expect(page.locator('.progress a').nth(4)).not.toHaveClass(/done/);
+  await page.locator('.ready li.todo', { hasText: 'Repository' }).getByRole('button', { name: 'fill it in' }).click();
+  await expect(page.locator('#s-repo')).toBeFocused();
+  await page.locator('.finding', { hasText: 'Commit' }).getByRole('button', { name: /Jump to it/ }).click();
+  await expect(page.locator('#s-commit')).toBeFocused();
+  // Back to scratch: the starting point is ready again.
+  await page.getByRole('button', { name: /^From scratch/ }).click();
+  await expect(go).toBeEnabled();
+});
+
+test('token readiness links open row 0 and focus the missing field', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  for (const [label, field] of [['Token name', 'name'], ['Symbol', 'symbol']]) {
+    await page.locator('#rule-token-row').getByRole('button', { name: /Edit/ }).click();
+    await page.locator(`#p-0-${field}`).fill('');
+    await page.locator('#rule-token-row').getByRole('button', { name: /Close/ }).click();
+    await expect(page.locator('#p-0-name')).toHaveCount(0);
+    await page.locator('.ready li.todo', { hasText: label }).first().getByRole('button', { name: 'fill it in' }).click();
+    await expect(page.locator('#rule-token-row')).toHaveClass(/open/);
+    await expect(page.locator(`#p-0-${field}`)).toBeFocused();
+    await page.locator('#rule-token-row').getByRole('button', { name: /Close/ }).click();
+    await page.locator('.finding', { hasText: label }).first().getByRole('button', { name: /Jump to it/ }).click();
+    await expect(page.locator(`#p-0-${field}`)).toBeFocused();
+    await page.locator(`#p-0-${field}`).fill(field === 'name' ? 'Pondside' : 'POND');
+    await page.locator('#rule-token-row').getByRole('button', { name: /Close/ }).click();
+  }
+});
+
+async function pairedWithImd(page: Page) {
+  await page.locator('#s-chain').selectOption('1');
+  await page.locator('#s-pair').selectOption('imd');
+  await page.locator('#s-pool').fill('50');
+  await page.locator('#s-owner').fill(OWNER);
+  await page.locator('#s-rem').fill(OWNER);
+}
+
+test('a text finding opens the sheet at its own highlighted words', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, undefined, false);
+  await pairedWithImd(page);
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
+  const words = `Take 1% of the ETH side of every buy, settled in IMD; send it to ${OWNER}.\n${'Observe swaps without changing their accounting.\n'.repeat(40)}Settle the fee in ETH.`;
+  await page.locator('#p-text').fill(words);
+  const row = page.locator('.finding', { hasText: 'The fee side must be IMD' });
+  await expect(row.locator('q')).toHaveText('ETH side');
+  await row.getByRole('button', { name: /Jump to it/ }).click();
+  const pre = page.locator('#composed');
+  await expect(pre).toBeVisible();
+  const view = (await pre.boundingBox())!;
+  const mark = pre.locator('mark', { hasText: 'ETH side' }).first();
+  const box = (await mark.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(view.y);
+  expect(box.y + box.height).toBeLessThanOrEqual(view.y + view.height);
+  // Every finding's identity matches its mark: the settlement finding scrolls to its own words.
+  await page.keyboard.press('Escape');
+  const settle = page.locator('.finding', { hasText: 'Settle the fee in IMD' }).first();
+  const quote = await settle.locator('q').textContent();
+  expect(quote).not.toBe('Settle the fee in ETH.');
+  await settle.getByRole('button', { name: /Jump to it/ }).click();
+  const second = (await pre.locator('mark', { hasText: quote! }).last().boundingBox())!;
+  const view2 = (await pre.boundingBox())!;
+  expect(second.y).toBeGreaterThanOrEqual(view2.y);
+  expect(second.y + second.height).toBeLessThanOrEqual(view2.y + view2.height);
+});
+
+test('finding excerpts quote only words that are in the request, never a whole sentence', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, undefined, false);
+  const check = async () => {
+    const text = (await exact(page))!;
+    for (const q of await page.locator('.finding em q').allTextContents()) {
+      expect(text, `excerpt ${q}`).toContain(q);
+      expect(q.length).toBeLessThanOrEqual(60);
+      expect(q).not.toMatch(/^\w+: ""/);
+    }
+  };
+  await check();
+  const owner = page.locator('.finding', { hasText: 'Connect the paying wallet or enter a full owner address' }).first();
+  if (await owner.count()) { await expect(owner.locator('q')).not.toHaveText(/choose a chain/); }
+  await pairedWithImd(page);
+  await page.getByRole('button', { name: 'Describe it', exact: true }).click();
+  await page.locator('#p-text').fill('Settle the fee in ETH.');
+  await check();
+  for (const q of await page.locator('.finding em q').allTextContents()) expect(q).not.toBe('Settle the fee in ETH.');
+  // A finding without an exact span jumps to its field instead of quoting.
+  const amount = page.locator('.finding', { hasText: 'Name an exact fee amount' }).first();
+  await expect(amount.locator('q')).toHaveCount(0);
+  await amount.getByRole('button', { name: /Jump to it/ }).click();
+  await expect(page.locator('#p-text')).toBeFocused();
+});
+
+test('where the money goes applies the LP share before the recipient', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  const flow = page.locator('.flow');
+  await expect(flow).toContainText('1.0% on every buy and sell → my wallet');
+  await page.getByRole('tab', { name: /^Treasury/ }).click();
+  await page.getByRole('button', { name: 'Add Share fees with LPs' }).click();
+  await rule(page, 'lp-share').getByLabel(/Share to LPs/).fill('100');
+  await expect(flow).toContainText('1.0% on every buy and sell → all to in-range LPs, 0% left for my wallet');
+  await expect(flow).not.toContainText('→ my wallet ·');
+  await expect(flow).toContainText('if no liquidity is in range, the whole fee goes to my wallet');
+  expect(await exact(page)).toContain('donate 100%');
+  await page.getByRole('tab', { name: /^Fees/ }).click();
+  await page.getByRole('button', { name: 'Add Split the fee' }).click();
+  await expect(flow).toContainText('0% left for the split (70% me / 30%');
+  await rule(page, 'lp-share').getByLabel(/Share to LPs/).fill('40');
+  await expect(flow).toContainText('40% to in-range LPs, 60% to the split (70% me / 30%');
+  // Jar money stays separate.
+  await expect(flow).toContainText('into a jar');
+});
+
 for (const width of [320, 390, 768, 1100, 1440, 2560]) {
   test(`Builder at ${width}px: layout, no horizontal overflow, card within the viewport, screenshot`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -230,8 +384,12 @@ for (const width of [320, 390, 768, 1100, 1440, 2560]) {
       expect(Math.round(col!.width)).toBe(420);
       expect(col!.x).toBeGreaterThan(steps!.x + steps!.width);
       expect(col!.height).toBeLessThanOrEqual(900);
+      expect((await page.locator('.hookcard').boundingBox())!.height).toBeLessThanOrEqual(900);
       expect(await page.locator('.hookcol').evaluate(el => getComputedStyle(el).position)).toBe('sticky');
-    } else expect(col!.y).toBeLessThan(steps!.y);
+    } else {
+      expect(col!.y).toBeLessThan(steps!.y);
+      expect((await page.locator('.hookcard').boundingBox())!.height).toBeLessThanOrEqual(900);
+    }
     // Type sizes are fixed, never viewport-scaled.
     expect(await page.locator('.step h2').first().evaluate(el => getComputedStyle(el).fontSize)).toBe('13px');
     await page.evaluate(() => window.scrollTo(0, 0));
