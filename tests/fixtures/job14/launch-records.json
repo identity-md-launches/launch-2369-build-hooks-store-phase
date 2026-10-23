@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-23T04:50:51Z",
+  "launches": [
+    {
+      "launchId": "9f778988-4553-4ff6-99fb-706824bb9e31",
+      "launchNumber": 2424,
+      "chainId": 4663,
+      "kind": "evm_contracts",
+      "status": "live",
+      "parkedReason": null,
+      "createdAt": "2026-10-22T00:00:07.426Z",
+      "updatedAt": "2026-10-22T00:00:44.607Z",
+      "jobId": "a21b246a-6a18-4fb7-92e3-c7f81e8dadac",
+      "jobState": "completed",
+      "blockedReason": null,
+      "paidBy": "0x5bff2a2fecd1d6152676813b21346238733beab1",
+      "objectiveSha256": "06d2cd24c9949055104f04a05f242a1f26505c80c3a599254b922162eac1c00a",
+      "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2424-deploy-one-contract-pondsideguard",
+      "sourceCommit": "5a9f6a36d659084e084a8abc08a55213c9516f07",
+      "attested": true,
+      "artifacts": [
+        {
+          "role": "other",
+          "name": "PondsideGuardDeployer",
+          "address": "0x0c45bc8ca7b4e08ea65962ae6837af0992809517",
+          "txHash": "0x314290c1b93c9498860169d616b014a5edbb9b547056e495f7422336ab24a6cd",
+          "blockNumber": 94682949
+        }
+      ],
+      "pool": null
+    },
+    {
+      "launchId": "7b3da6ae-7b9b-4c39-851b-154c41433898",
+      "launchNumber": 2448,
+      "chainId": 4663,
+      "kind": "univ4_hook",
+      "status": "live",
+      "parkedReason": null,
+      "createdAt": "2026-10-22T02:35:50.404Z",
+      "updatedAt": "2026-10-22T14:40:35.618Z",
+      "jobId": "a01dd7fe-7f49-4efa-a87d-bd32293d0bc2",
+      "jobState": "completed",
+      "blockedReason": null,
+      "paidBy": "0x5bff2a2fecd1d6152676813b21346238733beab1",
+      "objectiveSha256": "8a7e0634d3bf3d2554c43efcf1b0a14d0fe435af573eb3ac0e6c8fddf27c314f",
+      "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2448-launch-test-test-uniswap",
+      "sourceCommit": "9d10e13fdf142f542fad136a18d0cf3e42b9997b",
+      "attested": true,
+      "artifacts": [
+        {
+          "role": "distributor",
+          "name": "MerkleDistributor",
+          "address": "0x29760ee79ca59cec260da5e476ef03a137fc66b6",
+          "txHash": "0x0c25fcab781420cfb1835a6b0185bb3214a36f6643e38c803cb0b44253955bdd",
+          "blockNumber": 95187895
+        },
+        {
+          "role": "hook",
+          "name": "TestHook",
+          "address": "0x5a9e7a61c45d2c615162fa57931bcbc06d9b20cc",
+          "txHash": "0x0c25fcab781420cfb1835a6b0185bb3214a36f6643e38c803cb0b44253955bdd",
+          "blockNumber": 95187895
+        },
+        {
+          "role": "token",
+          "name": "TestToken",
+          "address": "0xe7244bfb99c7ad49c5a40eaeedb215cb47dde85b",
+          "txHash": "0x0c25fcab781420cfb1835a6b0185bb3214a36f6643e38c803cb0b44253955bdd",
+          "blockNumber": 95187895
+        }
+      ],
+      "pool": {
+        "fee": 12500,
+        "hooks": "0x5a9e7a61c45d2c615162fa57931bcbc06d9b20cc",
+        "currency0": "0x5f7bb59365ce557c26dbcaa4ee9d39a4b95b7127",
+        "currency1": "0xe7244bfb99c7ad49c5a40eaeedb215cb47dde85b",
+        "tickSpacing": 60
+      }
+    },
+    {
+      "launchId": "981d8c6b-d3c2-43a7-a701-1fef35c3bd03",
+      "launchNumber": 2449,
+      "chainId": 4663,
+      "kind": "evm_contracts",
+      "status": "live",
+      "parkedReason": null,
+      "createdAt": "2026-10-22T03:12:34.741Z",
+      "updatedAt": "2026-10-22T14:40:38.121Z",
+      "jobId": "292d0dab-c9a9-4c74-951d-c36d9855680b",
+      "jobState": "completed",
+      "blockedReason": null,
+      "paidBy": "0x5bff2a2fecd1d6152676813b21346238733beab1",
+      "objectiveSha256": "ccd1ca554a920ba9e08f5bbedf43735c4ce00af04590c6045f09487a6de99499",
+      "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2449-deploy-one-contract-reedguarddeployer",
+      "sourceCommit": "65dbed3c6428352398a55e344e7bfac161c26657",
+      "attested": true,
+      "artifacts": [
+        {
+          "role": "other",
+          "name": "ReedGuardDeployer",
+          "address": "0x66be840c62c9ef735c2a3bdf44760514810258e4",
+          "txHash": "0x1a2cdd3a6e8a4a7e89ffdd90e0ba7d6705e709f88e2354a2796ebf61aed1feb4",
+          "blockNumber": 95187921
+        }
+      ],
+      "pool": null
+    },
+    {
+      "launchId": "f3a9856a-fcda-4f87-8413-a615708e3d41",
+      "launchNumber": 2450,
+      "chainId": 4663,
+      "kind": "evm_contracts",
+      "status": "live",
+      "parkedReason": null,
+      "createdAt": "2026-10-22T02:48:35.450Z",
+      "updatedAt": "2026-10-22T14:40:39.537Z",
+      "jobId": "50fae95a-207c-4ecc-93ba-f0d863d885d7",
+      "jobState": "completed",
+      "blockedReason": null,
+      "paidBy": "0x5bff2a2fecd1d6152676813b21346238733beab1",
+      "objectiveSha256": "43e99551340f31a44372f6993e2175b5326e19d7a425197d98a17e8ec94975ec",
+      "sourceRepoUrl": "https://github.com/identity-md-launches/launch-2450-deploy-one-contract-lilyguarddeployer",
+      "sourceCommit": "107fb460b8a3ff0966dffe7bd0982cdd36e55c50",
+      "attested": true,
+      "artifacts": [
+        {
+          "role": "other",
+          "name": "LilyGuardDeployer",
+          "address": "0x327733d178813c3bf06d4c254522c7371bb46f83",
+          "txHash": "0x56e080600a66cd45662e9b0f76319b15515262cfe29c096d93408572a15e300e",
+          "blockNumber": 95187935
+        }
+      ],
+      "pool": null
+    }
+  ]
+}

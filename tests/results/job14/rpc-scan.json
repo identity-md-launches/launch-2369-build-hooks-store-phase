@@ -1,0 +1,61 @@
+{
+  "observedAt": "2026-10-23T05:40:41.132Z",
+  "mode": "full Intake history through the production fallback on both chains",
+  "chains": [
+    {
+      "chainId": 4663,
+      "endpoints": [],
+      "fullHistory": {
+        "success": true,
+        "fromBlock": 85300000,
+        "toBlock": "95706591",
+        "requestedLogs": 18,
+        "completedLogs": 72
+      }
+    },
+    {
+      "chainId": 1,
+      "endpoints": [],
+      "fullHistory": {
+        "success": true,
+        "fromBlock": 26164897,
+        "toBlock": "26253294",
+        "requestedLogs": 45,
+        "completedLogs": 389
+      }
+    }
+  ],
+  "endpoints": [
+    {
+      "endpoint": "https://rpc.mainnet.chain.robinhood.com/",
+      "calls": 55,
+      "failedHttpCalls": 0,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 54,
+      "largestLogRange": 400000
+    },
+    {
+      "endpoint": "https://ethereum-rpc.publicnode.com/",
+      "calls": 1,
+      "failedHttpCalls": 0,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 0,
+      "largestLogRange": 0
+    },
+    {
+      "endpoint": "https://rpc.mevblocker.io/",
+      "calls": 2,
+      "failedHttpCalls": 0,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 2,
+      "largestLogRange": 88398
+    }
+  ],
+  "failedCalls": 0,
+  "maxLogCallsInFlight": 2,
+  "complete": true,
+  "quietNetworkTargetMet": true
+}

@@ -53,7 +53,12 @@ for(const [width,height] of [[320,900],[390,844],[768,900],[1100,800],[1366,768]
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);expect(await page.locator('.step h2').first().evaluate(el=>getComputedStyle(el).fontSize)).toBe('13px');
 });
 for(const [width,height] of [[1920,1080],[1366,768]]) test(`seven findings do not leave a phantom scroll gap at ${width}x${height}`,async({page})=>{
- await page.setViewportSize({width,height});await interceptChains(page,{noLogs:true});await page.goto('#builder');await expect(page.locator('.findings .finding')).toHaveCount(7);await page.evaluate(()=>document.fonts.ready);
+ await page.setViewportSize({width,height});await interceptChains(page,{noLogs:true});
+ // Seven independent inputs, rather than the duplicate owner/chain symptoms
+ // removed by job 14: name, symbol, chain, pool, owner, repository and commit.
+ const d=newDraft();d.blocks[0].p.name='';d.blocks[0].p.symbol='';
+ await page.addInitScript(d=>localStorage.setItem('hooks-store:draft:v2',JSON.stringify(d)),d);
+ await page.goto('#builder');await page.getByRole('button',{name:/^From my own code/}).click();await expect(page.locator('.findings .finding')).toHaveCount(7);await page.evaluate(()=>document.fonts.ready);
  const col=page.locator('.hookcol');
  for(const end of [false,true]){if(end)await col.evaluate(el=>el.scrollTop=el.scrollHeight);const g=await col.evaluate(el=>({actual:el.scrollHeight,expected:Math.max(el.clientHeight,el.lastElementChild!.getBoundingClientRect().bottom-el.getBoundingClientRect().top+el.scrollTop+parseFloat(getComputedStyle(el).paddingBottom))}));expect(Math.abs(g.actual-g.expected)).toBeLessThanOrEqual(2);}
 });
@@ -64,6 +69,7 @@ async function hookFixture(page:Page) {
  await page.route('**/site-config.json',r=>r.fulfill({json:{...site,chains:site.chains.map(c=>({...c,intakeFromBlock:head-20}))}}));
  await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));
  await page.route(`${site.relayUrl}/launches/${reed.launchId}`,r=>r.fulfill({json:{id:reed.launchId,chainId:4663,launchNumber:2449,status:'live',artifacts:[{role:'hook',name:'ReedHook',address:hook}]}}));
+ await page.route(`${site.relayUrl}/jobs/reed-build`,r=>r.fulfill({json:{id:'reed-build',state:'completed',nodes:[],launch:{id:reed.launchId,status:'live'}}}));
  await page.route(rpcRoute(site.chains[1]),async r=>{const q=r.request().postDataJSON();if(q.method==='eth_getLogs'&&q.params[0].topics[0]===REQUEST_TOPIC)return r.fulfill({json:{jsonrpc:'2.0',id:q.id,result:[requested]}});return r.fallback();});
  return requested;
 }
@@ -92,7 +98,7 @@ for(const [i,number,launchId,jobId] of [[0,2454,'24f55ec3-e64c-43b7-a095-977c9c5
  else if(q.method==='eth_getBlockByNumber')result={number:q.params[0],hash:e.requested.blockHash,timestamp:'0x6a500000',transactions:[]};else return r.fallback();return r.fulfill({json:{jsonrpc:'2.0',id:q.id,result}});
  });
  await page.route('https://ipfs.imd.fun/**',r=>r.fulfill({json:{complete:true,jobId,launch:{id:launchId,chainId}}}));
- await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));await page.route(`${site.relayUrl}/intake/1/${e.requested.transactionHash}`,r=>r.fulfill({json:{entries:[{requestId:id,action:'launch.open',admission:{result:{jobId}}}]}}));await page.route(`${site.relayUrl}/jobs/${jobId}`,r=>r.fulfill({json:{launch:{id:launchId}}}));await page.route(`${site.relayUrl}/launches/${launchId}`,r=>r.fulfill({json:{id:launchId,launchNumber:number,chainId,status:'live',artifacts:[]}}));
+ await page.route(`${site.relayUrl}/**`,r=>r.fulfill({json:{entries:[]}}));await page.route(`${site.relayUrl}/intake/1/${e.requested.transactionHash}`,r=>r.fulfill({json:{entries:[{requestId:id,action:'launch.open',admission:{result:{jobId}}}]}}));await page.route(`${site.relayUrl}/jobs/${jobId}`,r=>r.fulfill({json:{id:jobId,state:'completed',nodes:[],launch:{id:launchId}}}));await page.route(`${site.relayUrl}/launches/${launchId}`,r=>r.fulfill({json:{id:launchId,launchNumber:number,chainId,status:'live',artifacts:[]}}));
  await page.goto(`#hook/1/${id}`);await expect(page.getByRole('heading',{name:`Contracts launch ${number}, live`,exact:true})).toBeVisible();await expect(page.getByText('Not a hook: a contracts launch for the store',{exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'Open IMD explorer',exact:true})).toHaveAttribute('href',`https://explorer.imd.fun/jobs/${jobId}`);expect(targeted).toBeGreaterThan(0);await expect(page.locator('#connect')).toHaveText('Connect');
 });
 async function promotionFixture(page:Page,options:{balance?:bigint;both?:boolean;deposit?:bigint;proceeds?:bigint;first429?:boolean;allowance?:bigint}={}) {
@@ -226,9 +232,10 @@ test.describe('job 13 promotions panel',()=>{
   fs.mkdirSync(job13Out,{recursive:true});await page.goto('#store');await page.addStyleTag({content:hidingStylesheet(rules)});await page.locator('#featured').scrollIntoViewIfNeeded();await page.screenshot({path:`${job13Out}/featured-easylist-390.jpg`,type:'jpeg',quality:60});
  });
  test('the first RPC answering 429 is invisible: strip and panel still render',async({page})=>{
+  test.setTimeout(60000); // Required 2/4/8-second backoff precedes fallback.
   const {rejected}=await promotionFixture(page,{both:true,first429:true});
-  await expect(page.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 2 IMD');
-  await page.goto('#store');const card=page.locator('.featured-group:not([aria-hidden]) .placement-card:not(.placement-slot)');await expect(card).toHaveCount(1);await expect(card).toContainText('ReedHook');
+  await expect(page.locator('.wallet-imd')).toHaveText('In your wallet on Ethereum: 2 IMD',{timeout:45000});
+  await page.goto('#store');const card=page.locator('.featured-group:not([aria-hidden]) .placement-card:not(.placement-slot)');await expect(card).toHaveCount(1,{timeout:45000});await expect(card).toContainText('ReedHook');
   await expect(page.locator('#featured')).not.toContainText('Could not read promotions');expect(rejected()).toBeGreaterThan(0);
  });
 });

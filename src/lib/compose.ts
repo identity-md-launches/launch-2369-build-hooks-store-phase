@@ -270,6 +270,9 @@ export const feeRecipient = (d: Draft, wallet?: string): string => {
     })).values()];
     if (targets.length === 1) return targets[0];
     if (targets.length > 1) return 'the unresolved written fee recipient';
+    // With no fee to route, the deployer still needs a concrete constructor
+    // recipient. The explicit owner supplies it without requiring a wallet.
+    return walletOr(d.settings.owner, wallet);
   }
   const choice = String(fee?.p.to ?? 'my wallet');
   return choice === "IMD's treasury" || choice === 'treasury address' ? IMD_TREASURY : choice === 'my wallet' ? walletOr('', wallet) : choice;

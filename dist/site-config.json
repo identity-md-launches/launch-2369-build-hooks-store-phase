@@ -51,17 +51,29 @@
     "ipfsGateway": "https://ipfs.imd.fun/ipfs/"
   },
   "ads": {
-    "4663": {
-      "registry": "0x366c84a2971713fc8fa24d3d4b8abd2f4f085625",
-      "placements": "0x63b59cbf5b535e46815ae5d4cf126bf409dba69c",
-      "launchNumber": 2454,
-      "commit": "952e62de284440144a24fc4ec4868461e4534612"
-    },
     "1": {
       "registry": "0xff8b7110525c1ec39d6df825880890e7d9184f06",
       "placements": "0x1da6f19ee08365813651de6420603fea4fbcdc9a",
       "launchNumber": 2456,
       "commit": "fcca6490b279cd9821cf71d1edf083afbfa1cba5"
+    },
+    "4663": {
+      "registry": "0x366c84a2971713fc8fa24d3d4b8abd2f4f085625",
+      "placements": "0x63b59cbf5b535e46815ae5d4cf126bf409dba69c",
+      "launchNumber": 2454,
+      "commit": "952e62de284440144a24fc4ec4868461e4534612"
     }
+  },
+  "rpcLogRanges": {
+    "https://ethereum-rpc.publicnode.com": 10000,
+    "https://rpc.mevblocker.io": 100000,
+    "https://eth.llamarpc.com": 10000,
+    "https://rpc.mainnet.chain.robinhood.com": 400000,
+    "https://robinhood-rpc.publicnode.com": 10000
+  },
+  "launchRecordsUrl": "https://raw.githubusercontent.com/the-hook-store/hooks-store-spec/main/evidence/launch-records.json",
+  "rpcLogLookbacks": {
+    "https://ethereum-rpc.publicnode.com": 9000,
+    "https://robinhood-rpc.publicnode.com": 0
   }
 }

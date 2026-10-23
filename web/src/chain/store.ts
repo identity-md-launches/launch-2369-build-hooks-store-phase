@@ -4,14 +4,16 @@ import type { SiteConfig } from '../config';
 import { CHAINS, type Launch } from '../types.ts';
 import { cast } from '../../../src/scene/cast.ts';
 import { applyCompleted, applyResult, applyLaunchRecord, launchFromRequested, pondMessage, resultUrl, type RawLog } from './decode.ts';
-import { intakeJob, relayFetch } from '../relay.ts';
+import { applyJobRecord, intakeJob, relayFetch } from '../relay.ts';
 import { publicClients, readCache, writeCache, type ReadClient } from './clients.ts';
 import { creatorName } from './ens.ts';
+import { deriveLaunchStatus, isPublicLaunch, launchStopped } from './visibility.ts';
+import { applySnapshotRecord, LAUNCH_RECORDS_URL, matchingLaunchRecord, parseLaunchRecords, type LaunchRecord } from './records.ts';
 export const REQUEST_TOPIC = '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41fe2a576074379063';
 export const COMPLETE_TOPIC = '0xd4ad2d2ef4e8ea9995103f34e322dbefb2534f3a52984a308f7db8e257b76fa1';
 const CACHE_VERSION = 2;
 export const cacheKey = (chainId: number) => `hooks-store:intake:v${CACHE_VERSION}:${chainId}`;
-type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; relayLaunchId?: string; launchRecord?: unknown; hookCodeVerified?: string; hookRead?: { deployer: string; address: string } };
+type RecordEntry = { requested: RawLog; completed?: RawLog; result?: unknown; timestamp?: number; relayLaunchId?: string; launchRecord?: unknown; jobRecord?: unknown; snapshotRecord?: LaunchRecord; hookCodeVerified?: string; hookRead?: { deployer: string; address: string } };
 export const deployerAbi = parseAbi(['function hook() view returns (address)']);
 type ChainCache = { version: number; head: string; cursor: string; records: Record<string, RecordEntry>; completions: Record<string, RawLog> };
 const sameLog = (a: RawLog, b: RawLog) => !b.removed && BigInt(a.blockNumber) === BigInt(b.blockNumber)
@@ -32,8 +34,9 @@ export async function readLogs(client: ReadClient, address: string, topics: (Hex
     if (logs.length >= 10000 && from < to) throw new Error('Possible RPC result cap');
     return logs as RawLog[];
   } catch (error) {
-    // Any failure (including HTTP/timeout/archive errors) gets smaller windows. Never skip blocks.
-    if (to - from + 1n <= 1000n) throw error;
+    // Only a result/range cap benefits from subdivision. An outage, archive denial or
+    // rate limit must not fan out into a storm of smaller, equally failing calls.
+    if (to - from + 1n <= 1000n || !/result cap|too many (?:results|logs)|block range|response size|query returned more/i.test(String(error))) throw error;
     const middle = (from + to) / 2n;
     return [...await readLogs(client, address, topics, from, middle), ...await readLogs(client, address, topics, middle + 1n, to)];
   }
@@ -52,6 +55,9 @@ export class LaunchStore {
   private recordDue = new Map<string, number>();
   private named = new Set<string>();
   private enrichments = new Map<number, Promise<void>>();
+  private snapshot: Promise<LaunchRecord[]> = Promise.resolve([]);
+  private controller = new AbortController();
+  private pendingCasts = new Set<string>();
   private state: StoreState;
   readonly config: SiteConfig;
   private onCast: typeof cast;
@@ -86,11 +92,14 @@ export class LaunchStore {
     if (entry.result && row.completion?.status === 0) row = applyResult(row, entry.result);
     if (!row.launchId && entry.relayLaunchId) row.launchId = entry.relayLaunchId;
     if (entry.launchRecord) row = applyLaunchRecord(row, entry.launchRecord);
+    if (entry.snapshotRecord) row = applySnapshotRecord(row, entry.snapshotRecord);
+    if (entry.jobRecord) row = applyJobRecord(row, entry.jobRecord);
     if (row.deployerAddress && entry.hookRead?.deployer.toLowerCase() === row.deployerAddress.toLowerCase()) {
       const pending = entry.hookRead.address.toLowerCase() === zeroAddress;
       row = { ...row, hookAddress: pending ? null : entry.hookRead.address, hookPending: pending };
     }
-    if (row.type === 'A' && row.launchRecordStatus === 'live') { row.hookCodeVerified = entry.hookCodeVerified?.toLowerCase() === row.hookAddress?.toLowerCase(); if (!row.hookCodeVerified) row.status = 'in-progress'; }
+    row.hookCodeVerified = !!row.hookAddress && entry.hookCodeVerified?.toLowerCase() === row.hookAddress.toLowerCase();
+    row.status = deriveLaunchStatus(row);
     if (row.completion) row.resultUrl = resultUrl(row.completion.uri, this.config.intake.ipfsGateway);
     return row;
   }
@@ -101,9 +110,12 @@ export class LaunchStore {
   }
   start() {
     const epoch = ++this.epoch;
+    this.controller.abort(); this.controller = new AbortController();
+    this.snapshot = fetch(this.config.launchRecordsUrl ?? LAUNCH_RECORDS_URL, { signal: AbortSignal.any([this.controller.signal, AbortSignal.timeout(8000)]), cache: 'no-cache' })
+      .then(async response => { if (!response.ok) throw new Error('Launch snapshot unavailable'); return parseLaunchRecords(await response.json()); }).catch(() => []);
     for (const chain of this.config.chains) void this.run(chain.id, epoch);
     this.timer = setInterval(() => this.poll(), this.config.intake.pollIntervalMs);
-    return () => { ++this.epoch; clearInterval(this.timer); };
+    return () => { ++this.epoch; this.controller.abort(); clearInterval(this.timer); };
   }
   /** Resolve a public hash route from its Requested event, independently of wallet/history backfill. */
   async resolveRequest(chainId: number, requestId: string) {
@@ -112,8 +124,8 @@ export class LaunchStore {
     const client = this.clients[chainId];
     const head = await client.getBlockNumber({ cacheTime: 0 });
     const ranges = [...backwardsRanges(BigInt(chain.intakeFromBlock), head, BigInt(chain.logRange))];
-    for (let i = 0; i < ranges.length; i += 4) {
-      const windows = await Promise.all(ranges.slice(i, i + 4).map(([from, to]) => readLogs(client, this.config.intake.address, [REQUEST_TOPIC, requestId as Hex, null, this.config.intake.launchAction as Hex], from, to)));
+    for (let i = 0; i < ranges.length; i += 2) {
+      const windows = await Promise.all(ranges.slice(i, i + 2).map(([from, to]) => readLogs(client, this.config.intake.address, [REQUEST_TOPIC, requestId as Hex, null, this.config.intake.launchAction as Hex], from, to)));
       const requests = windows.flat().filter(log => log.topics[1]?.toLowerCase() === requestId.toLowerCase());
       if (!requests.length) continue;
       const completions: RawLog[] = [];
@@ -124,7 +136,7 @@ export class LaunchStore {
       return;
     }
   }
-  private poll = () => { for (const chain of this.config.chains) void this.run(chain.id, this.epoch); };
+  private poll = () => { this.emit(); for (const chain of this.config.chains) void this.run(chain.id, this.epoch); };
   retry = () => { this.resultDue.clear(); this.hookDue.clear(); this.recordDue.clear(); this.poll(); };
   private async run(chainId: number, epoch: number) {
     if (this.busy.has(chainId)) { this.pendingHead.add(chainId); return; }
@@ -149,10 +161,11 @@ export class LaunchStore {
       if (previous === 0n) cache.cursor = String(from - 1n);
       cache.head = String(head);
       const history = [...backwardsRanges(floor, BigInt(cache.cursor), size)];
-      // Four windows in flight keeps a fresh browser quick without an unbounded RPC fan-out.
-      for (let i = 0; i < history.length; i += 4) {
+      // Each window has two scans (Requested and Completed). The transport also
+      // caps log calls shared by history and direct-link readers at two per chain.
+      for (let i = 0; i < history.length; i++) {
         if (epoch !== this.epoch) return;
-        const group = history.slice(i, i + 4);
+        const group = history.slice(i, i + 1);
         const results = await Promise.allSettled(group.map(([start, end]) => this.window(chainId, start, end)));
         for (let j = 0; j < results.length; j++) {
           const result = results[j];
@@ -251,7 +264,7 @@ export class LaunchStore {
       // An identical reread must not invalidate enrichment already in flight.
       if (existed && sameLog(existed.requested, log)) existed.requested = log;
       else cache.records[row.requestId] = { requested: log };
-      if (!existed && castAfter !== undefined && BigInt(log.blockNumber) > castAfter) this.onCast(pondMessage(row));
+      if (!existed && castAfter !== undefined && BigInt(log.blockNumber) > castAfter && row.isHook !== false) this.pendingCasts.add(row.id);
     }
     for (const [id, entry] of Object.entries(cache.records)) {
       entry.completed = cache.completions[id.toLowerCase()] ?? entry.completed;
@@ -290,6 +303,10 @@ export class LaunchStore {
         } catch { /* Leave dates unknown. */ }
         row = this.hydrate(entry, chainId)!;
       }
+      // Requested age and a new cast do not wait for the optional record plane.
+      // A known stopped record still wins immediately through the shared rule.
+      this.rows.set(row.id, { ...row, creatorName: this.rows.get(row.id)?.creatorName }); this.emit();
+      if (row.createdAt && this.pendingCasts.delete(row.id) && isPublicLaunch(row) && row.isHook !== false) this.onCast(pondMessage(row));
       if (!this.named.has(row.payer.toLowerCase())) {
         const payer = row.payer;
         this.named.add(payer.toLowerCase());
@@ -300,7 +317,7 @@ export class LaunchStore {
         const url = resultUrl(row.completion.uri, this.config.intake.ipfsGateway);
         if (url) {
           try {
-            const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
+            const response = await fetch(url, { signal: AbortSignal.any([this.controller.signal, AbortSignal.timeout(12000)]) });
             if (!response.ok) throw new Error('Result unavailable');
             const data: unknown = await response.json();
             if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid result');
@@ -310,26 +327,41 @@ export class LaunchStore {
         } else row.resultError = 'Intake completed this request without a supported IPFS result URI.';
       }
       if (!current()) return;
-      if (row.status !== 'failed' && this.config.relayUrl && (this.recordDue.get(row.id) ?? 0) <= Date.now()) {
+      if (row.status !== 'failed' && (this.recordDue.get(row.id) ?? 0) <= Date.now()) {
         this.recordDue.set(row.id, Date.now() + 20000);
+        let freshJob = false;
         try {
+          if (!this.config.relayUrl) throw new Error('Relay not configured');
           let launchId = row.launchId;
-          if (!launchId) {
-            const jobId = row.jobIds[0] ?? intakeJob(await relayFetch(this.config.relayUrl, `/intake/${chainId}/${entry.requested.transactionHash}`), row.requestId);
-            if (jobId) {
-              const job = await relayFetch(this.config.relayUrl, `/jobs/${encodeURIComponent(jobId)}`) as { launch?: { id?: string }; launchId?: string };
-              launchId = job.launch?.id ?? job.launchId;
-            }
-          }
-          if (launchId && /^[\w-]+$/.test(launchId)) {
-            const detail = await relayFetch(this.config.relayUrl, `/launches/${encodeURIComponent(launchId)}`);
+          const jobId = row.jobIds[0] ?? intakeJob(await relayFetch(this.config.relayUrl, `/intake/${chainId}/${entry.requested.transactionHash}`, undefined, this.controller.signal), row.requestId);
+          if (jobId) {
+            const job = await relayFetch(this.config.relayUrl, `/jobs/${encodeURIComponent(jobId)}`, undefined, this.controller.signal) as { id?: string; launch?: { id?: string }; launchId?: string };
+            if (job.id !== jobId) throw new Error('Job record mismatch');
             if (!current()) return;
-            entry.relayLaunchId = launchId; entry.launchRecord = detail;
+            entry.jobRecord = job; freshJob = true; delete entry.snapshotRecord;
+            launchId = job.launch?.id ?? job.launchId ?? launchId;
             row = this.hydrate(entry, chainId)!;
           }
-        } catch { row.resultError = 'Deployed addresses and Live confirmation are unavailable from IMD. Retry the reading.'; }
+          if (launchId && /^[\w-]+$/.test(launchId)) {
+            const detail = await relayFetch(this.config.relayUrl, `/launches/${encodeURIComponent(launchId)}`, undefined, this.controller.signal);
+            if (!current()) return;
+            entry.relayLaunchId = launchId; entry.launchRecord = detail; delete entry.snapshotRecord;
+            row = this.hydrate(entry, chainId)!;
+          }
+        } catch {
+          const record = matchingLaunchRecord(row, await this.snapshot);
+          if (!current()) return;
+          if (record && !launchStopped(row)) {
+            entry.snapshotRecord = record;
+            if (!freshJob) delete entry.jobRecord;
+            // A fresh successful relay job read wins over the snapshot's job state.
+            row = this.hydrate(entry, chainId)!;
+          } else if (!launchStopped(row)) row.resultError ??= 'Deployed addresses and Live confirmation are unavailable from IMD. Retry the reading.';
+        }
       }
       if (!current()) return;
+      // Publish Checking before the asynchronous code read finishes.
+      this.rows.set(row.id, { ...row, creatorName: this.rows.get(row.id)?.creatorName }); this.emit();
       if (row.deployerAddress && (this.hookDue.get(row.id) ?? 0) <= Date.now()) {
         this.hookDue.set(row.id, Date.now() + 20000);
         try {
@@ -340,17 +372,18 @@ export class LaunchStore {
         } catch { row.resultError = 'Could not read hook() from the deployer. Hook controls remain locked. Retry the reading.'; }
       }
       if (!current()) return;
-      if (row.type === 'A' && row.hookAddress && row.launchRecordStatus === 'live') {
+      if (row.status !== 'failed' && !launchStopped(row) && row.hookAddress && (row.launchRecordStatus === 'live' || row.status === 'checking' || row.status === 'live')) {
         try {
           const code = await this.clients[row.chainId].getCode({ address: row.hookAddress as Address });
           if (!current()) return;
           entry.hookCodeVerified = code && code !== '0x' ? row.hookAddress : undefined;
           row = this.hydrate(entry, chainId)!;
-        } catch { row.status = 'in-progress'; row.resultError = 'Could not verify hook code. Retry the reading.'; }
+        } catch { if (row.type === 'A') row.status = 'checking'; row.resultError = 'Could not verify hook code. Retry the reading.'; }
       }
       if (!current()) return;
       const old = this.rows.get(row.id); row.creatorName = old?.creatorName;
       this.rows.set(row.id, row); this.emit();
+      if (this.pendingCasts.delete(row.id) && isPublicLaunch(row) && row.isHook !== false) this.onCast(pondMessage(row));
     }));
     writeCache(cacheKey(chainId), cache);
   }

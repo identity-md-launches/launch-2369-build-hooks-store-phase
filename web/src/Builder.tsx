@@ -135,6 +135,8 @@ export function faultWords(finding: SafetyFinding, text?: string): string {
 /** Body findings name a JSON path; these point at the setting that writes it. */
 const BODY_FIELDS: [RegExp, string][] = [[/^owner\b/i, 'settings.owner'], [/^remainderTo\b/i, 'settings.rem'], [/^tokenAddress\b/i, 'settings.token'], [/^recipient\b/i, 'settings.owner']];
 function findingField(finding: SafetyFinding, mode: Mode | null): string | null {
+  if (finding.code === 'owner') return 'settings.owner';
+  if (finding.code === 'chain') return 'settings.chain';
   const path = BODY_FIELDS.find(([pattern]) => finding.code === 'address-case' && pattern.test(finding.sentence));
   if (path) return path[1];
   if (finding.code === 'recipient' && /^Owner /.test(finding.sentence)) return 'settings.owner';
@@ -347,7 +349,7 @@ export function Builder({ config }: { config: SiteConfig & { blocksVerifiedUrl?:
   };
 
   // Findings: one line each (SPEC 3.2). Validation findings jump to their field; text findings open the sheet at their words.
-  const textFindings = [...check.consistency, ...check.conflicts];
+  const textFindings = [...check.consistency, ...check.conflicts].filter(finding => !(finding.code === 'chain' && issues.some(issue => issue.field === 'settings.chain')));
   const placeholders = [...new Set(text.match(PLACEHOLDER) ?? [])];
   // One canonical list: a finding's index here is the data-mark of its words in the sheet.
   const quotes = textFindings.map(finding => faultWords(finding, text));

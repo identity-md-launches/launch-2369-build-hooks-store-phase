@@ -185,9 +185,12 @@ test('findings box: one line each, short quote, jump; the sheet opens with COPY 
   await expect(chain.locator('q').first()).toHaveText('(choose a chain)');
   await chain.getByRole('button', { name: /Jump to it/ }).click();
   await expect(page.locator('#s-chain')).toBeFocused();
-  // Without a wallet the recipient is a placeholder: the text finding opens the sheet at the highlighted words.
-  const text = rows.filter({ has: page.locator('q', { hasText: /wallet/ }) }).first();
-  await text.getByRole('button', { name: /Jump to it/ }).click();
+  // Missing owner/recipient is one cause and jumps to its setting. The exact
+  // request remains available with its unresolved chain words highlighted.
+  const owner = rows.filter({ hasText: 'Connect the paying wallet or enter a full owner address' }).first();
+  await owner.getByRole('button', { name: /Jump to it/ }).click();
+  await expect(page.locator('#s-owner')).toBeFocused();
+  await page.getByRole('button', { name: 'Show exact text' }).click();
   const sheet = page.getByRole('dialog', { name: 'Exact text the swarm receives' });
   await expect(sheet).toBeVisible();
   await expect(sheet.locator('mark').first()).toBeVisible();
@@ -356,7 +359,7 @@ test('finding excerpts quote only words that are in the request, never a whole s
   };
   await check();
   const owner = page.locator('.finding', { hasText: 'Connect the paying wallet or enter a full owner address' }).first();
-  if (await owner.count()) { await expect(owner.locator('q')).not.toHaveText(/choose a chain/); }
+  if (await owner.count()) { await expect(owner.locator('q')).toHaveCount(0); }
   await pairedWithImd(page);
   await page.getByRole('button', { name: 'Describe it', exact: true }).click();
   await page.locator('#p-text').fill('Settle the fee in ETH.');

@@ -78,7 +78,7 @@ export async function interceptChains(page: Page, options: {status?:number; noLo
         else if(fn===toFunctionSelector('isAllowed(address)'))result=encodeAbiParameters(parseAbiParameters('bool'),[false]);
         else return {jsonrpc:'2.0',id:req.id,error:{code:3,message:'execution reverted'}};
       } else if(options.fork){const response=await fetch(options.fork,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(req)});return response.json();}
-      else if(req.method==='eth_getCode') result='0x';
+      else if(req.method==='eth_getCode') result=req.params[0].toLowerCase()===(options.deployedHook??hook).toLowerCase()?'0x600060005260206000f3':'0x';
       else return {jsonrpc:'2.0',id:req.id,error:{code:-32601,message:'Fixture method unavailable'}};
       return {jsonrpc:'2.0',id:req.id,result};
     }));

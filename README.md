@@ -1,6 +1,6 @@
 # The Hooks Store
 
-A static React/TypeScript storefront for composing, launching and managing Uniswap v4 hooks. This delivery revises **job 13**, against **SPEC 1.54**: balance-first promotions, public RPC fallbacks, EasyList-safe markup and cross-chain proven-launch wording. Source, the existing package manifest/lockfile, production export in `dist/` and actual test results in `tests/results/job13/` are included. Hash routes and relative runtime assets support static hosting and IPFS gateway subpaths.
+A static React/TypeScript storefront for composing, launching and managing Uniswap v4 hooks. Job 14 implements **SPEC 1.56, decision 49** and carry-overs **u, v, r, s, t**: the public pond rule, Checking status, runtime launch-record fallback, bounded RPC scans and grouped Builder findings. Source, the existing manifest/lockfile, production `dist/` and actual results in `tests/results/job14/` (also copied to `artifacts/job14/`) are included. Hash routes and relative runtime assets support static hosting and IPFS gateway subpaths.
 
 Every launch still uses the swarm, costs 0.5 IMD plus gas and receives its own audit. No factory or instant/free launch option is offered. No public-chain transaction, deployment or publication was performed by this job.
 
@@ -19,7 +19,7 @@ node scripts/serve.mjs --port 4173
 
 Open `http://127.0.0.1:4173/preview/#store`. Vite uses the root `index.html`, `base: './'` and root `dist/`. The committed export can be served directly; it needs no server rewrites or secrets. Fonts, icons, favicon and share image are local. Rebuilding replaces `dist/`.
 
-This task installed the unchanged `web/package.json` and `web/package-lock.json` in a temporary checkout for build/test. No existing build configuration, manifest, lockfile, ignore file or dependency directory in this repository was changed.
+Install dependencies from the existing lockfile. Build tool configuration, package manifests and lockfiles remain unchanged; generated dependencies and caches are excluded from the delivery. `public/site-config.json` is the application's public runtime configuration.
 
 ## Proven launches
 
@@ -41,21 +41,34 @@ Public ad-contract request links resolve the Intake's Requested event by request
 
 The existing configured registries and placement contracts are unchanged. Earlier job 12 read-only observations are retained in `tests/results/job12/live-ads-read.json`; contract setup remains checked at runtime. Each chain client uses the public `rpcUrls` list in `public/site-config.json`, with viem fallback and one retry before surfacing errors. The featured strip and panel use placement/featured/promotion class names. Refresh the pinned EasyList generic rules before building; the unit suite checks class and id names in the finished export.
 
+## Public pond and resilient reads
+
+`web/src/chain/visibility.ts` supplies one rule for the catalog, count, search, status rail, landing and featured lookup. Live launches and recorded running/deploying jobs are public. Requested launches are public for less than 24 hours from the Requested block timestamp, unless a stopped record is known. Failed completions (1/2), blocked/cancelled/failed/superseded jobs, needs_input reasons and parked/failed launches take precedence. The age rule works without the relay. Unknown timestamps wait for the block read rather than assuming a request is young.
+
+All payer requests remain in My hooks, newest first. Stopped requests keep Requested with Needs attention and Fix in Builder; failed requests read Failed. A direct link retains its page and adds the specified Not on the pond sentence. A live type A launch reads Checking… until its on-chain code read succeeds; Checking belongs to the In progress filter.
+
+At every load the site fetches the configured `launchRecordsUrl` from the public spec repository. This file is never bundled. The exact UTF-8 objective SHA-256, payer, kind and deploy chain must match the chain request, as must a previously known launch id. Relay reads remain first; a failure or timeout uses the matching snapshot's states, addresses, source and pool. Code checks and deployer `hook()` reads still run on chain. A successful relay job response overrides snapshot job state. New requests continue to come from Intake logs. The captured snapshot and real stopped-job/chain fixtures are documented in `tests/fixtures/job14/README.md`.
+
+`rpcLogRanges` sets each endpoint's maximum inclusive range: 10,000 for publicnode, 100,000 for mevblocker and 400,000 for the Robinhood primary. Splitting happens for the endpoint actually used, including a fallback with a smaller cap. `rpcLogLookbacks` additionally records known public-history restrictions: Ethereum publicnode is eligible within a conservative 9,000-block lookback; Robinhood publicnode does not serve public Intake logs (`0`) and remains a fallback for other reads. A history window outside those limits skips that endpoint without a failed HTTP call. These are public endpoint capabilities, not credentials. Recheck them with the read-only scan when changing providers.
+
+Each chain permits at most two active log scans shared by normal history and direct-link readers. Rate-limited reads wait 2, 4 and 8 seconds; the shared cooldown precedes failover to another endpoint after a 429. Outages and archive refusals do not recursively fan out. Only range/result caps subdivide. Polling cancels outstanding record/result fetches when the store stops.
+
+Missing chain and missing owner each produce one Builder cause. Independent malformed addresses, fee destinations and deployer instructions remain findings once their prerequisite is supplied. A constructor recipient for a hook with no fee uses the explicit owner, allowing a complete unsigned draft.
+
 ## Validation
 
 ```sh
 npm --prefix web run typecheck
 npm --prefix web run build
 npm --prefix web test
+node web/scripts/check-job14-rpc.mjs
 cd web
 npx playwright install chromium
-npx playwright test job12.spec.ts --grep 'job 13 promotions panel|two labelled balances' --reporter=list
-npx playwright test job12.spec.ts --grep-invert 'job 13 promotions panel|two labelled balances' --reporter=list
-npx playwright test store.spec.ts --grep 'Store and Learn fit|keyboard focus reaches main action|export works offline' --reporter=list
+npx playwright test job14.spec.ts job12.spec.ts store.spec.ts wallet.spec.ts builder.spec.ts hook.spec.ts pond.spec.ts
 ```
 
-The promotion regression suite also requires `forge`, `anvil`, solc 0.8.26 and access to the configured public Robinhood RPC. It compiles the pinned contract fixtures and sends transactions only to its isolated local fork. The controlled-RPC job 12 suite requires no public RPC or signer: `npx playwright test job12.spec.ts` from `web/`.
+The RPC check needs `curl`, sends read-only calls and writes `artifacts/job14/rpc-scan.json`. Its default scans both complete Intake histories through the production transport and counts every failed HTTP, JSON-RPC and transport call. `--probe-endpoints` additionally diagnoses individual providers; a diagnostic may fail even when the production fallback completes. The initial diagnostic is retained beside the final scan.
 
-Actual results, reproduction evidence, the six-domain Better Interface review, screenshots, export checks and limitations are recorded in [VALIDATION.md](VALIDATION.md) and [tests/results/job13/validation.md](tests/results/job13/validation.md). `unit-results.txt` and the three `*playwright*.txt` files contain the actual command output; `featured-easylist-390.jpg` and `promotions-balances-390.jpg` record the affected mobile views. Screenshot paths resolve relative to the test file, so they remain inside this repository regardless of the command's working directory. Older reports are historical, not claims about this run. [DESIGN.md](DESIGN.md) documents the final implemented system.
+[VALIDATION.md](VALIDATION.md) and [tests/results/job14/validation.md](tests/results/job14/validation.md) record actual commands, results, repairs, six-domain Better Interface coverage and limitations. [DESIGN.md](DESIGN.md) documents the implemented tokens, typography, components and responsive behavior. Historical reports in `tests/results/` describe their own earlier runs.
 
-Revision results: production build and separate typecheck passed; 1,192 unit tests and 37 Chromium cases passed, with no failures or skips in those runs. The design probe passed 13/16 checks; the three retained exceptions follow the required pixel design. Rendered checks used Playwright Chromium against the production export. WebKit, screen readers, physical devices, native zoom, the full historical browser suite and the Anvil fork were not rerun in this focused revision.
+Final results: build/typecheck passed; 1,228 unit tests passed; Chromium 105 passed, two optional fork cases skipped, no failures. The final full-history RPC scan reports zero failed calls and at most two log scans in flight. The pinned entry probe passes 13/16, retaining the specified pixel-design exceptions. WebKit could not launch; no WebKit or real-chain transaction results are claimed.

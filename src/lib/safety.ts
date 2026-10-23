@@ -58,6 +58,7 @@ const dependencyAddress = new RegExp(`^\\s*(?:(?:with|using)\\s+)?(?:(?:the|a)\\
 export function checkConsistency(input: Body): SafetyFinding[] {
   const text = typeof input.objective === 'string' ? input.objective : '';
   const currency = input.onchain === 'univ4_hook' && input.pairWith === 'imd' ? 'IMD' : 'ETH';
+  const missingOwner = !String(input.owner ?? '').trim();
   const findings: SafetyFinding[] = [];
   const add = (code: string, sentence: string, message: string) => {
     if (!findings.some(f => f.code === code && f.sentence === sentence)) findings.push({ code, sentence, message });
@@ -66,7 +67,7 @@ export function checkConsistency(input: Body): SafetyFinding[] {
   // Inspect every field recursively, including address literals inside objective.
   // The last signing guard repeats this check on the exact serialized body.
   const inspectAddresses = (value: unknown, path: string) => {
-    if (/(?:^|\.)(?:owner|remainderTo|recipient|address|tokenAddress|hookAddress)$/i.test(path) && (typeof value !== 'string' || !/^0x[\da-f]{40}$/.test(value))) add('address-case', `${path}: ${JSON.stringify(value)}`, 'Every body address must be a full lowercase EVM address.');
+    if (!(missingOwner && path === 'owner') && /(?:^|\.)(?:owner|remainderTo|recipient|address|tokenAddress|hookAddress)$/i.test(path) && (typeof value !== 'string' || !/^0x[\da-f]{40}$/.test(value))) add('address-case', `${path}: ${JSON.stringify(value)}`, 'Every body address must be a full lowercase EVM address.');
     if (typeof value === 'string') {
       for (const address of value.matchAll(/\b0x[\da-fA-F]{40}\b/g)) if (address[0] !== address[0].toLowerCase()) add('address-case', `${path}: ${address[0]}`, 'Every address in the request body must be lowercase before checking or paying.');
     } else if (Array.isArray(value)) value.forEach((item, index) => inspectAddresses(item, `${path}[${index}]`));
@@ -106,29 +107,29 @@ export function checkConsistency(input: Body): SafetyFinding[] {
       if (settlement.some(value => value !== currency)) add('fee-settlement', sentence, `Settle the fee in ${currency}, the pair currency.`);
       if (currency === 'IMD' && /(?:convert|sell|swap)\w* (?:the |an? |every |any )?(?:IMD[- ]side )?fee[^.;]*\b(?:to|for|into) ETH\b/i.test(asserted)) add('fee-conversion', sentence, 'Keep the fee in IMD. Conversion to ETH needs a different pool and conflicts with this pairing.');
     }
-    if (/\b(?:my wallet|treasury address|the second address|connect to resolve|0x…|0x\.\.\.)\b/i.test(sentence)) add('recipient', sentence, 'Replace the recipient with its full address. Connect the paying wallet for “my wallet”.');
+    if (/\b(?:my wallet|treasury address|the second address|connect to resolve|0x…|0x\.\.\.)\b/i.test(sentence) && !(missingOwner && /connect to resolve/.test(sentence))) add('recipient', sentence, 'Replace the recipient with its full address. Connect the paying wallet for “my wallet”.');
     for (const match of sentence.matchAll(/(?:send (?:it|them|the (?:bought |remaining )?tokens|the pot) to|send (?:[\w-]+\s+){0,4}fees?(?: (?:revenue|proceeds|payouts?))? to|\bfees? (?:revenue |proceeds )?(?:(?:must|shall|will) )?go(?:es)? to|remainder goes to|\d+(?:\.\d+)?% to)\s+([^;,.]+(?:\.[^\s]+)?)/gi)) {
       if (/^the (?:fee )?recipient\b/i.test(match[1]) && (new RegExp(`Fee recipient: ${addressPattern}\\.`).test(text) || !!catalogRules.get('fee-split'))) continue;
       // A named destination ('1% to the owner') is resolved and compared below with the written targets.
       if (/^(?:(?:the )?owner|(?:(?:the|IMD['’]s) )?treasury)\b/i.test(match[1].trim()) && writtenFeeTargets(sentence).length) continue;
       const target = /^0x[\da-fA-F]{40}\b/.exec(match[1].trim())?.[0] ?? match[1].trim().split(/\s/)[0];
-      if (!fullAddress(target)) add('recipient', sentence, 'Every fee or remainder recipient must be a full, nonzero address.');
+      if (!fullAddress(target) && !(missingOwner && /connect to resolve/.test(sentence))) add('recipient', sentence, 'Every fee or remainder recipient must be a full, nonzero address.');
     }
     const owner = /^Owner (.+?) (?:may only:|is \$owner\.)/.exec(sentence);
-    if (owner && !fullAddress(owner[1])) add('recipient', sentence, 'Connect the paying wallet or enter a full owner address.');
+    if (owner && !fullAddress(owner[1]) && !missingOwner) add('recipient', sentence, 'Connect the paying wallet or enter a full owner address.');
     // Missing or shortened literal addresses never pass as recipients or dependencies.
     for (const match of sentence.matchAll(/\b0x[\da-z]+/gi)) if (match[0] !== '0x800000' && !new RegExp(`^${addressPattern}$`).test(match[0])) add('address', sentence, 'Use a full address on the deploy chain.');
   }
   const chain = String(input.chainId);
   const opening = input.onchain === 'evm_contracts' ? text.split('\n').filter(line => !line.startsWith('Start from the audited source at ')).slice(0, 2).join(' ') : text.split('\n')[0];
   if (input.onchain === 'univ4_hook' && !opening.includes(`paired with ${currency}.`)) add('pairing', opening, `The request and launch body must both name the ${currency} pairing.`);
-  if (!POOL_MANAGERS[Number(input.chainId)]) add('dependency', opening, 'Choose a supported deploy chain with a verified PoolManager.');
+  if (!POOL_MANAGERS[Number(input.chainId)]) add('chain', opening, 'Choose a supported deploy chain; its PoolManager and deployer constructor follow that choice.');
   if (input.onchain === 'evm_contracts') {
     const manager = POOL_MANAGERS[Number(input.chainId)];
     if (manager && !opening.toLowerCase().includes(manager.toLowerCase())) add('dependency', opening, 'Name the verified PoolManager address on the deploy chain.');
     const token = /existing token (0x[\da-fA-F]+|\([^)]*\))/.exec(text);
     if (token && !fullAddress(token[1])) add('dependency', opening, 'The existing token needs its full deploy-chain address.');
-    if (!/^Deploy one contract, [A-Za-z][A-Za-z0-9]*Deployer,/.test(opening) || !/takes no salt argument/.test(opening) || !/starts at salt 0 and increments/.test(opening) || !/creates .+ in the launch transaction/.test(opening) || !/passing the PoolManager, \$owner and fee recipient unchanged/.test(opening) || !/neither constructor calls any other contract/.test(opening) || !/no deploy function to call afterwards/i.test(opening) || !/hook\(\)/.test(opening)) add('deployer', opening, 'Use a deployer whose constructor mines from salt 0 and creates the hook immediately, forwarding PoolManager, $owner and recipient unchanged, with hook() and no later deploy step.');
+    if (manager && (!/^Deploy one contract, [A-Za-z][A-Za-z0-9]*Deployer,/.test(opening) || !/takes no salt argument/.test(opening) || !/starts at salt 0 and increments/.test(opening) || !/creates .+ in the launch transaction/.test(opening) || !/passing the PoolManager, \$owner and fee recipient unchanged/.test(opening) || !/neither constructor calls any other contract/.test(opening) || !/no deploy function to call afterwards/i.test(opening) || !/hook\(\)/.test(opening))) add('deployer', opening, 'Use a deployer whose constructor mines from salt 0 and creates the hook immediately, forwarding PoolManager, $owner and recipient unchanged, with hook() and no later deploy step.');
     if (/\bfactory\b/i.test(text)) add('factory', lines.find(line => /factory/i.test(line))!, 'Hook-only and existing-token requests must not mention a launch factory.');
     if (!text.includes('Only pools whose currency0 is native ETH may be initialized with this hook; any other initialization reverts.')) add('pool-scope', opening, 'Restrict initialization to pools whose currency0 is native ETH.');
     if (!text.includes("In this hook, the token is the pool's non-ETH currency and its total supply is that token's totalSupply().")) add('token-definition', opening, 'Define the token as the non-ETH currency and use its totalSupply().');
@@ -137,7 +138,7 @@ export function checkConsistency(input: Body): SafetyFinding[] {
     const manager = POOL_MANAGERS[Number(input.chainId)];
     if (manager && !text.toLowerCase().includes(`PoolManager ${manager}, $owner and $factory.`.toLowerCase())) add('factory', opening, 'Constructor arguments must be the deploy-chain PoolManager, $owner and $factory.');
   }
-  if (!fullAddress(String(input.owner ?? ''))) add('owner', opening, 'Connect the paying wallet or enter a full owner address; the body always carries owner.');
+  if (!fullAddress(String(input.owner ?? ''))) add('owner', opening, 'Connect the paying wallet or enter a full owner address; check the fee recipient, body owner and deployer constructor together.');
   else if (!new RegExp(`^Owner ${escapePattern(String(input.owner))} (?:may only:|is \\$owner\\.)`, 'im').test(text)) add('owner', opening, 'The request body owner must match the owner named in the text.');
   if (!Array.isArray(input.references) || !['uniswap-v4-hooks', 'uniswap-v4-security'].every(ref => (input.references as unknown[]).includes(ref))) add('references', opening, 'Include both uniswap-v4-hooks and uniswap-v4-security references.');
   // A service is refused until an address has been verified for this chain. No guessed deployments.
@@ -202,9 +203,9 @@ export function checkConsistency(input: Body): SafetyFinding[] {
       else if (footer && resolved.toLowerCase() !== footer.toLowerCase()) add('fee-recipient', source, `The written fee destination ${resolved} disagrees with Fee recipient: ${footer}. Use one destination or a Split the fee block.`);
     }
   }
-  if (input.onchain === 'evm_contracts' && footer) {
+  if (input.onchain === 'evm_contracts') {
     const constructorRecipient = /\bfee recipient (0x[\da-fA-F]{40})\b/.exec(opening)?.[1];
-    if (!constructorRecipient || constructorRecipient.toLowerCase() !== footer.toLowerCase()) add('fee-recipient', opening, 'The deployer constructor must forward the same fee recipient named by the fee rules.');
+    if ((!constructorRecipient || footer && constructorRecipient.toLowerCase() !== footer.toLowerCase()) && !(missingOwner && (!footer || /connect to resolve/.test(footer)))) add('fee-recipient', opening, 'The deployer constructor must forward the same full fee recipient address named by the fee rules.');
   }
   const hookFeeIds = ['swap-fee', 'fee-dir', 'fee-size', 'fee-fade', 'fee-vol', 'jar', 'pot'];
   // LP fees, pool fee tiers and distribution percentages are not hook charges.

@@ -1,0 +1,110 @@
+{
+  "observedAt": "2026-10-23T05:14:09.079Z",
+  "mode": "read-only real public endpoints; recent per-endpoint scan plus full Intake history through production fallback",
+  "chains": [
+    {
+      "chainId": 4663,
+      "endpoints": [
+        {
+          "url": "https://rpc.mainnet.chain.robinhood.com",
+          "success": true,
+          "fromBlock": "95291226",
+          "toBlock": "95691225",
+          "requestedLogs": 1
+        },
+        {
+          "url": "https://robinhood-rpc.publicnode.com",
+          "success": false,
+          "limitation": "The configured endpoint did not complete its scan."
+        }
+      ],
+      "fullHistory": {
+        "success": true,
+        "fromBlock": 85300000,
+        "toBlock": "95691230",
+        "requestedLogs": 18,
+        "completedLogs": 72
+      }
+    },
+    {
+      "chainId": 1,
+      "endpoints": [
+        {
+          "url": "https://ethereum-rpc.publicnode.com",
+          "success": false,
+          "limitation": "The configured endpoint did not complete its scan."
+        },
+        {
+          "url": "https://rpc.mevblocker.io",
+          "success": true,
+          "fromBlock": "26164897",
+          "toBlock": "26253164",
+          "requestedLogs": 45
+        },
+        {
+          "url": "https://eth.llamarpc.com",
+          "success": false,
+          "limitation": "The configured endpoint did not complete its scan."
+        }
+      ],
+      "fullHistory": {
+        "success": true,
+        "fromBlock": 26164897,
+        "toBlock": "26253164",
+        "requestedLogs": 45,
+        "completedLogs": 389
+      }
+    }
+  ],
+  "endpoints": [
+    {
+      "endpoint": "https://rpc.mainnet.chain.robinhood.com/",
+      "calls": 56,
+      "failedHttpCalls": 0,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 53,
+      "largestLogRange": 400000
+    },
+    {
+      "endpoint": "https://robinhood-rpc.publicnode.com/",
+      "calls": 3,
+      "failedHttpCalls": 1,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 1,
+      "largestLogRange": 10000
+    },
+    {
+      "endpoint": "https://ethereum-rpc.publicnode.com/",
+      "calls": 6,
+      "failedHttpCalls": 2,
+      "failedJsonRpcCalls": 1,
+      "transportFailures": 0,
+      "logCalls": 3,
+      "largestLogRange": 10000
+    },
+    {
+      "endpoint": "https://rpc.mevblocker.io/",
+      "calls": 5,
+      "failedHttpCalls": 0,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 3,
+      "largestLogRange": 88268
+    },
+    {
+      "endpoint": "https://eth.llamarpc.com/",
+      "calls": 2,
+      "failedHttpCalls": 2,
+      "failedJsonRpcCalls": 0,
+      "transportFailures": 0,
+      "logCalls": 0,
+      "largestLogRange": 0
+    }
+  ],
+  "failedCalls": 6,
+  "maxLogCallsInFlight": 2,
+  "complete": true,
+  "quietNetworkTargetMet": false
+}

@@ -86,10 +86,16 @@ export const relativeTime = (date: string, now = Date.now()) => {
 export type JobStage = { title: 'Building' | 'Audit panel' | 'Deploying'; state: 'active' | 'complete' | 'pending' | 'failed'; detail: string };
 export function jobAttention(value: unknown): { blocked: boolean; questions: string[] } {
   const job = object(value), nodes = Array.isArray(job.nodes) ? job.nodes.map(object) : [];
-  const blocked = job.state === 'blocked' || nodes.some(n => n.state === 'failed' && typeof n.failureReason === 'string' && /needs_input|needs input/i.test(n.failureReason));
-  const questions = blocked ? [job.blockedReason, ...nodes.filter(n => n.state === 'failed').map(n => n.failureReason)]
+  const blocked = ['blocked', 'cancelled', 'failed', 'superseded'].includes(job.state) || typeof job.blockedReason === 'string' && /needs_input|needs input/i.test(job.blockedReason) || nodes.some(n => typeof n.failureReason === 'string' && /needs_input|needs input/i.test(n.failureReason));
+  const questions = blocked ? [job.blockedReason, ...nodes.map(n => n.failureReason)]
     .filter((q): q is string => typeof q === 'string' && q.trim().length > 0) : [];
   return { blocked, questions: [...new Set(questions)] };
+}
+export function applyJobRecord(launch: Launch, value: unknown): Launch {
+  const job = object(value), attention = jobAttention(job), nodes = Array.isArray(job.nodes) ? job.nodes.map(object) : [];
+  return { ...launch, jobState: typeof job.state === 'string' ? job.state : undefined,
+    jobNeedsInput: typeof job.blockedReason === 'string' && /needs_input|needs input/i.test(job.blockedReason) || nodes.some(n => typeof n.failureReason === 'string' && /needs_input|needs input/i.test(n.failureReason)),
+    attentionReasons: attention.questions, jobIds: [...new Set([...launch.jobIds, ...(typeof job.id === 'string' && /^[\w-]+$/.test(job.id) ? [job.id] : [])])] };
 }
 export function jobStages(value: unknown): JobStage[] {
   const job = object(value);

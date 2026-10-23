@@ -12,6 +12,7 @@ import { useLaunches } from './chain/store';
 import type { SiteConfig } from './config';
 import { ProvenLaunches } from './ProvenLaunches';
 import { LaunchNotificationDelivery } from './LaunchNotifications';
+import { isPublicLaunch } from './chain/visibility';
 
 const NAV = [['store', 'Store'], ['builder', 'Builder'], ['mine', 'My hooks'], ['learn', 'Learn']];
 function routeName() { const hash = location.hash.slice(1).split(/[/?]/)[0]; return ['store', 'catalog', 'learn', 'builder', 'launch', 'hook', 'mine'].includes(hash) ? hash : 'store'; }
@@ -52,7 +53,7 @@ export function App({ config }: { config: SiteConfig }) {
     </div></header>
     {config.inProgress && <div className="progress-banner">This site is being built; launches open when the banner goes away</div>}
     <main id="main" tabIndex={-1}>
-      {isStore ? <><Landing config={config} launches={data.launches.filter(l => l.isHook !== false)} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
+      {isStore ? <><Landing config={config} launches={data.launches.filter(l => l.isHook !== false && isPublicLaunch(l))} /><div className="wrap"><Featured /><Catalog query={query} clearQuery={() => setQuery('')} data={data} store={data.store} /></div></> : route === 'learn' ? <Learn /> : route === 'builder' ? <Builder config={config} /> : route === 'hook' ? <Hook key={hash} route={hash} data={data} config={config} store={data.store} /> : route === 'mine' ? <MyHooks key={hash} data={data} store={data.store} /> : <LaunchReview config={config} store={data.store} />}
 
     </main>
   </AdsProvider></ProvenLaunches>;

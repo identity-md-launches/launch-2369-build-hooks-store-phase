@@ -85,7 +85,7 @@ test('known launch 2 question is a live rule and catches the contradictory histo
 });
 test('unresolved, shortened and zero recipients fail before the free check or launch', () => {
   const d = one(BY_ID['swap-fee'], 'A', 'imd', 1);
-  assert.ok(checkConsistency(body(d)).some(f => f.code === 'recipient'));
+  assert.ok(checkConsistency(body(d)).some(f => f.code === 'owner'));
   for (const target of ['treasury address', 'my wallet', '0x1234', '0x' + '0'.repeat(40)]) {
     const input = body(d, wallet); input.objective = input.objective.replace(`send it to ${wallet}`, `send it to ${target}`);
     assert.ok(checkConsistency(input).some(f => f.code === 'recipient' || f.code === 'address'), target);

@@ -1,0 +1,23 @@
+{
+  "objective": "Launch test (TEST) with a Uniswap v4 hook on Robinhood Chain, paired with IMD.\nToken: test (TEST), the standard launch token: 1,000,000,000 supply, 18 decimals, plain transfers, no owner functions.\nThe hook does exactly the following, and nothing else:\n1. Take 1.0% of the ETH side of every buy and sell as a hook fee, settled in ETH inside the swap that paid it (mint a claim when the PoolManager cannot pay it directly), and send it to my wallet. Expose claimFees() that anyone may call to redeem claims to the recipient.\n2. The owner may pause and unpause swaps. Liquidity can always be removed while paused. Expose pause() and unpause() for the owner and paused() as a view.\n3. For the first 15 minutes after the pool opens, only addresses the owner has added to an allowlist may buy. After that, anyone. Expose setAllowed(address[] accounts, bool allowed) for the owner and isAllowed(address) as a view.\nOwner 0x5Bff2a2FEcD1d6152676813b21346238733bEAB1 may only: pause and unpause swaps, add and remove buyer allowlist addresses, through the functions named above. No other admin function, no backend signer, no upgrade path.\nFees are always taken from the IMD (pair currency) side, never from TEST; a fee the PoolManager cannot pay directly is minted as a claim the recipient can redeem.\nEnable beforeInitialize (required by the IMD launch factory) and only the callbacks the behavior above needs. Take the PoolManager as a constructor argument. Owner, if any, is $owner.\nPool: 10% of my 90% share seeds the pool; the remainder goes to 0x5Bff2a2FEcD1d6152676813b21346238733bEAB1.\nKeep the function names exactly as written so the storefront can show them. Composed with The Hooks Store block builder.",
+  "shape": "chain",
+  "references": [
+    "uniswap-v4-hooks",
+    "uniswap-v4-security"
+  ],
+  "steps": [
+    {
+      "skill": "build-contract-project"
+    },
+    {
+      "skill": "adversarial-review"
+    }
+  ],
+  "onchain": "univ4_hook",
+  "chainId": 4663,
+  "pairWith": "imd",
+  "economics": {
+    "poolBps": 1000
+  },
+  "github": true
+}

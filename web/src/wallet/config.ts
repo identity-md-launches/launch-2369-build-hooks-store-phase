@@ -16,6 +16,6 @@ export function createWalletConfig(site: SiteConfig) {
     chains: [chains[0], chains[1]],
     multiInjectedProviderDiscovery: true,
     connectors: [injected(), coinbaseWallet({ appName: 'The Hooks Store', appLogoUrl: new URL('favicon.svg', document.baseURI).href, preference: { options: 'all' } })],
-    transports: Object.fromEntries(chains.map(chain => [chain.id, rpcTransport([...chain.rpcUrls.default.http])])),
+    transports: Object.fromEntries(chains.map(chain => [chain.id, rpcTransport([...chain.rpcUrls.default.http], site.rpcLogRanges, site.rpcLogLookbacks)])),
   });
 }

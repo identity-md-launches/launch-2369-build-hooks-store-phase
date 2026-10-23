@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "launches": [
+    {
+      "launchId": "9f778988-4553-4ff6-99fb-706824bb9e31",
+      "launchNumber": 2424,
+      "chainId": 4663,
+      "type": "B",
+      "blocks": [
+        "swap-fee",
+        "anti-sniper",
+        "jar",
+        "pause"
+      ],
+      "repoUrl": "https://github.com/identity-md-launches/launch-2424-deploy-one-contract-pondsideguard.git",
+      "commit": "5a9f6a36d659084e084a8abc08a55213c9516f07",
+      "hookAddress": "0x74bbef7025b0378050bfdd3263bc29508522d0cc",
+      "deployerAddress": "0x0c45bc8ca7b4e08ea65962ae6837af0992809517",
+      "name": "PondsideGuard",
+      "verifiedAt": "2026-10-22",
+      "notes": "Deployer mines its salt after deployment (deploy(bytes32)); a reuse adapts it to 4.16 item 1."
+    },
+    {
+      "launchId": "7b3da6ae-7b9b-4c39-851b-154c41433898",
+      "launchNumber": 2448,
+      "chainId": 4663,
+      "type": "A",
+      "blocks": [
+        "token",
+        "swap-fee",
+        "allowlist",
+        "pause"
+      ],
+      "repoUrl": "https://github.com/identity-md-launches/launch-2448-launch-test-test-uniswap.git",
+      "commit": "9d10e13fdf142f542fad136a18d0cf3e42b9997b",
+      "hookAddress": "0x5a9e7a61c45d2c615162fa57931bcbc06d9b20cc",
+      "deployerAddress": null,
+      "tokenAddress": "0xe7244bfb99c7ad49c5a40eaeedb215cb47dde85b",
+      "distributorAddress": "0x29760ee79ca59cec260da5e476ef03a137fc66b6",
+      "poolId": "0xccab6575b5cdd5798731f62f9299c442f954366e91b9513386d83e249cb99843",
+      "name": "TestHook",
+      "verifiedAt": "2026-10-22",
+      "notes": "Launch token test (TEST), paired with IMD, pool fee 1.25%, tick spacing 60, seeded in the launch transaction 0x0c25fcab781420cfb1835a6b0185bb3214a36f6643e38c803cb0b44253955bdd (block 95187895). The store's test token: paused by the owner right after launch and never meant to trade."
+    },
+    {
+      "launchId": "981d8c6b-d3c2-43a7-a701-1fef35c3bd03",
+      "launchNumber": 2449,
+      "chainId": 4663,
+      "type": "B",
+      "blocks": [
+        "swap-fee",
+        "cooldown",
+        "pause"
+      ],
+      "repoUrl": "https://github.com/identity-md-launches/launch-2449-deploy-one-contract-reedguarddeployer.git",
+      "commit": "65dbed3c6428352398a55e344e7bfac161c26657",
+      "hookAddress": "0xc97c5b51eb09961aedebea6a1eb41b62fff560cc",
+      "deployerAddress": "0x66be840c62c9ef735c2a3bdf44760514810258e4",
+      "name": "ReedGuard",
+      "verifiedAt": "2026-10-22",
+      "notes": "In-constructor deployer (4.16 item 1): ReedGuardDeployer mines its salt and creates the hook inside its constructor, HookDeployed(hook, salt) in the launch transaction 0x1a2cdd3a6e8a4a7e89ffdd90e0ba7d6705e709f88e2354a2796ebf61aed1feb4 (block 95187921). No pool until someone opens one."
+    },
+    {
+      "launchId": "f3a9856a-fcda-4f87-8413-a615708e3d41",
+      "launchNumber": 2450,
+      "chainId": 4663,
+      "type": "C",
+      "blocks": [
+        "swap-fee",
+        "pause"
+      ],
+      "repoUrl": "https://github.com/identity-md-launches/launch-2450-deploy-one-contract-lilyguarddeployer.git",
+      "commit": "107fb460b8a3ff0966dffe7bd0982cdd36e55c50",
+      "hookAddress": "0xb3373d1d202449c07fc6a51c5fc38483b409a0cc",
+      "deployerAddress": "0x327733d178813c3bf06d4c254522c7371bb46f83",
+      "tokenAddress": "0x5f7bb59365ce557c26dbcaa4ee9d39a4b95b7127",
+      "name": "LilyGuard",
+      "verifiedAt": "2026-10-22",
+      "notes": "Existing token IMD on Robinhood Chain; in-constructor deployer as 2449, HookDeployed in 0x56e080600a66cd45662e9b0f76319b15515262cfe29c096d93408572a15e300e (block 95187935). No pool until the owner opens one (6.4)."
+    }
+  ]
+}

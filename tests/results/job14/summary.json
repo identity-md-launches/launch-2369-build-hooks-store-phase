@@ -1,0 +1,50 @@
+{
+  "specVersion": "1.56",
+  "decision": 49,
+  "itemsCompleted": [
+    "u",
+    "v",
+    "r",
+    "s",
+    "t"
+  ],
+  "productionBuild": "passed",
+  "typecheck": "passed",
+  "unit": {
+    "passed": 1228,
+    "failed": 0,
+    "skipped": 0
+  },
+  "chromium": {
+    "passed": 105,
+    "failed": 0,
+    "skipped": 2,
+    "flaky": 0
+  },
+  "rpc": {
+    "fullHistoriesComplete": true,
+    "failedCalls": 0,
+    "maxLogCallsInFlight": 2
+  },
+  "designProbe": {
+    "passed": 13,
+    "total": 16,
+    "retainedSpecExceptions": [
+      "casing",
+      "eyebrows",
+      "chrome"
+    ]
+  },
+  "exportIntegrity": "passed",
+  "losslessPackaging": {
+    "bytesSaved": 150944,
+    "imagesPreserved": 23,
+    "allPixelIdentical": true
+  },
+  "submissionBudget": "passed",
+  "limitations": [
+    "WebKit could not launch; no WebKit interaction results claimed.",
+    "Two optional real Ethereum fork cases skipped; no public-chain transaction sent.",
+    "Screen readers, physical devices, native zoom and full historical browser inventory not run."
+  ]
+}

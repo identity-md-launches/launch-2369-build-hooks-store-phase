@@ -14,11 +14,12 @@ import { useProvenLaunches } from './ProvenLaunches';
 import { provenForLaunch } from '../../src/lib/proven';
 import { copyLaunchDraft } from './Hook';
 import { mergeAds } from './chain/ads';
+import { isPublicLaunch } from './chain/visibility';
 
 const ALL_GROUPS: string[] = GROUPS.map(([id]) => id), ALL_CHAINS = [4663, 1];
 export function Catalog({ query, clearQuery, data, store }: { query: string; clearQuery: () => void; data: StoreState; store: LaunchStore }) {
   const proven = useProvenLaunches();
-  const launches = data.launches.filter(l => l.isHook !== false);
+  const launches = data.launches.filter(l => l.isHook !== false && isPublicLaunch(l));
   const address = searchAddress(query), known = address ? launches.some(l => matchesQuery(l, address)) : false;
   const [resolution, setResolution] = useState<{ found: ResolvedAddress[]; unavailable: number[] } | null>(null), [resolving, setResolving] = useState(false), [attempt, setAttempt] = useState(0), [error, setError] = useState('');
   useEffect(() => {
@@ -40,7 +41,7 @@ export function Catalog({ query, clearQuery, data, store }: { query: string; cle
   const filtered = query.trim() !== '' || groups.length !== ALL_GROUPS.length || chains.length !== ALL_CHAINS.length || status !== 'all';
   const rows = useMemo(() => launches.filter(l =>
     chains.includes(l.chainId) && l.groups.some(g => groups.includes(g)) &&
-    (status === 'all' || (status === 'progress' ? ['in-progress', 'requested'].includes(l.status) : l.status === 'live')) && matchesQuery(l, query)
+    (status === 'all' || (status === 'progress' ? ['in-progress', 'checking', 'requested'].includes(l.status) : l.status === 'live')) && matchesQuery(l, query)
   ).sort((a, b) => sort === 'name' ? a.name.localeCompare(b.name) :
     ((Date.parse(a.createdAt ?? '') || 0) - (Date.parse(b.createdAt ?? '') || 0)) * (sort === 'newest' ? -1 : 1) || a.id.localeCompare(b.id)), [launches, chains, groups, status, sort, query]);
   const clear = () => { clearQuery(); setGroups(ALL_GROUPS); setChains(ALL_CHAINS); setStatus('all'); setSort('newest'); };

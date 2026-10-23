@@ -1,0 +1,1407 @@
+{
+  "command": "npm run test:e2e -- job14.spec.ts job12.spec.ts store.spec.ts wallet.spec.ts builder.spec.ts hook.spec.ts pond.spec.ts",
+  "workingDirectory": "web/",
+  "browser": "Chromium",
+  "stats": {
+    "startTime": "2026-10-23T05:40:40.173Z",
+    "duration": 227551.011,
+    "expected": 105,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "errors": [],
+  "cases": [
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 29,
+      "title": "steps come in order: type, how, blocks, settings; first visit has no chooser and starts on Stack blocks",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3730
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 51,
+      "title": "step 2: own code fields exist only while chosen, and the composed text for own code is unchanged",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2349
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 69,
+      "title": "step 2: describe mode keeps the words, the saved stack and the warning inside the step",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2139
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 87,
+      "title": "step 3: shelf tabs with counts, add opens the rule, reorder, remove, edit, open all / close all",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5017
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 134,
+      "title": "the card: name, pills, tiles, where the money goes, readiness with fill it in, cost, buttons",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2694
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 173,
+      "title": "findings box: one line each, short quote, jump; the sheet opens with COPY and CLOSE and highlights the words",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2646
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 206,
+      "title": "phones: card first, shelf scrolls sideways, rule tools wrap under the text",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2660
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 225,
+      "title": "hidden scroll labels do not extend the desktop hook column past its panels",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1157
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 243,
+      "title": "the card details preserve the mobile floor and desktop viewport fit",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 8689
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 264,
+      "title": "own code with empty source fields blocks the launch and points at the missing fields",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3072
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 293,
+      "title": "token readiness links open row 0 and focus the missing field",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2743
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 320,
+      "title": "a text finding opens the sheet at its own highlighted words",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2408
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 349,
+      "title": "finding excerpts quote only words that are in the request, never a whole sentence",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1954
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 375,
+      "title": "where the money goes applies the LP share before the recipient",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2059
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 320px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1750
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 390px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1771
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 768px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2131
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 1100px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2002
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 1440px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2156
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 1920px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2540
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 397,
+      "title": "Builder at 2560px: layout, no horizontal overflow, card within the viewport, screenshot",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2014
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 428,
+      "title": "card never collapses after scroll and a keystroke at 1440x900",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1247
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 428,
+      "title": "card never collapses after scroll and a keystroke at 2560x1300",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1460
+        }
+      ]
+    },
+    {
+      "file": "web/tests/builder.spec.ts",
+      "line": 428,
+      "title": "card never collapses after scroll and a keystroke at 2560x1440",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1375
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 320px, exposes readings and owner gating, risk tooltip and cloning",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1762
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 390px, exposes readings and owner gating, risk tooltip and cloning",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1850
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 4,
+      "title": "Hook page fits 1440px, exposes readings and owner gating, risk tooltip and cloning",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1843
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 22,
+      "title": "owner forms validate address arrays and booleans; query-param viewing never unlocks controls",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2238
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 30,
+      "title": "My hooks query param lists payer requests, Manage routes live hooks, draft discard has undo",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1729
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 35,
+      "title": "catalog searches exact known addresses, request ids and keywords; reads bounded configured ranges",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2243
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 41,
+      "title": "failed completion and unavailable result remain explicit, with addresses unknown",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1483
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 44,
+      "title": "result failures are retryable without inventing a live deployment",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1719
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 47,
+      "title": "header switches an unsupported wallet to Ethereum",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1590
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 50,
+      "title": "Manage panel on a real Ethereum fork: pause sends, confirms and refreshes paused()",
+      "outcome": "skipped",
+      "expectedStatus": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 197
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 59,
+      "title": "readings refresh after 20 seconds, and a connected non-owner stays locked",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1698
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 65,
+      "title": "unknown-address lookup shows a known fork hook and prefills type C for a known token",
+      "outcome": "skipped",
+      "expectedStatus": "skipped",
+      "results": [
+        {
+          "status": "skipped",
+          "durationMs": 209
+        }
+      ]
+    },
+    {
+      "file": "web/tests/hook.spec.ts",
+      "line": 74,
+      "title": "Connect keeps a wallet already on Robinhood Chain connected without a switch",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1583
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 31,
+      "title": "nearest match, exact sheet and paid swarm review at 390",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2105
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 31,
+      "title": "nearest match, exact sheet and paid swarm review at 1100",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2453
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 31,
+      "title": "nearest match, exact sheet and paid swarm review at 1920",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2505
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 320x900",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1544
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 390x844",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1302
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 768x900",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1483
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 1100x800",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1811
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 1366x768",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1429
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 1440x900",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1536
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 1920x1080",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1537
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 46,
+      "title": "fluid Builder edges, fixed type and card fit at 2560x1440",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1704
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 55,
+      "title": "seven findings do not leave a phantom scroll gap at 1920x1080",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1302
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 55,
+      "title": "seven findings do not leave a phantom scroll gap at 1366x768",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1023
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 76,
+      "title": "proven catalog card and hook preload their audited blocks at 390",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1720
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 76,
+      "title": "proven catalog card and hook preload their audited blocks at 1100",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1761
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 76,
+      "title": "proven catalog card and hook preload their audited blocks at 1920",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1685
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 82,
+      "title": "loaded reading, rule, address, request and cost fonts at 390",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2320
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 82,
+      "title": "loaded reading, rule, address, request and cost fonts at 1440",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1959
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 92,
+      "title": "public ads request 2454 resolves its Requested event without a wallet",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 904
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 92,
+      "title": "public ads request 2456 resolves its Requested event without a wallet",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 946
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 151,
+      "title": "two labelled balances and the low-wallet note use controlled RPC readings",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1291
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 158,
+      "title": "Robinhood hook promoted with IMD on Ethereum from the deposit, then both balances refresh",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1815
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 242,
+      "title": "one featured card ranks the summed hook total and own placements show both payment chains",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 858
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 169,
+      "title": "exact proven blocks before choosing a chain, then both deploy chains",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1088
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 179,
+      "title": "deposit 0.25, promote, boost 0.05, cancel and withdraw at 320px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2966
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 179,
+      "title": "deposit 0.25, promote, boost 0.05, cancel and withdraw at 390px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4499
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 179,
+      "title": "deposit 0.25, promote, boost 0.05, cancel and withdraw at 1440px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4292
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 204,
+      "title": "an allowance that covers the amount sends one deposit, no approval",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2603
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 211,
+      "title": "a wallet with 0 deposit sees PROMOTE disabled with the note",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1383
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 218,
+      "title": "proceeds earned as recipient are withdrawn with WITHDRAW PROCEEDS",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1446
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 224,
+      "title": "EasyList generic rules injected as a stylesheet leave the placement and open-slot cards visible",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1666
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job12.spec.ts",
+      "line": 234,
+      "title": "the first RPC answering 429 is invisible: strip and panel still render",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 29561
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 98,
+      "title": "pond counts four hooks, excludes stopped names and preserves all four LIVE and PROVEN cards",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1246
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 106,
+      "title": "paying wallet retains all three stopped requests, explanations and Fix in Builder",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1252
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 114,
+      "title": "direct link keeps stopped test with pond notice",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 758
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 114,
+      "title": "direct link keeps stopped ImdGuard with pond notice",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 923
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 114,
+      "title": "direct link keeps stopped WordsmithHook with pond notice",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 688
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 117,
+      "title": "a young request leaves the next refreshed grid as soon as its real-plane job is blocked",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1982
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 122,
+      "title": "snapshot keeps four live hooks when all record reads return 503",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 927
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 122,
+      "title": "snapshot keeps four live hooks when intake record reads return 503",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1315
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 122,
+      "title": "snapshot keeps four live hooks when jobs record reads return 503",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 835
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 122,
+      "title": "snapshot keeps four live hooks when launches record reads return 503",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 925
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 125,
+      "title": "live type A reads Checking, appears in In progress, then becomes LIVE when code answers",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1138
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 131,
+      "title": "named hook-only draft without chain or wallet lists exactly two causes and links to owner",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1058
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 136,
+      "title": "production routes fit at 320px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1433
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 136,
+      "title": "production routes fit at 390px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1118
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 136,
+      "title": "production routes fit at 820px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 902
+        }
+      ]
+    },
+    {
+      "file": "web/tests/job14.spec.ts",
+      "line": 136,
+      "title": "production routes fit at 1440px",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1445
+        }
+      ]
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 24,
+      "title": "water click draws every cast frame in order with specified timings, then returns through idle",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5511
+        }
+      ]
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 47,
+      "title": "reduced motion leaves one still frame and no cast; the pointer-accessible opt-in starts it",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1540
+        }
+      ]
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 58,
+      "title": "scene pauses outside viewport, resizes, seeds 3 silhouettes and 42 flocking fish, and flees the pointer",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1591
+        }
+      ]
+    },
+    {
+      "file": "web/tests/pond.spec.ts",
+      "line": 77,
+      "title": "cast queue is capped at three and a keyboard press on the water also casts",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1080
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 320px; product and describe action visible",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1760
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 390px; product and describe action visible",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1642
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 20,
+      "title": "Store and Learn fit 1440px; product and describe action visible",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1934
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 821px, search >=120 and connected width unchanged",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1009
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 1024px, search >=120 and connected width unchanged",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1015
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 52,
+      "title": "Desktop bar remains one row at 1440px, search >=120 and connected width unchanged",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1054
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 75,
+      "title": "search shows the no-match state over the empty pond; Enter scrolls to Results",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 747
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 86,
+      "title": "a filter shows the no-match state, and reset restores the empty pond, status, search and all groups/chains",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 865
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 101,
+      "title": "describe saves required draft key, preserves other fields and opens the describe editor",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 871
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 115,
+      "title": "only open-slot ads, marquee pauses on hover/focus, terms are 24 hours in Store and Learn",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1087
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 127,
+      "title": "swarm failure hides all metrics; successful response uses actual fields with honest labels",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1021
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 134,
+      "title": "public config flag removes the in-progress banner",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 618
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 138,
+      "title": "keyboard focus reaches main action; wallet dialog traps focus, closes on Escape and restores trigger",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1094
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 146,
+      "title": "export works offline at a gateway subpath with local fonts and a single beige theme",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1068
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 158,
+      "title": "empty or blocked storage never silently loses a description",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1068
+        }
+      ]
+    },
+    {
+      "file": "web/tests/store.spec.ts",
+      "line": 169,
+      "title": "catalog navigation does not restore a stale Learn scroll",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 632
+        }
+      ]
+    },
+    {
+      "file": "web/tests/wallet.spec.ts",
+      "line": 34,
+      "title": "EIP-6963 lists a named wallet, handles rejection, connects a real fixture address and disconnects",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1044
+        }
+      ]
+    },
+    {
+      "file": "web/tests/wallet.spec.ts",
+      "line": 50,
+      "title": "mobile connect offers four wallet-browser links and Coinbase Smart Wallet without a relay",
+      "outcome": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1052
+        }
+      ]
+    }
+  ]
+}

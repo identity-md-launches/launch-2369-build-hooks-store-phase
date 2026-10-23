@@ -18,6 +18,7 @@ import { provenFromRequest, provenForLaunch, type ProvenLaunch } from '../../src
 import { useAds } from './Ads';
 import { intakeJob, relayFetch } from './relay';
 import { LaunchNotifications } from './LaunchNotifications';
+import { pondNotice } from './chain/visibility';
 
 export function copyLaunchDraft(launch: Launch, proven?: ProvenLaunch): Draft {
   const draft = newDraft(), words = /<description>([\s\S]*?)<\/description>/.exec(launch.request)?.[1] ?? '';
@@ -106,6 +107,7 @@ export function Hook({ route, data, config, store }: { route: string; data: Stor
       <h1 id="hook-h"><Text>{launch.name}</Text></h1>{launch.symbol && <p className="hook-symbol num">${launch.symbol}</p>}
       <p className="small creator">by {launch.creatorName ? <span>{launch.creatorName}</span> : <code>{launch.payer}</code>}</p>
     </div><button className="btn primary" onClick={() => { if (storeDraft(copyLaunchDraft(launch, indexed))) { clearCorrection(); location.hash = '#builder'; } else setError('Could not save the new draft. Allow site storage and try again.'); }}>Build one like this</button></div>
+    {pondNotice(launch) && <p className="notice pond-notice">{pondNotice(launch)}</p>}
     <ProvenLine entry={submittedProven(chain, id, launch.request) ?? provenFromRequest(launch.request, proven)} request={launch.request} />
     <div className="actions hook-link"><button className="btn" onClick={async () => { try { const url = new URL(location.href); url.hash = `hook/${chain}/${id}`; await navigator.clipboard.writeText(url.href); setCopyNote('Link copied.'); } catch { setCopyNote(`Copy this page’s address: ${location.href}`); } }}>Copy link</button><span role="status" className="copy-status">{copyNote}</span></div>
     <LaunchNotifications key={launch.id} launch={launch} />

@@ -4,7 +4,7 @@
 
 A pixel storefront for browsing, composing and managing Uniswap v4 hooks. Preserve the supplied pond scene, paper palette, hard borders, terminal numbers and compact Steam-style navigation. The primary actions are describing a hook on Store, completing its Builder request, and managing owned hooks and advertisements in My hooks.
 
-Canonical tokens and components are in `web/src/styles.css`. React composition is in `web/src/`. The canvas and character grids live in `src/scene/`. This document describes the final source, including job 13's balance-first Promotions panel and proven-launch wording. This revision preserves the existing tokens, typography and layout.
+Canonical tokens and components are in `web/src/styles.css`. React composition is in `web/src/`. The canvas and character grids live in `src/scene/`. Job 14 adds the public-launch rule, Checking status and recovery for stopped requests within the existing tokens, typography and layout.
 
 ## Colors
 
@@ -21,7 +21,9 @@ Canonical tokens and components are in `web/src/styles.css`. React composition i
 | `--ad` | `#c9a227` | #AD labels and promotion confirmation stripe |
 | `--bad`, `--warn` | `#a3382b`, `#a1731c` | Errors and caution |
 
-Builder category swatches are pine for token/treasury, gold `#c9a227` for fees, red `#a3382b` for protection, blue `#3b6ea5` for liquidity, purple `#7a4e9e` for timing, orange `#c2612e` for games and the existing ink tones for advanced/custom. Labels accompany every swatch and status; color alone carries no state. There is one light theme. The final entry-page probe measured solid-background contrast and passed; detailed coverage and canvas limitations are recorded in `tests/results/job12/validation.md`.
+Builder category swatches are pine for token/treasury, gold `#c9a227` for fees, red `#a3382b` for protection, blue `#3b6ea5` for liquidity, purple `#7a4e9e` for timing, orange `#c2612e` for games and the existing ink tones for advanced/custom. Labels accompany every swatch and status; color alone carries no state. There is one light theme. Solid-background contrast and canvas limitations are recorded in `tests/results/job14/validation.md`.
+
+`.status-checking` shares the Requested/In progress neutral treatment: paper-2 background, ink text and ink-3 border. Its literal label is “Checking…”. Live remains pine/on-pine; Failed remains bad/paper-3. `.pond-notice` uses the existing notice surface and caution stripe. `.mine-attention` takes a full flex row, keeping its explanation and Fix in Builder action together.
 
 ## Typography
 
@@ -63,11 +65,12 @@ Rectangular panels, fields, pills and buttons. The open slot has a dashed border
 | --- | --- |
 | `App`, `.top-in`, `.nav` | Hash routes, current-page state, labeled search, skip-to-main, one wallet control. |
 | `Landing`, `.prompt` | Describe field saves a local draft and opens Builder. Metrics come from live reads; reduced motion pauses the pond. |
-| `Catalog`, `Featured` | Immediate native filters, clearable empty state, chain-backed hook cards. Indexed cards add a textual PROVEN pill and a Build one like this action. Ads show purchased metadata, #AD, symbol, creator and hours left. Ranking sums live totals per hook across both payment chains and ties use the earliest purchase; open slot is last. |
+| `Catalog`, `Featured` | Immediate native filters, clearable empty state, chain-backed public hook cards and count. All means every public launch; In progress includes Checking and young Requested. Indexed cards retain PROVEN and Build one like this. Placements resolve only public hooks; ranking and open slot retain their existing behavior. |
 | `Builder`, `.step`, `.shelf`, `.rule` | Four steps, category tabs, one rule per row with Edit/reorder/remove, explicit own-code selection, token choice and readiness links. The old chooser and palette disclosures are absent. |
-| `.hookcard`, `.findings`, `dialog.sheet` | Tile summary, audited-source adaptation line, fees, wait and readiness; concise findings with Jump to it; exact request in a native modal with highlighted words, Copy, Close and Escape. An identical proven stack says Built from before a chain is chosen; choosing the other chain names its redeployment, without an empty change list. |
+| `.hookcard`, `.findings`, `dialog.sheet` | Tile summary, audited-source adaptation line, fees, wait and readiness. Chain and missing-owner findings are grouped by cause; Jump to it focuses their setting. Independent wrong recipients, addresses and deployer arguments remain actionable. Exact request uses the existing modal, highlighted words, Copy, Close and Escape. |
 | `Connect` | Native wallet sheet, EIP-6963 named wallets, mobile wallet-browser links and Coinbase Smart Wallet. Escape returns focus to Connect. |
-| `Hook`, `RelayTimeline`, `AddressValue` | Status and evidence, full copyable addresses, deduplicated Build page links, pool opening and exact request. Notifications are restricted to own launches. |
+| `Hook`, `RelayTimeline`, `AddressValue` | Status and evidence, full copyable addresses, deduplicated Build page links, pool opening and exact request. A nonpublic direct link retains its page with the required Not on the pond sentence below its header. Known stopped records show Needs attention, the reported question and Fix in Builder. |
+| `MyHooks`, `.mine-attention` | Every request paid by the viewing wallet remains available, newest first. Stopped requests retain Requested, failed requests read Failed; Needs attention and Fix in Builder restore the request with its question and spent-fee note. No public filter is applied here. |
 | `Management`, `.function-row` | Catalog labels matched by name to the source ABI. Owner reads gate writes. Pool-scoped rows wait for a selected/typed pool id and do no read without one. Every Send simulates first; failures use plain action reasons. |
 | `AdsProvider`, `Promotions` | Reads every 60 seconds and after transactions. Payment-chain selector, separately labelled wallet/deposit/proceeds balances, typed DEPOSIT form, live hook rows with PROMOTE, combined hook rank, typed BOOST with confirmation, cancellation terms and separate deposit/proceeds withdrawals. The persistent note explains that DEPOSIT moves wallet IMD into the contract and PROMOTE/BOOST spend it. Busy, rejected, unavailable, empty and setup-pending states have adjacent guidance. |
 | `OpenPool` | Type C initialization parameters and copyable calldata; sending from this site remains phase 2b. |

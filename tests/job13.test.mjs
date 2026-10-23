@@ -66,7 +66,7 @@ test('site-config lists RPC URLs per chain in fallback order', () => {
   assert.equal(validRpcUrls([]), false); assert.equal(validRpcUrls(['http://x.example']), false);
   assert.equal(validRpcUrls(['https://a.example', 'https://a.example']), false); assert.equal(validRpcUrls(['https://user:pw@a.example']), false);
   const clients = fs.readFileSync(new URL('../web/src/chain/clients.ts', import.meta.url), 'utf8');
-  assert.match(clients, /fallback\(urls\.map\(url => http\(url, \{ timeout: 12000, retryCount: 0 \}\)\), \{ retryCount: 1/);
+  assert.match(clients, /fallback\(endpoints, \{ retryCount: 1/);
   assert.match(fs.readFileSync(new URL('../web/src/wallet/config.ts', import.meta.url), 'utf8'), /rpcTransport\(/);
 });
 

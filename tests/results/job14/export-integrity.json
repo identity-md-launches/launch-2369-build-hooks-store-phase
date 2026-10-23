@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "title": true,
+    "favicon": true,
+    "description": true,
+    "ogTitle": true,
+    "ogImage": true
+  },
+  "absoluteRuntimeReferences": [],
+  "missingReferences": [],
+  "publicMismatches": [],
+  "relayUrl": "https://hooks-store-relay.hooks-store.workers.dev",
+  "inProgress": false,
+  "testRelayAbsentFromBundle": true,
+  "runtimeFiles": [
+    {
+      "path": "dist/assets/_esm-dvUg66Pw.js",
+      "bytes": 1560,
+      "sha256": "0119761add540f644c0ce464fa8efb32d700b16062f707bab9eb11954b464db4"
+    },
+    {
+      "path": "dist/assets/_esm-m-FADD3O.js",
+      "bytes": 209,
+      "sha256": "6e9eb2c15adfc4e902f56895fd7338494fc0d29695fc06f774b43d42eff1c8ce"
+    },
+    {
+      "path": "dist/assets/ccip-B3mHK0vv.js",
+      "bytes": 112330,
+      "sha256": "45e956d8aafa49d81ec9ccf70ce40e1ed17495b8d61f06de8cf278325c9bab34"
+    },
+    {
+      "path": "dist/assets/ccip-Dz5iJ4he.js",
+      "bytes": 81,
+      "sha256": "41108e91cff85498c1d9acca517d2d8377fa53c036eb3168927346abde56ffbe"
+    },
+    {
+      "path": "dist/assets/dist-CO-GLT2g.js",
+      "bytes": 96331,
+      "sha256": "465dd35b7beac9fb03f678e2ea42c14327cd52494b7d326344879a5ade3e13dd"
+    },
+    {
+      "path": "dist/assets/eventemitter3-ChfEjfXd.js",
+      "bytes": 3357,
+      "sha256": "0cc849deafd0173d387f0c059e3b950d8988f114f3b1bed0905a4b1768b4de17"
+    },
+    {
+      "path": "dist/assets/index-BVBJkY-U.js",
+      "bytes": 508477,
+      "sha256": "94d085a8f63dcceeee64815041ae4aaf4446ad5b293088df1c0a6bc415969d2a"
+    },
+    {
+      "path": "dist/assets/index-Cz2AOPYg.css",
+      "bytes": 45795,
+      "sha256": "0fccd54079c997af7df3a803ecc99b3a29e7dd71341537626d52c7403256c140"
+    },
+    {
+      "path": "dist/assets/secp256k1-DD8PxkG2.js",
+      "bytes": 52,
+      "sha256": "a857b6fdf64b9fb2782320b2be3e7782a71ad138fc43c16b61645189e38ed41a"
+    },
+    {
+      "path": "dist/assets/secp256k1-DMk4gNp3.js",
+      "bytes": 26342,
+      "sha256": "e536c850b7023142a1e86de0b4e101eeb196213deb0d7caf0759a7e128457dd0"
+    },
+    {
+      "path": "dist/assets/sha2-BtPXGKXt.js",
+      "bytes": 3574,
+      "sha256": "f8378bc9c2468220643816359ec52dc4369fae5099c3a736edf93a284929e718"
+    },
+    {
+      "path": "dist/assets/sha256-DOEGnsfp.js",
+      "bytes": 57,
+      "sha256": "30a9c96a51f63baa99656c3a3a4a46f688adc532b128235e76a81167fadfc126"
+    },
+    {
+      "path": "dist/assets/store-CMELW8id.js",
+      "bytes": 307302,
+      "sha256": "8d3a6897c90b015c4eed277c85a2d0cbd6341fb471c2120835b3210fa333ecc4"
+    },
+    {
+      "path": "dist/assets/store-t5vHOLmi.js",
+      "bytes": 47,
+      "sha256": "607cc5883647fd56ee827320613a98ff6758ab2d6f10cdc5609f44d7661924b4"
+    },
+    {
+      "path": "dist/assets/utils-DFnHSamt.js",
+      "bytes": 2439,
+      "sha256": "b8278644006806c9e7d5a945b7dc92e98e6746f77e4afe0b252ba09fc60078c7"
+    },
+    {
+      "path": "dist/blocks-verified.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "dist/favicon.svg",
+      "bytes": 225,
+      "sha256": "d52933cdc0a68ed43e49926b76510279b0550373c330f33f7ba11d9c233d42e6"
+    },
+    {
+      "path": "dist/fonts/LICENSES.txt",
+      "bytes": 13218,
+      "sha256": "ee23b51c5fafb60d14b17b4eb5456e3651fab70d79fd252af30858e5aa395c09"
+    },
+    {
+      "path": "dist/fonts/atkinson-hyperlegible-latin-400.woff2",
+      "bytes": 17208,
+      "sha256": "d64ba838ef5472bba248620ec4fd8b5aa7cf0db2908e0bb230600caf279ba7bc"
+    },
+    {
+      "path": "dist/fonts/atkinson-hyperlegible-latin-700.woff2",
+      "bytes": 17524,
+      "sha256": "140e2bd25a7315c8a062508391426b0d8c3297400c947b8d847be28f73a199f0"
+    },
+    {
+      "path": "dist/fonts/jetbrains-mono-latin.woff2",
+      "bytes": 31432,
+      "sha256": "83c005d49d8a6a50474c73a5a36ac0468076e9c4a29da7bdb14995d80560a5be"
+    },
+    {
+      "path": "dist/fonts/press-start-2p-latin.woff2",
+      "bytes": 12512,
+      "sha256": "afec86997fdaf54af1f59358fa2c1e2a0f1d04146edad18e5cd141d0384a7548"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 1995,
+      "sha256": "ffb604f5c83704cf39aaa7fe3b87af49a591ed99687e9c807a28da0f13000c40"
+    },
+    {
+      "path": "dist/og.png",
+      "bytes": 201060,
+      "sha256": "7afb250de54b3be3321b6d8adf00aefd4954fe3afe142b862988ee86a3278a59"
+    },
+    {
+      "path": "dist/site-config.json",
+      "bytes": 2510,
+      "sha256": "821801eb99be369706c537a4d736874cfe1ee3fe542b227bc79c0927680f2a17"
+    },
+    {
+      "path": "dist/wallets/LICENSE.txt",
+      "bytes": 1064,
+      "sha256": "5095037afa1ba03be36e04305c01ec9ee600e14377738a026482b1a888c4e365"
+    },
+    {
+      "path": "dist/wallets/coinbaseWallet.svg",
+      "bytes": 538,
+      "sha256": "74b55347075cbbb2a0292cca0f94459d531afd23586ecfd2fcc670236c590439"
+    },
+    {
+      "path": "dist/wallets/metaMaskWallet.svg",
+      "bytes": 1665,
+      "sha256": "892c7dfab8c4ca5682878dda3f42f55a75195d7d365e4adb0832845f3a0a2135"
+    },
+    {
+      "path": "dist/wallets/phantomWallet.svg",
+      "bytes": 861,
+      "sha256": "f841f8112e131259a2e5123177950099c79487e61e77971f4e193e6c374419eb"
+    },
+    {
+      "path": "dist/wallets/rabbyWallet.svg",
+      "bytes": 2290,
+      "sha256": "dcae4de88ebfa10cffa1fe28df13d7c8c0b40736ef2b704f1f2fc348e777e443"
+    }
+  ],
+  "specSha256": "252b003a5f535f0cf665106b86be538e4a90790749340d6f19aca6042e09e1af",
+  "passed": true
+}

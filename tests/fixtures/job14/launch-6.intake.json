@@ -1,0 +1,39 @@
+{
+  "logIndex": 215,
+  "blockNumber": 26245056,
+  "kind": "request",
+  "intake": "0xa43e6f75ee006411f79ac1c84120606c2330de82",
+  "state": "admitted",
+  "reason": null,
+  "detail": null,
+  "payer": "0x5bff2a2fecd1d6152676813b21346238733beab1",
+  "asset": "0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7",
+  "amount": "500000000000000000",
+  "requestId": "0xbe2a3bbe001cb0aa2fd3dafd7260eb579e10d948aad6aa62c80717ed5c0adf1c",
+  "action": "launch.open",
+  "actionVersion": "launch-1",
+  "bodyHash": "0xa04cc038df594ba6016d19e932e938e8cb9fc700ec4f90c43d57a45d46fb16fc",
+  "callback": null,
+  "deliverTo": null,
+  "order": {
+    "id": "50004eeb-6e93-4eca-8302-4052a27ad074",
+    "status": "paid",
+    "action": "launch.open",
+    "policyVersion": "launch-1"
+  },
+  "admission": {
+    "id": "13225c3a-0f0f-4862-958c-6cee0cca969c",
+    "result": {
+      "jobId": "292d0dab-c9a9-4c74-951d-c36d9855680b",
+      "kind": "job",
+      "launch": true,
+      "resultUrl": "/jobs/292d0dab-c9a9-4c74-951d-c36d9855680b/result",
+      "statusUrl": "/jobs/292d0dab-c9a9-4c74-951d-c36d9855680b"
+    },
+    "createdAt": "2026-10-22T02:07:11.025Z"
+  },
+  "completion": null,
+  "delivery": null,
+  "receivedAt": "2026-10-22T02:07:10.616Z",
+  "updatedAt": "2026-10-22T02:07:11.000Z"
+}

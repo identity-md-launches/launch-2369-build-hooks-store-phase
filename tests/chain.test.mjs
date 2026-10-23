@@ -116,14 +116,15 @@ test('cache construction re-filters unrelated launches; storage corruption stays
  storage.set(cacheKey(1),'bad json');assert.equal(new LaunchStore(config,{}).getSnapshot().launches.length,0);delete globalThis.localStorage;
 });
 
-test('head polling casts only newly observed store launches and resumes from the saved cursor', async () => {
+test('head polling casts only newly observed public store launches and resumes from the saved cursor', async t => {
+ t.mock.method(globalThis, 'fetch', async () => Response.json({version:1,generatedAt:new Date().toISOString(),launches:[]}));
  const storage = new Map(); globalThis.localStorage = { getItem:k=>storage.get(k)??null, setItem:(k,v)=>storage.set(k,v) };
- const first = {...requested(), blockNumber:'0x64'}, nextId=fixtures[0].logs.filter(l=>D.decodeIntake(l).eventName==='Requested')[1].topics[1];
- const second = {...requested(body(),nextId),blockNumber:'0x65'};
+ const first = {...requested(), blockNumber:'0x64',blockTimestamp:undefined}, nextId=fixtures[0].logs.filter(l=>D.decodeIntake(l).eventName==='Requested')[1].topics[1];
+ const second = {...requested(body(),nextId),blockNumber:'0x65',blockTimestamp:undefined};
  let head=100n, logs=[first], release, calls=[]; const casts=[];
- const client={ getChainId:async()=>1, getBlockNumber:async()=>head, getBlock:async()=>({timestamp:1792563203n}), getEnsName:async()=>null,
+ const client={ getChainId:async()=>1, getBlockNumber:async()=>head, getBlock:async()=>({timestamp:BigInt(Math.floor(Date.now()/1000))}), getEnsName:async()=>null,
   request:async(req)=>{calls.push(req);const q=req.params[0];if(release) {const wait=release;release=null;await wait;} return q.topics[0] === '0x1c521a43c9b0f72a335bc80a6918abce08af7949ebbd1c41fe2a576074379063' ? logs.filter(l=>BigInt(l.blockNumber)>=BigInt(q.fromBlock)&&BigInt(l.blockNumber)<=BigInt(q.toBlock)) : [];}};
- const localConfig={...config,chains:[{...config.chains.find(c=>c.id===1),intakeFromBlock:90}],intake:{...config.intake,pollIntervalMs:60000}};
+ const localConfig={...config,relayUrl:null,chains:[{...config.chains.find(c=>c.id===1),intakeFromBlock:90}],intake:{...config.intake,pollIntervalMs:60000}};
  const waitFor = async predicate => {for(let i=0;i<100&&!predicate();i++)await new Promise(r=>setTimeout(r,5));assert.ok(predicate());};
  const store=new LaunchStore(localConfig,{1:client},text=>casts.push(text));const stop=store.start();
  try {
@@ -131,7 +132,7 @@ test('head polling casts only newly observed store launches and resumes from the
   head=101n;logs=[first,{...base,blockNumber:'0x65'},second];
   let unblock;release=new Promise(r=>unblock=r);store.retry();await new Promise(r=>setTimeout(r,0));store.retry();unblock();
   await waitFor(()=>store.getSnapshot().launches.length===2&&JSON.parse(storage.get(cacheKey(1))).head==='101');
-  assert.equal(casts.length,1);assert.match(casts[0],/PondGuard was requested on Robinhood Chain/);
+  await waitFor(()=>casts.length===1);assert.match(casts[0],/PondGuard was requested on Robinhood Chain/);
   store.retry();await new Promise(r=>setTimeout(r,15));assert.equal(casts.length,1);
   const restored=new LaunchStore(localConfig,{1:client});assert.equal(restored.getSnapshot().launches.length,2);
   assert.equal(JSON.parse(storage.get(cacheKey(1))).cursor,'89');
@@ -153,11 +154,12 @@ test('configured windows start at Intake deployment and use 100,000 / 400,000 in
  for(const c of config.chains){const floor=BigInt(c.intakeFromBlock),size=BigInt(c.logRange),head=floor+size*3n+123n,ranges=[...backwardsRanges(floor,head,size)];
  assert.equal(ranges[0][1]-ranges[0][0]+1n,size);assert.equal(ranges.at(-1)[0],floor);for(let i=1;i<ranges.length;i++)assert.equal(ranges[i][1]+1n,ranges[i-1][0]);}
 });
-test('every failure splits logs to at most 1,000 blocks, including non-range HTTP errors',async()=>{
+test('only range and result caps split logs; HTTP/archive/offline errors never fan out',async()=>{
  const {readLogs}=await import('../web/src/chain/store.ts');const calls=[];
- const client={request:async({params:[q]})=>{const n=BigInt(q.toBlock)-BigInt(q.fromBlock)+1n;calls.push(n);if(n>1000n)throw new Error('HTTP 403 Archive requests require a personal token');return[];}};
+ const client={request:async({params:[q]})=>{const n=BigInt(q.toBlock)-BigInt(q.fromBlock)+1n;calls.push(n);if(n>1000n)throw new Error('block range exceeds endpoint limit');return[];}};
  assert.deepEqual(await readLogs(client,config.intake.address,[],0n,7999n),[]);assert.deepEqual(calls,[8000n,4000n,2000n,1000n,1000n,2000n,1000n,1000n,4000n,2000n,1000n,1000n,2000n,1000n,1000n]);
- calls.length=0;client.request=async({params:[q]})=>{calls.push(BigInt(q.toBlock)-BigInt(q.fromBlock)+1n);throw new Error('offline');};await assert.rejects(readLogs(client,config.intake.address,[],0n,7999n),/offline/);assert.deepEqual(calls,[8000n,4000n,2000n,1000n]);
+ for(const error of ['offline','HTTP 403 Archive requests require a personal token','HTTP 429 Too many requests']) {
+ calls.length=0;client.request=async({params:[q]})=>{calls.push(BigInt(q.toBlock)-BigInt(q.fromBlock)+1n);throw new Error(error);};await assert.rejects(readLogs(client,config.intake.address,[],0n,7999n));assert.deepEqual(calls,[8000n]);}
 });
 test('Completed is fetched once per shared window and matched even when seen before its older request',async()=>{
  const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
@@ -182,11 +184,12 @@ async function reorgStore(t, withCompletion = true, delayedResult = false) {
  const completion = { ...completed(), blockNumber: reorg.completionBlock, blockHash: reorg.originalHash, logIndex: '0x1' };
  const canonical = { head: BigInt(reorg.initialHead), requests: [request], completions: withCompletion ? [completion] : [], hashes: new Map([[reorg.requestBlock, reorg.originalHash], [reorg.completionBlock, reorg.originalHash]]), fail: false };
  let release;
- t.mock.method(globalThis, 'fetch', async () => {
+ t.mock.method(globalThis, 'fetch', async url => {
+  if(String(url).endsWith('/launch-records.json')) return Response.json({version:1,generatedAt:new Date().toISOString(),launches:[]});
   if (delayedResult) await new Promise(resolve => { release = resolve; });
   return Response.json(reorg.result);
  });
- const client = { getChainId: async () => 1, getBlockNumber: async () => canonical.head, getEnsName: async () => null,
+ const client = { getChainId: async () => 1, getBlockNumber: async () => canonical.head, getEnsName: async () => null, getCode: async () => '0x6000',
   readContract: async ({functionName}) => { assert.equal(functionName, 'hook'); return reorg.result.launch.hookAddress; },
   getBlock: async ({ blockNumber }) => ({ timestamp: 1792563203n, hash: canonical.hashes.get(String(blockNumber)) }),
   request: async ({ params: [q] }) => {

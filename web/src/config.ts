@@ -1,6 +1,6 @@
 import defaults from '../../public/site-config.json';
 import { validRpcUrls } from './chain/clients';
-export type SiteConfig = Omit<typeof defaults, 'relayUrl' | 'ads'> & { relayUrl: string | null; ads?: Record<string, { registry: string; placements: string; launchNumber: number; commit: string }> };
+export type SiteConfig = Omit<typeof defaults, 'relayUrl' | 'ads'> & { relayUrl: string | null; launchRecordsUrl?: string; ads?: Record<string, { registry: string; placements: string; launchNumber: number; commit: string }> };
 export const defaultConfig: SiteConfig = defaults;
 export const assetUrl = (file: string) => new URL(`${import.meta.env.BASE_URL}${file}`, document.baseURI).href;
 export async function loadConfig(): Promise<SiteConfig> {
@@ -9,6 +9,8 @@ export async function loadConfig(): Promise<SiteConfig> {
     if (!response.ok) throw new Error('Configuration unavailable');
     const data = await response.json();
     if (data.schemaVersion !== 1 || typeof data.inProgress !== 'boolean' || !Array.isArray(data.chains) || data.chains.length !== 2 || !data.chains.every((c: { id: number; rpcUrls: unknown }) => (c.id === 1 || c.id === 4663) && validRpcUrls(c.rpcUrls))) throw new Error('Invalid configuration');
+    if ('rpcLogRanges' in data && (!data.rpcLogRanges || typeof data.rpcLogRanges !== 'object' || Array.isArray(data.rpcLogRanges) || !Object.values(data.rpcLogRanges).every(v => typeof v === 'number' && Number.isSafeInteger(v) && v > 0))) throw new Error('Invalid endpoint log ranges');
+    if ('rpcLogLookbacks' in data && (!data.rpcLogLookbacks || typeof data.rpcLogLookbacks !== 'object' || Array.isArray(data.rpcLogLookbacks) || !Object.values(data.rpcLogLookbacks).every(v => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0))) throw new Error('Invalid endpoint log lookbacks');
     if (data.relayUrl != null && (typeof data.relayUrl !== 'string' || !/^https:\/\//.test(data.relayUrl) || new URL(data.relayUrl).username || new URL(data.relayUrl).password || new URL(data.relayUrl).search || new URL(data.relayUrl).hash)) throw new Error('Invalid relay URL');
     return { ...defaults, ...data, ads: data.ads ?? {} };
   } catch { return defaults; } // Use the same reviewed configuration bundled in this export.

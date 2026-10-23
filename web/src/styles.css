@@ -77,7 +77,8 @@ code { font-size: var(--text-large); overflow-wrap: anywhere; }
 .pill.chain { background: var(--paper-2); }
 .pill[class*="status-"] { max-width: 96px; white-space: normal; overflow-wrap: anywhere; }
 .pill.status-live { background: var(--pine); color: var(--on-pine); border-color: var(--pine); }
-.pill.status-in-progress, .pill.status-requested { background: var(--paper-2); color: var(--ink); border-color: var(--ink-3); }
+.pill.status-in-progress, .pill.status-checking, .pill.status-requested { background: var(--paper-2); color: var(--ink); border-color: var(--ink-3); }
+.mine-attention { flex-basis: 100%; }
 .pill.status-failed { background: var(--bad); color: var(--paper-3); border-color: var(--bad); }
 .pill.paid-tag { background: var(--ad); border-color: var(--ad); color: var(--ink); }
 input, select { min-width: 0; width: 100%; min-height: 44px; border: 3px solid var(--ink); background: var(--paper-3); color: var(--ink); padding: 8px 10px; border-radius: 0; font-size: var(--text-large); }

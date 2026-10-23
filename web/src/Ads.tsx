@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { LaunchStore } from './chain/store';
 import type { Launch } from './types';
 import { activePlacement, adsConfig, readAds, sortAds, type Ad } from './chain/ads';
+import { isPublicLaunch } from './chain/visibility';
 const Context = createContext<{ ads: Ad[]; errors: string[]; enabled: boolean; refresh: () => void }>({ ads: [], errors: [], enabled: false, refresh: () => {} });
 export const useAds = () => useContext(Context);
 export function AdsProvider({ store, launches, children }: { store: LaunchStore; launches: Launch[]; children: ReactNode }) {
@@ -10,7 +11,7 @@ export function AdsProvider({ store, launches, children }: { store: LaunchStore;
   const refresh = useCallback(() => setRevision(v => v + 1), []);
   const enabled = store.config.chains.some(c => adsConfig(store.config, c.id));
   // Launch enrichment adds payer names and the store-only route without rereading placements.
-  const linked = ads.filter(a => activePlacement(a.placement)).map(a => ({ ...a, launch: launches.find(l => l.isHook !== false && l.chainId === Number(a.listing.chainId) && l.hookAddress?.toLowerCase() === a.listing.hook.toLowerCase()) }));
+  const linked = ads.filter(a => activePlacement(a.placement)).map(a => ({ ...a, launch: launches.find(l => l.isHook !== false && isPublicLaunch(l) && l.chainId === Number(a.listing.chainId) && l.hookAddress?.toLowerCase() === a.listing.hook.toLowerCase()) }));
   useEffect(() => {
     const future = ads.map(a => Number(a.placement.endsAt) * 1000).filter(end => end > Date.now());
     if (!future.length) return;
